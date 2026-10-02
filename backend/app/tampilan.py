@@ -81,7 +81,7 @@ def detail(conn, id_: str) -> dict | None:
         "temuan": temuan,
         "metadata_file": b["metadata_file"],
         "ukuran": b["ukuran"],
-        "berkas": {"jpg": None, "pdf": f"/api/v1/berkas/{id_}/file", "sha256": b["sha256"]},
+        "berkas": {"jpg": None, "pdf": f"/api/v1/berkas/{id_}/file", "sha256": b["sha256"], "nama": b["nama_file"]},
         "keluarga": {"akar": kel[0], "anggota": kel[1]} if kel else None,
         "keputusan": _keputusan(repo.keputusan_terakhir(conn, id_)),
         "konfirmasi": None,

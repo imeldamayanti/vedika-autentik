@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, Query, UploadFile
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
@@ -17,6 +18,9 @@ from .label import SARAN
 TINDAKAN = {"scanUlang", "klarifikasi", "telaah", "wajar"}
 
 app = FastAPI(title="Vedika Autentik API", version="0.1")
+app.add_middleware(
+    CORSMiddleware, allow_origins=config.cors_origins(), allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"]
+)
 
 
 @app.exception_handler(Galat)

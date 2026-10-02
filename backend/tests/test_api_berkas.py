@@ -107,6 +107,29 @@ def test_berkas_kembar_tanpa_pasangan_di_arsip_tidak_dituduh(unggah, klien, conn
     assert not any(t["cek"] == "berkas_kembar" for t in h["temuan"])
 
 
+# ---------- detail dan CORS untuk FE ----------
+
+def test_detail_memuat_nama_berkas_asli(unggah, klien, conn, mesin, tmp_path):
+    _, h = unggah_dan_proses(unggah, klien, conn, mesin, tmp_path, "VA-ASL-01.pdf")
+    assert h["berkas"]["nama"] == "VA-ASL-01.pdf"
+
+
+def test_cors_mengizinkan_fe_lokal(klien):
+    r = klien.options(
+        "/api/v1/berkas",
+        headers={"Origin": "http://localhost:8899", "Access-Control-Request-Method": "POST"},
+    )
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:8899"
+
+
+def test_cors_menolak_origin_asing(klien):
+    r = klien.options(
+        "/api/v1/berkas",
+        headers={"Origin": "https://jahat.example", "Access-Control-Request-Method": "POST"},
+    )
+    assert "access-control-allow-origin" not in r.headers
+
+
 # ---------- klaim dari SEP ----------
 
 class MesinSpy:

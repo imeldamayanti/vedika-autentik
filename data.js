@@ -128,7 +128,7 @@
 
   /* Hasil tiap langkah pemeriksaan, ditulis untuk dibaca verifikator dalam sekali lirik. */
   function langkah(b) {
-    if (b.luar) {
+    if (b.luar && !b.dariApi) {
       return [
         { nama: "Terima berkas", hasil: b.nama, status: "ok" },
         { nama: "Baca isi berkas", hasil: "Isi tidak terbaca oleh prototipe. Berkas ditandai Perlu dicek.", status: "henti" }
@@ -193,7 +193,7 @@
     const b = PETA[id];
     const kembar = b.temuan.find((t) => t.cek === "berkas_kembar");
     const akar = kembar ? kembar.pasangan : id;
-    const anggota = MANIFEST.filter((x) => x.id === akar || x.temuan.some((t) => t.cek === "berkas_kembar" && t.pasangan === akar));
+    const anggota = Object.values(PETA).filter((x) => x.id === akar || x.temuan.some((t) => t.cek === "berkas_kembar" && t.pasangan === akar));
     return anggota.length > 1 ? { akar: akar, anggota: anggota } : null;
   }
 

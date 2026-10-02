@@ -21,6 +21,12 @@ FASKES = {
 }
 
 
+def cors_origins() -> list[str]:
+    """Origin FE yang boleh memanggil API langsung (dev). Produksi memakai rewrite Vercel, tanpa CORS."""
+    mentah = os.environ.get("CORS_ORIGINS", "http://localhost:8899,http://127.0.0.1:8899")
+    return [o.strip() for o in mentah.split(",") if o.strip()]
+
+
 def database_url() -> str:
     return os.environ.get("DATABASE_URL", "")
 

@@ -362,7 +362,7 @@
   }
 
   function tabelBanding(b) {
-    if (b.luar) return "";
+    if (b.luar && !b.dariApi) return "";
     const isi = b.isi_lembar, k = b.klaim;
     const ulang = b.label === "ulang";
     const mendukung = b.temuan.some((t) => t.cek === "kecocokan_klaim") ? isi.baris_asli : isi.baris_terisi;
@@ -752,6 +752,13 @@
     return id;
   }
 
+  async function berkasDariApi(file, asal) {
+    try {
+      const id = await window.API.unggah(file, asal.kode);
+      return await window.API.muatKeFe(id, { file: file, faskes: asal.faskes, kode: asal.kode });
+    } catch (e) { return null; }
+  }
+
   async function idDataset(file) {
     const cocok = /^((?:VA-(?:ASL|KMB|DST|AI|BRM)-\d{2}))\.(PDF|JPG|JPEG|PNG)$/i.exec(file.name);
     if (!cocok) return null;
@@ -788,7 +795,13 @@
         return;
       }
       ui.asalError = false;
-      const ids = daftar.map((file, i) => dikenal[i] || berkasLuar(file, asal));
+      /* Berkas di luar dataset dikirim ke mesin pemeriksa bila API sehat. Bila tidak, jatuh ke jalur cadangan. */
+      const apiSiap = dikenal.some((id) => !id) && window.API ? await window.API.sehat() : false;
+      if (apiSiap) toast("Mengirim berkas ke mesin pemeriksa…");
+      const ids = [];
+      for (let i = 0; i < daftar.length; i++) {
+        ids.push(dikenal[i] || (apiSiap && await berkasDariApi(daftar[i], asal)) || berkasLuar(daftar[i], asal));
+      }
       jalankan([...new Set(ids)]);
     } finally { ui.unggahMemeriksa = false; }
   }
