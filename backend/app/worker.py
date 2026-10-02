@@ -80,7 +80,7 @@ def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
     return True
 
 
-def jalankan(jeda: float = 2.0):
+def jalankan(jeda: float = 1.0):
     """Loop produksi: ambil job terus-menerus."""
     import httpx
     import psycopg
