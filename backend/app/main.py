@@ -34,6 +34,7 @@ def _validasi(_, e: RequestValidationError):
 def unggah(
     file: UploadFile = File(...),
     kode_faskes: str = Form(...),
+    sep: str | None = Form(None),
     conn=Depends(get_conn),
     simpan=Depends(get_penyimpanan),
 ):
@@ -49,7 +50,7 @@ def unggah(
     path = simpan.simpan(id_, nama, isi)
     repo.buat_berkas(
         conn, id_, kode_faskes, config.FASKES[kode_faskes], nama, path,
-        hashlib.sha256(isi).hexdigest(), config.VERIFIKATOR,
+        hashlib.sha256(isi).hexdigest(), config.VERIFIKATOR, sep=(sep or "").strip() or None,
     )
     conn.commit()
     b = repo.ambil_berkas(conn, id_)

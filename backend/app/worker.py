@@ -35,8 +35,9 @@ def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
         return False
     berkas = repo.ambil_berkas(conn, job["berkas_id"])
     isi = penyimpanan.baca(berkas["path_storage"])
+    klaim_awal = data_klaim.cari(berkas["sep"])  # SEP dari unggahan, bila ada
     try:
-        hasil = mesin.analisis(berkas["nama_file"], isi)
+        hasil = mesin.analisis(berkas["nama_file"], isi, klaim_awal)
     except MesinGalat as e:
         # Gagal aman: berkas yang tidak bisa diproses menjadi Perlu dicek, tidak pernah Lolos.
         repo.simpan_gagal(
@@ -71,7 +72,7 @@ def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
     label = hitung_label({"kualitas_scan": hasil["kualitas_scan"], "temuan": temuan})
     repo.simpan_hasil(
         conn, berkas["id"],
-        klaim=data_klaim.cari((hasil.get("isi_lembar") or {}).get("no_sep")),
+        klaim=data_klaim.cari((hasil.get("isi_lembar") or {}).get("no_sep")) or klaim_awal,
         hasil=hasil, temuan=temuan, label=label, alasan=ALASAN_SARAN[label],
         ringkasan=ringkasan(temuan, hasil["kualitas_scan"], label), versi_aturan=VERSI_ATURAN,
     )

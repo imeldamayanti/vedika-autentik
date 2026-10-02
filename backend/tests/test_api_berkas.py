@@ -107,6 +107,44 @@ def test_berkas_kembar_tanpa_pasangan_di_arsip_tidak_dituduh(unggah, klien, conn
     assert not any(t["cek"] == "berkas_kembar" for t in h["temuan"])
 
 
+# ---------- klaim dari SEP ----------
+
+class MesinSpy:
+    """Membungkus mesin asli dan mencatat klaim yang dikirim API."""
+
+    def __init__(self, asli):
+        self.asli, self.klaim = asli, []
+
+    def analisis(self, nama, isi, klaim=None):
+        self.klaim.append(klaim)
+        return self.asli.analisis(nama, isi, klaim)
+
+    def bandingkan(self, *a):
+        return self.asli.bandingkan(*a)
+
+
+def test_sep_saat_unggah_membuat_api_mengirim_klaim_ke_mesin(unggah, conn, mesin, tmp_path):
+    unggah("VA-DST-01.pdf", sep="0901R0140826V583301")
+    spy = MesinSpy(mesin)
+    assert proses_satu(conn, spy, Penyimpanan(tmp_path))
+    assert spy.klaim[0]["sesi_ditagih"] == 8
+    assert spy.klaim[0]["sep"] == "0901R0140826V583301"
+
+
+def test_tanpa_sep_klaim_dikirim_kosong(unggah, conn, mesin, tmp_path):
+    unggah("VA-DST-01.pdf")
+    spy = MesinSpy(mesin)
+    proses_satu(conn, spy, Penyimpanan(tmp_path))
+    assert not spy.klaim[0]
+
+
+def test_sep_tidak_dikenal_tetap_diproses_tanpa_klaim(unggah, conn, mesin, tmp_path):
+    unggah("VA-ASL-01.pdf", sep="0000X0000000V000000")
+    spy = MesinSpy(mesin)
+    assert proses_satu(conn, spy, Penyimpanan(tmp_path))
+    assert not spy.klaim[0]
+
+
 # ---------- antrean ----------
 
 def test_antrean_urut_prioritas_dulu_dan_bisa_disaring(unggah, klien, conn, mesin, tmp_path):

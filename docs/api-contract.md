@@ -241,7 +241,7 @@ Aturan untuk mesin AI:
 8. **Jangan mengirim temuan `berkas_kembar`.** Kembar hanya bisa dibuktikan dengan arsip, jadi dibuat API: sidik jari dicari di DB, kandidat dikonfirmasi lewat `/v1/bandingkan`. Mesin cukup memberi `sidik_jari`. Temuan `tempelan` boleh dikirim tanpa `pasangan`, API yang mengisinya.
 9. Berkas yang tidak bisa dibaca dibalas galat `422 tidak_terbaca`. API lalu menandainya Perlu dicek, tidak pernah Lolos.
 
-> **Status implementasi `klaim`:** API belum mengirim `klaim` ke mesin (dikirim `{}`). Data klaim dicari dari nomor SEP, dan SEP baru diketahui bila `sep` diisi saat unggah. Dukungan ini menyusul. Sementara itu mesin menghitung `kecocokan_klaim` hanya bila `klaim.sesi_ditagih` ada; bila kosong, lewati pemeriksaan itu dan tetap kembalikan `isi_lembar` (jumlah baris dan tanggal sesi).
+> **`klaim` ke mesin:** API mengirim `klaim` bila `sep` diisi saat unggah dan SEP itu ada di data klaim pembanding (stand-in E-Klaim). Bila `sep` kosong atau tidak dikenal, `klaim` dikirim `{}`. Mesin menghitung `kecocokan_klaim` hanya bila `klaim.sesi_ditagih` ada; bila kosong, lewati pemeriksaan itu dan tetap kembalikan `isi_lembar` (jumlah baris dan tanggal sesi). API juga mencocokkan klaim dari `isi_lembar.no_sep` hasil baca mesin untuk ditampilkan.
 
 ## `POST /v1/bandingkan`
 

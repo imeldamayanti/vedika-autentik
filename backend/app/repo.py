@@ -8,11 +8,11 @@ def _j(nilai):
     return Jsonb(nilai) if nilai is not None else None
 
 
-def buat_berkas(conn, id_, kode_faskes, faskes, nama_file, path, sha256, oleh):
+def buat_berkas(conn, id_, kode_faskes, faskes, nama_file, path, sha256, oleh, sep=None):
     conn.execute(
-        "insert into berkas (id, kode_faskes, faskes, nama_file, path_storage, sha256, diunggah_oleh)"
-        " values (%s,%s,%s,%s,%s,%s,%s)",
-        (id_, kode_faskes, faskes, nama_file, path, sha256, oleh),
+        "insert into berkas (id, sep, kode_faskes, faskes, nama_file, path_storage, sha256, diunggah_oleh)"
+        " values (%s,%s,%s,%s,%s,%s,%s,%s)",
+        (id_, sep, kode_faskes, faskes, nama_file, path, sha256, oleh),
     )
     conn.execute("insert into job (berkas_id) values (%s)", (id_,))
 

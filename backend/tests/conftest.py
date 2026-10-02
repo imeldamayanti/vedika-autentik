@@ -56,11 +56,10 @@ def klien(conn, mesin, tmp_path):
 
 @pytest.fixture
 def unggah(klien):
-    def _unggah(nama, isi=b"%PDF-1.4 uji", kode_faskes="0901R014", tipe="application/pdf"):
-        return klien.post(
-            "/api/v1/berkas",
-            files={"file": (nama, isi, tipe)},
-            data={"kode_faskes": kode_faskes},
-        )
+    def _unggah(nama, isi=b"%PDF-1.4 uji", kode_faskes="0901R014", tipe="application/pdf", sep=None):
+        data = {"kode_faskes": kode_faskes}
+        if sep:
+            data["sep"] = sep
+        return klien.post("/api/v1/berkas", files={"file": (nama, isi, tipe)}, data=data)
 
     return _unggah
