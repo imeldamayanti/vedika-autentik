@@ -238,6 +238,10 @@ Aturan untuk mesin AI:
 5. `sidik_jari` harus deterministik: berkas yang sama menghasilkan nilai yang sama.
 6. Setiap temuan wajib punya `kalimat` satu kalimat dalam bahasa verifikator, tanpa istilah teknis (mis. tulis "ditempel", bukan "ELA anomali").
 7. Mesin AI boleh memakai LLM hanya untuk merangkai `kalimat`, tidak untuk memutuskan `kekuatan`.
+8. **Jangan mengirim temuan `berkas_kembar`.** Kembar hanya bisa dibuktikan dengan arsip, jadi dibuat API: sidik jari dicari di DB, kandidat dikonfirmasi lewat `/v1/bandingkan`. Mesin cukup memberi `sidik_jari`. Temuan `tempelan` boleh dikirim tanpa `pasangan`, API yang mengisinya.
+9. Berkas yang tidak bisa dibaca dibalas galat `422 tidak_terbaca`. API lalu menandainya Perlu dicek, tidak pernah Lolos.
+
+> **Status implementasi `klaim`:** API belum mengirim `klaim` ke mesin (dikirim `{}`). Data klaim dicari dari nomor SEP, dan SEP baru diketahui bila `sep` diisi saat unggah. Dukungan ini menyusul. Sementara itu mesin menghitung `kecocokan_klaim` hanya bila `klaim.sesi_ditagih` ada; bila kosong, lewati pemeriksaan itu dan tetap kembalikan `isi_lembar` (jumlah baris dan tanggal sesi).
 
 ## `POST /v1/bandingkan`
 
