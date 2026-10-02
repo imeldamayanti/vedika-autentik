@@ -107,6 +107,63 @@ def test_berkas_kembar_tanpa_pasangan_di_arsip_tidak_dituduh(unggah, klien, conn
     assert not any(t["cek"] == "berkas_kembar" for t in h["temuan"])
 
 
+# ---------- ketahanan worker ----------
+
+class PenyimpananRusak:
+    """File berkas hilang (mis. disk container diganti)."""
+
+    def baca(self, rel):
+        raise FileNotFoundError(rel)
+
+
+class PenyimpananTanpaKembaran:
+    """File berkas ada, tetapi file kembarannya di arsip hilang."""
+
+    def __init__(self, asli, hilang):
+        self.asli, self.hilang = asli, hilang
+
+    def baca(self, rel):
+        if rel == self.hilang:
+            raise FileNotFoundError(rel)
+        return self.asli.baca(rel)
+
+
+def test_file_hilang_gagal_aman_dan_tidak_macet(unggah, klien, conn, mesin):
+    id_ = unggah("VA-ASL-01.pdf").json()["id"]
+    assert proses_satu(conn, mesin, PenyimpananRusak()) is True
+    h = klien.get(f"/api/v1/berkas/{id_}").json()
+    assert h["status"] == "gagal" and h["label"] == "cek"
+    assert proses_satu(conn, mesin, PenyimpananRusak()) is False  # job tidak nyangkut
+
+
+def test_file_kembaran_hilang_tidak_boleh_berujung_lolos(unggah, klien, conn, mesin, tmp_path):
+    asal, _ = unggah_dan_proses(unggah, klien, conn, mesin, tmp_path, "VA-KMB-00.pdf")
+    path_asal = conn.execute("select path_storage from berkas where id = %s", (asal,)).fetchone()["path_storage"]
+    id_ = unggah("VA-KMB-01.pdf").json()["id"]
+    assert proses_satu(conn, mesin, PenyimpananTanpaKembaran(Penyimpanan(tmp_path), path_asal)) is True
+    h = klien.get(f"/api/v1/berkas/{id_}").json()
+    assert h["status"] == "gagal" and h["label"] == "cek"
+
+
+def test_job_nyangkut_diambil_ulang_setelah_batas_waktu(unggah, klien, conn, mesin, tmp_path):
+    id_ = unggah("VA-ASL-01.pdf").json()["id"]
+    conn.execute("update job set status = 'jalan', percobaan = 1, diambil = now() - interval '10 minutes'")
+    assert proses_satu(conn, mesin, Penyimpanan(tmp_path)) is True
+    assert klien.get(f"/api/v1/berkas/{id_}").json()["status"] == "selesai"
+
+
+def test_job_yang_sedang_dikerjakan_tidak_diambil_ganda(unggah, conn, mesin, tmp_path):
+    unggah("VA-ASL-01.pdf")
+    conn.execute("update job set status = 'jalan', percobaan = 1, diambil = now()")
+    assert proses_satu(conn, mesin, Penyimpanan(tmp_path)) is False
+
+
+def test_job_terlalu_sering_gagal_tidak_diulang_terus(unggah, conn, mesin, tmp_path):
+    unggah("VA-ASL-01.pdf")
+    conn.execute("update job set status = 'jalan', percobaan = 3, diambil = now() - interval '10 minutes'")
+    assert proses_satu(conn, mesin, Penyimpanan(tmp_path)) is False
+
+
 # ---------- detail dan CORS untuk FE ----------
 
 def test_detail_memuat_nama_berkas_asli(unggah, klien, conn, mesin, tmp_path):

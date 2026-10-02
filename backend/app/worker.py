@@ -1,6 +1,10 @@
 """Worker antrean: ambil job, panggil mesin AI (Kontrak B), simpan hasil, hitung label.
 
 Jalankan sebagai proses terpisah dengan `python -m app.worker`, atau panggil proses_satu langsung.
+
+Ketahanan: semua galat saat memproses berujung berkas `gagal` berlabel Perlu dicek (gagal aman),
+tidak pernah crash dan tidak pernah Lolos. Job yang nyangkut `jalan` lebih dari BATAS_NYANGKUT
+diambil ulang, maksimal MAKS_PERCOBAAN kali.
 """
 import time
 
@@ -11,10 +15,18 @@ from .label import ALASAN_SARAN, hitung_label
 from .mesin import KlienMesin, MesinGalat
 from .tampilan import ringkasan
 
+BATAS_NYANGKUT = "5 minutes"
+MAKS_PERCOBAAN = 3
+KALIMAT_GAGAL = "Berkas tidak bisa diproses oleh mesin pemeriksa. Ditandai Perlu dicek."
+ALASAN_GAGAL = "Berkas tidak bisa diproses, sehingga tidak bisa dinyatakan Lolos."
+
 
 def _ambil_job(conn):
     job = conn.execute(
-        "select id, berkas_id from job where status = 'menunggu' order by dibuat, id for update skip locked limit 1"
+        "select id, berkas_id from job"
+        " where status = 'menunggu' or (status = 'jalan' and percobaan < %s and diambil < now() - %s::interval)"
+        " order by dibuat, id for update skip locked limit 1",
+        (MAKS_PERCOBAAN, BATAS_NYANGKUT),
     ).fetchone()
     if job:
         conn.execute(
@@ -28,26 +40,20 @@ def _tutup_job(conn, job_id, status, galat=None):
     conn.execute("update job set status = %s, galat = %s, selesai = now() where id = %s", (status, galat, job_id))
 
 
-def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
-    """Memproses satu job. True bila ada job yang diproses."""
-    job = _ambil_job(conn)
-    if job is None:
-        return False
+def _gagal(conn, berkas_id, job_id, kode):
+    repo.simpan_gagal(conn, berkas_id, galat=kode, kalimat=KALIMAT_GAGAL, alasan=ALASAN_GAGAL, versi_aturan=VERSI_ATURAN)
+    _tutup_job(conn, job_id, "gagal", kode)
+
+
+def _proses(conn, job, mesin: KlienMesin, penyimpanan):
     berkas = repo.ambil_berkas(conn, job["berkas_id"])
     isi = penyimpanan.baca(berkas["path_storage"])
     klaim_awal = data_klaim.cari(berkas["sep"])  # SEP dari unggahan, bila ada
     try:
         hasil = mesin.analisis(berkas["nama_file"], isi, klaim_awal)
     except MesinGalat as e:
-        # Gagal aman: berkas yang tidak bisa diproses menjadi Perlu dicek, tidak pernah Lolos.
-        repo.simpan_gagal(
-            conn, berkas["id"], galat=e.kode,
-            kalimat="Berkas tidak bisa diproses oleh mesin pemeriksa. Ditandai Perlu dicek.",
-            alasan="Berkas tidak bisa diproses, sehingga tidak bisa dinyatakan Lolos.", versi_aturan=VERSI_ATURAN,
-        )
-        _tutup_job(conn, job["id"], "gagal", e.kode)
-        conn.commit()
-        return True
+        _gagal(conn, berkas["id"], job["id"], e.kode)
+        return
 
     # Berkas kembar bukan sinyal dari satu berkas. Dibuktikan API: sidik jari di arsip, lalu perbandingan.
     temuan = [dict(t) for t in hasil["temuan"] if t["cek"] != "berkas_kembar"]
@@ -77,6 +83,19 @@ def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
         ringkasan=ringkasan(temuan, hasil["kualitas_scan"], label), versi_aturan=VERSI_ATURAN,
     )
     _tutup_job(conn, job["id"], "selesai")
+
+
+def proses_satu(conn, mesin: KlienMesin, penyimpanan) -> bool:
+    """Memproses satu job. True bila ada job yang diproses (berhasil atau gagal aman)."""
+    job = _ambil_job(conn)
+    if job is None:
+        return False
+    try:
+        with conn.transaction():  # savepoint: hasil setengah jadi dibuang bila ada galat
+            _proses(conn, job, mesin, penyimpanan)
+    except Exception as e:  # noqa: BLE001 - apa pun yang salah harus berujung gagal aman, bukan macet
+        with conn.transaction():
+            _gagal(conn, job["berkas_id"], job["id"], getattr(e, "kode", None) or "galat_internal")
     conn.commit()
     return True
 
@@ -93,9 +112,12 @@ def jalankan(jeda: float = 1.0):
     mesin = KlienMesin(httpx.Client(base_url=config.mesin_url(), timeout=60), config.kunci_mesin())
     simpan = Penyimpanan(config.upload_dir())
     while True:
-        with psycopg.connect(config.database_url(), row_factory=dict_row, prepare_threshold=None) as conn:
-            while proses_satu(conn, mesin, simpan):
-                pass
+        try:
+            with psycopg.connect(config.database_url(), row_factory=dict_row, prepare_threshold=None) as conn:
+                while proses_satu(conn, mesin, simpan):
+                    pass
+        except psycopg.Error as e:
+            print(f"worker: koneksi database bermasalah ({type(e).__name__}), coba lagi", flush=True)
         time.sleep(jeda)
 
 
