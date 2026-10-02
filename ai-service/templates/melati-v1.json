@@ -1,0 +1,18 @@
+{
+  "id": "melati-v1",
+  "version": "1.1",
+  "kode_faskes": "0901R014",
+  "canonical_size": [1240, 1754],
+  "regions": {
+    "identity": [80, 245, 1080, 245],
+    "name": [250, 265, 380, 65],
+    "card": [250, 315, 380, 65],
+    "sep": [780, 305, 380, 90],
+    "periode": [780, 400, 380, 90],
+    "table": [85, 540, 1070, 782],
+    "total": [84, 1335, 680, 90]
+  },
+  "row_y": [576, 668, 760, 852, 944, 1036, 1128, 1220],
+  "row_height": 92,
+  "fingerprint_masks": ["identity", "sep", "periode"]
+}

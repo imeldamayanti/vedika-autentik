@@ -48,10 +48,13 @@ Tanda buatan AI tidak pernah menjadi satu-satunya alasan Prioritas. Scan yang je
 | `data.js` | Aturan label, urutan langkah pemeriksaan, empat tindakan, pesan PANDAWA |
 | `app.js` | Perute, tujuh layar, demo otomatis, panduan, laporan PDF |
 | `dataset/` | 17 berkas uji beserta ground truth. Lihat [dataset/README.md](dataset/README.md) |
+| `ai-service/` | Mesin analisis PRAMANA berbasis FastAPI, OpenCV, dan Tesseract |
 | `tools/dataset/` | Pembangkit dataset: render lembar di Chromium, lalu efek pindai dan manipulasi di Python |
 | `tests/alur.test.js` | Uji alur dari masuk sampai unduh PDF, termasuk layar ponsel |
 
-Tidak ada AI yang berjalan di prototipe ini. Temuan dibaca dari ground truth dataset (`dataset/manifest.js`), jadi yang ditunjukkan adalah alur kerja dan cara bukti disajikan ke verifikator. Rancangan teknis mesin analisisnya ada di PRD bagian 12.
+Demo web publik masih membaca temuan dari ground truth dataset (`dataset/manifest.js`).
+Mesin analisis nyata berada di `ai-service/` dan terhubung ke `backend/` melalui
+Contract B; ia tidak dijalankan oleh halaman statis demo.
 
 ## Menjalankan secara lokal
 

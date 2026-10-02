@@ -193,7 +193,7 @@ Angka untuk beranda: per faskes `masuk`, `selesai`, `prioritas`, `cek`, `ulang`.
 
 # Kontrak B: API ↔ Mesin AI (`/v1`)
 
-Tanpa state, tanpa autentikasi pengguna. Dilindungi kunci layanan `X-Kunci-Layanan` yang hanya dipegang API. Target: di bawah 10 detik per berkas 1–2 halaman di CPU biasa.
+Tanpa state, tanpa autentikasi pengguna. Dilindungi kunci layanan `X-Kunci-Layanan` yang hanya dipegang API. Target: di bawah 10 detik per berkas satu halaman di CPU biasa.
 
 ## `POST /v1/analisis`
 
@@ -203,29 +203,32 @@ Tanpa state, tanpa autentikasi pengguna. Dilindungi kunci layanan `X-Kunci-Layan
 |---|---|---|
 | `file` | file | PDF/JPG/PNG asli |
 | `klaim` | JSON string | `{ "sep", "sesi_ditagih", "periode", "kode_faskes" }` untuk pemeriksaan kecocokan |
-| `template` | string | id template letak kolom per rumah sakit, mis. `melati-v1`. Kosong = deteksi tabel otomatis. |
+| `template` | string | id template letak kolom per rumah sakit, mis. `melati-v1`. Kosong = pilih dari `klaim.kode_faskes`; geometri bersama dipakai bila konteks tidak ada. |
 
 Respons `200`:
 
 ```json
 {
-  "versi_mesin": "pramana-0.3.1",
+  "versi_mesin": "pramana-0.5.0",
   "ukuran": [1240, 1754],
-  "halaman_jpg": "<base64 atau URL sementara>",
-  "kualitas_scan": { "status": "baik", "catatan": "Terbaca, miring 0.4 derajat.", "ketajaman": 0.91, "miring_derajat": 0.4 },
-  "isi_lembar": { "nama": "Ratna Kusuma", "no_sep": "…", "baris_terisi": 5, "tanggal_sesi": ["04/08"], "jumlah_kunjungan_tertulis": 8, "kemiripan_ttd_rerata": 0.815 },
+  "halaman_jpg": "<JPEG base64>",
+  "kualitas_scan": { "status": "baik", "catatan": "Berkas terbaca, kemiringan 0.4 derajat.", "ketajaman": 0.91, "miring_derajat": 0.4, "perspektif_dikoreksi": false },
+  "isi_lembar": { "nama": null, "no_sep": null, "baris_terisi": 5, "baris_asli": 5, "tanggal_sesi": ["04/08", "07/08", "11/08", "14/08", "18/08"], "jumlah_kunjungan_tertulis": null, "kemiripan_ttd_rerata": 0.815 },
   "temuan": [
     { "cek": "kecocokan_klaim", "kekuatan": "kuat", "kalimat": "Ditagih 8 sesi, berkas hanya mendukung 5.", "region": [90, 1036, 1065, 283], "skor": 0.98 },
-    { "cek": "suntingan", "kekuatan": "sedang", "kalimat": "Angka 8 … ditempel di atas angka 5.", "region": [347, 1360, 29, 44], "skor": 0.74 }
+    { "cek": "suntingan", "kekuatan": "sedang", "kalimat": "Metadata menunjukkan berkas pernah diproses dengan editor gambar; lokasi perubahan belum dapat dipastikan dari metadata saja.", "skor": 0.7 }
   ],
   "metadata_file": { "Producer": "…", "Creator": "…", "CreationDate": "…", "ModDate": "…" },
   "sidik_jari": {
-    "algoritma": "phash64+simhash",
+    "algoritma": "phash64-visual",
     "halaman": "a3f09c…",
     "baris": ["…", "…"],
-    "teks": "7d21…"
+    "teks": "7d21…",
+    "versi_fingerprint": "visual-phash64-v1"
   },
-  "waktu_proses_ms": 4210
+  "waktu_proses_ms": 1020,
+  "template_id": "melati-v1",
+  "versi_template": "1.1"
 }
 ```
 
@@ -237,11 +240,12 @@ Aturan untuk mesin AI:
 4. Kolom identitas dan tanggal **ditutup sebelum** `sidik_jari` dihitung (PRD bagian 14).
 5. `sidik_jari` harus deterministik: berkas yang sama menghasilkan nilai yang sama.
 6. Setiap temuan wajib punya `kalimat` satu kalimat dalam bahasa verifikator, tanpa istilah teknis (mis. tulis "ditempel", bukan "ELA anomali").
-7. Mesin AI boleh memakai LLM hanya untuk merangkai `kalimat`, tidak untuk memutuskan `kekuatan`.
-8. **Jangan mengirim temuan `berkas_kembar`.** Kembar hanya bisa dibuktikan dengan arsip, jadi dibuat API: sidik jari dicari di DB, kandidat dikonfirmasi lewat `/v1/bandingkan`. Mesin cukup memberi `sidik_jari`. Temuan `tempelan` boleh dikirim tanpa `pasangan`, API yang mengisinya.
+7. Baseline tidak memakai LLM. Jika kelak dipakai, fungsinya hanya merangkai `kalimat`, bukan menentukan temuan atau `kekuatan`.
+8. **Jangan mengirim temuan `berkas_kembar` atau `tempelan` dari `/v1/analisis`.** Keduanya membutuhkan pembanding arsip: sidik jari dicari di DB, kandidat dikonfirmasi lewat `/v1/bandingkan`, lalu API membuat temuan beserta `pasangan`. Mesin cukup memberi `sidik_jari` pada analisis satu berkas.
 9. Berkas yang tidak bisa dibaca dibalas galat `422 tidak_terbaca`. API lalu menandainya Perlu dicek, tidak pernah Lolos.
+10. Field OCR yang tidak melewati validasi dikirim `null` atau `[]`; mesin tidak menebak dan tidak menyalin nilai dari konteks klaim.
 
-> **`klaim` ke mesin:** API mengirim `klaim` bila `sep` diisi saat unggah dan SEP itu ada di data klaim pembanding (stand-in E-Klaim). Bila `sep` kosong atau tidak dikenal, `klaim` dikirim `{}`. Mesin menghitung `kecocokan_klaim` hanya bila `klaim.sesi_ditagih` ada; bila kosong, lewati pemeriksaan itu dan tetap kembalikan `isi_lembar` (jumlah baris dan tanggal sesi). API juga mencocokkan klaim dari `isi_lembar.no_sep` hasil baca mesin untuk ditampilkan.
+> **`klaim` ke mesin:** API selalu mengirim `kode_faskes` sebagai konteks template. Data klaim lain dikirim bila `sep` unggahan ditemukan di data pembanding (stand-in E-Klaim). Mesin menghitung `kecocokan_klaim` hanya bila `klaim.sesi_ditagih` ada; bila tidak, pemeriksaan itu dilewati dan mesin tetap mengembalikan `isi_lembar`. API juga dapat mencocokkan `isi_lembar.no_sep` yang berhasil dibaca mesin.
 
 ## `POST /v1/bandingkan`
 
@@ -268,7 +272,7 @@ API lalu membuat dua temuan di hasil akhir: `berkas_kembar` (dengan `pasangan`) 
 
 ## `GET /v1/kesehatan`
 
-`{ "status": "ok", "versi_mesin": "pramana-0.3.1", "model": ["ocr", "ela"] }`
+`{ "status": "ok", "versi_mesin": "pramana-0.5.0", "model": ["tesseract-5"], "siap_analisis": true }`
 
 ## Galat mesin
 

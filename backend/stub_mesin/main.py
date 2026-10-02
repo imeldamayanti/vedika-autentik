@@ -50,9 +50,12 @@ async def analisis(file: UploadFile = File(...), klaim: str = Form("{}"), templa
     if berkas is None:
         return _galat(422, "tidak_terbaca", "Stub hanya mengenali berkas dataset (VA-XXX-NN).")
     akar = _akar(berkas)
-    # Berkas kembar baru bisa dibuktikan dengan arsip (sidik jari + /v1/bandingkan), jadi dibuat oleh API,
-    # bukan dikirim mesin dari satu berkas. Sama seperti mesin nyata.
-    temuan = [{k: v for k, v in t.items() if k != "pasangan"} for t in berkas["temuan"] if t["cek"] != "berkas_kembar"]
+    # Bukti pasangan hanya boleh lahir dari /v1/bandingkan, bukan analisis satu berkas.
+    temuan = [
+        {k: v for k, v in t.items() if k != "pasangan"}
+        for t in berkas["temuan"]
+        if t["cek"] not in {"berkas_kembar", "tempelan"}
+    ]
     return {
         "versi_mesin": VERSI_MESIN,
         "ukuran": berkas["ukuran"],
@@ -77,6 +80,19 @@ async def bandingkan(file_a: UploadFile = File(...), file_b: UploadFile = File(.
     if a is None or b is None:
         return _galat(422, "tidak_terbaca", "Stub hanya mengenali berkas dataset (VA-XXX-NN).")
     sama = _akar(a) == _akar(b)
+    tempelan = []
+    if sama:
+        for index in range(1, 9):
+            key = f"ttd-{index}"
+            if key in a["region_lembar"] and key in b["region_lembar"]:
+                tempelan.append(
+                    {
+                        "bagian": key,
+                        "region_a": a["region_lembar"][key],
+                        "region_b": b["region_lembar"][key],
+                        "kemiripan": 0.99,
+                    }
+                )
     return {
         "kemiripan": 0.97 if sama else 0.12,
         "sama": sama,
@@ -84,5 +100,5 @@ async def bandingkan(file_a: UploadFile = File(...), file_b: UploadFile = File(.
         else "Isi kedua berkas berbeda.",
         "region_a": [a["region_lembar"]["tabel"]] if sama else [],
         "region_b": [b["region_lembar"]["tabel"]] if sama else [],
-        "tempelan": [],
+        "tempelan": tempelan,
     }

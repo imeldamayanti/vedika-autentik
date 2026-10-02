@@ -29,6 +29,7 @@ def test_analisis_berkas_dataset_mengikuti_kontrak_b():
 def test_analisis_tidak_mengirim_label_atau_saran():
     h = kirim("VA-KMB-01.pdf").json()
     assert "label" not in h and "saran" not in h
+    assert not {"berkas_kembar", "tempelan"} & {finding["cek"] for finding in h["temuan"]}
 
 
 def test_berkas_di_luar_dataset_tidak_terbaca():
@@ -60,6 +61,7 @@ def test_bandingkan_berkas_kembar_sama():
     h = bandingkan("VA-KMB-01.pdf", "VA-KMB-00.pdf").json()
     assert h["sama"] is True
     assert h["kemiripan"] >= 0.9
+    assert len(h["tempelan"]) == 8
 
 
 def test_bandingkan_berkas_beda_tidak_sama():
