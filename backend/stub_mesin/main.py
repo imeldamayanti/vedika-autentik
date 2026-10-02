@@ -50,7 +50,9 @@ async def analisis(file: UploadFile = File(...), klaim: str = Form("{}"), templa
     if berkas is None:
         return _galat(422, "tidak_terbaca", "Stub hanya mengenali berkas dataset (VA-XXX-NN).")
     akar = _akar(berkas)
-    temuan = [{k: v for k, v in t.items() if k != "pasangan"} for t in berkas["temuan"]]
+    # Berkas kembar baru bisa dibuktikan dengan arsip (sidik jari + /v1/bandingkan), jadi dibuat oleh API,
+    # bukan dikirim mesin dari satu berkas. Sama seperti mesin nyata.
+    temuan = [{k: v for k, v in t.items() if k != "pasangan"} for t in berkas["temuan"] if t["cek"] != "berkas_kembar"]
     return {
         "versi_mesin": VERSI_MESIN,
         "ukuran": berkas["ukuran"],
