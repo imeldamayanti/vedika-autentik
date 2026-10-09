@@ -140,7 +140,7 @@
   /* ============================================================== masuk */
 
   function lamanMasuk() {
-    return '<div class="masuk"><div class="masuk-bungkus">' +
+    return '<div class="masuk"><div class="masuk-foto"><img src="assets/foto/kantor.jpg" alt=""></div><div class="masuk-bungkus">' +
       '<div class="merek-ikon">' + ikon("perisai") + "</div>" +
       "<h1>VEDIKA</h1><p>Verifikasi Digital Klaim</p>" +
       '<div class="masuk-kartu">' +
