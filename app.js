@@ -123,7 +123,7 @@
         '<div class="sisi-kaki nav">' +
           '<button type="button" data-aksi="tur-mulai">' + ikon("tanya") + "Panduan demo</button>" +
           '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
-          '<p class="catatan-prototipe"><b>Prototipe Healthkathon 2026.</b> Semua nama, nomor, dan rumah sakit fiktif. Deteksi disimulasikan dari dataset uji.</p>' +
+          '<p class="catatan-prototipe"><b>Prototipe Healthkathon 2026.</b> Semua data fiktif.</p>' +
         "</div>" +
       "</aside>" +
       '<div class="kolom">' +
@@ -144,11 +144,11 @@
       '<div class="merek-ikon">' + ikon("perisai") + "</div>" +
       "<h1>VEDIKA</h1><p>Verifikasi Digital Klaim</p>" +
       '<div class="masuk-kartu">' +
-        "<h2>Otentikasi pengguna</h2><p>Masuk dengan akun verifikator kantor cabang.</p>" +
+        "<h2>Otentikasi pengguna</h2>" +
         '<div class="medan"><span class="kapital">Username</span><div class="medan-isi">' + ikon("pengguna") + "rsantoso.kc0901</div></div>" +
         '<div class="medan"><span class="kapital">Kata sandi</span><div class="medan-isi">' + ikon("kunci") + "••••••••••</div></div>" +
         '<button class="btn btn--primer btn--lebar btn--kapital" type="button" data-aksi="masuk">Masuk sebagai verifikator demo</button>' +
-        '<p class="masuk-catatan">Ini prototipe. Akunnya fiktif dan tidak ada data yang dikirim ke mana pun.</p>' +
+        '<p class="masuk-catatan">Akun fiktif. Tidak ada data yang dikirim.</p>' +
       "</div>" +
       '<p class="masuk-versi">Prototipe Vedika Autentik · Healthkathon 2026</p>' +
     "</div></div>";
@@ -172,7 +172,7 @@
 
     return '<div class="kepala"><div><h1>Beranda</h1><p>' + D.HARI_INI + " · " + D.VERIFIKATOR.kantor + "</p></div></div>" +
       '<div class="pengumuman"><span class="merek-ikon merek-ikon--veritas">' + logoVeritas + "</span>" +
-        "<div><b>Autentik sekarang aktif untuk klaim fisioterapi</b><p>Setiap berkas yang masuk ke JKN Drive diperiksa keasliannya lebih dulu. Hasilnya muncul sebagai label di antrean Anda. Keputusan tetap di tangan Anda.</p></div>" +
+        "<div><b>Autentik sekarang aktif untuk klaim fisioterapi</b><p>Berkas dari JKN Drive diperiksa keasliannya lebih dulu. Keputusan tetap di tangan Anda.</p></div>" +
         '<a class="btn btn--primer" href="#/autentik">Buka Autentik</a></div>' +
       '<section class="panel"><div class="panel-kepala"><h2>Klaim fisioterapi masuk, 7 hari terakhir</h2><span class="kanan redup">Batas verifikasi 10 hari kerja</span></div>' +
         '<div class="ringkas">' +
@@ -222,15 +222,15 @@
         '<label for="faskesUnggah">Rumah sakit pengirim <span>untuk berkas di luar dataset</span></label>' +
         '<select id="faskesUnggah" data-aksi="asal-unggah" aria-describedby="asalUnggahBantu"' + (ui.asalError ? ' aria-invalid="true"' : '') + '>' +
           '<option value="">Pilih rumah sakit</option>' + D.BATCH.map((r) => '<option value="' + esc(r.faskes) + '"' + (ui.asalUnggah === r.faskes ? ' selected' : '') + '>' + esc(r.faskes) + '</option>').join("") + '</select>' +
-        '<p id="asalUnggahBantu">Berkas contoh memakai rumah sakit dari data klaim. Pilihan manual bukan bukti asal dokumen.</p>' +
+        '<p id="asalUnggahBantu">Pilihan manual bukan bukti asal dokumen.</p>' +
         (ui.asalError ? '<p class="galat" role="alert">Pilih rumah sakit sebelum mengunggah berkas di luar dataset.</p>' : '') +
       '</div>' +
       '<label class="unggah-jatuh" id="jatuh" for="pilihBerkas">' + ikon("unggah") +
-        "<b>Tarik berkas klaim ke sini</b><p>PDF, JPG, atau PNG. Berkas dari folder dataset langsung dikenali. Di produksi, berkas diambil otomatis dari JKN Drive.</p>" +
+        "<b>Tarik berkas klaim ke sini</b><p>PDF, JPG, atau PNG</p>" +
         '<span class="btn btn--kecil">Pilih berkas</span>' +
         '<input class="sr" type="file" id="pilihBerkas" accept=".pdf,.jpg,.jpeg,.png" multiple></label></div>' +
       '<div class="unggah-demo">' +
-        '<div class="unggah-demo-kepala"><div><b>Coba lima berkas contoh</b><p>Satu berkas untuk setiap jenis hasil. Klik satu kartu, atau masukkan kelimanya sekaligus.</p></div>' +
+        '<div class="unggah-demo-kepala"><div><b>Coba lima berkas contoh</b><p>Satu berkas untuk tiap jenis hasil</p></div>' +
           '<button class="btn btn--primer" type="button" id="tombolDemo" data-aksi="demo"' + (jalan ? " disabled" : "") + ">" + ikon("main") + (semuaAda ? "Jalankan ulang demo" : "Jalankan demo") + "</button></div>" +
         '<div class="skenario">' + kartu + "</div>" +
       "</div>" +
@@ -294,7 +294,7 @@
       "</tr>";
     }).join("");
 
-    return '<div class="kepala"><div><h1>Autentik</h1><p>Pemeriksaan keaslian berkas fisioterapi dari JKN Drive. Berkas yang perlu dicek sudah ada di urutan atas.</p></div></div>' +
+    return '<div class="kepala"><div><h1>Autentik</h1><p>Pemeriksaan keaslian berkas fisioterapi dari JKN Drive</p></div></div>' +
       panelUnggah() +
       '<section class="panel tabel-antrean"><div class="saringan"><div class="segmen" role="group" aria-label="Saring menurut label">' + segmen + "</div>" +
         '<select class="pilih" data-aksi="saring-faskes" aria-label="Saring menurut fasilitas kesehatan"><option value="">Semua rumah sakit</option>' +
@@ -303,7 +303,7 @@
           (lolosTerbuka ? '<button class="btn btn--kecil" type="button" data-aksi="setujui-lolos">' + ikon("cek") + "Setujui " + lolosTerbuka + " yang lolos</button>" : "") + "</div></div>" +
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Label</th><th>Peserta</th><th>Alasan</th><th>Rumah sakit</th><th>SEP</th><th>Sesi</th><th class="kanan">Nilai klaim</th><th>Masuk</th><th>Keputusan</th></tr></thead><tbody>' + baris + "</tbody></table></div>"
-          : '<div class="kosong"><b>Tidak ada berkas yang cocok</b>Ubah saringan label atau rumah sakit, atau kosongkan pencarian.</div>') +
+          : '<div class="kosong"><b>Tidak ada berkas yang cocok</b>Ubah saringan atau kosongkan pencarian.</div>') +
       "</section>";
   }
 
@@ -497,19 +497,18 @@
 
     const status = jawab
       ? '<div class="jawaban-kartu"><span class="kapital">Jawaban peserta</span><b>' + jawab + " · " + D.JAWABAN[jawab].teks + "</b><p>" + D.JAWABAN[jawab].akibat + "</p></div>"
-      : '<div class="jawaban-kartu"><span class="kapital">Status</span><b>Terkirim otomatis pukul 09.14</b><p>Menunggu jawaban. Kalau peserta tidak menjawab, label berkas tidak berubah.</p></div>';
+      : '<div class="jawaban-kartu"><span class="kapital">Status</span><b>Terkirim otomatis pukul 09.14</b><p>Menunggu jawaban. Label tidak berubah kalau tidak dijawab.</p></div>';
 
     return '<div class="peserta"><div class="ponsel" aria-label="Simulasi layar WhatsApp peserta"><div class="ponsel-layar">' +
       '<div class="ponsel-kepala"><span class="foto">BPJS</span><div><b>BPJS Kesehatan ' + ikon("lencanaCek") + "</b><span>PANDAWA · 0811 8 165 165</span></div></div>" +
       '<div class="obrolan">' + obrolan + "</div>" + balas + "</div></div>" +
-      '<div class="peserta-info"><div><h2 style="font-size:18px;font-weight:800">Konfirmasi ke ' + inisial + " " + esc(b.klaim.peserta.split(" ")[0]) + '</h2><p class="redup" style="margin-top:4px">Hanya untuk label Prioritas. Peserta menjadi saksi dari luar rumah sakit.</p></div>' +
+      '<div class="peserta-info"><div><h2 style="font-size:18px;font-weight:800">Konfirmasi ke ' + inisial + " " + esc(b.klaim.peserta.split(" ")[0]) + '</h2><p class="redup" style="margin-top:4px">Hanya untuk label Prioritas</p></div>' +
         status +
         '<section class="panel"><div class="panel-kepala"><h3>Aturan pesan</h3></div><div class="panel-isi"><ul class="aturan">' +
-          ["Dikirim lewat PANDAWA, WhatsApp resmi BPJS Kesehatan.", "Tanpa tautan, karena penipu sering menyamar sebagai BPJS.", "Tidak menyebut dugaan kecurangan atau nama pihak yang dicurigai.",
-            "Satu pesan untuk satu klaim.", "Jawaban menaikkan urutan pemeriksaan, tidak pernah menjadi vonis."]
+          ["Lewat PANDAWA, WhatsApp resmi BPJS.", "Tanpa tautan, karena penipu sering menyamar sebagai BPJS.", "Tidak menyebut dugaan kecurangan.", "Jawaban menaikkan urutan pemeriksaan, bukan vonis."]
             .map((t) => "<li>" + ikon("cek") + "<span>" + t + "</span></li>").join("") +
         "</ul></div></section>" +
-        '<p class="redup" style="font-size:12.5px">Di prototipe ini jawaban peserta disimulasikan. Di produksi, pesan dikirim lewat WhatsApp Business API resmi BPJS.</p>' +
+        '<p class="redup" style="font-size:12.5px">Jawaban peserta disimulasikan di prototipe ini.</p>' +
       "</div></div>";
   }
 
@@ -524,7 +523,7 @@
     if (b.label === "prioritas") {
       item.push({ waktu: "09.14", judul: "Pertanyaan dikirim ke peserta lewat PANDAWA", teks: "Satu pesan netral tanpa tautan." });
       item.push(jawab ? { waktu: "Hari ini", judul: "Peserta menjawab: " + D.JAWABAN[jawab].teks, teks: D.JAWABAN[jawab].akibat }
-        : { menunggu: true, waktu: "", judul: "Menunggu jawaban peserta", teks: "Label tidak berubah kalau peserta tidak menjawab." });
+        : { menunggu: true, waktu: "", judul: "Menunggu jawaban peserta", teks: "Label tidak berubah." });
     }
     if (k) {
       item.push({ waktu: k.waktu.split(", ")[1] || k.waktu, judul: k.oleh + ": " + D.TINDAKAN[k.tindakan].nama, teks: (k.ikutSaran ? "Sesuai saran sistem." : "Berbeda dari saran sistem.") + (k.catatan ? " Catatan: " + k.catatan : "") });
@@ -532,7 +531,7 @@
     } else {
       item.push({ menunggu: true, waktu: "", judul: "Menunggu keputusan verifikator", teks: "Saran sistem: " + D.TINDAKAN[D.SARAN[b.label]].nama.toLowerCase() + "." });
     }
-    return '<section class="panel"><div class="panel-kepala"><h3>Jejak keputusan</h3><span class="kanan redup">Setiap langkah tercatat: siapa, kapan, dan alasannya</span></div><ol class="linimasa">' +
+    return '<section class="panel"><div class="panel-kepala"><h3>Jejak keputusan</h3><span class="kanan redup">Siapa, kapan, dan alasannya</span></div><ol class="linimasa">' +
       item.map((x) => '<li class="' + (x.menunggu ? "menunggu" : "") + '"><time>' + esc(x.waktu) + '</time><span class="bulat">' + (x.menunggu ? "" : ikon("cek")) + "</span><div><b>" + esc(x.judul) + "</b><p>" + (x.html ? x.teks : esc(x.teks)) + "</p></div></li>").join("") +
       "</ol></section>";
   }
@@ -821,25 +820,15 @@
 
   const TUR = [
     { tengah: true, judul: "Selamat datang di Vedika Autentik",
-      teks: "Anda berperan sebagai verifikator di KC Jakarta Pusat. Fitur ini memeriksa keaslian berkas fisioterapi sebelum klaim dibayar. Panduannya sekitar dua menit." },
-    { rute: "#/autentik", sel: ".nav-autentik", posisi: "kanan", judul: "Tab baru di Vedika",
-      teks: "Autentik ada di samping menu verifikasi yang sudah Anda pakai. Rumah sakit tidak perlu aplikasi atau dokumen baru." },
+      teks: "Anda verifikator di KC Jakarta Pusat. Fitur ini memeriksa keaslian berkas fisioterapi sebelum klaim dibayar." },
     { rute: "#/autentik", sel: "#panelUnggah", posisi: "bawah", coba: "#tombolDemo", tungguDemo: true, judul: "Masukkan lima berkas contoh",
-      teks: "Anggap rumah sakit baru saja mengunggah lima berkas ke JKN Drive. Setiap berkas melewati tujuh langkah pemeriksaan.", cobaTeks: "Tekan Jalankan demo" },
-    { rute: "#/autentik", sel: ".tabel-antrean", posisi: "atas", siap: pastikanDemo, judul: "Empat label, satu urutan kerja",
-      teks: "Prioritas selalu di atas. Scan yang buram tidak dianggap curang, labelnya Scan ulang. Setiap baris punya alasan satu kalimat." },
+      teks: "Anggap rumah sakit baru mengunggah lima berkas ke JKN Drive. Hasilnya masuk antrean, Prioritas di atas.", cobaTeks: "Tekan Jalankan demo" },
     { rute: "#/berkas/VA-KMB-01/bukti", sel: ".penampil", posisi: "kanan", siap: () => { pastikanDemo(); bukaBerkas("VA-KMB-01"); }, judul: "Buktinya langsung terlihat",
-      teks: "Berkas Pak Budi ternyata lembar milik Bu Siti. Kotak merah menandai bagian yang sama persis, termasuk delapan tanda tangan." },
-    { rute: "#/berkas/VA-KMB-01/bukti", sel: ".daftar-temuan", posisi: "kiri", judul: "Setiap temuan punya kekuatan",
-      teks: "Kuat, sedang, atau lemah. Klik salah satu temuan untuk menyorot bagiannya di berkas." },
+      teks: "Berkas Pak Budi ternyata lembar milik Bu Siti. Kotak merah menandai bagian yang sama persis." },
     { rute: "#/berkas/VA-KMB-01/peserta", sel: ".ponsel", posisi: "kanan", coba: ".ponsel-balas button", judul: "Peserta ditanya langsung",
-      teks: "Satu pertanyaan netral lewat PANDAWA, WhatsApp resmi BPJS. Peserta menjadi saksi dari luar rumah sakit.", cobaTeks: "Pilih salah satu jawaban peserta" },
+      teks: "Satu pertanyaan netral lewat PANDAWA. Peserta menjadi saksi dari luar rumah sakit.", cobaTeks: "Pilih salah satu jawaban" },
     { rute: "#/berkas/VA-KMB-01/bukti", sel: ".saran", posisi: "kiri", coba: '[data-aksi="setujui"]', judul: "Sistem menyarankan, Anda memutuskan",
-      teks: "Sarannya: teruskan ke telaah lanjut. Setujui dengan satu klik, atau pilih tindakan lain dengan alasan tertulis.", cobaTeks: "Tekan Setujui saran" },
-    { rute: "#/laporan/VA-KMB-01", sel: ".kertas-laporan", posisi: "kanan", judul: "Laporan temuan terbit",
-      teks: "Identitas klaim, temuan, potongan bukti, sidik berkas, dan keputusan Anda dalam satu dokumen. Bisa diunduh sebagai PDF." },
-    { tengah: true, rute: "#/autentik", akhir: true, judul: "Silakan coba sendiri",
-      teks: "Masih ada empat berkas contoh di antrean: asli, angka disunting, buatan AI, dan scan buram. Panduan bisa diputar ulang dari menu kiri bawah." }
+      teks: "Setujui dengan satu klik, atau pilih tindakan lain dengan alasan tertulis. Tersisa empat berkas contoh untuk dicoba sendiri.", cobaTeks: "Tekan Setujui saran" }
   ];
 
   const tur = { aktif: false, i: 0, dengar: false };
