@@ -227,14 +227,15 @@ main.isi { padding: 28px 28px 64px; max-width: 1440px; width: 100%; }
 /* ---------- beranda ---------- */
 
 .pengumuman {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; min-height: 210px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; min-height: 230px;
   padding: 20px 22px; border-radius: var(--radius-panel); color: #fff; margin-bottom: 22px;
   background: linear-gradient(90deg, oklch(28% .05 205 / .92) 0, oklch(28% .05 205 / .85) 40%, oklch(28% .05 205 / 0) 70%),
     url(assets/foto/fisio.jpg) center 22% / cover;
 }
-.pengumuman .merek-ikon { width: 40px; height: 40px; }
-.pengumuman b { display: block; font-size: 14.5px; }
-.pengumuman p { color: oklch(94% .01 205); font-size: 13px; margin-top: 2px; max-width: 34ch; }
+.pengumuman .merek-ikon { width: 52px; height: 52px; }
+.pengumuman b { display: block; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+.pengumuman p { color: #fff; font-size: 16px; line-height: 1.5; margin-top: 6px; max-width: 40ch; }
+.pengumuman .btn { font-size: 15px; padding: 11px 20px; }
 .pengumuman .merek-ikon { background: #fff; }
 
 .ringkas { display: flex; gap: 36px; flex-wrap: wrap; padding: 18px 18px 16px; border-bottom: 1px solid var(--border); }
