@@ -232,7 +232,8 @@ main.isi { padding: 28px 28px 64px; max-width: 1440px; width: 100%; }
   background: linear-gradient(90deg, oklch(28% .05 205 / .92) 0, oklch(28% .05 205 / .85) 40%, oklch(28% .05 205 / 0) 70%),
     url(assets/foto/fisio.jpg) center 22% / cover;
 }
-.pengumuman .merek-ikon { width: 52px; height: 52px; }
+.pengumuman .merek-ikon { width: 116px; height: 116px; border-radius: 22px; }
+.pengumuman .merek-ikon--veritas img { width: 78px; height: 78px; }
 .pengumuman b { display: block; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
 .pengumuman p { color: #fff; font-size: 16px; line-height: 1.5; margin-top: 6px; max-width: 40ch; }
 .pengumuman .btn { font-size: 15px; padding: 11px 20px; }
