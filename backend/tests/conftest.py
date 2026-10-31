@@ -5,6 +5,7 @@ dan di-rollback per tes. Tabel produksi (schema public) tidak tersentuh.
 Tanpa DATABASE_URL di backend/.env, uji yang butuh DB dilewati.
 """
 import os
+from contextlib import nullcontext
 from pathlib import Path
 
 import psycopg
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from psycopg.rows import dict_row
 
-from app.deps import get_conn, get_mesin, get_penyimpanan
+from app.deps import get_buka_conn, get_conn, get_mesin, get_penyimpanan
 from app.main import app
 from app.mesin import KlienMesin
 from app.penyimpanan import Penyimpanan
@@ -102,4 +103,31 @@ def klien_v3(conn_v3, mesin, tmp_path):
     app.dependency_overrides[get_mesin] = lambda: mesin
     app.dependency_overrides[get_penyimpanan] = lambda: Penyimpanan(tmp_path)
     yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+KUNCI_AGEN = "kunci-agen-uji"
+
+
+@pytest.fixture
+def pembaca():
+    """Pembaca palsu: uji mengisi .balasan; bawaan menjawab tidak yakin."""
+    from tests.util_v3 import PembacaPalsu
+
+    return PembacaPalsu({"status_panggilan": "terjawab", "penerima": "peserta", "hadir": True, "jumlah_min": None,
+                         "jumlah_maks": None, "keyakinan": "rendah", "tanda_bahaya": [], "kutipan_kunci": "", "ringkasan": "-"})
+
+
+@pytest.fixture
+def klien_agen(conn_v3, pembaca, tmp_path, monkeypatch):
+    """Klien dengan header X-Kunci-Agen; pembaca palsu dan koneksi latar memakai koneksi uji yang sama."""
+    monkeypatch.setenv("AGEN_KEY", KUNCI_AGEN)
+    monkeypatch.setenv("NOMOR_PENGUJI", "081234567890")
+    app.dependency_overrides[get_conn] = lambda: conn_v3
+    app.dependency_overrides[get_mesin] = lambda: pembaca
+    app.dependency_overrides[get_penyimpanan] = lambda: Penyimpanan(tmp_path)
+    app.dependency_overrides[get_buka_conn] = lambda: (lambda: nullcontext(conn_v3))
+    k = TestClient(app)
+    k.headers.update({"X-Kunci-Agen": KUNCI_AGEN})
+    yield k
     app.dependency_overrides.clear()

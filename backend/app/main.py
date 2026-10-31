@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-from . import config, repo, router_v3, tampilan
+from . import config, repo, router_agen, router_v3, tampilan
 from .deps import get_conn, get_mesin, get_penyimpanan
 from .galat import Galat
 from .label import SARAN
@@ -22,6 +22,7 @@ app.add_middleware(
     CORSMiddleware, allow_origins=config.cors_origins(), allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["*"]
 )
 app.include_router(router_v3.router)
+app.include_router(router_agen.router)
 
 
 @app.exception_handler(Galat)

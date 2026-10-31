@@ -1,7 +1,7 @@
 """Akses database v3 (konfirmasi suara). Semua SQL v3 ada di sini. Tabel tanpa awalan schema."""
 from psycopg.types.json import Jsonb
 
-from .aturan_v3 import BAWAAN_PENGATURAN, STATUS_SELESAI
+from .aturan_v3 import BAWAAN_PENGATURAN, STATUS_BERJALAN, STATUS_SELESAI
 
 KOLOM_BARIS = (
     "p.id, p.id_peserta, p.id_rs, p.bulan_layanan, p.sesi_ditagih, p.penerima, p.nama_penerima, p.hubungan,"
@@ -148,3 +148,50 @@ def simpan_keputusan(conn, id_: str, verifikator: str, tindakan: str, ikut_saran
 
 def jalur_rekaman(conn) -> list[str]:
     return [r["rekaman_path"] for r in conn.execute("select rekaman_path from panggilan where rekaman_path is not null")]
+
+
+# ---- agen suara (D-04) ----
+
+KOLOM_JSON = ("jawaban", "transkrip", "tangkapan_sementara")
+
+
+def perbarui(conn, id_: str, kolom: dict) -> None:
+    """Ubah kolom panggilan; nilai dict/list untuk kolom jsonb dibungkus otomatis."""
+    sets = ", ".join(f"{k} = %s" for k in kolom)
+    nilai = [Jsonb(v) if k in KOLOM_JSON and v is not None else v for k, v in kolom.items()]
+    conn.execute(f"update panggilan set {sets} where id = %s", (*nilai, id_))
+
+
+def tambah_log(conn, id_: str, status: str, waktu, percobaan: int | None, catatan: str | None = None) -> None:
+    conn.execute(
+        "insert into panggilan_log (panggilan_id, status, waktu, percobaan, catatan) values (%s,%s,%s,%s,%s)",
+        (id_, status, waktu, percobaan, catatan),
+    )
+
+
+def tambah_transkrip(conn, id_: str, baris: list[dict]) -> None:
+    conn.execute(
+        "update panggilan set transkrip = coalesce(transkrip, '[]'::jsonb) || %s where id = %s", (Jsonb(baris), id_)
+    )
+
+
+def ada_panggilan_aktif(conn, batas_kunci) -> bool:
+    """Satu panggilan aktif sekaligus: ada yang sedang berjalan, atau sudah diambil agen dan kuncinya belum lepas."""
+    return conn.execute(
+        "select 1 from panggilan where status = any(%s) or (status = 'antre' and diambil_pada > %s) limit 1",
+        (list(STATUS_BERJALAN), batas_kunci),
+    ).fetchone() is not None
+
+
+def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None:
+    """Ambil dan kunci satu panggilan antre: prioritas dulu, lalu urutan id biner. Kunci yang lewat batas boleh diambil lagi."""
+    r = conn.execute(
+        "update panggilan set diambil_pada = %s where id = ("
+        " select id from panggilan where status = 'antre'"
+        " and (diambil_pada is null or diambil_pada <= %s)"
+        " and (coba_lagi_setelah is null or coba_lagi_setelah <= %s)"
+        " and (prioritas or %s)"
+        ' order by prioritas desc, id collate "C" limit 1 for update skip locked) returning id',
+        (sekarang, batas_kunci, sekarang, boleh_otomatis),
+    ).fetchone()
+    return r["id"] if r else None
