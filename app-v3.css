@@ -53,6 +53,13 @@
 .bar-antrean { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .bar-antrean .kapital { margin-right: 2px; }
 .bar-antrean .kanan { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* Dropdown filter: panah sendiri supaya jaraknya konsisten di semua peramban. */
+.bar-antrean .pilih {
+  appearance: none; -webkit-appearance: none; min-width: 150px; height: 36px; padding: 0 34px 0 12px; font-size: 13px; font-weight: 600; color: var(--fg); cursor: pointer;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6a66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+}
+.bar-antrean .pilih:hover { border-color: oklch(80% .006 90); }
+.bar-antrean .pilih:focus-visible { outline-offset: 1px; }
 .btn--otomatis[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
 .btn--otomatis[aria-pressed="true"]:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 .btn--otomatis b { letter-spacing: .04em; }
