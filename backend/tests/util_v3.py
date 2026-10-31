@@ -36,3 +36,19 @@ class PembacaPalsu:
 
     def sehat(self):
         return True
+
+
+class JamMaju:
+    """Jam API yang maju hanya saat tidur(): dipakai uji stub agen supaya jeda dan percobaan jalan tanpa menunggu."""
+
+    def __init__(self, monkeypatch, awal=None):
+        from datetime import timedelta
+
+        self._delta = timedelta
+        self.t = awal or wib(2026, 10, 6, 10, 0)
+        monkeypatch.setattr(jam, "sekarang", lambda: self.t)
+        self.total_tidur = 0.0
+
+    def tidur(self, detik):
+        self.total_tidur += detik
+        self.t += self._delta(seconds=detik)
