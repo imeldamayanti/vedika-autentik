@@ -1,0 +1,19 @@
+/* Vedika Autentik v3: tambahan gaya di atas app.css.
+   Token, tombol, tabel, panel, dan ponsel WA dipakai ulang dari app.css; di sini hanya
+   komponen yang baru di v3 (lencana Simulasi, sub-menu, kartu angka, panggilan, kartu bukti). */
+
+/* ---------- lencana Simulasi ---------- */
+
+.lencana-simulasi {
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: 4px; background: var(--cek-bg); color: var(--cek-fg); white-space: nowrap;
+  border: 1px solid oklch(86% .07 85);
+}
+.masuk-bungkus .lencana-simulasi { display: inline-block; margin-top: 10px; }
+
+/* ---------- sub-menu Autentik ---------- */
+
+.nav .nav-autentik.induk { color: var(--fg); }
+.nav-sub { display: flex; flex-direction: column; gap: 2px; margin: 0 0 2px 20px; padding-left: 10px; border-left: 2px solid var(--border); }
+.nav-sub a { height: 34px; font-size: 13px; }
+.nav-sub a .lencana { margin-left: auto; }
