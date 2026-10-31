@@ -241,7 +241,22 @@
   const kosong = (judul, teks) => '<div class="kosong"><b>' + esc(judul) + "</b>" + esc(teks) + "</div>";
   const kepala = (judul, ket) => '<div class="kepala"><div><h1>' + esc(judul) + "</h1><p>" + esc(ket) + "</p></div></div>";
 
-  function lamanBeranda() { return kepala("Beranda", D.HARI_INI + " · " + D.VERIFIKATOR.kantor) + kosong("Beranda v3", "Diisi pada tiket UI-09."); }
+  /* ============================================================== beranda */
+
+  function lamanBeranda() {
+    const menunggu = D.URUTAN_ANTREAN.filter((id) => statusBaris(id) === "antre").length;
+    const a = angka();
+    return kepala("Beranda", D.HARI_INI + " · " + D.VERIFIKATOR.kantor) +
+      '<div class="pengumuman"><span class="merek-ikon merek-ikon--veritas">' + logoVeritas + "</span>" +
+        "<div><b>Autentik kini mengonfirmasi lewat suara</b><p>AI menelepon peserta atau keluarganya untuk memastikan sesi fisioterapi benar-benar dijalani. Keputusan tetap di tangan Anda.</p></div>" +
+        '<a class="btn btn--primer" href="#/autentik">Buka antrean</a></div>' +
+      '<div class="judul-seksi"><h2>Konfirmasi suara, layanan ' + D.BULAN + "</h2><span>Pasien terpicu = dua indikator aktif atau lebih</span></div>" +
+      kartuAngka() +
+      '<div class="tautan-kartu">' +
+        '<a href="#/autentik"><b>Antrean konfirmasi</b><span>' + menunggu + " pasien menunggu ditelepon. Aktifkan panggilan otomatis atau telepon satu per satu.</span>" + '<span class="btn btn--kecil">Buka antrean</span></a>' +
+        '<a href="#/ringkasan-rs"><b>Ringkasan per rumah sakit</b><span>' + (a.rsKlarifikasi ? a.rsKlarifikasi + " rumah sakit perlu klarifikasi." : "Belum ada rumah sakit yang perlu klarifikasi.") + " Satu jawaban tidak cukup mengubah status.</span>" + '<span class="btn btn--kecil">Lihat ringkasan</span></a>' +
+      "</div>";
+  }
   /* ============================================================== antrean */
 
   const penerimaTeks = (p) => (p.penerima.hubungan === "peserta" ? "Peserta" : esc(p.penerima.nama) + ' <span class="redup">(' + esc(p.penerima.hubungan) + ")</span>");
