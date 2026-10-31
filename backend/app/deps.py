@@ -1,4 +1,6 @@
 """Dependensi FastAPI: koneksi DB, klien mesin, penyimpanan. Diganti di uji lewat dependency_overrides."""
+from contextlib import contextmanager
+
 import httpx
 import psycopg
 from psycopg.rows import dict_row
@@ -22,3 +24,17 @@ def get_mesin() -> KlienMesin:
 
 def get_penyimpanan() -> Penyimpanan:
     return Penyimpanan(config.upload_dir())
+
+
+def get_buka_conn():
+    """Pabrik koneksi untuk pekerjaan latar (berjalan setelah respons terkirim, di luar siklus permintaan)."""
+
+    @contextmanager
+    def buka():
+        conn = psycopg.connect(config.database_url(), row_factory=dict_row, prepare_threshold=None, connect_timeout=10)
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    return buka

@@ -22,7 +22,14 @@ AKAR = Path(__file__).resolve().parents[2]
 DATA = AKAR / "data-uji-konfirmasi"
 BULAN = "2026-08"
 RETENSI_SESUAI = timedelta(days=30)
-WAKTU_RIWAYAT = datetime(2026, 8, 31, 10, 0, tzinfo=timezone.utc)
+WIB = timezone(timedelta(hours=7))
+# Empat riwayat latar demo: (waktu_mulai, durasi detik). Sama dengan data demo FE (data-v3.js).
+JADWAL_RIWAYAT = {
+    "CALL-LATAR-001": (datetime(2026, 10, 5, 9, 42, tzinfo=WIB), 84),
+    "CALL-LATAR-002": (datetime(2026, 10, 5, 10, 5, tzinfo=WIB), 71),
+    "CALL-LATAR-003": (datetime(2026, 10, 5, 10, 31, tzinfo=WIB), 66),
+    "CALL-LATAR-004": (datetime(2026, 10, 5, 11, 18, tzinfo=WIB), 74),
+}
 PESAN_KONEKSI = "Tidak bisa terhubung ke database: DATABASE_URL salah atau project Supabase di-pause."
 
 TABEL_V3 = (
@@ -30,8 +37,9 @@ TABEL_V3 = (
 )
 SQL_PANGGILAN = (
     "insert into panggilan (id, id_peserta, id_rs, bulan_layanan, sesi_ditagih, penerima, nama_penerima,"
-    " hubungan, status, percobaan, jawaban, label, alasan, waktu_mulai, waktu_selesai, hapus_pada, sumber)"
-    " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing"
+    " hubungan, status, percobaan, jawaban, label, alasan, waktu_mulai, waktu_selesai, hapus_pada, sumber,"
+    " durasi_detik)"
+    " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing"
 )
 
 
@@ -91,16 +99,17 @@ def id_panggilan(id_peserta, bulan):
     return f"CALL-{id_peserta}-{bulan}"
 
 
-def baris_panggilan(p, peserta, waktu):
-    """Riwayat: penerima mengikuti jawaban yang tercatat di berkas riwayat."""
-    j = p["jawaban"]
+def baris_panggilan(p, peserta, jadwal=JADWAL_RIWAYAT):
+    """Riwayat: penerima mengikuti R1.3 (bukan kolom penerima di berkas riwayat); jawaban disesuaikan."""
     pes = peserta[p["id_peserta"]]
-    keluarga = j["penerima"] == "keluarga"
-    nama = pes["kontak_keluarga"] if keluarga else pes["nama"]
+    penerima, nama, hubungan = tentukan_penerima(pes)
+    j = {**p["jawaban"], "penerima": penerima, "hubungan": hubungan}
+    mulai, durasi = jadwal[p["id_panggilan"]]
+    selesai = mulai + timedelta(seconds=durasi)
     return (
         p["id_panggilan"], p["id_peserta"], p["id_rs"], p["bulan_layanan"], p["sesi_ditagih"],
-        j["penerima"], nama, j.get("hubungan"), "selesai", 1, Jsonb(j), p["label"], p["alasan"],
-        waktu, waktu, hapus_pada(p["label"], waktu), "sintetis-riwayat",
+        penerima, nama, hubungan, "selesai", 1, Jsonb(j), p["label"], p["alasan"],
+        mulai, selesai, hapus_pada(p["label"], selesai), "sintetis-riwayat", durasi,
     )
 
 
@@ -109,7 +118,7 @@ def baris_antre(h, pes):
     penerima, nama, hubungan = tentukan_penerima(pes)
     return (
         id_panggilan(h["id_peserta"], h["bulan"]), h["id_peserta"], h["id_rs"], h["bulan"], h["sesi_ditagih"],
-        penerima, nama, hubungan, "antre", 0, None, None, None, None, None, None, "panggilan",
+        penerima, nama, hubungan, "antre", 0, None, None, None, None, None, None, "panggilan", None,
     )
 
 
@@ -168,8 +177,25 @@ def isi_ke(conn, d, reset=False):
         "insert into indikator_bulanan values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
         [baris_indikator(h) for h in d["indikator"].values()],
     )
-    cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"], WAKTU_RIWAYAT) for p in d["riwayat"]])
+    cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
     cur.executemany(SQL_PANGGILAN, d["antre"])
+
+
+def reset_panggilan(conn, d):
+    """Keadaan awal demo tanpa menyentuh data master: hapus panggilan, log, dan keputusan, isi ulang 4 riwayat
+    Selesai + panggilan Antre, matikan mode otomatis dan Jeda. Tanpa commit."""
+    conn.execute("delete from panggilan_log")
+    conn.execute("delete from keputusan_panggilan")
+    conn.execute("delete from panggilan")
+    cur = conn.cursor()
+    cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
+    cur.executemany(SQL_PANGGILAN, d["antre"])
+    for kunci in ("mode_otomatis", "jeda"):
+        conn.execute(
+            "insert into pengaturan (kunci, nilai) values (%s, 'false'::jsonb)"
+            " on conflict (kunci) do update set nilai = excluded.nilai",
+            (kunci,),
+        )
 
 
 def isi_database(url, d, reset=False):
