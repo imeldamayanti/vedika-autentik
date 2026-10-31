@@ -143,34 +143,39 @@ def muat_data():
     }
 
 
+def isi_ke(conn, d, reset=False):
+    """Tulis data lewat koneksi yang diberikan (tanpa commit). reset = kosongkan tabel v3 dulu (tabel v2 tidak disentuh)."""
+    if reset:
+        conn.execute(f"truncate {TABEL_V3} restart identity cascade")
+    cur = conn.cursor()
+    cur.executemany(
+        "insert into rumah_sakit (id_rs, nama_rs, tipe, wilayah) values (%s,%s,%s,%s) on conflict do nothing",
+        [(r["id_rs"], r["nama_rs"], r["tipe"], r["wilayah"]) for r in d["rs"]],
+    )
+    cur.executemany(
+        "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
+        [baris_peserta(r) for r in d["peserta"]],
+    )
+    cur.executemany(
+        "insert into klaim_sesi values (%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
+        [baris_klaim(r) for r in d["klaim"]],
+    )
+    cur.executemany(
+        "insert into libur_nasional (tanggal, nama) values (%s,%s) on conflict do nothing",
+        [(r["tanggal"], r["nama"]) for r in d["libur"]],
+    )
+    cur.executemany(
+        "insert into indikator_bulanan values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
+        [baris_indikator(h) for h in d["indikator"].values()],
+    )
+    cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"], WAKTU_RIWAYAT) for p in d["riwayat"]])
+    cur.executemany(SQL_PANGGILAN, d["antre"])
+
+
 def isi_database(url, d, reset=False):
-    """Tulis data ke database dalam satu transaksi. reset = kosongkan tabel v3 dulu (tabel v2 tidak disentuh)."""
+    """Tulis data ke database dalam satu transaksi."""
     with psycopg.connect(url, prepare_threshold=None, connect_timeout=10) as conn:
-        if reset:
-            conn.execute(f"truncate {TABEL_V3} restart identity cascade")
-        cur = conn.cursor()
-        cur.executemany(
-            "insert into rumah_sakit (id_rs, nama_rs, tipe, wilayah) values (%s,%s,%s,%s) on conflict do nothing",
-            [(r["id_rs"], r["nama_rs"], r["tipe"], r["wilayah"]) for r in d["rs"]],
-        )
-        cur.executemany(
-            "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
-            [baris_peserta(r) for r in d["peserta"]],
-        )
-        cur.executemany(
-            "insert into klaim_sesi values (%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
-            [baris_klaim(r) for r in d["klaim"]],
-        )
-        cur.executemany(
-            "insert into libur_nasional (tanggal, nama) values (%s,%s) on conflict do nothing",
-            [(r["tanggal"], r["nama"]) for r in d["libur"]],
-        )
-        cur.executemany(
-            "insert into indikator_bulanan values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
-            [baris_indikator(h) for h in d["indikator"].values()],
-        )
-        cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"], WAKTU_RIWAYAT) for p in d["riwayat"]])
-        cur.executemany(SQL_PANGGILAN, d["antre"])
+        isi_ke(conn, d, reset)
         conn.commit()
 
 
