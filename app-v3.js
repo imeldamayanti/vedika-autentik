@@ -302,7 +302,7 @@
         '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
         '<td class="sembunyi-hp">' + esc(D.namaRs(p.rs)) + "</td>" +
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
-        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
+        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
         '<td><div class="sel-status"><span class="status-chip status-chip--' + p.st + '">' + STATUS[p.st] + "</span>" + (lab ? labelChip(lab) + "<small>" + (S.keputusan[p.id] ? D.TINDAKAN[S.keputusan[p.id].tindakan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
@@ -453,7 +453,7 @@
       : S.hasil[id] ? "" : '<button class="btn btn--primer" type="button" data-aksi="telepon" data-id="' + id + '"' + (ui.aktif ? ' disabled title="Satu panggilan aktif pada satu waktu"' : "") + ">" + ikon("telepon") + "Telepon sekarang</button>";
     const kop = '<div class="kepala-panggilan"><div><h1>' + esc(p.pasien) + " · " + esc(D.namaRs(p.rs)) + " · " + D.BULAN + "</h1>" +
       '<div class="meta-panggilan"><span><b>Ditagih</b>' + p.ditagih + " sesi</span>" +
-        '<span><b>Indikator</b><span class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</span></span>" +
+        '<span><b>Indikator</b><span class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</span></span>" +
         "<span><b>Tanggal libur</b>" + libur + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div>" +
       '<div class="kepala-aksi">' + aksi + "</div></div>";
     if (S.hasil[id]) {

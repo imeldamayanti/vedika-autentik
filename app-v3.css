@@ -59,8 +59,13 @@
 .chip-ind-wadah { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip-ind {
   display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11.5px; font-weight: 700;
-  background: oklch(24% .02 205); color: #fff; white-space: nowrap;
+  white-space: nowrap; border: 1px solid transparent;
 }
+/* Warna menurut arti: melebihi batas = merah, beban mingguan = kuning, episode panjang = biru, hari tutup = teal. */
+.chip-ind--I1 { background: var(--prioritas-bg); color: var(--prioritas-fg); border-color: oklch(88% .05 27); }
+.chip-ind--I2 { background: var(--cek-bg); color: var(--cek-fg); border-color: oklch(88% .06 85); }
+.chip-ind--I3 { background: var(--ulang-bg); color: var(--ulang-fg); border-color: oklch(88% .04 261); }
+.chip-ind--I4 { background: var(--primary-subtle); color: var(--primary); border-color: oklch(88% .04 205); }
 .tabel td.aksi { text-align: right; white-space: nowrap; }
 .catatan-kaki { padding: 12px 18px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted-fg); }
 
