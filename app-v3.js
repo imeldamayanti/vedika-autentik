@@ -73,7 +73,7 @@
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
     otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false,
-    pilihLain: false, tindakanLain: null, catatan: null
+    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null
   };
 
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
@@ -636,7 +636,43 @@
 
     return kop + peringatan + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div>";
   }
-  function lamanRingkasanRs() { return kepala("Ringkasan per rumah sakit", "Layanan Agustus 2026") + kosong("Ringkasan RS", "Diisi pada tiket UI-08."); }
+  /* ============================================================ ringkasan RS */
+
+  const persenRs = (x) => koma(x.toFixed(1)) + "%";
+
+  function lamanRingkasanRs() {
+    const selesai = panggilanSelesai();
+    const ring = D.ringkasanRs(selesai);
+    const baris = D.RS.map((r, i) => {
+      const c = ring[i], buka = ui.rsBuka === r.id;
+      const daftar = selesai.filter((p) => p.rs === r.id);
+      const rinci = daftar.length
+        ? '<ul class="daftar-rinci">' + daftar.map((p) => {
+          const sel = D.selisih(p);
+          const ringkas = p.label === "tidak_terhubung" ? "Panggilan tidak diangkat" : p.label === "menolak" ? "Menolak menjawab"
+            : p.ditagih + " ditagih · versi peserta " + (p.jawaban.jumlah_min === p.jawaban.jumlah_maks ? p.jawaban.jumlah_min : p.jawaban.jumlah_min + "–" + p.jawaban.jumlah_maks) + (p.label === "tidak_yakin" ? " (perkiraan)" : " · selisih " + sel);
+          return "<li><b>" + esc(p.pasien) + "</b>" + labelChip(p.label) + "<span>" + ringkas + '</span><a class="btn btn--kecil" href="#/kartu/' + p.id + '">Buka kartu</a></li>';
+        }).join("") + "</ul>"
+        : '<p class="daftar-rinci kosong-rinci">Belum ada panggilan selesai untuk rumah sakit ini.</p>';
+      return "<tr>" +
+        '<td class="nama-berkas"><b>' + esc(r.nama) + "</b><span>" + r.id + "</span></td>" +
+        '<td class="angka sembunyi-hp">' + r.aktif + "</td>" +
+        '<td class="angka">' + r.terpicu + ' <span class="redup-kecil">(' + persenRs(r.persen) + ")</span></td>" +
+        '<td class="angka sembunyi-hp">' + c.terjawab + "</td>" +
+        '<td class="angka">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</td>" +
+        '<td><span class="label label--' + (c.status === "Normal" ? "sesuai" : "tidak_sesuai") + '">' + c.status + "</span></td>" +
+        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Tutup kartu" : "Lihat kartu") + "</button></td></tr>" +
+        (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
+    }).join("");
+
+    const sesudahS1 = !!S.hasil.S1;
+    return '<div class="kepala"><div><h1>Ringkasan per rumah sakit · layanan ' + D.BULAN + "</h1>" +
+        '<p class="keterangan-pemicu">Berdasarkan ' + selesai.length + " panggilan yang sudah selesai.</p></div></div>" +
+      '<div class="keterangan-aturan"><b>Satu jawaban belum cukup.</b> Rumah sakit berstatus <b>Perlu klarifikasi RS</b> jika ada <b>3 jawaban tidak sesuai atau lebih</b> DAN jumlahnya <b>10% atau lebih dari yang terjawab</b>. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
+      (sesudahS1 ? '<div class="perubahan-rs">Setelah panggilan Andi Pratama (S1), RS Melati Sehat berubah dari Normal (2 tidak sesuai dari 4 terjawab) menjadi Perlu klarifikasi RS (3 dari 5).</div>' : "") +
+      '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
+        '<p class="catatan-kaki">Identitas penerima telepon tidak pernah tampil di data yang dibagikan ke rumah sakit. Terpicu = pasien dengan dua indikator aktif atau lebih.</p></section>';
+  }
   function lamanRiwayat() { return kepala("Riwayat keputusan", "Semua keputusan verifikator atas panggilan konfirmasi.") + kosong("Riwayat keputusan", "Diisi pada tiket UI-10."); }
 
   /* ============================================================== render */
@@ -692,6 +728,7 @@
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
     transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
+    "lihat-kartu-rs"(el) { ui.rsBuka = ui.rsBuka === el.dataset.id ? null : el.dataset.id; gambar(true); },
     setujui(el) { putuskan(el.dataset.id, D.SARAN[tunggal(el.dataset.id).label], "", true); },
     "pilih-lain"() { ui.pilihLain = true; ui.tindakanLain = null; ui.catatan = ""; gambar(true); },
     "batal-lain"() { ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; gambar(true); },

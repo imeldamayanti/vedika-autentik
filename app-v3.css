@@ -176,6 +176,22 @@
 .petunjuk-alasan { display: block; margin-top: 4px; font-size: 12px; color: var(--muted-fg); }
 .saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { margin-top: 16px; }
 
+/* ---------- ringkasan rumah sakit ---------- */
+
+.keterangan-aturan { margin-bottom: 16px; padding: 12px 16px; border-radius: var(--radius-panel); background: var(--primary-subtle); border: 1px solid oklch(90% .03 205); font-size: 13px; color: var(--fg-2); line-height: 1.55; }
+.keterangan-aturan b { color: var(--fg); }
+.perubahan-rs { margin-bottom: 16px; padding: 12px 16px; border-radius: var(--radius-panel); background: var(--cek-bg); border: 1px solid oklch(86% .07 85); font-size: 13px; color: var(--cek-fg); font-weight: 600; }
+.tabel td.lebar-angka { white-space: nowrap; }
+.tabel .redup-kecil { color: var(--muted-fg); font-size: 12px; }
+.tabel tr.rinci td { background: var(--muted); padding: 0; }
+.daftar-rinci { list-style: none; margin: 0; padding: 6px 18px 10px 32px; display: grid; }
+.daftar-rinci li { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.daftar-rinci li:last-child { border-bottom: 0; }
+.daftar-rinci li > b { min-width: 150px; }
+.daftar-rinci li > span { color: var(--fg-2); }
+.daftar-rinci li .btn { margin-left: auto; }
+.daftar-rinci.kosong-rinci { padding: 16px 32px; color: var(--muted-fg); font-size: 13px; }
+
 /* ---------- mockup WhatsApp ---------- */
 
 .tautan-kecil { display: inline; padding: 0; border: 0; background: none; color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
