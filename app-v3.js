@@ -312,15 +312,15 @@
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi · layanan ' + D.BULAN + "</h1>" +
         '<p class="keterangan-pemicu">Pasien masuk antrean jika dua indikator atau lebih aktif. Panggilan otomatis berjalan pukul 09.00–17.00 dan hanya satu panggilan aktif pada satu waktu.</p></div></div>' +
-      kartuAngka() +
-      '<section class="panel tabel-antrean"><div class="bar-antrean"><span class="kapital">Filter</span>' +
+      '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean"><span class="kapital">Filter</span>' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           D.RS.map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
         '<select class="pilih" data-aksi="saring-status" aria-label="Saring menurut status"><option value="">Semua status</option>' +
           Object.keys(STATUS).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + STATUS[k] + "</option>").join("") + "</select>" +
         '<div class="kanan">' + (ui.otomatis ? '<span class="redup" style="font-size:12.5px">' + keadaan + "</span>" : "") +
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + ui.otomatis + '">' + ikon("telepon") + "Panggilan otomatis: <b>" + (ui.otomatis ? "AKTIF" : "NONAKTIF") + "</b></button>" +
-          '<button class="btn" type="button" data-aksi="jeda"' + (ui.otomatis ? "" : " disabled") + ">" + ikon(ui.jeda ? "main" : "jeda") + (ui.jeda ? "Lanjutkan" : "Jeda") + "</button></div></div>" +
+          '<button class="btn" type="button" data-aksi="jeda"' + (ui.otomatis ? "" : " disabled") + ">" + ikon(ui.jeda ? "main" : "jeda") + (ui.jeda ? "Lanjutkan" : "Jeda") + "</button></div></div></div>" +
+      '<section class="panel tabel-antrean">' +
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima telepon</th><th>Status</th><th></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
