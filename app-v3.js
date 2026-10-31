@@ -674,7 +674,7 @@
 
     let bukti;
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
-    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="none" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi dari suara buatan (ElevenLabs), bukan suara penerima sungguhan.</small></div>';
+    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi dari suara buatan (ElevenLabs), bukan suara penerima sungguhan.</small></div>';
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
     const tombolTranskrip = simpanTeks && !latar
       ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
@@ -773,7 +773,16 @@
     else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = "<b>Riwayat keputusan</b>"; }
     else { isi = lamanBeranda(); jejak = "<b>Beranda</b>"; }
 
+    /* Pemutar rekaman di kartu bukti dipertahankan lintas render ulang (buka-tutup transkrip, keputusan),
+       jika tidak elemen audio baru menggantikannya dan rekaman yang sedang diputar berhenti. */
+    const pemutarLama = document.querySelector(".pemutar audio");
+    const mainLagi = !!pemutarLama && !pemutarLama.paused;
     akar.innerHTML = kerangka(r, isi, jejak) + (ui.wa ? modalWa() : "");
+    const pemutarBaru = document.querySelector(".pemutar audio");
+    if (pemutarLama && pemutarBaru && pemutarLama.getAttribute("src") === pemutarBaru.getAttribute("src")) {
+      pemutarBaru.replaceWith(pemutarLama);
+      if (mainLagi && pemutarLama.paused) pemutarLama.play().catch(() => { /* autoplay ditolak */ });
+    }
     document.title = (JUDUL_HALAMAN[r.nama] || "Beranda") + " · Vedika Autentik";
     window.scrollTo(0, tetap ? y : 0);
     const obrolan = ui.wa && document.querySelector("#modalWa .obrolan");
