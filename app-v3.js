@@ -204,6 +204,7 @@
           '<a href="#/riwayat"' + aktif(r.nama === "riwayat") + ">" + ikon("riwayat") + "Riwayat keputusan</a>" +
         "</nav>" +
         '<div class="sisi-kaki nav">' +
+          '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
           '<p class="catatan-prototipe"><b>Simulasi Healthkathon 2026.</b> Semua data fiktif.</p>' +
         "</div>" +
       "</aside>" +
@@ -755,6 +756,16 @@
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
     transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
+    "ulang-demo"() {
+      /* Hentikan panggilan yang sedang berjalan dan jadwal otomatis, lalu kosongkan semua hasil dan keputusan. */
+      clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa();
+      const tetapMasuk = S.masuk;
+      S = statusAwal(); S.masuk = tetapMasuk;
+      Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, transkripBuka: false, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
+      simpan();
+      ke("#/autentik");
+      toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal.");
+    },
     "lihat-kartu-rs"(el) { ui.rsBuka = ui.rsBuka === el.dataset.id ? null : el.dataset.id; gambar(true); },
     setujui(el) { putuskan(el.dataset.id, D.SARAN[tunggal(el.dataset.id).label], "", true); },
     "pilih-lain"() { ui.pilihLain = true; ui.tindakanLain = null; ui.catatan = ""; gambar(true); },
