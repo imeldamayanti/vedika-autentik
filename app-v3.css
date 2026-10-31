@@ -172,6 +172,9 @@
 .saran-kartu .catatan-saran { margin-top: 12px; font-size: 12px; color: var(--muted-fg); line-height: 1.45; }
 .transkrip--tetap { height: auto; max-height: 520px; border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
 .tombol-transkrip { margin: 0 20px 16px; }
+.putusan p b { display: inline; font-size: inherit; color: var(--fg); }
+.petunjuk-alasan { display: block; margin-top: 4px; font-size: 12px; color: var(--muted-fg); }
+.saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { margin-top: 16px; }
 
 /* ---------- mockup WhatsApp ---------- */
 

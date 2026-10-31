@@ -50,9 +50,10 @@
   const KUNCI_SIMPAN = "vedika.konfirmasi.v1";
 
   /* hasil: panggilan skenario yang sudah selesai, {id: {menit}}. Panggilan yang sedang
-     berjalan tidak disimpan; setelah muat ulang ia kembali Antre. */
+     berjalan tidak disimpan; setelah muat ulang ia kembali Antre.
+     keputusan: {id: {tindakan, alasan, ikutSaran, oleh, waktu}} untuk panggilan skenario dan latar. */
   function statusAwal() {
-    return { masuk: false, hasil: {} };
+    return { masuk: false, hasil: {}, keputusan: {} };
   }
 
   function muat() {
@@ -71,7 +72,8 @@
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
-    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false
+    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false,
+    pilihLain: false, tindakanLain: null, catatan: null
   };
 
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
@@ -152,7 +154,8 @@
       a.chatDibuka = true;
       if (dilihat) { a.status = st; bukaWa(a.id, "cadangan", true); return; }
     }
-    if (st !== a.status) { a.status = st; gambar(true); return; }
+    /* Status hanya tampil di antrean dan layar panggilan; di layar lain jangan merender ulang agar isian alasan tidak terganggu. */
+    if (st !== a.status) { a.status = st; if (r.nama === "autentik" || r.nama === "panggilan") gambar(true); return; }
     if (dilihat) perbaruiPanggilan(p, t);
   }
 
@@ -184,6 +187,7 @@
   function kerangka(r, isi, jejak) {
     const dalamAutentik = r.nama === "autentik" || r.nama === "panggilan" || r.nama === "kartu";
     const aktif = (ya) => (ya ? ' aria-current="page"' : "");
+    const menunggu = panggilanSelesai().filter((p) => p.label === "tidak_sesuai" && !S.keputusan[p.id]).length;
     return '<div class="kerangka">' +
       '<aside class="sisi' + (ui.menuBuka ? " buka" : "") + '" id="sisi">' +
         '<a class="merek" href="#/beranda"><span class="merek-ikon">' + ikon("perisai") + "</span><span><b>VEDIKA</b><span>Verifikasi Digital Klaim</span></span></a>" +
@@ -191,7 +195,8 @@
           '<a href="#/beranda"' + aktif(r.nama === "beranda") + ">" + ikon("rumah") + "Beranda</a>" +
           '<span class="nav-judul kapital">Verifikasi</span>' +
           '<button class="mati" type="button" aria-disabled="true" title="Menu Vedika yang sudah ada, tidak termasuk prototipe">' + ikon("berkas") + "Verifikasi klaim<small>Sudah ada</small></button>" +
-          '<a class="nav-autentik induk" href="#/autentik">' + logoVeritas + "Autentik</a>" +
+          '<a class="nav-autentik induk" href="#/autentik">' + logoVeritas + "Autentik" +
+            (menunggu ? '<span class="lencana" title="Panggilan Tidak sesuai yang belum diputuskan">' + menunggu + "</span>" : "") + "</a>" +
           '<div class="nav-sub">' +
             '<a href="#/autentik"' + aktif(dalamAutentik) + ">Antrean konfirmasi</a>" +
             '<a href="#/ringkasan-rs"' + aktif(r.nama === "ringkasan-rs") + ">Ringkasan RS</a>" +
@@ -283,7 +288,7 @@
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
         '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
-        '<td><div class="sel-status"><span class="status-chip status-chip--' + p.st + '">' + STATUS[p.st] + "</span>" + (lab ? labelChip(lab) : "") + "</div></td>" +
+        '<td><div class="sel-status"><span class="status-chip status-chip--' + p.st + '">' + STATUS[p.st] + "</span>" + (lab ? labelChip(lab) + "<small>" + (S.keputusan[p.id] ? D.TINDAKAN[S.keputusan[p.id].tindakan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
     }).join("");
 
@@ -537,6 +542,41 @@
     return { versi: versi, versiKet: versiKet, selisih: selisihTeks, selisihKet: selisihKet, gaya: gaya, versiGaya: p.label === "tidak_sesuai" ? "beda" : p.label === "sesuai" ? "sama" : "netral" };
   }
 
+  /* Keputusan (R5.3): setujui saran, atau pilih tindakan lain dengan alasan wajib. */
+  const alasanTerisi = () => !!(ui.tindakanLain && ui.catatan && ui.catatan.trim());
+
+  function aksiKeputusan(p) {
+    if (!ui.pilihLain) {
+      return '<div class="saran-tombol"><button class="btn btn--primer" type="button" data-aksi="setujui" data-id="' + p.id + '">' + ikon("cek") + "Setujui saran</button>" +
+        '<button class="btn btn--hantu" type="button" data-aksi="pilih-lain">Pilih tindakan lain</button></div>';
+    }
+    const lain = D.PILIHAN_TINDAKAN.filter((x) => x !== D.SARAN[p.label]);
+    return '<div class="pilihan-lain" role="radiogroup" aria-label="Tindakan lain">' +
+      lain.map((x) => '<label class="' + (ui.tindakanLain === x ? "dipilih" : "") + '"><input type="radio" name="tindakan" data-aksi="tindakan-lain" value="' + x + '"' + (ui.tindakanLain === x ? " checked" : "") + ">" +
+        "<span><b>" + D.TINDAKAN[x].nama + "</b><span>" + D.TINDAKAN[x].akibat + "</span></span></label>").join("") +
+      '<label class="catatan-medan"><span class="kapital">Alasan tidak mengikuti saran</span><textarea data-aksi="catatan" rows="3" placeholder="Contoh: pasien baru pindah RS bulan ini, sudah dikonfirmasi lewat telepon ke RS.">' + esc(ui.catatan || "") + "</textarea>" +
+        '<span class="petunjuk-alasan">Alasan wajib diisi. Catatan ini masuk ke riwayat keputusan.</span></label>' +
+      '<div class="saran-tombol"><button class="btn btn--primer" type="button" data-aksi="simpan-lain" data-id="' + p.id + '"' + (alasanTerisi() ? "" : " disabled") + ">Simpan keputusan</button>" +
+      '<button class="btn btn--hantu" type="button" data-aksi="batal-lain">Kembali ke saran</button></div></div>';
+  }
+
+  function putusanTerpilih(p, k) {
+    const t = D.TINDAKAN[k.tindakan];
+    return '<div class="putusan"><b>' + ikon("lencanaCek") + t.status + "</b>" +
+      "<p>" + esc(k.oleh) + " memilih <b>" + t.nama + "</b> pada " + esc(k.waktu) + (k.ikutSaran ? ", sesuai saran sistem." : ", berbeda dari saran sistem.") + "</p>" +
+      (k.alasan ? "<blockquote>" + esc(k.alasan) + "</blockquote>" : "") +
+      '<div class="aksi"><a class="btn btn--kecil" href="#/riwayat">Lihat di riwayat</a><button class="btn btn--kecil" type="button" data-aksi="batal-putusan" data-id="' + p.id + '">Ubah keputusan</button></div></div>';
+  }
+
+  function putuskan(id, tindakan, alasan, ikutSaran) {
+    const p = tunggal(id);
+    S.keputusan[id] = { tindakan: tindakan, alasan: alasan, ikutSaran: ikutSaran, oleh: D.VERIFIKATOR.nama, waktu: "6 Okt 2026, " + formatJam(menitSekarang()) };
+    ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null;
+    simpan();
+    gambar(true);
+    toast(D.TINDAKAN[tindakan].status + " · " + p.pasien, "#/riwayat", "Lihat riwayat");
+  }
+
   function lamanKartu(id) {
     const p = tunggal(id);
     if (!p || !(D.LATAR[id] || D.SKENARIO[id])) {
@@ -588,9 +628,11 @@
 
     const konteks = '<div class="konteks"><span><b>' + esc(D.namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " jawaban tidak sesuai dari " + rs.terjawab + " terjawab.</span>" +
       '<span>Status RS: <b>' + rs.status + "</b>. Perlu klarifikasi bila tidak sesuai ≥3 dan ≥10% dari terjawab.</span></div>";
+    const keputusan = S.keputusan[id];
     const sarankan = '<section class="panel saran saran-kartu"><div class="saran-isi"><span class="kapital">Langkah yang disarankan</span><h3>' + saran.nama + "</h3>" +
-      "<p>" + esc(p.alasan) + " " + esc(saran.akibat) + "</p>" + konteks +
-      '<p class="catatan-saran">Rekaman adalah bukti awal untuk klarifikasi, bukan satu-satunya dasar menolak klaim. Satu jawaban tidak mengubah status RS.</p></div></section>';
+      "<p>" + esc(p.alasan) + " " + esc(saran.akibat) + "</p>" + konteks + (keputusan ? "" : aksiKeputusan(p)) +
+      '<p class="catatan-saran">Rekaman adalah bukti awal untuk klarifikasi, bukan satu-satunya dasar menolak klaim. Satu jawaban tidak mengubah status RS.</p></div>' +
+      (keputusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div>";
   }
@@ -605,6 +647,7 @@
     const y = window.scrollY;
     const r = rute();
     const akar = document.getElementById("akar");
+    const sedangMengetik = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.aksi === "catatan" ? document.activeElement.selectionStart : null;
     document.body.style.overflow = "";
 
     if (!S.masuk) {
@@ -626,6 +669,10 @@
     window.scrollTo(0, tetap ? y : 0);
     const obrolan = ui.wa && document.querySelector("#modalWa .obrolan");
     if (obrolan) obrolan.scrollTop = obrolan.scrollHeight;
+    if (sedangMengetik != null) {
+      const kolom = document.querySelector('[data-aksi="catatan"]');
+      if (kolom) { kolom.focus(); kolom.setSelectionRange(sedangMengetik, sedangMengetik); }
+    }
   }
 
   function toast(pesan, tautan, teksTautan) {
@@ -645,6 +692,14 @@
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
     transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
+    setujui(el) { putuskan(el.dataset.id, D.SARAN[tunggal(el.dataset.id).label], "", true); },
+    "pilih-lain"() { ui.pilihLain = true; ui.tindakanLain = null; ui.catatan = ""; gambar(true); },
+    "batal-lain"() { ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; gambar(true); },
+    "simpan-lain"(el) {
+      if (!alasanTerisi()) return;
+      putuskan(el.dataset.id, ui.tindakanLain, ui.catatan.trim(), false);
+    },
+    "batal-putusan"(el) { delete S.keputusan[el.dataset.id]; simpan(); gambar(true); },
     "tutup-wa"() { tutupWa(); },
     diam() { /* klik di dalam kartu tidak menutup latar */ },
     telepon(el) { mulaiPanggilan(el.dataset.id); },
@@ -681,9 +736,18 @@
     const a = e.target.dataset && e.target.dataset.aksi;
     if (a === "saring-rs") { ui.filterRs = e.target.value; gambar(true); }
     else if (a === "saring-status") { ui.filterStatus = e.target.value; gambar(true); }
+    else if (a === "tindakan-lain") { ui.tindakanLain = e.target.value; gambar(true); }
   });
 
-  window.addEventListener("hashchange", () => { ui.menuBuka = false; ui.transkripBuka = false; gambar(false); });
+  /* Tombol simpan hanya menyala bila tindakan dipilih dan alasan terisi; diperbarui tanpa merender ulang agar kursor tetap. */
+  document.addEventListener("input", (e) => {
+    if (!e.target.dataset || e.target.dataset.aksi !== "catatan") return;
+    ui.catatan = e.target.value;
+    const simpanBtn = document.querySelector('[data-aksi="simpan-lain"]');
+    if (simpanBtn) simpanBtn.disabled = !alasanTerisi();
+  });
+
+  window.addEventListener("hashchange", () => { ui.menuBuka = false; ui.transkripBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; gambar(false); });
 
   gambar(false);
 })();
