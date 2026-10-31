@@ -123,6 +123,56 @@
 .belum-mulai b { display: block; font-size: 15px; margin-bottom: 4px; }
 .belum-mulai p { color: var(--muted-fg); margin-bottom: 14px; }
 
+/* ---------- kartu bukti ---------- */
+
+.kepala-kartu { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.kepala-kartu h1 { font-size: 22px; font-weight: 800; }
+.kepala-kartu .meta-panggilan { margin-top: 6px; }
+.kepala-kartu .label { margin-left: auto; }
+
+.tanda-bahaya {
+  display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; margin-bottom: 16px; padding: 12px 16px;
+  border: 1px solid oklch(86% .06 27); border-radius: var(--radius-panel); background: var(--prioritas-bg); color: var(--prioritas-fg);
+}
+.tanda-bahaya svg { width: 20px; height: 20px; margin-top: 1px; }
+.tanda-bahaya b { display: block; font-size: 13.5px; }
+.tanda-bahaya p { margin-top: 2px; font-size: 13px; color: var(--fg-2); }
+
+.tiga-kartu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.tiga-kartu > section { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 18px; }
+.tiga-kartu .kapital { display: block; margin-bottom: 6px; }
+.tiga-kartu .besar { font-size: 34px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tiga-kartu .besar small { font-size: 16px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
+.tiga-kartu .ket { margin-top: 8px; font-size: 13px; color: var(--fg-2); }
+.tiga-kartu .beda .besar { color: var(--prioritas-fg); }
+.tiga-kartu .sama .besar { color: var(--lolos-fg); }
+.tiga-kartu .netral .besar { color: var(--muted-fg); }
+.tanggal-sesi { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+.tgl {
+  display: inline-flex; align-items: baseline; gap: 5px; height: 26px; padding: 0 8px; align-items: center; border-radius: 5px;
+  font-size: 12.5px; font-weight: 700; background: var(--muted); border: 1px solid var(--border); color: var(--fg-2); font-variant-numeric: tabular-nums;
+}
+.tgl small { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; }
+.tgl--tanda { background: var(--cek-bg); border-color: oklch(86% .07 85); color: var(--cek-fg); }
+.tanggal-sesi + .ket { margin-top: 10px; }
+
+.bukti-bawah { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.kutipan { margin: 0; padding: 16px 20px 6px; font-size: 17px; line-height: 1.5; font-weight: 600; color: var(--fg); }
+.kutipan::before { content: "“"; color: var(--brand); font-size: 28px; line-height: 0; vertical-align: -8px; margin-right: 3px; }
+.kutipan-ringkasan { padding: 0 20px 14px; font-size: 13px; color: var(--fg-2); }
+.pemutar { padding: 12px 20px 16px; border-top: 1px solid var(--border); display: grid; gap: 6px; }
+.pemutar audio { width: 100%; height: 40px; }
+.pemutar small, .tanpa-rekaman { font-size: 12px; color: var(--muted-fg); }
+.tanpa-rekaman { padding: 12px 20px 16px; border-top: 1px solid var(--border); line-height: 1.45; }
+.catatan-bukti { padding: 12px 20px 14px; border-top: 1px solid var(--border); display: grid; gap: 4px; font-size: 12.5px; color: var(--fg-2); }
+.catatan-bukti span { display: flex; gap: 8px; }
+.catatan-bukti svg { width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--primary); }
+.saran-kartu .konteks { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--muted); border: 1px solid var(--border); font-size: 12.5px; color: var(--fg-2); display: grid; gap: 6px; }
+.saran-kartu .konteks b { color: var(--fg); }
+.saran-kartu .catatan-saran { margin-top: 12px; font-size: 12px; color: var(--muted-fg); line-height: 1.45; }
+.transkrip--tetap { height: auto; max-height: 520px; border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+.tombol-transkrip { margin: 0 20px 16px; }
+
 /* ---------- mockup WhatsApp ---------- */
 
 .tautan-kecil { display: inline; padding: 0; border: 0; background: none; color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
@@ -152,6 +202,7 @@
 /* ---------- layar sedang dan kecil ---------- */
 
 @media (max-width: 1180px) {
+  .bukti-bawah { grid-template-columns: minmax(0, 1fr) 340px; }
   .panggilan-grid { grid-template-columns: 240px minmax(0, 1fr); }
   .panggilan-grid > :nth-child(3) { grid-column: 1 / -1; }
 }
@@ -160,6 +211,8 @@
   .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .panggilan-grid { grid-template-columns: 1fr; }
   .transkrip { height: 380px; }
+  .tiga-kartu { grid-template-columns: 1fr; }
+  .bukti-bawah { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {

@@ -25,6 +25,7 @@
     cek: '<path d="M20 6 9 17l-5-5"/>',
     telepon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    awas: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
     jeda: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
     main: '<polygon points="6 3 20 12 6 21 6 3"/>',
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
@@ -70,7 +71,7 @@
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
-    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null
+    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false
   };
 
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
@@ -505,7 +506,94 @@
     ui.aktif.mulai = Date.now() - (titik(D.SKENARIO[ui.aktif.id]).total + 1) * 1000;
     tick();
   }
-  function lamanKartu(id) { return kepala("Kartu bukti", id) + kosong("Kartu bukti", "Diisi pada tiket UI-06."); }
+  /* ============================================================ kartu bukti */
+
+  const daftarTanggal = (t) => t.join(" dan ") + " " + D.BULAN_PENDEK;
+
+  function waktuPanggilan(p) {
+    return D.LATAR[p.id] ? D.LATAR[p.id].waktu : "6 Okt 2026, " + formatJam(S.hasil[p.id].menit);
+  }
+
+  /* Versi penerima, selisih, dan keterangannya untuk tiga kartu. Yang tidak dihitung tampil "–". */
+  function ringkasKartu(p) {
+    const j = p.jawaban, dihitung = p.label === "tidak_sesuai" || p.label === "sesuai";
+    let versi = "–", versiKet = "", gaya = "netral";
+    if (p.label === "tidak_terhubung") versiKet = "Belum ada jawaban. Panggilan tidak diangkat 2 kali.";
+    else if (p.label === "menolak") versiKet = "Penerima menolak menjawab. Tidak dihitung sebagai sinyal negatif.";
+    else {
+      versi = j.jumlah_min === j.jumlah_maks ? j.jumlah_min : j.jumlah_min + "–" + j.jumlah_maks;
+      versiKet = p.label === "tidak_yakin" ? "Perkiraan saja, keyakinan rendah."
+        : j.membantah_tanggal_libur === true ? "Membantah ada sesi pada " + daftarTanggal(p.tanggalLibur) + "."
+        : !p.tanggalLibur.length ? "AI tidak menanyakan tanggal libur karena tidak ada." : "";
+    }
+    const sel = D.selisih(p);
+    let selisihTeks = "–", selisihKet = "Tidak dihitung pada ringkasan RS.";
+    if (dihitung) {
+      selisihTeks = sel;
+      selisihKet = "Toleransi salah ingat: " + D.TOLERANSI + " sesi. " + (sel > D.TOLERANSI ? "Selisih di atas toleransi." : "Masih dalam toleransi.");
+      gaya = sel > D.TOLERANSI ? "beda" : "sama";
+    }
+    if (p.label === "tidak_yakin") selisihKet = "Tidak dihitung karena penerima tidak yakin.";
+    return { versi: versi, versiKet: versiKet, selisih: selisihTeks, selisihKet: selisihKet, gaya: gaya, versiGaya: p.label === "tidak_sesuai" ? "beda" : p.label === "sesuai" ? "sama" : "netral" };
+  }
+
+  function lamanKartu(id) {
+    const p = tunggal(id);
+    if (!p || !(D.LATAR[id] || D.SKENARIO[id])) {
+      return kepala("Kartu bukti tidak ditemukan", "Kartu bukti hanya ada untuk pasien yang sudah ditelepon.") + '<section class="panel"><div class="belum-mulai"><b>Tidak ada kartu untuk ' + esc(id || "") + '</b><a class="btn btn--primer" href="#/autentik">Ke antrean konfirmasi</a></div></section>';
+    }
+    if (D.SKENARIO[id] && !S.hasil[id]) {
+      return kepala("Kartu bukti belum tersedia", p.pasien) + '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + ' belum ditelepon</b><p>Kartu bukti dibuat setelah panggilan selesai.</p><a class="btn btn--primer" href="#/panggilan/' + id + '">Ke layar panggilan</a></div></section>';
+    }
+    const j = p.jawaban, rk = ringkasKartu(p), latar = !!D.LATAR[id];
+    const saran = D.TINDAKAN[D.SARAN[p.label]];
+    const rs = D.ringkasanRs(panggilanSelesai()).find((r) => r.id_rs === p.rs);
+    const bahaya = j.tanda_bahaya.length;
+    const simpanTeks = p.label === "tidak_sesuai" || p.label === "sesuai";
+
+    const tanggal = '<div class="tanggal-sesi">' + p.tanggal.map((h) => {
+      const tanda = p.tandaTanggal[h];
+      return '<span class="tgl' + (tanda ? " tgl--tanda" : "") + '">' + h + (tanda ? "<small>" + tanda + "</small>" : "") + "</span>";
+    }).join("") + "</div>";
+    const nTanda = Object.keys(p.tandaTanggal).length;
+
+    const durasi = tidakTerhubung(p) ? "2 percobaan, tidak diangkat" : "durasi " + mmss(p.durasi);
+    const kop = '<div class="kepala-kartu"><div><h1>' + esc(p.pasien) + " · " + esc(D.namaRs(p.rs)) + "</h1>" +
+      '<div class="meta-panggilan"><span><b>Layanan</b>Fisioterapi · ' + D.BULAN + "</span><span><b>Panggilan</b>" + waktuPanggilan(p) + " · " + durasi + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div>" +
+      labelChip(p.label, true) + "</div>";
+
+    const peringatan = bahaya ? '<div class="tanda-bahaya" role="alert">' + ikon("awas") + "<div><b>Tanda bahaya: " + esc(j.tanda_bahaya.map((x) => TANDA_BAHAYA[x]).join(", ")) + "</b><p>" + esc(j.ringkasan) + "</p></div></div>" : "";
+
+    const tiga = '<div class="tiga-kartu">' +
+      '<section><span class="kapital">Ditagih rumah sakit</span><div class="besar">' + p.ditagih + "<small>sesi</small></div>" + tanggal +
+        '<p class="ket">' + (nTanda ? nTanda + " tanggal jatuh di Minggu atau libur nasional (ditandai kuning)." : "Tidak ada sesi di hari Minggu atau libur nasional.") + "</p></section>" +
+      '<section class="' + rk.versiGaya + '"><span class="kapital">Versi peserta</span><div class="besar">' + rk.versi + (rk.versi === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.versiKet) + "</p></section>" +
+      '<section class="' + rk.gaya + '"><span class="kapital">Selisih</span><div class="besar">' + rk.selisih + (rk.selisih === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.selisihKet) + "</p></section>" +
+    "</div>";
+
+    let bukti;
+    if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
+    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="none" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman placeholder untuk simulasi: nada pendek, bukan suara penerima.</small></div>';
+    else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
+    const tombolTranskrip = simpanTeks && !latar
+      ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
+    const transkrip = ui.transkripBuka && simpanTeks && !latar
+      ? '<div class="transkrip transkrip--tetap">' + p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div>" : "";
+
+    const kutipan = '<section class="panel"><div class="panel-kepala"><h2>Kutipan kunci</h2></div>' +
+      (j.kutipan_kunci ? '<blockquote class="kutipan">' + esc(j.kutipan_kunci) + '</blockquote><p class="kutipan-ringkasan">' + esc(j.ringkasan) + "</p>"
+        : '<p class="kutipan-ringkasan" style="padding-top:16px">Tidak ada kutipan. ' + esc(j.ringkasan) + "</p>") +
+      bukti + tombolTranskrip + transkrip +
+      '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke rumah sakit.</span></div></section>";
+
+    const konteks = '<div class="konteks"><span><b>' + esc(D.namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " jawaban tidak sesuai dari " + rs.terjawab + " terjawab.</span>" +
+      '<span>Status RS: <b>' + rs.status + "</b>. Perlu klarifikasi bila tidak sesuai ≥3 dan ≥10% dari terjawab.</span></div>";
+    const sarankan = '<section class="panel saran saran-kartu"><div class="saran-isi"><span class="kapital">Langkah yang disarankan</span><h3>' + saran.nama + "</h3>" +
+      "<p>" + esc(p.alasan) + " " + esc(saran.akibat) + "</p>" + konteks +
+      '<p class="catatan-saran">Rekaman adalah bukti awal untuk klarifikasi, bukan satu-satunya dasar menolak klaim. Satu jawaban tidak mengubah status RS.</p></div></section>';
+
+    return kop + peringatan + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div>";
+  }
   function lamanRingkasanRs() { return kepala("Ringkasan per rumah sakit", "Layanan Agustus 2026") + kosong("Ringkasan RS", "Diisi pada tiket UI-08."); }
   function lamanRiwayat() { return kepala("Riwayat keputusan", "Semua keputusan verifikator atas panggilan konfirmasi.") + kosong("Riwayat keputusan", "Diisi pada tiket UI-10."); }
 
@@ -556,6 +644,7 @@
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
+    transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
     "tutup-wa"() { tutupWa(); },
     diam() { /* klik di dalam kartu tidak menutup latar */ },
     telepon(el) { mulaiPanggilan(el.dataset.id); },
@@ -594,7 +683,7 @@
     else if (a === "saring-status") { ui.filterStatus = e.target.value; gambar(true); }
   });
 
-  window.addEventListener("hashchange", () => { ui.menuBuka = false; gambar(false); });
+  window.addEventListener("hashchange", () => { ui.menuBuka = false; ui.transkripBuka = false; gambar(false); });
 
   gambar(false);
 })();
