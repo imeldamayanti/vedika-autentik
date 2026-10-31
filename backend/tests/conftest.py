@@ -17,6 +17,7 @@ from app.deps import get_conn, get_mesin, get_penyimpanan
 from app.main import app
 from app.mesin import KlienMesin
 from app.penyimpanan import Penyimpanan
+from scripts import seed_v3
 from stub_mesin.main import app as app_stub
 
 AKAR = Path(__file__).resolve().parents[2]
@@ -63,3 +64,33 @@ def unggah(klien):
         return klien.post("/api/v1/berkas", files={"file": (nama, isi, tipe)}, data=data)
 
     return _unggah
+
+
+# ---- v3 ----
+# Satu transaksi untuk seluruh sesi uji: schema `uji3` dibuat dan di-seed sekali (±8 detik), tiap tes memakai
+# savepoint yang dibuang di akhir tes, dan seluruh transaksi di-rollback di akhir. Tidak ada yang pernah di-commit.
+SKEMA_V3 = (AKAR / "backend" / "db" / "schema_v3.sql").read_text().replace("public.", "uji3.")
+
+
+@pytest.fixture(scope="session")
+def _db_v3():
+    url = os.environ.get("DATABASE_URL", "")
+    if not url or "GANTI_" in url:
+        pytest.skip("DATABASE_URL belum diisi di backend/.env")
+    c = psycopg.connect(url, connect_timeout=10, prepare_threshold=None, row_factory=dict_row)
+    c.execute("create schema uji3")
+    c.execute("set local search_path to uji3")
+    c.execute(SKEMA_V3)
+    seed_v3.isi_ke(c, seed_v3.muat_data())
+    c.commit = lambda: None
+    yield c
+    c.rollback()
+    c.close()
+
+
+@pytest.fixture
+def conn_v3(_db_v3):
+    _db_v3.execute("savepoint tes")
+    yield _db_v3
+    _db_v3.execute("rollback to savepoint tes")
+    _db_v3.execute("release savepoint tes")

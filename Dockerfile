@@ -10,6 +10,8 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend backend
 COPY dataset/manifest.json dataset/manifest.json
+# Aturan label dan status RS v3 (satu-satunya sumber, dimuat apa adanya oleh app/aturan_v3.py)
+COPY data-uji-konfirmasi/tools/aturan.py data-uji-konfirmasi/tools/aturan.py
 
 WORKDIR /app/backend
 CMD ["sh", "start.sh"]
