@@ -1,11 +1,11 @@
 """Uji seed v3 tanpa database: konversi baris, penentuan penerima (R1.3), hapus_pada (R5.5), antrean."""
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 import pytest
 
 from scripts import seed_v3
 
-WAKTU = datetime(2026, 8, 31, 10, 0, tzinfo=timezone.utc)
+WAKTU = seed_v3.JADWAL_RIWAYAT["CALL-LATAR-001"][0]
 
 
 def peserta(**ubah):
@@ -66,14 +66,37 @@ def test_baris_antre_dari_indikator():
     h = {"id_peserta": "P-X", "id_rs": "RS01", "bulan": "2026-08", "sesi_ditagih": 10}
     b = seed_v3.baris_antre(h, peserta(hubungi_keluarga="ya", kontak_keluarga="Wali Uji", hubungan_keluarga="anak"))
     assert b[:9] == ("CALL-P-X-2026-08", "P-X", "RS01", "2026-08", 10, "keluarga", "Wali Uji", "anak", "antre")
-    assert b[9] == 0 and b[10:16] == (None,) * 6
+    assert b[9] == 0 and b[10:16] == (None,) * 6 and b[17] is None
 
 
 def test_baris_riwayat_selesai_dengan_retensi_per_label(data):
     for p in data["riwayat"]:
-        b = seed_v3.baris_panggilan(p, data["peta_peserta"], WAKTU)
+        b = seed_v3.baris_panggilan(p, data["peta_peserta"])
+        mulai, durasi = seed_v3.JADWAL_RIWAYAT[p["id_panggilan"]]
+        selesai = mulai + timedelta(seconds=durasi)
         assert b[8] == "selesai" and b[16] == "sintetis-riwayat"
-        assert b[15] == (WAKTU + timedelta(days=30) if p["label"] == "Sesuai" else None)
+        assert (b[13], b[14], b[17]) == (mulai, selesai, durasi)
+        assert b[15] == (selesai + timedelta(days=30) if p["label"] == "Sesuai" else None)
+
+
+def test_riwayat_waktu_dan_durasi_sama_dengan_data_demo_fe(data):
+    jadwal = [seed_v3.baris_panggilan(p, data["peta_peserta"]) for p in data["riwayat"]]
+    assert [b[13].isoformat() for b in jadwal] == [
+        "2026-10-05T09:42:00+07:00", "2026-10-05T10:05:00+07:00",
+        "2026-10-05T10:31:00+07:00", "2026-10-05T11:18:00+07:00",
+    ]
+    assert [b[17] for b in jadwal] == [84, 71, 66, 74]
+
+
+def test_riwayat_penerima_keluarga_untuk_anak_mengikuti_r13(data):
+    """CALL-LATAR-001 (5 tahun) dan 004 (8 tahun) ditelepon ke orang tua; jawaban ikut disesuaikan."""
+    per_id = {b[0]: b for b in (seed_v3.baris_panggilan(p, data["peta_peserta"]) for p in data["riwayat"])}
+    for id_ in ("CALL-LATAR-001", "CALL-LATAR-004"):
+        b = per_id[id_]
+        assert b[5] == "keluarga" and b[7] == "orang tua"
+        assert b[10].obj["penerima"] == "keluarga" and b[10].obj["hubungan"] == "orang tua"
+    for id_ in ("CALL-LATAR-002", "CALL-LATAR-003"):
+        assert per_id[id_][5] == "peserta" and per_id[id_][10].obj["hubungan"] is None
 
 
 def test_data_sesuai_prd(data):

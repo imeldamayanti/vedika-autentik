@@ -49,3 +49,30 @@ Butuh `backend/.env` (salin dari `.env.example`, jangan di-commit). Tanpa `DATAB
 ```
 
 Skema database: [db/schema.sql](db/schema.sql). Uji API berjalan di schema sementara `uji` yang di-rollback, jadi tabel produksi tidak tersentuh.
+
+## v3: konfirmasi suara
+
+Kontrak: [docs/api-contract-v3.md](../docs/api-contract-v3.md). Serah terima bagian Zahra: [docs/serah-terima-zahra.md](../docs/serah-terima-zahra.md).
+
+```
+FE (index.html) ──Kontrak A──▶ API ──Kontrak B2──▶ pembaca jawaban (stub_mesin: POST /v1/baca)
+                                 ▲
+agen suara (scripts/stub_agen.py) ──Kontrak B1──┘
+```
+
+Perlu di `backend/.env`: `AGEN_KEY` (kunci agen), `NOMOR_PENGUJI`; lihat `.env.example`.
+
+```bash
+.venv/bin/python -m scripts.terapkan_v3 --reset            # skema v3 + seed keadaan awal (mengubah DB!)
+.venv/bin/uvicorn stub_mesin.main:app --port 8001           # stub pembaca jawaban
+.venv/bin/uvicorn app.main:app --port 8000                  # API
+.venv/bin/python -m scripts.stub_agen --skenario S1         # stub agen: Telepon sekarang S1 sampai selesai
+python3 -m http.server 8899                                 # website (dari akar repo)
+```
+
+Demo cepat: `PUT /api/v1/pengaturan {"jeda_wa_menit": 0, "jeda_percobaan_menit": 0}` dan, di luar jam 09.00–17.00,
+`{"jam_mulai": "00:00", "jam_selesai": "23:59"}`. Tombol "Mulai ulang demo" (atau `POST /api/v1/demo/reset`) mengembalikan
+panggilan, log, dan keputusan ke keadaan awal.
+
+Uji: `.venv/bin/pytest` (±10 menit karena DB jauh). Uji v3 berjalan dalam satu transaksi di schema sementara `uji3`
+yang di-rollback di akhir sesi; tabel produksi tidak tersentuh. Pembaca jawaban diganti objek palsu di uji.

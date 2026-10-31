@@ -81,7 +81,7 @@ create table if not exists public.panggilan (
   label text check (label in ('Sesuai','Tidak sesuai','Tidak yakin','Tidak terhubung','Menolak')),
   alasan text,
   rekaman_path text,
-  transkrip jsonb,                     -- [{waktu, pembicara, teks}]
+  transkrip jsonb,                     -- [{detik, pembicara, teks}]; pembicara ai | penerima
   waktu_wa timestamptz,
   waktu_mulai timestamptz,
   waktu_selesai timestamptz,
@@ -105,6 +105,12 @@ create table if not exists public.panggilan (
 alter table public.panggilan add column if not exists coba_lagi_setelah timestamptz;
 -- R1.5: "Telepon sekarang", diambil agen di giliran berikutnya walau mode otomatis mati.
 alter table public.panggilan add column if not exists prioritas boolean not null default false;
+-- Kunci ambil agen: terisi saat agen mengambil tugas, lepas otomatis setelah 5 menit tanpa laporan.
+alter table public.panggilan add column if not exists diambil_pada timestamptz;
+-- Panel "Yang ditangkap AI" selama panggilan (sebagian field jawaban pembaca); dikosongkan saat selesai. Bukan dasar label.
+alter table public.panggilan add column if not exists tangkapan_sementara jsonb;
+-- Durasi panggilan (detik) kiriman agen; waktu_selesai - waktu_mulai tidak cukup tepat.
+alter table public.panggilan add column if not exists durasi_detik int;
 create index if not exists panggilan_status_idx on public.panggilan (status);
 create index if not exists panggilan_rs_idx on public.panggilan (id_rs, bulan_layanan);
 
@@ -126,13 +132,18 @@ create table if not exists public.keputusan_panggilan (
   id bigint generated always as identity primary key,
   panggilan_id text not null references public.panggilan(id) on delete cascade,
   verifikator text not null,
-  tindakan text not null check (tindakan in ('tutup_kasus','minta_klarifikasi_rs','teruskan_pk_jkn')),
+  tindakan text not null check (tindakan in ('tutup_kasus','minta_klarifikasi_rs','teruskan_pk_jkn','pantau')),
   ikut_saran boolean not null,
   alasan text,
   waktu timestamptz not null default now(),
   check (ikut_saran or coalesce(btrim(alasan), '') <> '')
 );
 create index if not exists keputusan_panggilan_idx on public.keputusan_panggilan (panggilan_id);
+-- 'pantau' (saran untuk label Tidak yakin, Tidak terhubung, Menolak) ditambahkan setelah tabel pertama kali dibuat,
+-- jadi batas tindakan diganti lewat drop + add supaya database yang sudah ada ikut berubah.
+alter table public.keputusan_panggilan drop constraint if exists keputusan_panggilan_tindakan_check;
+alter table public.keputusan_panggilan add constraint keputusan_panggilan_tindakan_check
+  check (tindakan in ('tutup_kasus','minta_klarifikasi_rs','teruskan_pk_jkn','pantau'));
 
 -- R1.5 dan R2.2: mode otomatis, jeda WA, jeda percobaan.
 create table if not exists public.pengaturan (
@@ -141,6 +152,7 @@ create table if not exists public.pengaturan (
 );
 insert into public.pengaturan (kunci, nilai) values
   ('mode_otomatis', 'false'::jsonb),
+  ('jeda', 'false'::jsonb),
   ('jam_mulai', '"09:00"'::jsonb),
   ('jam_selesai', '"17:00"'::jsonb),
   ('jeda_wa_menit', '1'::jsonb),
