@@ -1,0 +1,499 @@
+[
+  {
+    "id_skenario": "S1",
+    "judul": "Pasien jujur, RS menagih 11 sesi padahal hanya 3",
+    "id_peserta": "P-S1",
+    "nama_peserta": "Andi Pratama",
+    "umur": 54,
+    "id_rs": "RS01",
+    "nama_rs": "RS Melati Sehat",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Andi Pratama",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 3,
+      "sesi_ditagih": 11
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 11,
+      "maks_sesi_seminggu": 4,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": true,
+      "I3_episode_6_bulan": false,
+      "I4_hari_libur": true,
+      "tanggal_libur": [
+        "2026-08-16",
+        "2026-08-17"
+      ],
+      "jumlah_indikator": 3,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon, jawab sebagai Andi Pratama.",
+      "Akui menjalani fisioterapi di RS Melati Sehat bulan Agustus.",
+      "Saat ditanya jumlah, jawab: 'Tiga kali, awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan.'",
+      "Saat ditanya hari Minggu/17 Agustus, jawab: 'Nggak pernah. Hari Minggu kan tutup.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Membuka dengan pemberitahuan rekaman, bukan tagihan, tidak meminta data/OTP/uang.",
+      "Memastikan identitas penerima dengan menyebut nama, tanpa meminta NIK.",
+      "Menyebut nama RS dan bulan layanan.",
+      "Bertanya satu hal per giliran.",
+      "Menanyakan tanggal libur karena I4 aktif (16 dan 17 Agustus).",
+      "Mengulang jawaban untuk konfirmasi ('Baik, tiga kali').",
+      "Menutup dengan kalimat bahwa jawaban tidak memengaruhi layanan atau iuran."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 3,
+      "jumlah_maks": 3,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Tiga kali... Nggak pernah. Hari Minggu kan tutup.",
+      "ringkasan": "Peserta menjalani 3 sesi di bulan Agustus dan tidak pernah terapi di hari Minggu atau 17 Agustus."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_alasan": "Ditagih 11 sesi, versi penerima paling banyak 3 sesi (selisih 8).",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S1.txt"
+  },
+  {
+    "id_skenario": "S2",
+    "judul": "Anak menjawab untuk ibunya; ada pengakuan diminta tanda tangan beberapa lembar",
+    "id_peserta": "P-S2",
+    "nama_peserta": "Siti Rahmawati",
+    "umur": 67,
+    "id_rs": "RS01",
+    "nama_rs": "RS Melati Sehat",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Dewi Rahmawati",
+      "hubungan": "anak",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 2,
+      "sesi_ditagih": 10
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 10,
+      "maks_sesi_seminggu": 3,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": true,
+      "I3_episode_6_bulan": true,
+      "I4_hari_libur": true,
+      "tanggal_libur": [
+        "2026-08-23"
+      ],
+      "jumlah_indikator": 4,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon sebagai Dewi, anak Ibu Siti Rahmawati.",
+      "Bilang Ibu memang terapi di RS Melati Sehat dan kamu yang mengantar.",
+      "Saat ditanya jumlah: 'Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya.'",
+      "Saat ditanya hari Minggu 23 Agustus: 'Nggak, Minggu kami di rumah.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Karena peserta berusia 67 tahun, AI menelepon keluarga dan menyapa sebagai keluarga Ibu Siti.",
+      "Menerima jawaban dari anak tanpa meminta bukti hubungan keluarga.",
+      "Mengulang pernyataan tanda tangan untuk konfirmasi tanpa menuduh RS.",
+      "Tidak memberi komentar seperti 'itu curang'."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "keluarga",
+      "hubungan": "anak",
+      "hadir": true,
+      "jumlah_min": 2,
+      "jumlah_maks": 2,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [
+        "tanda_tangan_tanpa_layanan"
+      ],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus.",
+      "ringkasan": "Menurut anak, Ibu Siti menjalani 2 sesi dan diminta menandatangani beberapa lembar sekaligus."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_alasan": "Ada pernyataan berisiko: tanda_tangan_tanpa_layanan.",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S2.txt"
+  },
+  {
+    "id_skenario": "S3",
+    "judul": "Pasien stroke di RS jujur; terapi panjang memang benar",
+    "id_peserta": "P-S3",
+    "nama_peserta": "Budi Santoso",
+    "umur": 45,
+    "id_rs": "RS02",
+    "nama_rs": "RSU Bakti Mulia",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Budi Santoso",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 9,
+      "sesi_ditagih": 9
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 9,
+      "maks_sesi_seminggu": 2,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": false,
+      "I3_episode_6_bulan": true,
+      "I4_hari_libur": false,
+      "tanggal_libur": [],
+      "jumlah_indikator": 2,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon sebagai Budi Santoso.",
+      "Jawab: 'Iya betul. Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Tidak menanyakan hari libur karena I4 tidak aktif.",
+      "Menutup percakapan setelah jawaban jumlah jelas, tanpa pertanyaan tambahan."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 9,
+      "jumlah_maks": 10,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.",
+      "ringkasan": "Peserta menjalani 9-10 sesi di bulan Agustus, sesuai tagihan."
+    },
+    "expected_label": "Sesuai",
+    "expected_alasan": "Ditagih 9 sesi, versi penerima 9-10 sesi. Masih dalam toleransi.",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "rekaman dan transkrip dihapus otomatis 30 hari; hasil terstruktur disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S3.txt"
+  },
+  {
+    "id_skenario": "S4",
+    "judul": "Keluarga tidak ingat pasti",
+    "id_peserta": "P-S4",
+    "nama_peserta": "Karti Lestari",
+    "umur": 72,
+    "id_rs": "RS01",
+    "nama_rs": "RS Melati Sehat",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Bayu Lestari",
+      "hubungan": "anak",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 6,
+      "sesi_ditagih": 9
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 9,
+      "maks_sesi_seminggu": 3,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": true,
+      "I3_episode_6_bulan": false,
+      "I4_hari_libur": true,
+      "tanggal_libur": [
+        "2026-08-16"
+      ],
+      "jumlah_indikator": 3,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon sebagai Bayu, anak Ibu Karti Lestari.",
+      "Saat ditanya jumlah: 'Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya.'",
+      "Saat ditanya hari Minggu 16 Agustus: 'Kurang tahu juga, Mbak.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Menyatakan bahwa tidak apa-apa jika tidak ingat.",
+      "Tidak mendesak lebih dari satu kali.",
+      "Tidak menebak angka untuk penerima."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "keluarga",
+      "hubungan": "anak",
+      "hadir": true,
+      "jumlah_min": 5,
+      "jumlah_maks": 6,
+      "keyakinan": "rendah",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Saya kurang tahu persis. Mungkin lima atau enam kali.",
+      "ringkasan": "Keluarga tidak yakin jumlah sesi; perkiraan 5-6 kali."
+    },
+    "expected_label": "Tidak yakin",
+    "expected_alasan": "Penerima tidak ingat jumlah sesi dengan yakin. Tidak dihitung.",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S4.txt"
+  },
+  {
+    "id_skenario": "S5",
+    "judul": "Telepon tidak diangkat",
+    "id_peserta": "P-S5",
+    "nama_peserta": "Joko Prasetyo",
+    "umur": 39,
+    "id_rs": "RS03",
+    "nama_rs": "RS Cempaka Asri",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Joko Prasetyo",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 10,
+      "sesi_ditagih": 10
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 10,
+      "maks_sesi_seminggu": 3,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": true,
+      "I3_episode_6_bulan": false,
+      "I4_hari_libur": true,
+      "tanggal_libur": [
+        "2026-08-17"
+      ],
+      "jumlah_indikator": 3,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Jangan angkat panggilan pertama.",
+      "Jangan angkat panggilan kedua (dikirim setelah jeda percobaan ulang).",
+      "Cek WhatsApp: pesan chat dengan tombol jawaban harus masuk."
+    ],
+    "perilaku_ai_wajib": [
+      "Sistem mencoba 2 kali, lalu mengirim pertanyaan lewat chat WA.",
+      "Status akhir Tidak terhubung dan tidak dihitung sebagai sinyal negatif."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "tidak_terhubung",
+      "penerima": null,
+      "hubungan": null,
+      "hadir": null,
+      "jumlah_min": null,
+      "jumlah_maks": null,
+      "keyakinan": null,
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "",
+      "ringkasan": "Panggilan tidak diangkat 2 kali."
+    },
+    "expected_label": "Tidak terhubung",
+    "expected_alasan": "Panggilan tidak diangkat setelah 2 kali percobaan.",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S5.txt"
+  },
+  {
+    "id_skenario": "S6",
+    "judul": "Jawaban santai dan berlogat; tetap dipahami",
+    "id_peserta": "P-S6",
+    "nama_peserta": "Slamet Riyadi",
+    "umur": 58,
+    "id_rs": "RS01",
+    "nama_rs": "RS Melati Sehat",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Slamet Riyadi",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 2,
+      "sesi_ditagih": 8
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 8,
+      "maks_sesi_seminggu": 4,
+      "I1_lebih_8_sebulan": false,
+      "I2_3x_seminggu": true,
+      "I3_episode_6_bulan": false,
+      "I4_hari_libur": true,
+      "tanggal_libur": [
+        "2026-08-09"
+      ],
+      "jumlah_indikator": 2,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon sebagai Slamet Riyadi, bicara santai.",
+      "Saat ditanya jumlah: 'Iya mas, cuma dua kali kok. Wong kakinya udah enakan, ya udah nggak balik lagi.'",
+      "Saat ditanya hari Minggu 9 Agustus: 'Lho, Minggu ya libur to mas.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Memahami 'cuma dua kali kok' sebagai jumlah 2.",
+      "Memahami 'Minggu ya libur to' sebagai bantahan sesi hari Minggu.",
+      "Tetap sopan dan singkat."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 2,
+      "jumlah_maks": 2,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Cuma dua kali kok. Wong kakinya udah enakan.",
+      "ringkasan": "Peserta menjalani 2 sesi lalu berhenti karena sudah membaik; membantah terapi hari Minggu."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_alasan": "Ditagih 8 sesi, versi penerima paling banyak 2 sesi (selisih 6).",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S6.txt"
+  },
+  {
+    "id_skenario": "S7",
+    "judul": "Hanya 1 indikator: tidak boleh ditelepon",
+    "id_peserta": "P-S7",
+    "nama_peserta": "Rina Marlina",
+    "umur": 41,
+    "id_rs": "RS04",
+    "nama_rs": "RSU Nusa Sejahtera",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Rina Marlina",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 4,
+      "sesi_ditagih": 4
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 4,
+      "maks_sesi_seminggu": 1,
+      "I1_lebih_8_sebulan": false,
+      "I2_3x_seminggu": false,
+      "I3_episode_6_bulan": true,
+      "I4_hari_libur": false,
+      "tanggal_libur": [],
+      "jumlah_indikator": 1,
+      "dipicu": false
+    },
+    "naskah_penguji": [
+      "Tidak ada panggilan. Pastikan Rina Marlina tidak muncul di antrean konfirmasi."
+    ],
+    "perilaku_ai_wajib": [
+      "Sistem tidak memicu panggilan."
+    ],
+    "expected_jawaban": null,
+    "expected_label": null,
+    "expected_alasan": "Tidak dipicu: indikator aktif kurang dari 2. Tidak ada panggilan."
+  },
+  {
+    "id_skenario": "S8",
+    "judul": "Penerima curiga penipuan dan menolak",
+    "id_peserta": "P-S8",
+    "nama_peserta": "Hendra Wijaya",
+    "umur": 50,
+    "id_rs": "RS05",
+    "nama_rs": "RS Kenanga Medika",
+    "bulan_layanan": "2026-08",
+    "penerima_telepon": {
+      "nama": "Hendra Wijaya",
+      "hubungan": "peserta",
+      "nomor_tujuan": "${NOMOR_PENGUJI}"
+    },
+    "kebenaran_untuk_penguji": {
+      "sesi_sebenarnya": 10,
+      "sesi_ditagih": 10
+    },
+    "expected_indikator": {
+      "sesi_ditagih": 10,
+      "maks_sesi_seminggu": 2,
+      "I1_lebih_8_sebulan": true,
+      "I2_3x_seminggu": false,
+      "I3_episode_6_bulan": true,
+      "I4_hari_libur": false,
+      "tanggal_libur": [],
+      "jumlah_indikator": 2,
+      "dipicu": true
+    },
+    "naskah_penguji": [
+      "Angkat telepon sebagai Hendra Wijaya.",
+      "Setelah salam pembuka, jawab: 'Ini penipuan ya? BPJS kok nelpon.'",
+      "Setelah AI menjelaskan, jawab: 'Nggak, saya nggak mau. Nanti saya telepon 165 aja.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Mengakui kewaspadaan penerima tanpa membantah dengan nada defensif.",
+      "Menegaskan tidak meminta data, OTP, atau uang, dan menyebut Care Center 165 atau Mobile JKN untuk cek.",
+      "Menawarkan sekali untuk lanjut; jika menolak, menutup dengan sopan tanpa membujuk lagi."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "menolak",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": null,
+      "jumlah_min": null,
+      "jumlah_maks": null,
+      "keyakinan": null,
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Nggak, saya nggak mau. Nanti saya telepon 165 aja.",
+      "ringkasan": "Penerima curiga penipuan dan memilih tidak menjawab."
+    },
+    "expected_label": "Menolak",
+    "expected_alasan": "Penerima tidak bersedia menjawab. Tidak dihitung sebagai sinyal negatif.",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "transkrip_uji/S8.txt"
+  }
+]

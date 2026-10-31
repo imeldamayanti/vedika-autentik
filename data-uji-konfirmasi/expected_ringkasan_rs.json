@@ -1,0 +1,261 @@
+{
+  "aturan": "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tidak sesuai/terjawab >= 10%",
+  "pemicu_per_rs_2026-08": {
+    "RS01": {
+      "id_rs": "RS01",
+      "pasien_aktif": 68,
+      "pasien_dipicu": 27,
+      "persen_dipicu": 39.7
+    },
+    "RS02": {
+      "id_rs": "RS02",
+      "pasien_aktif": 65,
+      "pasien_dipicu": 1,
+      "persen_dipicu": 1.5
+    },
+    "RS03": {
+      "id_rs": "RS03",
+      "pasien_aktif": 59,
+      "pasien_dipicu": 1,
+      "persen_dipicu": 1.7
+    },
+    "RS04": {
+      "id_rs": "RS04",
+      "pasien_aktif": 53,
+      "pasien_dipicu": 0,
+      "persen_dipicu": 0.0
+    },
+    "RS05": {
+      "id_rs": "RS05",
+      "pasien_aktif": 55,
+      "pasien_dipicu": 1,
+      "persen_dipicu": 1.8
+    }
+  },
+  "sebelum_skenario": {
+    "RS01": {
+      "id_rs": "RS01",
+      "sesuai": 2,
+      "tidak_sesuai": 2,
+      "tidak_yakin": 0,
+      "tidak_terhubung": 0,
+      "menolak": 0,
+      "terjawab": 4,
+      "rasio_tidak_sesuai": 0.5,
+      "status": "Normal"
+    }
+  },
+  "langkah": [
+    {
+      "setelah": "S1",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 3,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 5,
+          "rasio_tidak_sesuai": 0.6,
+          "status": "Perlu klarifikasi RS"
+        }
+      }
+    },
+    {
+      "setelah": "S2",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 4,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 6,
+          "rasio_tidak_sesuai": 0.667,
+          "status": "Perlu klarifikasi RS"
+        }
+      }
+    },
+    {
+      "setelah": "S3",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 4,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 6,
+          "rasio_tidak_sesuai": 0.667,
+          "status": "Perlu klarifikasi RS"
+        },
+        "RS02": {
+          "id_rs": "RS02",
+          "sesuai": 1,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 1,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        }
+      }
+    },
+    {
+      "setelah": "S4",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 4,
+          "tidak_yakin": 1,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 6,
+          "rasio_tidak_sesuai": 0.667,
+          "status": "Perlu klarifikasi RS"
+        },
+        "RS02": {
+          "id_rs": "RS02",
+          "sesuai": 1,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 1,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        }
+      }
+    },
+    {
+      "setelah": "S5",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 4,
+          "tidak_yakin": 1,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 6,
+          "rasio_tidak_sesuai": 0.667,
+          "status": "Perlu klarifikasi RS"
+        },
+        "RS02": {
+          "id_rs": "RS02",
+          "sesuai": 1,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 1,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        },
+        "RS03": {
+          "id_rs": "RS03",
+          "sesuai": 0,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 1,
+          "menolak": 0,
+          "terjawab": 0,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        }
+      }
+    },
+    {
+      "setelah": "S6",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 5,
+          "tidak_yakin": 1,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 7,
+          "rasio_tidak_sesuai": 0.714,
+          "status": "Perlu klarifikasi RS"
+        },
+        "RS02": {
+          "id_rs": "RS02",
+          "sesuai": 1,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 1,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        },
+        "RS03": {
+          "id_rs": "RS03",
+          "sesuai": 0,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 1,
+          "menolak": 0,
+          "terjawab": 0,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        }
+      }
+    },
+    {
+      "setelah": "S8",
+      "ringkasan": {
+        "RS01": {
+          "id_rs": "RS01",
+          "sesuai": 2,
+          "tidak_sesuai": 5,
+          "tidak_yakin": 1,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 7,
+          "rasio_tidak_sesuai": 0.714,
+          "status": "Perlu klarifikasi RS"
+        },
+        "RS02": {
+          "id_rs": "RS02",
+          "sesuai": 1,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 0,
+          "terjawab": 1,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        },
+        "RS03": {
+          "id_rs": "RS03",
+          "sesuai": 0,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 1,
+          "menolak": 0,
+          "terjawab": 0,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        },
+        "RS05": {
+          "id_rs": "RS05",
+          "sesuai": 0,
+          "tidak_sesuai": 0,
+          "tidak_yakin": 0,
+          "tidak_terhubung": 0,
+          "menolak": 1,
+          "terjawab": 0,
+          "rasio_tidak_sesuai": 0.0,
+          "status": "Normal"
+        }
+      }
+    }
+  ]
+}
