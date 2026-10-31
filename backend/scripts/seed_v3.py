@@ -145,7 +145,7 @@ def muat_data():
 
 def isi_database(url, d, reset=False):
     """Tulis data ke database dalam satu transaksi. reset = kosongkan tabel v3 dulu (tabel v2 tidak disentuh)."""
-    with psycopg.connect(url, autocommit=False, connect_timeout=10) as conn:
+    with psycopg.connect(url, prepare_threshold=None, connect_timeout=10) as conn:
         if reset:
             conn.execute(f"truncate {TABEL_V3} restart identity cascade")
         cur = conn.cursor()
