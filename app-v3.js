@@ -24,6 +24,7 @@
     ulang: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     cek: '<path d="M20 6 9 17l-5-5"/>',
     telepon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     jeda: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
     main: '<polygon points="6 3 20 12 6 21 6 3"/>',
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
@@ -130,7 +131,7 @@
     const p = D.SKENARIO[id];
     if (!p || S.hasil[id] || ui.aktif) return;
     clearTimeout(ui.timerBerikut);
-    ui.aktif = { id: id, mulai: Date.now(), menit: menitSekarang(), status: "wa" };
+    ui.aktif = { id: id, mulai: Date.now(), menit: menitSekarang(), status: "wa", terisi: {}, barisLihat: 0, sig: "" };
     ui.timer = setInterval(tick, 250);
     gambar(true);
     toast("Pesan WA terkirim ke " + p.penerima.nama + ". Panggilan untuk " + p.pasien + " dimulai.", "#/panggilan/" + id, "Buka panggilan");
@@ -143,7 +144,9 @@
     const t = (Date.now() - a.mulai) / 1000;
     if (t >= titik(p).total) { selesaikan(a.id); return; }
     const st = statusSim(p, t);
-    if (st !== a.status) { a.status = st; gambar(true); }
+    if (st !== a.status) { a.status = st; gambar(true); return; }
+    const r = rute();
+    if (r.nama === "panggilan" && r.id === a.id) perbaruiPanggilan(p, t);
   }
 
   function selesaikan(id) {
@@ -152,7 +155,9 @@
     S.hasil[id] = { menit: ui.aktif.menit };
     ui.aktif = null;
     simpan();
-    gambar(true);
+    /* Bila verifikator sedang menonton panggilan ini, pindah sendiri ke kartu bukti. */
+    const r = rute();
+    if (r.nama === "panggilan" && r.id === id) ke("#/kartu/" + id); else gambar(true);
     toast("Panggilan selesai: " + p.pasien + " · " + D.LABEL[p.label].nama + ".", "#/kartu/" + id, "Buka kartu bukti");
     if (ui.otomatis && !ui.jeda) ui.timerBerikut = setTimeout(lanjutOtomatis, SIM.jedaBerikut);
   }
@@ -294,7 +299,161 @@
         '<p class="catatan-kaki">Indikator: Melebihi 8 sesi sebulan · 3x seminggu · 6 bulan berturut-turut · Libur (Minggu atau libur nasional). Pasien dengan satu indikator saja tidak ditelepon.</p>' +
       "</section>";
   }
-  function lamanPanggilan(id) { return kepala("Panggilan berlangsung", id) + kosong("Panggilan", "Diisi pada tiket UI-04."); }
+  /* ============================================================== panggilan */
+
+  const mmss = (d) => Math.floor(d / 60) + ":" + String(Math.floor(d % 60)).padStart(2, "0");
+  const detikLayar = () => (ui.aktif ? (Date.now() - ui.aktif.mulai) / 1000 : null);
+  const TANDA_BAHAYA = { tanda_tangan_tanpa_layanan: "Tanda tangan tanpa layanan", diminta_membayar: "Diminta membayar", layanan_berbeda: "Layanan berbeda" };
+
+  /* Detik panggilan nyata yang sudah direkam pada detik layar t. */
+  const detikRekam = (p, t) => Math.max(0, Math.min(p.durasi, (t - SIM.rekam) / SIM.rentang * p.durasi));
+
+  /* Jumlah baris transkrip yang sudah muncul pada detik layar t. */
+  const barisTampil = (p, t) => (t == null ? 0 : p.transkrip.filter((l) => t >= SIM.rekam + l[1] * SIM.rentang / p.durasi).length);
+
+  /* Peristiwa S5 yang muncul di kolom transkrip: tidak ada suara, hanya log percobaan. */
+  function logPercobaan(p, t) {
+    const k = titik(p);
+    return [
+      [k.coba1, "Percobaan 1: memanggil " + p.penerima.nama + "…"], [k.gagal1, "Tidak diangkat."],
+      [k.coba2, "Percobaan 2 (jeda 2 menit, dipadatkan): memanggil lagi…"], [k.gagal2, "Tidak diangkat."],
+      [k.chat, "Chat cadangan dikirim ke WhatsApp penerima."]
+    ].filter((e) => t != null && t >= e[0]);
+  }
+
+  /* Tahap progres dan keadaannya (menunggu, jalan, selesai, gagal) pada detik layar t; t kosong = belum mulai. */
+  function langkahSim(p, t) {
+    const k = titik(p), a = ui.aktif && ui.aktif.id === p.id ? ui.aktif : null;
+    const jam = (x) => (a ? formatJam(a.menit + x) : "");
+    const st = (mulai, akhir) => (t == null || t < mulai ? "menunggu" : t < akhir ? "jalan" : "selesai");
+    const wa = { nama: "Pesan WA terkirim", state: t == null ? "menunggu" : "selesai", jam: jam(0) };
+    if (tidakTerhubung(p)) {
+      const coba = (n, mulai, akhir, x) => {
+        const s = st(mulai, akhir);
+        return { nama: "Percobaan " + n, state: s === "selesai" ? "gagal" : s, ket: s === "jalan" ? "Memanggil…" : s === "selesai" ? "Tidak diangkat" : "", jam: jam(x) };
+      };
+      return [
+        wa, coba(1, k.coba1, k.gagal1, D.JEDA_PESAN_MENIT), coba(2, k.coba2, k.gagal2, D.JEDA_PESAN_MENIT + 3),
+        { nama: "Chat cadangan terkirim", state: st(k.gagal2, k.chat), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: "Pilihan jawaban 1–6" },
+        { nama: "Kartu bukti", state: st(k.chat, k.total), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: st(k.chat, k.total) === "jalan" ? "Menyusun kartu bukti" : "" }
+      ];
+    }
+    const sambung = st(0, k.sambung), rekam = st(k.rekam, k.akhir), baca = st(k.akhir, k.kartu), kartu = st(k.kartu, k.total);
+    const jamBaca = jam(D.JEDA_PESAN_MENIT + Math.ceil(p.durasi / 60));
+    return [
+      wa,
+      { nama: "Panggilan tersambung", state: t == null ? "menunggu" : sambung, jam: jam(D.JEDA_PESAN_MENIT), ket: sambung === "jalan" ? "Menunggu jeda pesan, dipadatkan" : "" },
+      { nama: "Merekam", state: rekam, jam: jam(D.JEDA_PESAN_MENIT),
+        ket: rekam === "jalan" ? '<span id="durasiLive">' + mmss(detikRekam(p, t)) + "</span> direkam" : rekam === "selesai" ? "Durasi " + mmss(p.durasi) : "" },
+      { nama: "Membaca jawaban", state: baca, jam: jamBaca, ket: baca === "jalan" ? "Mengubah percakapan menjadi isian" : "" },
+      { nama: "Kartu bukti", state: kartu, jam: jamBaca, ket: kartu === "jalan" ? "Menyusun kartu bukti" : "" }
+    ];
+  }
+
+  function htmlLangkah(p, t) {
+    return langkahSim(p, t).map((l) => '<li class="' + l.state + '"><span class="ikon">' + (l.state === "selesai" ? ikon("cek") : l.state === "gagal" ? ikon("x") : "") + "</span>" +
+      "<div><b>" + l.nama + "</b>" + (l.ket ? "<small>" + l.ket + "</small>" : "") + "</div><time>" + (l.state === "menunggu" ? "" : l.jam) + "</time></li>").join("");
+  }
+
+  function htmlTranskrip(p, t) {
+    const a = ui.aktif && ui.aktif.id === p.id ? ui.aktif : null;
+    if (tidakTerhubung(p)) {
+      const log = logPercobaan(p, t);
+      return log.length ? log.map((e) => '<div class="baris-trans baris-trans--sistem">' + esc(e[1]) + "</div>").join("")
+        : '<p class="kosong-trans">' + (t == null ? "Log percobaan muncul di sini setelah panggilan dimulai." : "Menunggu percobaan pertama…") + "</p>";
+    }
+    const n = barisTampil(p, t), k = titik(p);
+    if (!n) return '<p class="kosong-trans">' + (t == null ? "Transkrip muncul di sini setelah panggilan tersambung." : "Menunggu panggilan tersambung…") + "</p>";
+    const baru = a ? a.barisLihat : n;
+    const baris = p.transkrip.slice(0, n).map((l, i) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + (i >= baru ? " baru" : "") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") +
+      "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("");
+    if (a) a.barisLihat = n;
+    const berikut = p.transkrip[n];
+    const ketik = berikut && t < k.akhir ? '<div class="baris-trans baris-trans--tunggu' + (berikut[0] === "P" ? " p" : "") + '" aria-hidden="true"><span class="titik-ketik"><i></i><i></i><i></i></span></div>' : "";
+    return baris + ketik;
+  }
+
+  const ISIAN = [["penerima", "Penerima"], ["hadir", "Hadir"], ["jumlah", "Jumlah sesi"], ["keyakinan", "Keyakinan"], ["libur", "Tanggal libur"], ["bahaya", "Tanda bahaya"]];
+
+  function nilaiIsian(p, k) {
+    const j = p.jawaban;
+    if (k === "penerima") return j.penerima === "peserta" ? "Peserta" : "Keluarga (" + j.hubungan + ")";
+    if (k === "hadir") return j.hadir === true ? "Ya" : j.hadir === false ? "Tidak" : "Tidak dijawab";
+    if (k === "jumlah") return j.jumlah_min == null ? "Tidak dijawab" : j.jumlah_min === j.jumlah_maks ? j.jumlah_min + " sesi" : j.jumlah_min + "–" + j.jumlah_maks + " sesi";
+    if (k === "keyakinan") return j.keyakinan === "tinggi" ? "Tinggi" : j.keyakinan === "rendah" ? "Rendah" : "–";
+    if (k === "libur") return !p.tanggalLibur.length ? "Tidak ditanyakan" : j.membantah_tanggal_libur === true ? "Membantah" : j.membantah_tanggal_libur === false ? "Mengakui" : "Tidak jelas";
+    return j.tanda_bahaya.length ? j.tanda_bahaya.map((x) => TANDA_BAHAYA[x]).join(", ") : "Tidak ada";
+  }
+
+  /* Isian terisi bertahap menurut baris transkrip; setelah rekaman selesai semuanya terisi. */
+  function terisi(p, t) {
+    if (tidakTerhubung(p) || t == null) return [];
+    const n = barisTampil(p, t), selesaiRekam = t >= titik(p).akhir;
+    return ISIAN.map((x) => x[0]).filter((k) => selesaiRekam || (p.tangkap[k] != null && n > p.tangkap[k]));
+  }
+
+  function htmlIsian(p, t) {
+    const a = ui.aktif && ui.aktif.id === p.id ? ui.aktif : null;
+    const isi = terisi(p, t);
+    const tanpaJawaban = tidakTerhubung(p);
+    return ISIAN.map((x) => {
+      const ada = isi.includes(x[0]);
+      const baru = ada && a && !a.terisi[x[0]];
+      if (ada && a) a.terisi[x[0]] = true;
+      const bahaya = ada && x[0] === "bahaya" && p.jawaban.tanda_bahaya.length;
+      return "<div><dt>" + x[1] + "</dt><dd class=\"" + (ada ? "" : "kosong-isi") + (baru ? " baru" : "") + (bahaya ? " bahaya" : "") + '">' + (ada ? esc(nilaiIsian(p, x[0])) : tanpaJawaban && t != null && t >= titik(p).chat ? "Tidak ada" : "–") + "</dd></div>";
+    }).join("");
+  }
+
+  function isiPanggilan(p, t) {
+    return '<div class="panggilan-grid" id="panggilan">' +
+      '<section class="panel"><div class="panel-kepala"><h2>Progres</h2></div><ol class="progres">' + htmlLangkah(p, t) + "</ol>" +
+        '<p class="catatan-simulasi">Simulasi: ' + (tidakTerhubung(p) ? "dua percobaan tanpa jawaban" : "panggilan nyata " + mmss(p.durasi)) + " dipadatkan menjadi sekitar " + (tidakTerhubung(p) ? "25" : "45") + " detik. Tidak ada suara yang diputar.</p></section>" +
+      '<section class="panel"><div class="panel-kepala"><h2>' + (tidakTerhubung(p) ? "Log panggilan" : "Transkrip langsung") + '</h2></div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
+      '<section class="panel"><div class="panel-kepala"><h2>Yang ditangkap AI</h2></div><dl class="isian">' + htmlIsian(p, t) + "</dl></section>" +
+    "</div>";
+  }
+
+  function lamanPanggilan(id) {
+    const p = D.SKENARIO[id];
+    if (!p) return kepala("Panggilan tidak ditemukan", "Hanya pasien di antrean yang punya panggilan simulasi.") + '<section class="panel"><div class="belum-mulai"><b>Tidak ada panggilan untuk ' + esc(id || "") + '</b><a class="btn btn--primer" href="#/autentik">Ke antrean konfirmasi</a></div></section>';
+    const a = ui.aktif && ui.aktif.id === id;
+    const t = a ? detikLayar() : null;
+    const libur = p.tanggalLibur.length ? p.tanggalLibur.join(" dan ") + " " + D.BULAN_PENDEK : "tidak ada";
+    const aksi = a ? '<span class="status-chip status-chip--' + ui.aktif.status + '">' + STATUS[ui.aktif.status] + "</span>"
+      : S.hasil[id] ? "" : '<button class="btn btn--primer" type="button" data-aksi="telepon" data-id="' + id + '"' + (ui.aktif ? ' disabled title="Satu panggilan aktif pada satu waktu"' : "") + ">" + ikon("telepon") + "Telepon sekarang</button>";
+    const kop = '<div class="kepala-panggilan"><div><h1>' + esc(p.pasien) + " · " + esc(D.namaRs(p.rs)) + " · " + D.BULAN + "</h1>" +
+      '<div class="meta-panggilan"><span><b>Ditagih</b>' + p.ditagih + " sesi</span>" +
+        '<span><b>Indikator</b><span class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</span></span>" +
+        "<span><b>Tanggal libur</b>" + libur + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div>" +
+      '<div class="kepala-aksi">' + aksi + "</div></div>";
+    if (S.hasil[id]) {
+      return kop + '<section class="panel"><div class="belum-mulai"><b>Panggilan sudah selesai</b><p>Hasilnya ada di kartu bukti.</p><a class="btn btn--primer" href="#/kartu/' + id + '">Buka kartu bukti</a></div></section>';
+    }
+    return kop + isiPanggilan(p, t);
+  }
+
+  /* Perbarui hanya bagian panggilan bila ada yang berubah, supaya transkrip tidak berkedip. */
+  function perbaruiPanggilan(p, t) {
+    const a = ui.aktif;
+    const sig = [langkahSim(p, t).map((l) => l.state[0]).join(""), barisTampil(p, t), terisi(p, t).length, logPercobaan(p, t).length, t >= titik(p).akhir].join("|");
+    const el = document.getElementById("panggilan");
+    if (el && sig !== a.sig) {
+      a.sig = sig;
+      el.outerHTML = isiPanggilan(p, t);
+      const tr = document.getElementById("transkrip");
+      if (tr) tr.scrollTop = tr.scrollHeight;
+    }
+    const d = document.getElementById("durasiLive");
+    if (d) d.textContent = mmss(detikRekam(p, t));
+  }
+
+  /* Pintasan tersembunyi Alt+L: lompat ke akhir panggilan yang sedang berjalan, hasilnya sama dengan menunggu. */
+  function lompatAkhir() {
+    if (!ui.aktif) return;
+    ui.aktif.mulai = Date.now() - (titik(D.SKENARIO[ui.aktif.id]).total + 1) * 1000;
+    tick();
+  }
   function lamanKartu(id) { return kepala("Kartu bukti", id) + kosong("Kartu bukti", "Diisi pada tiket UI-06."); }
   function lamanRingkasanRs() { return kepala("Ringkasan per rumah sakit", "Layanan Agustus 2026") + kosong("Ringkasan RS", "Diisi pada tiket UI-08."); }
   function lamanRiwayat() { return kepala("Riwayat keputusan", "Semua keputusan verifikator atas panggilan konfirmasi.") + kosong("Riwayat keputusan", "Diisi pada tiket UI-10."); }
@@ -366,6 +525,10 @@
     const f = AKSI[el.dataset.aksi];
     if (f) { if (el.tagName === "A") e.preventDefault(); f(el); }
     if (ui.menuBuka && !e.target.closest("#sisi") && el.dataset.aksi !== "menu") { ui.menuBuka = false; gambar(true); }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey && e.code === "KeyL") { e.preventDefault(); lompatAkhir(); }
   });
 
   document.addEventListener("change", (e) => {
