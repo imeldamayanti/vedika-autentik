@@ -32,6 +32,29 @@ def test_panggilan_punya_kolom_tambahan(conn):
     } <= kolom(conn, "panggilan")
 
 
+def test_kolom_susulan_ditambahkan_ke_tabel_yang_sudah_ada(conn):
+    """Database yang sudah menerapkan skema lama harus mendapat coba_lagi_setelah dan prioritas."""
+    conn.execute(SKEMA_V3)
+    conn.execute("alter table uji.panggilan drop column coba_lagi_setelah, drop column prioritas")
+    assert not {"coba_lagi_setelah", "prioritas"} & kolom(conn, "panggilan")
+    conn.execute(SKEMA_V3)
+    assert {"coba_lagi_setelah", "prioritas"} <= kolom(conn, "panggilan")
+
+
+def test_prioritas_bawaan_false_dan_tidak_boleh_null(conn):
+    conn.execute(SKEMA_V3)
+    conn.execute("insert into uji.rumah_sakit (id_rs, nama_rs) values ('RS01', 'RS Uji')")
+    conn.execute("insert into uji.peserta (id_peserta, nama) values ('P01', 'Peserta Uji')")
+    conn.execute(
+        "insert into uji.panggilan (id, id_peserta, id_rs, bulan_layanan, sesi_ditagih, penerima)"
+        " values ('C1', 'P01', 'RS01', '2026-08', 10, 'peserta')"
+    )
+    baris = conn.execute("select prioritas, coba_lagi_setelah from uji.panggilan where id = 'C1'").fetchone()
+    assert baris == {"prioritas": False, "coba_lagi_setelah": None}
+    with pytest.raises(psycopg.errors.NotNullViolation):
+        conn.execute("update uji.panggilan set prioritas = null where id = 'C1'")
+
+
 def test_panggilan_log_ada_dan_menjaga_status(conn):
     conn.execute(SKEMA_V3)
     assert {"id", "panggilan_id", "status", "waktu", "percobaan", "catatan"} <= kolom(conn, "panggilan_log")

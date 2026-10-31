@@ -2,7 +2,8 @@
 -- Tambahan, bukan pengganti: tabel v2 (berkas, hasil_cek, label, ...) di schema.sql tidak disentuh.
 -- RLS aktif tanpa policy: hanya API (service role) yang boleh mengakses.
 -- Idempoten: aman dijalankan berulang (if not exists, on conflict do nothing, enable RLS berulang tidak berefek).
--- Kolom baru di tabel yang sudah ada harus ditambah lewat alter table ... add column if not exists (belum ada kebutuhan).
+-- Kolom baru di tabel yang sudah diterapkan ke database harus lewat alter table ... add column if not exists,
+-- karena create table if not exists tidak mengubah tabel yang sudah ada.
 
 create table if not exists public.rumah_sakit (
   id_rs text primary key,
@@ -99,6 +100,11 @@ create table if not exists public.panggilan (
   dibuat timestamptz not null default now(),
   unique (id_peserta, id_rs, bulan_layanan)
 );
+-- Kolom susulan, lewat alter supaya database yang sudah menerapkan versi sebelumnya ikut mendapatkannya.
+-- R3.5: percobaan ke-2 baru boleh diambil agen setelah waktu ini (percobaan ke-1 gagal + jeda_percobaan_menit).
+alter table public.panggilan add column if not exists coba_lagi_setelah timestamptz;
+-- R1.5: "Telepon sekarang", diambil agen di giliran berikutnya walau mode otomatis mati.
+alter table public.panggilan add column if not exists prioritas boolean not null default false;
 create index if not exists panggilan_status_idx on public.panggilan (status);
 create index if not exists panggilan_rs_idx on public.panggilan (id_rs, bulan_layanan);
 
