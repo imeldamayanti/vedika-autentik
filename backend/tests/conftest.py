@@ -94,3 +94,12 @@ def conn_v3(_db_v3):
     yield _db_v3
     _db_v3.execute("rollback to savepoint tes")
     _db_v3.execute("release savepoint tes")
+
+
+@pytest.fixture
+def klien_v3(conn_v3, mesin, tmp_path):
+    app.dependency_overrides[get_conn] = lambda: conn_v3
+    app.dependency_overrides[get_mesin] = lambda: mesin
+    app.dependency_overrides[get_penyimpanan] = lambda: Penyimpanan(tmp_path)
+    yield TestClient(app)
+    app.dependency_overrides.clear()

@@ -130,3 +130,21 @@ def daftar_keputusan(conn) -> list[dict]:
         " join peserta s on s.id_peserta = p.id_peserta join rumah_sakit r on r.id_rs = p.id_rs"
         " order by k.waktu desc, k.id desc"
     ).fetchall()
+
+
+# ---- tulis (D-03) ----
+
+def tandai_prioritas(conn, id_: str) -> None:
+    conn.execute("update panggilan set prioritas = true where id = %s", (id_,))
+
+
+def simpan_keputusan(conn, id_: str, verifikator: str, tindakan: str, ikut_saran: bool, alasan: str | None, waktu) -> dict:
+    return conn.execute(
+        "insert into keputusan_panggilan (panggilan_id, verifikator, tindakan, ikut_saran, alasan, waktu)"
+        " values (%s,%s,%s,%s,%s,%s) returning id, panggilan_id, verifikator, tindakan, ikut_saran, alasan, waktu",
+        (id_, verifikator, tindakan, ikut_saran, alasan, waktu),
+    ).fetchone()
+
+
+def jalur_rekaman(conn) -> list[str]:
+    return [r["rekaman_path"] for r in conn.execute("select rekaman_path from panggilan where rekaman_path is not null")]

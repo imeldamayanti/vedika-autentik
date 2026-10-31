@@ -2,36 +2,11 @@
 import json
 from datetime import datetime, timedelta
 
-import pytest
-from fastapi.testclient import TestClient
-
-from app import config, jam
-from app.deps import get_conn, get_mesin
-from app.main import app
-from app.mesin import KlienMesin
-from stub_mesin.main import app as app_stub
+from app import config
+from tests.util_v3 import jam_palsu, ubah
 
 DATA = config.AKAR / "data-uji-konfirmasi"
 S1 = "CALL-P-S1-2026-08"
-
-
-@pytest.fixture
-def klien_v3(conn_v3):
-    app.dependency_overrides[get_conn] = lambda: conn_v3
-    app.dependency_overrides[get_mesin] = lambda: KlienMesin(TestClient(app_stub))
-    yield TestClient(app)
-    app.dependency_overrides.clear()
-
-
-def jam_palsu(monkeypatch, tahun=2026, bulan=10, tanggal=6, jam_=10, menit=0):
-    waktu = datetime(tahun, bulan, tanggal, jam_, menit, tzinfo=config.ZONA)
-    monkeypatch.setattr(jam, "sekarang", lambda: waktu)
-    return waktu
-
-
-def ubah(conn, id_, **kolom):
-    sets = ", ".join(f"{k} = %s" for k in kolom)
-    conn.execute(f"update panggilan set {sets} where id = %s", (*kolom.values(), id_))
 
 
 # ---- GET /antrean ----

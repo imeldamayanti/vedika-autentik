@@ -181,6 +181,23 @@ def isi_ke(conn, d, reset=False):
     cur.executemany(SQL_PANGGILAN, d["antre"])
 
 
+def reset_panggilan(conn, d):
+    """Keadaan awal demo tanpa menyentuh data master: hapus panggilan, log, dan keputusan, isi ulang 4 riwayat
+    Selesai + panggilan Antre, matikan mode otomatis dan Jeda. Tanpa commit."""
+    conn.execute("delete from panggilan_log")
+    conn.execute("delete from keputusan_panggilan")
+    conn.execute("delete from panggilan")
+    cur = conn.cursor()
+    cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
+    cur.executemany(SQL_PANGGILAN, d["antre"])
+    for kunci in ("mode_otomatis", "jeda"):
+        conn.execute(
+            "insert into pengaturan (kunci, nilai) values (%s, 'false'::jsonb)"
+            " on conflict (kunci) do update set nilai = excluded.nilai",
+            (kunci,),
+        )
+
+
 def isi_database(url, d, reset=False):
     """Tulis data ke database dalam satu transaksi."""
     with psycopg.connect(url, prepare_threshold=None, connect_timeout=10) as conn:
