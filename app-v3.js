@@ -31,6 +31,8 @@
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
     pengguna: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
     kunci: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    suara: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+    bisu: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/>',
     lencanaCek: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>'
   };
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
@@ -73,7 +75,7 @@
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
     otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false,
-    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null
+    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false
   };
 
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
@@ -89,9 +91,10 @@
 
   /* ======================================================= panggilan simulasi */
 
-  /* Durasi dipadatkan: panggilan nyata 1-2 menit berjalan sekitar 45 detik di layar.
-     Jeda pesan WA ke panggilan (PRD R2.2, bawaan prototipe 1 menit) ikut dipadatkan. */
-  const SIM = { sambung: 4, rekam: 6, rentang: 32, kartu: 4, jedaBerikut: 12000 };
+  /* Percakapan berjalan sepanjang rekaman (p.durasi, dari assets/rekaman/waktu.json), jadi transkrip
+     dan suara seirama. Hanya jeda pesan WA ke panggilan (PRD R2.2, bawaan prototipe 1 menit) dan
+     penyusunan kartu yang dipadatkan. */
+  const SIM = { sambung: 4, rekam: 6, kartu: 4, jedaBerikut: 12000 };
 
   const tidakTerhubung = (p) => p.jawaban.status_panggilan === "tidak_terhubung";
 
@@ -99,7 +102,7 @@
      yang gagal lalu chat cadangan; skenario lain tersambung, merekam, lalu dibaca. */
   function titik(p) {
     if (tidakTerhubung(p)) return { coba1: 4, gagal1: 9, coba2: 12, gagal2: 17, chat: 19, kartu: 22, total: 24 };
-    const akhir = SIM.rekam + SIM.rentang;
+    const akhir = SIM.rekam + p.durasi;
     return { sambung: SIM.sambung, rekam: SIM.rekam, akhir: akhir, kartu: akhir + SIM.kartu, total: akhir + SIM.kartu + 2 };
   }
 
@@ -156,12 +159,13 @@
     }
     /* Status hanya tampil di antrean dan layar panggilan; di layar lain jangan merender ulang agar isian alasan tidak terganggu. */
     if (st !== a.status) { a.status = st; if (r.nama === "autentik" || r.nama === "panggilan") gambar(true); return; }
-    if (dilihat) perbaruiPanggilan(p, t);
+    if (dilihat) { suaraMain(p, t); perbaruiPanggilan(p, t); }
   }
 
   function selesaikan(id) {
     const p = D.SKENARIO[id];
     clearInterval(ui.timer);
+    suaraHenti();
     S.hasil[id] = { menit: ui.aktif.menit };
     ui.aktif = null;
     simpan();
@@ -334,10 +338,49 @@
   const TANDA_BAHAYA = { tanda_tangan_tanpa_layanan: "Tanda tangan tanpa layanan", diminta_membayar: "Diminta membayar", layanan_berbeda: "Layanan berbeda" };
 
   /* Detik panggilan nyata yang sudah direkam pada detik layar t. */
-  const detikRekam = (p, t) => Math.max(0, Math.min(p.durasi, (t - SIM.rekam) / SIM.rentang * p.durasi));
+  const detikRekam = (p, t) => Math.max(0, Math.min(p.durasi, t - SIM.rekam));
 
   /* Jumlah baris transkrip yang sudah muncul pada detik layar t. */
-  const barisTampil = (p, t) => (t == null ? 0 : p.transkrip.filter((l) => t >= SIM.rekam + l[1] * SIM.rentang / p.durasi).length);
+  const barisTampil = (p, t) => (t == null ? 0 : p.transkrip.filter((l) => t >= SIM.rekam + l[1]).length);
+
+  /* ---------- suara ---------- */
+
+  /* Suara panggilan = potongan per baris (assets/rekaman/<S>/<nn>.mp3) yang diputar saat barisnya muncul.
+     Hanya terdengar selama layar Panggilan panggilan itu terbuka; tiba di tengah panggilan, baris yang
+     sedang berjalan diputar dari posisi yang sesuai. Peramban bisa menolak autoplay: diabaikan, transkrip tetap jalan. */
+  const suara = { id: null, klip: [], idx: -1 };
+
+  function suaraHenti() {
+    suara.klip.forEach((a) => { a.pause(); a.removeAttribute("src"); a.load(); });
+    suara.id = null; suara.klip = []; suara.idx = -1;
+  }
+
+  function suaraMain(p, t) {
+    if (!p.suara_langsung) return;
+    if (suara.id !== p.id) {
+      suaraHenti();
+      suara.id = p.id;
+      suara.klip = p.transkrip.map((l, i) => {
+        const a = new Audio(p.suara_langsung + "/" + String(i + 1).padStart(2, "0") + ".mp3");
+        a.preload = "auto"; a.muted = ui.bisu;
+        return a;
+      });
+    }
+    const n = barisTampil(p, t);
+    if (n - 1 <= suara.idx) return;
+    suara.idx = n - 1;
+    const a = suara.klip[n - 1], telat = t - SIM.rekam - p.transkrip[n - 1][1];
+    if (telat > 0.3) a.currentTime = telat;
+    a.play().catch(() => { /* autoplay ditolak */ });
+  }
+
+  /* Hentikan suara bila layar Panggilan panggilan yang berjalan tidak sedang dibuka. */
+  function suaraSelaraskan() {
+    const r = rute();
+    if (!(ui.aktif && r.nama === "panggilan" && r.id === ui.aktif.id)) suaraHenti();
+  }
+
+  const tombolBisu = () => '<button class="btn btn--kecil" type="button" data-aksi="bisu" aria-pressed="' + ui.bisu + '">' + ikon(ui.bisu ? "bisu" : "suara") + (ui.bisu ? "Suara mati" : "Suara nyala") + "</button>";
 
   /* Peristiwa S5 yang muncul di kolom transkrip: tidak ada suara, hanya log percobaan. */
   function logPercobaan(p, t) {
@@ -437,8 +480,9 @@
   function isiPanggilan(p, t) {
     return '<div class="panggilan-grid" id="panggilan">' +
       '<section class="panel"><div class="panel-kepala"><h2>Progres</h2></div><ol class="progres">' + htmlLangkah(p, t) + "</ol>" +
-        '<p class="catatan-simulasi">Simulasi: ' + (tidakTerhubung(p) ? "dua percobaan tanpa jawaban" : "panggilan nyata " + mmss(p.durasi)) + " dipadatkan menjadi sekitar " + (tidakTerhubung(p) ? "25" : "45") + " detik. Tidak ada suara yang diputar.</p></section>" +
-      '<section class="panel"><div class="panel-kepala"><h2>' + (tidakTerhubung(p) ? "Log panggilan" : "Transkrip langsung") + '</h2></div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
+        '<p class="catatan-simulasi">' + (tidakTerhubung(p) ? "Simulasi: dua percobaan tanpa jawaban dipadatkan menjadi sekitar 25 detik. Tidak ada suara yang diputar."
+          : "Simulasi: percakapan berjalan sepanjang rekaman, " + mmss(p.durasi) + ". Suara dari rekaman buatan (ElevenLabs), bukan panggilan nyata.") + "</p></section>" +
+      '<section class="panel"><div class="panel-kepala"><h2>' + (tidakTerhubung(p) ? "Log panggilan" : "Transkrip langsung") + "</h2>" + (p.suara_langsung ? '<div class="kanan">' + tombolBisu() + "</div>" : "") + '</div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
       '<section class="panel"><div class="panel-kepala"><h2>Yang ditangkap AI</h2></div><dl class="isian">' + htmlIsian(p, t) + "</dl></section>" +
     "</div>";
   }
@@ -524,6 +568,7 @@
   /* Pintasan tersembunyi Alt+L: lompat ke akhir panggilan yang sedang berjalan, hasilnya sama dengan menunggu. */
   function lompatAkhir() {
     if (!ui.aktif) return;
+    suaraHenti();
     ui.aktif.mulai = Date.now() - (titik(D.SKENARIO[ui.aktif.id]).total + 1) * 1000;
     tick();
   }
@@ -629,7 +674,7 @@
 
     let bukti;
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
-    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="none" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman placeholder untuk simulasi: nada pendek, bukan suara penerima.</small></div>';
+    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="none" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi dari suara buatan (ElevenLabs), bukan suara penerima sungguhan.</small></div>';
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
     const tombolTranskrip = simpanTeks && !latar
       ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
@@ -756,9 +801,14 @@
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
     transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
+    bisu() {
+      ui.bisu = !ui.bisu;
+      suara.klip.forEach((a) => { a.muted = ui.bisu; });
+      document.querySelectorAll('[data-aksi="bisu"]').forEach((el) => { el.outerHTML = tombolBisu(); });
+    },
     "ulang-demo"() {
       /* Hentikan panggilan yang sedang berjalan dan jadwal otomatis, lalu kosongkan semua hasil dan keputusan. */
-      clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa();
+      clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa(); suaraHenti();
       const tetapMasuk = S.masuk;
       S = statusAwal(); S.masuk = tetapMasuk;
       Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, transkripBuka: false, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
@@ -822,7 +872,7 @@
     if (simpanBtn) simpanBtn.disabled = !alasanTerisi();
   });
 
-  window.addEventListener("hashchange", () => { ui.menuBuka = false; ui.transkripBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; gambar(false); });
+  window.addEventListener("hashchange", () => { ui.menuBuka = false; ui.transkripBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; suaraSelaraskan(); gambar(false); });
 
   gambar(false);
 })();

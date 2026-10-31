@@ -119,7 +119,7 @@
       ditagih: 11, tanggal: [3, 4, 6, 10, 11, 13, 16, 17, 20, 24, 27], tandaTanggal: { 16: "Minggu", 17: "Libur nasional" },
       indikator: ["I1", "I2", "I4"], tanggalLibur: [16, 17],
       penerima: { nama: "Andi Pratama", hubungan: "peserta" },
-      durasi: 92, rekaman: "assets/rekaman/S1.wav",
+      durasi: 63.4, rekaman: "assets/rekaman/S1.mp3", suara_langsung: "assets/rekaman/S1",
       jawaban: {
         status_panggilan: "terjawab", penerima: "peserta", hubungan: null, hadir: true, jumlah_min: 3, jumlah_maks: 3, keyakinan: "tinggi",
         tanda_bahaya: [], membantah_tanggal_libur: true,
@@ -129,15 +129,15 @@
       label: "tidak_sesuai",
       alasan: "Ditagih 11 sesi, versi penerima paling banyak 3 sesi (selisih 8).",
       transkrip: [
-        ["A", 0, BUKA("Bapak Andi Pratama")],
-        ["P", 17, "Iya, saya sendiri."],
-        ["A", 20, "Terima kasih, Pak Andi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
-        ["P", 36, "Iya, betul."],
-        ["A", 39, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"],
-        ["P", 45, "Tiga kali. Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan."],
-        ["A", 56, "Baik, tiga kali. Satu lagi, Pak. Apakah Bapak pernah terapi di hari Minggu tanggal 16 Agustus atau tanggal 17 Agustus?"],
-        ["P", 71, "Nggak pernah. Hari Minggu kan tutup."],
-        ["A", 76, "Terima kasih, Pak Andi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
+        ["A", 0.0, BUKA("Bapak Andi Pratama")],
+        ["P", 19.4, "Iya, saya sendiri."],
+        ["A", 21.4, "Terima kasih, Pak Andi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 33.5, "Iya, betul."],
+        ["A", 35.1, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"],
+        ["P", 39.4, "Tiga kali. Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan."],
+        ["A", 43.7, "Baik, tiga kali. Satu lagi, Pak. Apakah Bapak pernah terapi di hari Minggu tanggal 16 Agustus atau tanggal 17 Agustus?"],
+        ["P", 53.0, "Nggak pernah. Hari Minggu kan tutup."],
+        ["A", 55.5, "Terima kasih, Pak Andi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 8 }
     },
@@ -147,7 +147,7 @@
       ditagih: 10, tanggal: [1, 3, 5, 7, 12, 14, 19, 23, 26, 28], tandaTanggal: { 23: "Minggu" },
       indikator: ["I1", "I2", "I3", "I4"], tanggalLibur: [23],
       penerima: { nama: "Dewi Rahmawati", hubungan: "anak" },
-      durasi: 97, rekaman: "assets/rekaman/S2.wav",
+      durasi: 72.3, rekaman: "assets/rekaman/S2.mp3", suara_langsung: "assets/rekaman/S2",
       jawaban: {
         status_panggilan: "terjawab", penerima: "keluarga", hubungan: "anak", hadir: true, jumlah_min: 2, jumlah_maks: 2, keyakinan: "tinggi",
         tanda_bahaya: ["tanda_tangan_tanpa_layanan"], membantah_tanggal_libur: true,
@@ -157,15 +157,15 @@
       label: "tidak_sesuai",
       alasan: "Ada pernyataan berisiko: tanda tangan tanpa layanan.",
       transkrip: [
-        ["A", 0, BUKA("keluarga Ibu Siti Rahmawati")],
-        ["P", 17, "Iya, saya Dewi, anaknya."],
-        ["A", 21, "Terima kasih, Bu Dewi. Saya mau konfirmasi singkat soal fisioterapi Ibu Siti di RS Melati Sehat bulan Agustus. Apakah Ibu Siti menjalani fisioterapi di sana bulan Agustus?"],
-        ["P", 37, "Iya, saya yang nganter."],
-        ["A", 41, "Kira-kira berapa kali Ibu Siti terapi di bulan Agustus?"],
-        ["P", 48, "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya."],
-        ["A", 63, "Baik, dua kali, dan Ibu Siti diminta tanda tangan beberapa lembar sekaligus. Apakah Ibu Siti pernah terapi di hari Minggu, tanggal 23 Agustus?"],
-        ["P", 80, "Nggak, Minggu kami di rumah."],
-        ["A", 84, "Terima kasih, Bu Dewi. Jawaban Ibu sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."]
+        ["A", 0.0, BUKA("keluarga Ibu Siti Rahmawati")],
+        ["P", 19.6, "Iya, saya Dewi, anaknya."],
+        ["A", 22.5, "Terima kasih, Bu Dewi. Saya mau konfirmasi singkat soal fisioterapi Ibu Siti di RS Melati Sehat bulan Agustus. Apakah Ibu Siti menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 34.7, "Iya, saya yang nganter."],
+        ["A", 37.0, "Kira-kira berapa kali Ibu Siti terapi di bulan Agustus?"],
+        ["P", 41.3, "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya."],
+        ["A", 51.1, "Baik, dua kali, dan Ibu Siti diminta tanda tangan beberapa lembar sekaligus. Apakah Ibu Siti pernah terapi di hari Minggu, tanggal 23 Agustus?"],
+        ["P", 61.8, "Nggak, Minggu kami di rumah."],
+        ["A", 64.1, "Terima kasih, Bu Dewi. Jawaban Ibu sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 5 }
     },
@@ -175,7 +175,7 @@
       ditagih: 9, tanggal: [1, 3, 6, 10, 13, 18, 21, 25, 28], tandaTanggal: {},
       indikator: ["I1", "I3"], tanggalLibur: [],
       penerima: { nama: "Budi Santoso", hubungan: "peserta" },
-      durasi: 68, rekaman: "assets/rekaman/S3.wav",
+      durasi: 55.0, rekaman: "assets/rekaman/S3.mp3", suara_langsung: "assets/rekaman/S3",
       jawaban: {
         status_panggilan: "terjawab", penerima: "peserta", hubungan: null, hadir: true, jumlah_min: 9, jumlah_maks: 10, keyakinan: "tinggi",
         tanda_bahaya: [], membantah_tanggal_libur: null,
@@ -185,13 +185,13 @@
       label: "sesuai",
       alasan: "Ditagih 9 sesi, versi penerima 9-10 sesi. Masih dalam toleransi.",
       transkrip: [
-        ["A", 0, BUKA("Bapak Budi Santoso")],
-        ["P", 16, "Iya, betul."],
-        ["A", 19, "Terima kasih, Pak Budi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RSU Bakti Mulia bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
-        ["P", 35, "Iya betul."],
-        ["A", 38, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"],
-        ["P", 44, "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali."],
-        ["A", 54, "Baik, sekitar sembilan sampai sepuluh kali. Terima kasih, Pak Budi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
+        ["A", 0.0, BUKA("Bapak Budi Santoso")],
+        ["P", 18.8, "Iya, betul."],
+        ["A", 20.4, "Terima kasih, Pak Budi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RSU Bakti Mulia bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 33.1, "Iya betul."],
+        ["A", 34.6, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"],
+        ["P", 38.9, "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali."],
+        ["A", 44.4, "Baik, sekitar sembilan sampai sepuluh kali. Terima kasih, Pak Budi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 6, bahaya: 6 }
     },
@@ -201,7 +201,7 @@
       ditagih: 9, tanggal: [4, 6, 11, 13, 16, 18, 20, 25, 27], tandaTanggal: { 16: "Minggu" },
       indikator: ["I1", "I2", "I4"], tanggalLibur: [16],
       penerima: { nama: "Bayu Lestari", hubungan: "anak" },
-      durasi: 88, rekaman: null,
+      durasi: 62.3, rekaman: null, suara_langsung: "assets/rekaman/S4",
       jawaban: {
         status_panggilan: "terjawab", penerima: "keluarga", hubungan: "anak", hadir: true, jumlah_min: 5, jumlah_maks: 6, keyakinan: "rendah",
         tanda_bahaya: [], membantah_tanggal_libur: null,
@@ -211,15 +211,15 @@
       label: "tidak_yakin",
       alasan: "Penerima tidak ingat jumlah sesi dengan yakin. Tidak dihitung.",
       transkrip: [
-        ["A", 0, BUKA("keluarga Ibu Karti Lestari")],
-        ["P", 17, "Iya, saya Bayu, anaknya."],
-        ["A", 21, "Terima kasih, Pak Bayu. Saya mau konfirmasi singkat soal fisioterapi Ibu Karti di RS Melati Sehat bulan Agustus. Apakah Ibu Karti menjalani fisioterapi di sana bulan Agustus?"],
-        ["P", 37, "Iya."],
-        ["A", 40, "Kira-kira berapa kali Ibu Karti terapi di bulan Agustus?"],
-        ["P", 46, "Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya."],
-        ["A", 61, "Tidak apa-apa, Pak. Apakah Ibu Karti pernah terapi di hari Minggu, tanggal 16 Agustus?"],
-        ["P", 71, "Kurang tahu juga, Mbak."],
-        ["A", 75, "Baik, terima kasih, Pak Bayu. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."]
+        ["A", 0.0, BUKA("keluarga Ibu Karti Lestari")],
+        ["P", 19.6, "Iya, saya Bayu, anaknya."],
+        ["A", 21.6, "Terima kasih, Pak Bayu. Saya mau konfirmasi singkat soal fisioterapi Ibu Karti di RS Melati Sehat bulan Agustus. Apakah Ibu Karti menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 34.3, "Iya."],
+        ["A", 35.6, "Kira-kira berapa kali Ibu Karti terapi di bulan Agustus?"],
+        ["P", 39.8, "Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya."],
+        ["A", 45.5, "Tidak apa-apa, Pak. Apakah Ibu Karti pernah terapi di hari Minggu, tanggal 16 Agustus?"],
+        ["P", 52.3, "Kurang tahu juga, Mbak."],
+        ["A", 54.1, "Baik, terima kasih, Pak Bayu. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 8 }
     },
@@ -246,7 +246,7 @@
       ditagih: 8, tanggal: [3, 5, 7, 9, 12, 19, 24, 26], tandaTanggal: { 9: "Minggu" },
       indikator: ["I2", "I4"], tanggalLibur: [9],
       penerima: { nama: "Slamet Riyadi", hubungan: "peserta" },
-      durasi: 78, rekaman: "assets/rekaman/S6.wav",
+      durasi: 54.8, rekaman: "assets/rekaman/S6.mp3", suara_langsung: "assets/rekaman/S6",
       jawaban: {
         status_panggilan: "terjawab", penerima: "peserta", hubungan: null, hadir: true, jumlah_min: 2, jumlah_maks: 2, keyakinan: "tinggi",
         tanda_bahaya: [], membantah_tanggal_libur: true,
@@ -256,13 +256,13 @@
       label: "tidak_sesuai",
       alasan: "Ditagih 8 sesi, versi penerima paling banyak 2 sesi (selisih 6).",
       transkrip: [
-        ["A", 0, BUKA("Bapak Slamet Riyadi")],
-        ["P", 16, "Iya, saya."],
-        ["A", 19, "Terima kasih, Pak Slamet. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
-        ["P", 35, "Iya mas, cuma dua kali kok. Wong kakinya udah enakan, ya udah nggak balik lagi."],
-        ["A", 49, "Baik, dua kali. Apakah Bapak pernah terapi di hari Minggu, tanggal 9 Agustus?"],
-        ["P", 60, "Lho, Minggu ya libur to mas."],
-        ["A", 65, "Terima kasih, Pak Slamet. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
+        ["A", 0.0, BUKA("Bapak Slamet Riyadi")],
+        ["P", 19.5, "Iya, saya."],
+        ["A", 21.1, "Terima kasih, Pak Slamet. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 33.7, "Iya mas, cuma dua kali kok. Wong kakinya udah enakan, ya udah nggak balik lagi."],
+        ["A", 38.5, "Baik, dua kali. Apakah Bapak pernah terapi di hari Minggu, tanggal 9 Agustus?"],
+        ["P", 44.7, "Lho, Minggu ya libur to mas."],
+        ["A", 46.8, "Terima kasih, Pak Slamet. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 3, keyakinan: 3, libur: 5, bahaya: 6 }
     },
@@ -272,7 +272,7 @@
       ditagih: 10, tanggal: [1, 3, 5, 10, 12, 18, 20, 24, 26, 31], tandaTanggal: {},
       indikator: ["I1", "I3"], tanggalLibur: [],
       penerima: { nama: "Hendra Wijaya", hubungan: "peserta" },
-      durasi: 52, rekaman: null,
+      durasi: 50.6, rekaman: null, suara_langsung: "assets/rekaman/S8",
       jawaban: {
         status_panggilan: "menolak", penerima: "peserta", hubungan: null, hadir: null, jumlah_min: null, jumlah_maks: null, keyakinan: null,
         tanda_bahaya: [], membantah_tanggal_libur: null,
@@ -282,11 +282,11 @@
       label: "menolak",
       alasan: "Penerima tidak bersedia menjawab. Tidak dihitung sebagai sinyal negatif.",
       transkrip: [
-        ["A", 0, BUKA("Bapak Hendra Wijaya")],
-        ["P", 15, "Ini penipuan ya? BPJS kok nelpon."],
-        ["A", 19, "Wajar Bapak waspada. Saya tidak akan meminta data pribadi, kode OTP, atau uang. Bapak bisa memastikan panggilan ini lewat Care Center 165 atau aplikasi Mobile JKN. Apakah Bapak bersedia menjawab dua pertanyaan singkat soal fisioterapi bulan Agustus?"],
-        ["P", 38, "Nggak, saya nggak mau. Nanti saya telepon 165 aja."],
-        ["A", 43, "Baik, Pak, tidak apa-apa. Terima kasih atas waktunya. Selamat siang."]
+        ["A", 0.0, BUKA("Bapak Hendra Wijaya")],
+        ["P", 19.4, "Ini penipuan ya? BPJS kok nelpon."],
+        ["A", 22.1, "Wajar Bapak waspada. Saya tidak akan meminta data pribadi, kode OTP, atau uang. Bapak bisa memastikan panggilan ini lewat Care Center 165 atau aplikasi Mobile JKN. Apakah Bapak bersedia menjawab dua pertanyaan singkat soal fisioterapi bulan Agustus?"],
+        ["P", 42.5, "Nggak, saya nggak mau. Nanti saya telepon 165 aja."],
+        ["A", 46.3, "Baik, Pak, tidak apa-apa. Terima kasih atas waktunya. Selamat siang."]
       ],
       tangkap: { penerima: 1, hadir: 3, jumlah: 3, keyakinan: 3, libur: 3, bahaya: 4 }
     }
