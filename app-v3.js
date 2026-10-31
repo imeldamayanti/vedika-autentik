@@ -70,7 +70,7 @@
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
-    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null
+    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null
   };
 
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
@@ -133,7 +133,8 @@
     clearTimeout(ui.timerBerikut);
     ui.aktif = { id: id, mulai: Date.now(), menit: menitSekarang(), status: "wa", terisi: {}, barisLihat: 0, sig: "" };
     ui.timer = setInterval(tick, 250);
-    gambar(true);
+    const r = rute();
+    if (r.nama === "panggilan" && r.id === id) bukaWa(id, "pemberitahuan", true); else gambar(true);
     toast("Pesan WA terkirim ke " + p.penerima.nama + ". Panggilan untuk " + p.pasien + " dimulai.", "#/panggilan/" + id, "Buka panggilan");
   }
 
@@ -144,9 +145,14 @@
     const t = (Date.now() - a.mulai) / 1000;
     if (t >= titik(p).total) { selesaikan(a.id); return; }
     const st = statusSim(p, t);
+    const r = rute(), dilihat = r.nama === "panggilan" && r.id === a.id;
+    /* Chat cadangan S5 muncul sendiri di layar ponsel bila verifikator sedang menonton panggilannya. */
+    if (tidakTerhubung(p) && t >= titik(p).chat && !a.chatDibuka) {
+      a.chatDibuka = true;
+      if (dilihat) { a.status = st; bukaWa(a.id, "cadangan", true); return; }
+    }
     if (st !== a.status) { a.status = st; gambar(true); return; }
-    const r = rute();
-    if (r.nama === "panggilan" && r.id === a.id) perbaruiPanggilan(p, t);
+    if (dilihat) perbaruiPanggilan(p, t);
   }
 
   function selesaikan(id) {
@@ -326,7 +332,8 @@
     const k = titik(p), a = ui.aktif && ui.aktif.id === p.id ? ui.aktif : null;
     const jam = (x) => (a ? formatJam(a.menit + x) : "");
     const st = (mulai, akhir) => (t == null || t < mulai ? "menunggu" : t < akhir ? "jalan" : "selesai");
-    const wa = { nama: "Pesan WA terkirim", state: t == null ? "menunggu" : "selesai", jam: jam(0) };
+    const tautanWa = (jenis, teks) => '<button class="tautan-kecil" type="button" data-aksi="wa" data-id="' + p.id + '" data-jenis="' + jenis + '">' + teks + "</button>";
+    const wa = { nama: "Pesan WA terkirim", state: t == null ? "menunggu" : "selesai", jam: jam(0), ket: t == null ? "" : tautanWa("pemberitahuan", "Lihat pesan") };
     if (tidakTerhubung(p)) {
       const coba = (n, mulai, akhir, x) => {
         const s = st(mulai, akhir);
@@ -334,7 +341,7 @@
       };
       return [
         wa, coba(1, k.coba1, k.gagal1, D.JEDA_PESAN_MENIT), coba(2, k.coba2, k.gagal2, D.JEDA_PESAN_MENIT + 3),
-        { nama: "Chat cadangan terkirim", state: st(k.gagal2, k.chat), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: "Pilihan jawaban 1–6" },
+        { nama: "Chat cadangan terkirim", state: st(k.gagal2, k.chat), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: st(k.gagal2, k.chat) === "selesai" ? tautanWa("cadangan", "Lihat chat · pilihan 1–6") : "" },
         { nama: "Kartu bukti", state: st(k.chat, k.total), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: st(k.chat, k.total) === "jalan" ? "Menyusun kartu bukti" : "" }
       ];
     }
@@ -433,6 +440,50 @@
     return kop + isiPanggilan(p, t);
   }
 
+  /* ================================================================ mockup WA */
+
+  /* Menit (jam simulasi) saat panggilan dimulai, untuk cap waktu di gelembung. */
+  const menitPanggilan = (id) => (ui.aktif && ui.aktif.id === id ? ui.aktif.menit : S.hasil[id] ? S.hasil[id].menit : menitSekarang());
+
+  const gelembungWa = (teks, jam) => '<div class="gelembung dari-bpjs"><p>' + esc(teks) + "</p><small>" + jam + "</small></div>";
+
+  /* Komponen ponsel dari v2. Pengirim hanya nomor tim (Simulasi), bukan nama atau logo BPJS. */
+  function modalWa() {
+    const p = D.SKENARIO[ui.wa.id], cadangan = ui.wa.jenis === "cadangan";
+    const m = menitPanggilan(p.id);
+    const obrolan = '<span class="tanggal-obrolan">Hari ini</span>' + gelembungWa(D.pesanPemberitahuan(p), formatJam(m)) +
+      (cadangan ? '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.JEDA_PESAN_MENIT) + "</div>" +
+        '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.JEDA_PESAN_MENIT + 3) + "</div>" +
+        gelembungWa(D.pesanCadangan(p), formatJam(m + D.JEDA_PESAN_MENIT + 4)) : "");
+    const petunjuk = cadangan ? "Penerima belum membalas. Jawaban 1–6 menggantikan panggilan." : "Penerima belum membalas. Pesan ini tanpa tautan.";
+    const aturan = cadangan
+      ? ["Dikirim setelah dua kali panggilan tidak diangkat (jeda 2 menit di prototipe, 2 jam di produksi).", "Satu pertanyaan, jawaban cukup dengan angka 1–6.", "Tanpa tautan, tidak meminta data pribadi atau pembayaran.", "Tidak dijawab bukan sinyal negatif: label tetap Tidak terhubung."]
+      : ["Dikirim sebelum panggilan. Jeda " + D.JEDA_PESAN_MENIT + " menit di prototipe, 10 menit di produksi.", "Tanpa tautan, karena penipu sering menyamar sebagai BPJS.", "Tidak meminta data pribadi, kode OTP, atau pembayaran.", "Mengarahkan penerima mengecek ke Care Center 165."];
+    return '<div class="modal-wa" id="modalWa" data-aksi="tutup-wa"><div class="modal-wa-kartu" data-aksi="diam" role="dialog" aria-modal="true" aria-label="Simulasi layar WhatsApp penerima">' +
+      '<button class="modal-wa-tutup" type="button" data-aksi="tutup-wa" aria-label="Tutup">' + ikon("x") + "</button>" +
+      '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + D.NOMOR_PENELEPON + "</b><span>Nomor tim · Simulasi</span></div></div>" +
+        '<div class="obrolan">' + obrolan + '</div><div class="ponsel-balas"><span class="petunjuk">' + petunjuk + "</span></div></div></div>" +
+      '<div class="modal-wa-info"><span class="kapital">' + (cadangan ? "Chat cadangan" : "Pesan pemberitahuan") + "</span><h2>" + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</h2>" +
+        "<p>" + (cadangan ? "Sistem tidak berhasil menelepon, lalu mengirim pertanyaan lewat chat." : "Penerima tahu akan ditelepon dan tidak mengira panggilan ini penipuan.") + "</p>" +
+        '<ul class="aturan">' + aturan.map((t) => "<li>" + ikon("cek") + "<span>" + t + "</span></li>").join("") + "</ul></div>" +
+    "</div></div>";
+  }
+
+  let timerWa = null;
+  function bukaWa(id, jenis, otomatis) {
+    clearTimeout(timerWa);
+    ui.wa = { id: id, jenis: jenis };
+    gambar(true);
+    if (otomatis) timerWa = setTimeout(tutupWa, 7000);
+  }
+  function tutupWa() {
+    clearTimeout(timerWa);
+    if (!ui.wa) return;
+    ui.wa = null;
+    const el = document.getElementById("modalWa");
+    if (el) el.remove();
+  }
+
   /* Perbarui hanya bagian panggilan bila ada yang berubah, supaya transkrip tidak berkedip. */
   function perbaruiPanggilan(p, t) {
     const a = ui.aktif;
@@ -482,9 +533,11 @@
     else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = "<b>Riwayat keputusan</b>"; }
     else { isi = lamanBeranda(); jejak = "<b>Beranda</b>"; }
 
-    akar.innerHTML = kerangka(r, isi, jejak);
+    akar.innerHTML = kerangka(r, isi, jejak) + (ui.wa ? modalWa() : "");
     document.title = (JUDUL_HALAMAN[r.nama] || "Beranda") + " · Vedika Autentik";
     window.scrollTo(0, tetap ? y : 0);
+    const obrolan = ui.wa && document.querySelector("#modalWa .obrolan");
+    if (obrolan) obrolan.scrollTop = obrolan.scrollHeight;
   }
 
   function toast(pesan, tautan, teksTautan) {
@@ -502,6 +555,9 @@
     masuk() { S.masuk = true; simpan(); ke("#/beranda"); },
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
+    wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
+    "tutup-wa"() { tutupWa(); },
+    diam() { /* klik di dalam kartu tidak menutup latar */ },
     telepon(el) { mulaiPanggilan(el.dataset.id); },
     otomatis() {
       ui.otomatis = !ui.otomatis;
@@ -529,6 +585,7 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.altKey && e.code === "KeyL") { e.preventDefault(); lompatAkhir(); }
+    else if (e.key === "Escape") tutupWa();
   });
 
   document.addEventListener("change", (e) => {
