@@ -265,10 +265,10 @@
   function kartuAngka() {
     const a = angka();
     return '<div class="kartu-angka">' +
-      "<div><b>" + a.terpicu + "</b><span>pasien terpicu dari " + a.aktif + " aktif</span></div>" +
-      "<div><b>" + a.ditelepon + "</b><span>sudah ditelepon</span></div>" +
-      '<div class="' + (a.tidakSesuai ? "peringatan" : "") + '"><b>' + a.tidakSesuai + "</b><span>tidak sesuai</span></div>" +
-      '<div class="' + (a.rsKlarifikasi ? "waspada" : "") + '"><b>' + a.rsKlarifikasi + "</b><span>RS perlu klarifikasi</span></div>" +
+      '<div class="angka-terpicu"><b>' + a.terpicu + "</b><span>pasien terpicu dari " + a.aktif + " aktif</span></div>" +
+      '<div class="angka-ditelepon"><b>' + a.ditelepon + "</b><span>sudah ditelepon</span></div>" +
+      '<div class="angka-tidak-sesuai"><b>' + a.tidakSesuai + "</b><span>tidak sesuai</span></div>" +
+      '<div class="angka-klarifikasi"><b>' + a.rsKlarifikasi + "</b><span>RS perlu klarifikasi</span></div>" +
     "</div>";
   }
 
