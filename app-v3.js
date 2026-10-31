@@ -688,7 +688,19 @@
       '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
         '<p class="catatan-kaki">Identitas penerima telepon tidak pernah tampil di data yang dibagikan ke rumah sakit. Terpicu = pasien dengan dua indikator aktif atau lebih.</p></section>';
   }
-  function lamanRiwayat() { return kepala("Riwayat keputusan", "Semua keputusan verifikator atas panggilan konfirmasi.") + kosong("Riwayat keputusan", "Diisi pada tiket UI-10."); }
+  /* ============================================================== riwayat */
+
+  function lamanRiwayat() {
+    const daftar = Object.keys(S.keputusan).filter((id) => tunggal(id)).map((id) => Object.assign({ id: id, p: tunggal(id) }, S.keputusan[id]));
+    const isi = daftar.length
+      ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Waktu</th><th>Pasien</th><th>Rumah sakit</th><th>Label</th><th>Tindakan</th><th>Saran sistem</th><th>Alasan</th><th>Verifikator</th></tr></thead><tbody>' +
+        daftar.reverse().map((x) => '<tr class="bisa-klik" data-aksi="buka-baris" data-tujuan="#/kartu/' + x.id + '"><td class="redup">' + esc(x.waktu) + '</td><td class="nama-berkas"><b>' + esc(x.p.pasien) + "</b><span>" + x.p.umur + " th</span></td>" +
+          '<td class="sembunyi-hp">' + esc(D.namaRs(x.p.rs)) + "</td><td>" + labelChip(x.p.label) + "</td><td><b>" + D.TINDAKAN[x.tindakan].nama + '</b></td><td class="sembunyi-hp">' +
+          (x.ikutSaran ? "Diikuti" : '<b style="color:var(--cek-fg)">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp">' + esc(x.oleh) + "</td></tr>").join("") +
+        "</tbody></table></div>"
+      : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Setiap keputusan di kartu bukti tercatat di sini, lengkap dengan waktu, tindakan, dan alasannya.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
+    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Semua keputusan verifikator atas panggilan konfirmasi: siapa, kapan, apa, dan alasannya. Data ini dipakai untuk audit.</p></div></div><section class="panel">' + isi + "</section>";
+  }
 
   /* ============================================================== render */
 
