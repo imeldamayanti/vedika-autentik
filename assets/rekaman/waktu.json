@@ -1,0 +1,268 @@
+{
+ "S1": {
+  "berkas": "assets/rekaman/S1.mp3",
+  "total": 63.36,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 18.81,
+    "sha": "c57d75c69e1f"
+   },
+   {
+    "mulai": 19.41,
+    "durasi": 1.39,
+    "sha": "2374fc1bab13"
+   },
+   {
+    "mulai": 21.4,
+    "durasi": 11.52,
+    "sha": "7ff664275b97"
+   },
+   {
+    "mulai": 33.52,
+    "durasi": 1.02,
+    "sha": "5ef251619683"
+   },
+   {
+    "mulai": 35.14,
+    "durasi": 3.62,
+    "sha": "17820a003644"
+   },
+   {
+    "mulai": 39.36,
+    "durasi": 3.76,
+    "sha": "4a071273d6a9"
+   },
+   {
+    "mulai": 43.72,
+    "durasi": 8.64,
+    "sha": "8e6a52d11670"
+   },
+   {
+    "mulai": 52.96,
+    "durasi": 1.9,
+    "sha": "54a7ef6d36ea"
+   },
+   {
+    "mulai": 55.47,
+    "durasi": 7.89,
+    "sha": "2f63df95c30e"
+   }
+  ]
+ },
+ "S2": {
+  "berkas": "assets/rekaman/S2.mp3",
+  "total": 72.28,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 18.99,
+    "sha": "5183201ac80b"
+   },
+   {
+    "mulai": 19.59,
+    "durasi": 2.28,
+    "sha": "8be152356829"
+   },
+   {
+    "mulai": 22.47,
+    "durasi": 11.66,
+    "sha": "8a45a80c24e9"
+   },
+   {
+    "mulai": 34.73,
+    "durasi": 1.63,
+    "sha": "4b77d25942ff"
+   },
+   {
+    "mulai": 36.95,
+    "durasi": 3.72,
+    "sha": "bb73ad582184"
+   },
+   {
+    "mulai": 41.27,
+    "durasi": 9.29,
+    "sha": "4d5308fb86ef"
+   },
+   {
+    "mulai": 51.15,
+    "durasi": 10.08,
+    "sha": "1acbca2a46ff"
+   },
+   {
+    "mulai": 61.83,
+    "durasi": 1.67,
+    "sha": "ba77d7bf72dd"
+   },
+   {
+    "mulai": 64.1,
+    "durasi": 8.17,
+    "sha": "dc8a1d75283b"
+   }
+  ]
+ },
+ "S3": {
+  "berkas": "assets/rekaman/S3.mp3",
+  "total": 54.96,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 18.2,
+    "sha": "b7f12ca9b295"
+   },
+   {
+    "mulai": 18.8,
+    "durasi": 1.02,
+    "sha": "5ef251619683"
+   },
+   {
+    "mulai": 20.43,
+    "durasi": 12.07,
+    "sha": "20f0e93e87c3"
+   },
+   {
+    "mulai": 33.1,
+    "durasi": 0.93,
+    "sha": "4c588cf8a24e"
+   },
+   {
+    "mulai": 34.63,
+    "durasi": 3.67,
+    "sha": "17820a003644"
+   },
+   {
+    "mulai": 38.9,
+    "durasi": 4.92,
+    "sha": "da23262d4d1b"
+   },
+   {
+    "mulai": 44.42,
+    "durasi": 10.54,
+    "sha": "46f1f3058933"
+   }
+  ]
+ },
+ "S4": {
+  "berkas": "assets/rekaman/S4.mp3",
+  "total": 62.34,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 19.04,
+    "sha": "57cbd66f1e64"
+   },
+   {
+    "mulai": 19.64,
+    "durasi": 1.39,
+    "sha": "17d6c303db46"
+   },
+   {
+    "mulai": 21.63,
+    "durasi": 12.03,
+    "sha": "1142f30e147e"
+   },
+   {
+    "mulai": 34.26,
+    "durasi": 0.7,
+    "sha": "f90a0efce25b"
+   },
+   {
+    "mulai": 35.56,
+    "durasi": 3.67,
+    "sha": "7d1651102978"
+   },
+   {
+    "mulai": 39.83,
+    "durasi": 5.06,
+    "sha": "f85e80a56fb8"
+   },
+   {
+    "mulai": 45.49,
+    "durasi": 6.18,
+    "sha": "7191aff71a1b"
+   },
+   {
+    "mulai": 52.27,
+    "durasi": 1.25,
+    "sha": "6fadfe92990e"
+   },
+   {
+    "mulai": 54.12,
+    "durasi": 8.22,
+    "sha": "94cf55338f3e"
+   }
+  ]
+ },
+ "S6": {
+  "berkas": "assets/rekaman/S6.mp3",
+  "total": 54.82,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 18.9,
+    "sha": "62591c056bdc"
+   },
+   {
+    "mulai": 19.5,
+    "durasi": 1.02,
+    "sha": "c36f0eabdd47"
+   },
+   {
+    "mulai": 21.12,
+    "durasi": 11.98,
+    "sha": "77d1d704843d"
+   },
+   {
+    "mulai": 33.7,
+    "durasi": 4.23,
+    "sha": "0391a2ef0173"
+   },
+   {
+    "mulai": 38.53,
+    "durasi": 5.57,
+    "sha": "53685cee5978"
+   },
+   {
+    "mulai": 44.7,
+    "durasi": 1.49,
+    "sha": "1b432b263fbc"
+   },
+   {
+    "mulai": 46.79,
+    "durasi": 8.03,
+    "sha": "bbf675b71a48"
+   }
+  ]
+ },
+ "S8": {
+  "berkas": "assets/rekaman/S8.mp3",
+  "total": 50.6,
+  "baris": [
+   {
+    "mulai": 0.0,
+    "durasi": 18.81,
+    "sha": "fef7f82f5299"
+   },
+   {
+    "mulai": 19.41,
+    "durasi": 2.04,
+    "sha": "0992766deb17"
+   },
+   {
+    "mulai": 22.05,
+    "durasi": 19.88,
+    "sha": "913080285a49"
+   },
+   {
+    "mulai": 42.53,
+    "durasi": 3.16,
+    "sha": "4aa52f07d005"
+   },
+   {
+    "mulai": 46.29,
+    "durasi": 4.32,
+    "sha": "3ba6de22d7b3"
+   }
+  ]
+ }
+}
