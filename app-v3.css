@@ -11,9 +11,78 @@
 }
 .masuk-bungkus .lencana-simulasi { display: inline-block; margin-top: 10px; }
 
+/* ---------- label hasil panggilan ----------
+   Warna label v2 dipakai ulang: Tidak sesuai = Prioritas, Sesuai = Lolos, Tidak yakin = Perlu dicek,
+   Tidak terhubung = Scan ulang. Menolak netral karena tidak dihitung sebagai sinyal negatif. */
+
+.label--tidak_sesuai { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.label--sesuai { background: var(--lolos-bg); color: var(--lolos-fg); }
+.label--tidak_yakin { background: var(--cek-bg); color: var(--cek-fg); }
+.label--tidak_terhubung { background: var(--ulang-bg); color: var(--ulang-fg); }
+.label--menolak { background: var(--muted); color: var(--fg-2); border: 1px solid var(--border-strong); }
+
+/* ---------- status panggilan di antrean ---------- */
+
+.status-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 12px;
+  font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--muted); color: var(--fg-2); border: 1px solid var(--border);
+}
+.status-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+.status-chip--wa { background: var(--ulang-bg); color: var(--ulang-fg); border-color: oklch(88% .04 261); }
+.status-chip--menelepon { background: var(--primary-subtle); color: var(--primary); border-color: oklch(86% .04 205); }
+.status-chip--menelepon::before { opacity: 1; animation: denyut 1s ease-in-out infinite; }
+.status-chip--selesai { background: var(--lolos-bg); color: var(--lolos-fg); border-color: oklch(88% .05 150); }
+.status-chip--tidak_terhubung { background: var(--ulang-bg); color: var(--ulang-fg); border-color: oklch(88% .04 261); }
+@keyframes denyut { 50% { opacity: .25; } }
+
+.sel-status { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.sel-status small { font-size: 11.5px; color: var(--muted-fg); }
+
+/* ---------- kartu angka ---------- */
+
+.kartu-angka { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kartu-angka > div { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 14px 18px 15px; }
+.kartu-angka b { display: block; font-size: 28px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kartu-angka span { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted-fg); }
+.kartu-angka .peringatan b { color: var(--prioritas-fg); }
+.kartu-angka .waspada b { color: var(--cek-fg); }
+
+/* ---------- antrean konfirmasi ---------- */
+
+.keterangan-pemicu { color: var(--muted-fg); margin-top: 4px; max-width: 78ch; }
+.bar-antrean { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.bar-antrean .kapital { margin-right: 2px; }
+.bar-antrean .kanan { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.btn--otomatis[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+.btn--otomatis[aria-pressed="true"]:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn--otomatis b { letter-spacing: .04em; }
+.chip-ind-wadah { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip-ind {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11.5px; font-weight: 700;
+  background: oklch(24% .02 205); color: #fff; white-space: nowrap;
+}
+.tabel td.aksi { text-align: right; white-space: nowrap; }
+.catatan-kaki { padding: 12px 18px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted-fg); }
+
 /* ---------- sub-menu Autentik ---------- */
 
 .nav .nav-autentik.induk { color: var(--fg); }
 .nav-sub { display: flex; flex-direction: column; gap: 2px; margin: 0 0 2px 20px; padding-left: 10px; border-left: 2px solid var(--border); }
 .nav-sub a { height: 34px; font-size: 13px; }
 .nav-sub a .lencana { margin-left: auto; }
+
+/* ---------- layar sedang dan kecil ---------- */
+
+@media (max-width: 960px) {
+  .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .kartu-angka { gap: 10px; }
+  .kartu-angka > div { padding: 12px 14px; }
+  .kartu-angka b { font-size: 24px; }
+  .bar-antrean .kanan { margin-left: 0; width: 100%; }
+  .bar-antrean .kanan .btn { flex: 1; }
+  .bar-antrean .pilih { flex: 1; min-width: 0; }
+  .tabel td.aksi { text-align: left; }
+}

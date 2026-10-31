@@ -23,6 +23,9 @@
     riwayat: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     ulang: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     cek: '<path d="M20 6 9 17l-5-5"/>',
+    telepon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    jeda: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+    main: '<polygon points="6 3 20 12 6 21 6 3"/>',
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
     pengguna: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
     kunci: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
@@ -31,12 +34,23 @@
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
   const logoVeritas = '<img src="assets/veritas-mark.svg" alt="" aria-hidden="true">';
 
+  const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
+  const koma = (n) => String(n).replace(".", ",");
+  const tunggal = (id) => D.SEMUA[id];
+
+  /* Jam kerja simulasi: demo selalu terasa berlangsung pagi hari di kantor cabang. */
+  const MULAI = Date.now();
+  const menitSekarang = () => 9 * 60 + 20 + Math.floor((Date.now() - MULAI) / 60000);
+  const formatJam = (m) => String(Math.floor(m / 60)).padStart(2, "0") + "." + String(m % 60).padStart(2, "0");
+
   /* ================================================================ status */
 
   const KUNCI_SIMPAN = "vedika.konfirmasi.v1";
 
+  /* hasil: panggilan skenario yang sudah selesai, {id: {menit}}. Panggilan yang sedang
+     berjalan tidak disimpan; setelah muat ulang ia kembali Antre. */
   function statusAwal() {
-    return { masuk: false };
+    return { masuk: false, hasil: {} };
   }
 
   function muat() {
@@ -53,7 +67,12 @@
   };
 
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
-  const ui = { menuBuka: false };
+  const ui = {
+    menuBuka: false, filterRs: "", filterStatus: "",
+    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null
+  };
+
+  const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
 
   /* ============================================================== perute */
 
@@ -63,6 +82,90 @@
     return { nama: bagian[0] || "beranda", id: bagian[1] || null };
   }
   const ke = (h) => { if (location.hash !== h) location.hash = h; else gambar(true); };
+
+  /* ======================================================= panggilan simulasi */
+
+  /* Durasi dipadatkan: panggilan nyata 1-2 menit berjalan sekitar 45 detik di layar.
+     Jeda pesan WA ke panggilan (PRD R2.2, bawaan prototipe 1 menit) ikut dipadatkan. */
+  const SIM = { sambung: 4, rekam: 6, rentang: 32, kartu: 4, jedaBerikut: 12000 };
+
+  const tidakTerhubung = (p) => p.jawaban.status_panggilan === "tidak_terhubung";
+
+  /* Titik waktu layar (detik sejak panggilan dimulai) untuk tiap tahap. S5 punya dua percobaan
+     yang gagal lalu chat cadangan; skenario lain tersambung, merekam, lalu dibaca. */
+  function titik(p) {
+    if (tidakTerhubung(p)) return { coba1: 4, gagal1: 9, coba2: 12, gagal2: 17, chat: 19, kartu: 22, total: 24 };
+    const akhir = SIM.rekam + SIM.rentang;
+    return { sambung: SIM.sambung, rekam: SIM.rekam, akhir: akhir, kartu: akhir + SIM.kartu, total: akhir + SIM.kartu + 2 };
+  }
+
+  function statusSim(p, t) {
+    const k = titik(p);
+    if (tidakTerhubung(p)) return t >= k.chat ? "tidak_terhubung" : t >= k.coba1 ? "menelepon" : "wa";
+    return t >= k.sambung ? "menelepon" : "wa";
+  }
+
+  function statusBaris(id) {
+    if (D.LATAR[id]) return "selesai";
+    if (S.hasil[id]) return tidakTerhubung(tunggal(id)) ? "tidak_terhubung" : "selesai";
+    if (ui.aktif && ui.aktif.id === id) return ui.aktif.status;
+    return "antre";
+  }
+
+  const labelBaris = (id) => (D.LATAR[id] || S.hasil[id] ? tunggal(id).label : null);
+
+  /* Semua panggilan yang sudah selesai: 4 latar sebelum demo dan skenario yang sudah dijalankan. */
+  const panggilanSelesai = () => Object.keys(D.LATAR).map((id) => D.LATAR[id]).concat(Object.keys(S.hasil).map((id) => D.SKENARIO[id]));
+
+  function angka() {
+    const selesai = panggilanSelesai();
+    return {
+      terpicu: D.PASIEN_TERPICU, aktif: D.PASIEN_AKTIF, ditelepon: selesai.length,
+      tidakSesuai: selesai.filter((p) => p.label === "tidak_sesuai").length,
+      rsKlarifikasi: D.ringkasanRs(selesai).filter((r) => r.status === "Perlu klarifikasi RS").length
+    };
+  }
+
+  function mulaiPanggilan(id) {
+    const p = D.SKENARIO[id];
+    if (!p || S.hasil[id] || ui.aktif) return;
+    clearTimeout(ui.timerBerikut);
+    ui.aktif = { id: id, mulai: Date.now(), menit: menitSekarang(), status: "wa" };
+    ui.timer = setInterval(tick, 250);
+    gambar(true);
+    toast("Pesan WA terkirim ke " + p.penerima.nama + ". Panggilan untuk " + p.pasien + " dimulai.", "#/panggilan/" + id, "Buka panggilan");
+  }
+
+  function tick() {
+    const a = ui.aktif;
+    if (!a) return;
+    const p = D.SKENARIO[a.id];
+    const t = (Date.now() - a.mulai) / 1000;
+    if (t >= titik(p).total) { selesaikan(a.id); return; }
+    const st = statusSim(p, t);
+    if (st !== a.status) { a.status = st; gambar(true); }
+  }
+
+  function selesaikan(id) {
+    const p = D.SKENARIO[id];
+    clearInterval(ui.timer);
+    S.hasil[id] = { menit: ui.aktif.menit };
+    ui.aktif = null;
+    simpan();
+    gambar(true);
+    toast("Panggilan selesai: " + p.pasien + " · " + D.LABEL[p.label].nama + ".", "#/kartu/" + id, "Buka kartu bukti");
+    if (ui.otomatis && !ui.jeda) ui.timerBerikut = setTimeout(lanjutOtomatis, SIM.jedaBerikut);
+  }
+
+  /* Mode otomatis (R1.5): satu panggilan aktif, lalu berikutnya menurut urutan antrean. */
+  function lanjutOtomatis() {
+    if (!ui.otomatis || ui.jeda || ui.aktif) return;
+    const id = D.URUTAN_ANTREAN.find((x) => D.SKENARIO[x] && !S.hasil[x]);
+    if (id) { mulaiPanggilan(id); return; }
+    ui.otomatis = false;
+    toast("Semua panggilan di antrean sudah selesai. Panggilan otomatis dinonaktifkan.");
+    gambar(true);
+  }
 
   /* ============================================================== kerangka */
 
@@ -122,7 +225,75 @@
   const kepala = (judul, ket) => '<div class="kepala"><div><h1>' + esc(judul) + "</h1><p>" + esc(ket) + "</p></div></div>";
 
   function lamanBeranda() { return kepala("Beranda", D.HARI_INI + " · " + D.VERIFIKATOR.kantor) + kosong("Beranda v3", "Diisi pada tiket UI-09."); }
-  function lamanAntrean() { return kepala("Antrean konfirmasi", "Layanan Agustus 2026") + kosong("Antrean konfirmasi", "Diisi pada tiket UI-03."); }
+  /* ============================================================== antrean */
+
+  const penerimaTeks = (p) => (p.penerima.hubungan === "peserta" ? "Peserta" : esc(p.penerima.nama) + ' <span class="redup">(' + esc(p.penerima.hubungan) + ")</span>");
+
+  function kartuAngka() {
+    const a = angka();
+    return '<div class="kartu-angka">' +
+      "<div><b>" + a.terpicu + "</b><span>pasien terpicu dari " + a.aktif + " aktif</span></div>" +
+      "<div><b>" + a.ditelepon + "</b><span>sudah ditelepon</span></div>" +
+      '<div class="' + (a.tidakSesuai ? "peringatan" : "") + '"><b>' + a.tidakSesuai + "</b><span>tidak sesuai</span></div>" +
+      '<div class="' + (a.rsKlarifikasi ? "waspada" : "") + '"><b>' + a.rsKlarifikasi + "</b><span>RS perlu klarifikasi</span></div>" +
+    "</div>";
+  }
+
+  /* Tujuan klik baris: kartu bukti bila sudah selesai, layar panggilan bila skenario, kosong bila belum ada panggilan. */
+  function tujuanBaris(p) {
+    if (D.LATAR[p.id] || S.hasil[p.id]) return "#/kartu/" + p.id;
+    if (D.SKENARIO[p.id]) return "#/panggilan/" + p.id;
+    return null;
+  }
+
+  function barisAntrean() {
+    return D.URUTAN_ANTREAN
+      .map((id) => Object.assign({ st: statusBaris(id) }, tunggal(id)))
+      .filter((p) => !ui.filterRs || p.rs === ui.filterRs)
+      .filter((p) => !ui.filterStatus || p.st === ui.filterStatus);
+  }
+
+  function lamanAntrean() {
+    const baris = barisAntrean().map((p) => {
+      const tujuan = tujuanBaris(p), lab = labelBaris(p.id);
+      const bisaTelepon = D.SKENARIO[p.id] && p.st === "antre";
+      let aksi;
+      if (bisaTelepon) {
+        aksi = '<button class="btn btn--kecil btn--primer" type="button" data-aksi="telepon" data-id="' + p.id + '"' + (ui.aktif ? ' disabled title="Satu panggilan aktif pada satu waktu"' : "") + ">" + ikon("telepon") + "Telepon sekarang</button>";
+      } else if (tujuan) {
+        aksi = '<a class="btn btn--kecil" href="' + tujuan + '">Lihat</a>';
+      } else {
+        aksi = '<span class="redup">Belum ditelepon</span>';
+      }
+      return "<tr" + (tujuan ? ' class="bisa-klik" data-aksi="buka-baris" data-tujuan="' + tujuan + '"' : "") + ">" +
+        '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
+        '<td class="sembunyi-hp">' + esc(D.namaRs(p.rs)) + "</td>" +
+        '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
+        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
+        '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
+        '<td><div class="sel-status"><span class="status-chip status-chip--' + p.st + '">' + STATUS[p.st] + "</span>" + (lab ? labelChip(lab) : "") + "</div></td>" +
+        '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
+    }).join("");
+
+    const keadaan = ui.jeda ? "Dijeda. Panggilan yang berjalan diselesaikan dulu." : ui.aktif ? "1 panggilan berjalan." : "Menyiapkan panggilan berikutnya.";
+
+    return '<div class="kepala"><div><h1>Antrean konfirmasi · layanan ' + D.BULAN + "</h1>" +
+        '<p class="keterangan-pemicu">Pasien masuk antrean jika dua indikator atau lebih aktif. Panggilan otomatis berjalan pukul 09.00–17.00 dan hanya satu panggilan aktif pada satu waktu.</p></div></div>' +
+      kartuAngka() +
+      '<section class="panel tabel-antrean"><div class="bar-antrean"><span class="kapital">Filter</span>' +
+        '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
+          D.RS.map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
+        '<select class="pilih" data-aksi="saring-status" aria-label="Saring menurut status"><option value="">Semua status</option>' +
+          Object.keys(STATUS).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + STATUS[k] + "</option>").join("") + "</select>" +
+        '<div class="kanan">' + (ui.otomatis ? '<span class="redup" style="font-size:12.5px">' + keadaan + "</span>" : "") +
+          '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + ui.otomatis + '">' + ikon("telepon") + "Panggilan otomatis: <b>" + (ui.otomatis ? "AKTIF" : "NONAKTIF") + "</b></button>" +
+          '<button class="btn" type="button" data-aksi="jeda"' + (ui.otomatis ? "" : " disabled") + ">" + ikon(ui.jeda ? "main" : "jeda") + (ui.jeda ? "Lanjutkan" : "Jeda") + "</button></div></div>" +
+        (baris
+          ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima telepon</th><th>Status</th><th></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
+          : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
+        '<p class="catatan-kaki">Indikator: Melebihi 8 sesi sebulan · 3x seminggu · 6 bulan berturut-turut · Libur (Minggu atau libur nasional). Pasien dengan satu indikator saja tidak ditelepon.</p>' +
+      "</section>";
+  }
   function lamanPanggilan(id) { return kepala("Panggilan berlangsung", id) + kosong("Panggilan", "Diisi pada tiket UI-04."); }
   function lamanKartu(id) { return kepala("Kartu bukti", id) + kosong("Kartu bukti", "Diisi pada tiket UI-06."); }
   function lamanRingkasanRs() { return kepala("Ringkasan per rumah sakit", "Layanan Agustus 2026") + kosong("Ringkasan RS", "Diisi pada tiket UI-08."); }
@@ -170,7 +341,23 @@
 
   const AKSI = {
     masuk() { S.masuk = true; simpan(); ke("#/beranda"); },
-    menu() { ui.menuBuka = !ui.menuBuka; gambar(true); }
+    menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
+    "buka-baris"(el) { ke(el.dataset.tujuan); },
+    telepon(el) { mulaiPanggilan(el.dataset.id); },
+    otomatis() {
+      ui.otomatis = !ui.otomatis;
+      ui.jeda = false;
+      clearTimeout(ui.timerBerikut);
+      gambar(true);
+      if (ui.otomatis) lanjutOtomatis();
+      else toast("Panggilan otomatis dinonaktifkan.");
+    },
+    jeda() {
+      ui.jeda = !ui.jeda;
+      clearTimeout(ui.timerBerikut);
+      gambar(true);
+      if (!ui.jeda) lanjutOtomatis();
+    }
   };
 
   document.addEventListener("click", (e) => {
@@ -179,6 +366,12 @@
     const f = AKSI[el.dataset.aksi];
     if (f) { if (el.tagName === "A") e.preventDefault(); f(el); }
     if (ui.menuBuka && !e.target.closest("#sisi") && el.dataset.aksi !== "menu") { ui.menuBuka = false; gambar(true); }
+  });
+
+  document.addEventListener("change", (e) => {
+    const a = e.target.dataset && e.target.dataset.aksi;
+    if (a === "saring-rs") { ui.filterRs = e.target.value; gambar(true); }
+    else if (a === "saring-status") { ui.filterStatus = e.target.value; gambar(true); }
   });
 
   window.addEventListener("hashchange", () => { ui.menuBuka = false; gambar(false); });
