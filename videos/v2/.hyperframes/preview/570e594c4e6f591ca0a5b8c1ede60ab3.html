@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head><script data-hf-gsap-fallback>
+(function(){
+  var cdnBase="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/";
+  var loaded={};
+  function loadFallback(file){
+    if(loaded[file])return loaded[file];
+    return loaded[file]=new Promise(function(ok,fail){
+      var s=document.createElement("script");
+      s.src=cdnBase+file;s.hfGsapFallback=true;s.onload=ok;s.onerror=fail;
+      document.head.appendChild(s);
+    });
+  }
+  document.addEventListener("error",function(e){
+    var t=e.target;
+    if(!t||t.tagName!=="SCRIPT"||!t.src||t.hfGsapFallback)return;
+    var m=t.src.match(/gsap[^/]*\/dist\/(.+\.js)/);
+    if(m)loadFallback(m[1]).catch(function(){
+      reportError(new Error("GSAP could not load from "+t.src+" or "+cdnBase+m[1]+", so this preview's animations will not play."));
+    });
+  },true);
+})();
+</script>
+<meta name="hyperframes-studio-preview"><script>(function(){var seen=window.__hfPreviewErrors=[];
+addEventListener("error",function(e){seen.push(e.message||String(e))});})();</script>
+<base href="/api/projects/v2/preview/"><style data-hyperframes-text-rendering="true">html,body,*{text-rendering:geometricPrecision}</style><script data-hf-after-fonts-fallback="">document.addEventListener("DOMContentLoaded", function () {
+  if (window.__hfAfterFontsClaimed) return;
+  var T = "text/hf-after-fonts";
+  var all = [].slice.call(document.querySelectorAll('script[type="text/hf-after-fonts"], script[type="text/hf-after-fonts+module"]'));
+  if (!all.length) return;
+  console.warn("[hyperframes] the runtime has no web-font gate; composition scripts run without waiting for fonts");
+  var late = function (el) { return el.type !== T || el.matches('[defer][src], [defer][data-hf-inlined-src]'); };
+  var queue = all.filter(function (el) { return !late(el); }).concat(all.filter(late));
+  (function next() {
+    var el = queue.shift();
+    if (!el) return;
+    var s = document.createElement("script");
+    for (var i = 0; i < el.attributes.length; i++) s.setAttribute(el.attributes[i].name, el.attributes[i].value);
+    if (el.type === T) s.removeAttribute("type"); else s.type = "module";
+    s.async = el.hasAttribute("async");
+    s.text = el.text;
+    var waits = s.type !== "module" && s.hasAttribute("src") && !s.async && !s.noModule;
+    if (waits) { s.addEventListener("load", next); s.addEventListener("error", next); }
+    el.replaceWith(s);
+    if (!waits) next();
+  })();
+});
+//# sourceURL=hyperframes://after-fonts-fallback</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <!-- Dibuat oleh tools/build.py dari tools/index.template.html. Edit template, lalu jalankan build.py. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; font-weight: 400; src: url("assets/fonts/Poppins-Regular.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 500; src: url("assets/fonts/Poppins-Medium.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 600; src: url("assets/fonts/Poppins-SemiBold.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 700; src: url("assets/fonts/Poppins-Bold.ttf") format("truetype"); }
+      :root {
+        --teal: #0f3d3e; --teal-lt: #145558; --teal-dk: #082a2b; --green: #0e7c3a; --orange: #f26b21;
+        --navy: #1b2d4f; --mint: #eaf3f1; --mint-2: #d3e3df; --grey: #5b6b6a; --gold: #f3b441;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #070d0d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Poppins", sans-serif; background: #070d0d; }
+      .layer { position: absolute; inset: 0; }
+
+      /* ---------- hook dan penutup: klip video AI ---------- */
+      .shot { position: absolute; inset: 0; overflow: hidden; }
+      .shot .inner { position: absolute; inset: 0; }
+      .shot video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #sh-h1b .inner { transform-origin: 58% 30%; }
+      #sh-h2a .inner { transform-origin: 66% 40%; }
+      #sh-h2b .inner { transform-origin: 69% 36%; }
+      #sh-pn .inner { transform-origin: 46% 80%; filter: blur(2.5px) saturate(0.7); }
+      #sh-pn::after { content: ""; position: absolute; inset: 0; background: rgba(15, 61, 62, 0.58); }
+      #sh-zv { z-index: 30; }
+      #black { position: absolute; inset: 0; background: #050808; z-index: 40; pointer-events: none; }
+      .lb { position: absolute; inset: 0; pointer-events: none; z-index: 45; }
+      .lb i { position: absolute; left: 0; right: 0; height: 118px; background: #040706; display: block; }
+      .lb i:first-child { top: 0; transform-origin: 50% 0%; }
+      .lb i:last-child { bottom: 0; transform-origin: 50% 100%; }
+      .tag { position: absolute; top: 44px; right: 56px; z-index: 46; color: rgba(255, 255, 255, 0.72);
+        font-size: 20px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+
+      /* ---------- kartu logo (H3 dan penutup) ---------- */
+      .card { position: absolute; inset: 0; z-index: 50; }
+      .card-in { position: absolute; inset: 0; }
+      .card-bg { position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 80% at 50% 45%, var(--teal-lt) 0%, var(--teal) 62%, var(--teal-dk) 100%); }
+      .card-glow { position: absolute; left: 50%; top: 45%; width: 1400px; height: 1400px; margin: -700px 0 0 -700px;
+        border-radius: 50%; background: radial-gradient(circle, rgba(46, 140, 132, 0.42) 0%, rgba(20, 85, 88, 0) 62%); }
+      .card-grid { position: absolute; inset: 0; opacity: 0.16;
+        background-image: radial-gradient(rgba(234, 243, 241, 0.55) 1.2px, transparent 1.4px); background-size: 36px 36px;
+        -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%);
+        mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%); }
+      .lock { position: absolute; left: 0; right: 0; top: 0; height: 900px; display: flex; align-items: center;
+        justify-content: center; gap: 70px; }
+      .mark-wrap { width: 300px; height: 300px; position: relative; }
+      .mark { width: 300px; height: 300px; display: block; overflow: visible; }
+      .words { position: relative; padding: 10px 40px 14px 0; overflow: hidden; }
+      .wm-line { overflow: hidden; height: 158px; }
+      .wm { display: block; color: #e4f0ed; font-weight: 700; font-size: 150px; line-height: 158px; letter-spacing: -0.03em; }
+      .oline { display: block; width: 260px; height: 8px; border-radius: 4px; background: var(--orange); margin-top: 30px; transform-origin: 0% 50%; }
+      .wm-in { position: relative; }
+      .wm-sh { position: absolute; left: 0; top: 0; color: transparent; -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 38%, #ffffff 50%, rgba(255, 255, 255, 0) 62%);
+        background-size: 300% 100%; background-repeat: no-repeat; background-position: 150% 0%;
+        -webkit-background-clip: text; background-clip: text; }
+      .scan-v { position: absolute; top: 0; bottom: 0; left: 0; width: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .scan-h { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 55%); }
+      #z-lock { height: 760px; }
+      #z-lock .mark-wrap, #z-lock .mark { width: 240px; height: 240px; }
+      #z-lock .wm { font-size: 122px; line-height: 130px; }
+      #z-lock .wm-line { height: 130px; }
+      .slogan { position: absolute; left: 0; right: 0; top: 700px; text-align: center; overflow: hidden; height: 110px; }
+      .slogan span { display: inline-block; color: var(--mint); font-weight: 600; font-size: 76px; line-height: 104px; letter-spacing: -0.015em; }
+      .credit { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; color: rgba(234, 243, 241, 0.78);
+        font-size: 26px; font-weight: 500; letter-spacing: 0.06em; }
+
+      /* ---------- panggung demo ---------- */
+      #stage { position: absolute; inset: 0; z-index: 10; background: var(--mint); overflow: hidden; }
+      #mint-dots { position: absolute; inset: -60px; opacity: 0.55;
+        background-image: radial-gradient(rgba(15, 61, 62, 0.16) 1.6px, transparent 1.8px); background-size: 34px 34px; }
+      #mint-glow { position: absolute; left: 50%; top: 50%; width: 2200px; height: 1500px; margin: -750px 0 0 -1100px;
+        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 60%); }
+      #win { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 22px; overflow: hidden;
+        background: #fff; transform-origin: 0 0;
+        box-shadow: 0 50px 140px rgba(15, 61, 62, 0.26), 0 8px 30px rgba(15, 61, 62, 0.12), 0 0 0 2px rgba(15, 61, 62, 0.1); }
+      #win video, #win img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      #scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 170px; pointer-events: none;
+        background: linear-gradient(180deg, rgba(234, 243, 241, 0.96) 0%, rgba(234, 243, 241, 0.86) 45%, rgba(234, 243, 241, 0) 100%); }
+      .step { position: absolute; left: 60px; top: 44px; z-index: 20; }
+      .step-in { display: flex; align-items: center; gap: 20px; }
+      .step-no { color: var(--orange); font-weight: 700; font-size: 34px; letter-spacing: 0.02em; }
+      .step-rule { display: block; width: 3px; height: 38px; background: var(--teal); opacity: 0.35; }
+      .step-ti { color: var(--teal); font-weight: 600; font-size: 34px; letter-spacing: -0.01em; }
+      .foot { position: absolute; right: 52px; bottom: 22px; z-index: 20; display: flex; align-items: center; gap: 12px;
+        color: var(--grey); font-size: 20px; font-weight: 500; background: rgba(255, 255, 255, 0.92); padding: 6px 16px 6px 10px; border-radius: 12px; }
+      .foot svg { width: 26px; height: 26px; }
+
+      /* ---------- subtitle ---------- */
+      .sub { position: absolute; left: 0; right: 0; z-index: 60; text-align: center; pointer-events: none; }
+      .sub p { display: inline-block; max-width: 1500px; }
+      .sub-hook { bottom: 150px; }
+      .sub-hook p { color: #fff; font-size: 46px; font-weight: 500; line-height: 1.32;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 22px rgba(0, 0, 0, 0.55); }
+      .sub-logo { bottom: 104px; }
+      .sub-logo p { color: var(--mint); font-size: 42px; font-weight: 500; line-height: 1.32; }
+      .sub-demo { bottom: 44px; }
+      .sub-demo p { background: rgba(15, 61, 62, 0.95); color: #fff; font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      #endfade { position: absolute; inset: 0; background: #050808; z-index: 90; pointer-events: none; }
+    </style>
+  
+<script data-hyperframes-preview-runtime="1" src="/api/runtime.js"></script>
+<meta name="hyperframes-project-signature" content="f66bb496dc62ff26bb5ee329">
+</head>
+  <body>
+    <div data-hf-id="hf-ghvk" id="root" data-composition-id="main" data-start="0" data-duration="88.27" data-width="1920" data-height="1080">
+
+      <!-- ===== panggung demo (W1–W7): jendela prototipe di latar mint, kamera = transform #win ===== -->
+      <div data-hf-id="hf-1rt5" id="stage">
+        <div data-hf-id="hf-rluu" id="mint-glow" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-vqs1" id="mint-dots" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-fs56" id="win" data-layout-allow-overflow="">
+          <img loading="lazy" data-hf-preview-lazy data-hf-id="hf-kwbo" id="w1a" class="clip" src="assets/video/w1-still.png" alt="" data-start="26.66" data-duration="2.75" data-track-index="3">
+<video data-hf-id="hf-30n0" id="w1b" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="29.41" data-duration="6.36" data-media-start="4.58" data-playback-rate="1.0" data-track-index="3" data-end="35.77" data-has-audio="false"></video>
+<video data-hf-id="hf-ms2c" id="w2a" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="35.47" data-duration="3.3" data-media-start="7.9" data-playback-rate="1.5" data-track-index="3" data-end="38.769999999999996" data-has-audio="false"></video>
+<video data-hf-id="hf-0zy5" id="w2b" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="38.47" data-duration="3.48" data-media-start="13.85" data-playback-rate="0.7" data-track-index="3" data-end="41.949999999999996" data-has-audio="false"></video>
+<video data-hf-id="hf-ofaw" id="w3a" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="41.65" data-duration="4.0" data-media-start="18.1" data-playback-rate="0.608" data-track-index="3" data-end="45.65" data-has-audio="false"></video>
+<video data-hf-id="hf-tbwm" id="w3b" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="45.35" data-duration="4.25" data-media-start="22.4" data-playback-rate="0.519" data-track-index="3" data-end="49.6" data-has-audio="false"></video>
+<video data-hf-id="hf-j278" id="w4a" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="49.3" data-duration="3.55" data-media-start="25.0" data-playback-rate="1.0" data-track-index="3" data-end="52.849999999999994" data-has-audio="false"></video>
+<video data-hf-id="hf-n518" id="w4b" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="52.55" data-duration="5.27" data-media-start="31.0" data-playback-rate="0.85" data-track-index="3" data-end="57.81999999999999" data-has-audio="false"></video>
+<video data-hf-id="hf-0d3v" id="w5" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="57.52" data-duration="6.57" data-media-start="41.9" data-playback-rate="1.0" data-track-index="3" data-end="64.09" data-has-audio="false"></video>
+<video data-hf-id="hf-1z70" id="w6a" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="63.79" data-duration="4.41" data-media-start="48.96" data-playback-rate="0.8" data-track-index="3" data-end="68.2" data-has-audio="false"></video>
+<video data-hf-id="hf-zdm5" id="w6b" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="68.2" data-duration="4.02" data-media-start="52.49" data-playback-rate="1.0" data-track-index="3" data-end="72.22" data-has-audio="false"></video>
+<video data-hf-id="hf-7f7m" id="w7" class="clip scr" src="assets/video/screen.mp4" muted playsinline data-start="71.92" data-duration="6.62" data-media-start="58.6" data-playback-rate="1.0" data-track-index="3" data-end="78.54" data-has-audio="false"></video>
+        </div>
+        <div data-hf-id="hf-1djr" id="scrim-top"></div>
+      </div>
+<div data-hf-id="hf-gqek" class="step clip" id="st-w1" data-start="27.26" data-duration="8.21" data-track-index="6"><div data-hf-id="hf-l936" class="step-in"><span data-hf-id="hf-yqzu" class="step-no">01</span><span data-hf-id="hf-js22" class="step-rule"></span><span data-hf-id="hf-oy41" class="step-ti">Unggah berkas</span></div></div>
+<div data-hf-id="hf-4nth" class="step clip" id="st-w2" data-start="35.47" data-duration="6.18" data-track-index="6"><div data-hf-id="hf-v8o6" class="step-in"><span data-hf-id="hf-z5av" class="step-no">02</span><span data-hf-id="hf-6m4u" class="step-rule"></span><span data-hf-id="hf-tpqb" class="step-ti">Cek kualitas scan</span></div></div>
+<div data-hf-id="hf-13cq" class="step clip" id="st-w3" data-start="41.65" data-duration="7.65" data-track-index="6"><div data-hf-id="hf-vmz7" class="step-in"><span data-hf-id="hf-zjlw" class="step-no">03</span><span data-hf-id="hf-70fv" class="step-rule"></span><span data-hf-id="hf-50tl" class="step-ti">Label otomatis</span></div></div>
+<div data-hf-id="hf-njlh" class="step clip" id="st-w4" data-start="49.3" data-duration="8.22" data-track-index="6"><div data-hf-id="hf-w1a8" class="step-in"><span data-hf-id="hf-zxwx" class="step-no">04</span><span data-hf-id="hf-7eqw" class="step-rule"></span><span data-hf-id="hf-x5ob" class="step-ti">Kartu bukti</span></div></div>
+<div data-hf-id="hf-s0ie" class="step clip" id="st-w5" data-start="57.52" data-duration="6.27" data-track-index="6"><div data-hf-id="hf-t951" class="step-in"><span data-hf-id="hf-ey5h" class="step-no">04</span><span data-hf-id="hf-4mlp" class="step-rule"></span><span data-hf-id="hf-itwh" class="step-ti">Berkas kembar</span></div></div>
+<div data-hf-id="hf-bf5u" class="step clip" id="st-w6" data-start="63.79" data-duration="8.13" data-track-index="6"><div data-hf-id="hf-tng2" class="step-in"><span data-hf-id="hf-0c7y" class="step-no">05</span><span data-hf-id="hf-50wq" class="step-rule"></span><span data-hf-id="hf-aas2" class="step-ti">Konfirmasi peserta</span></div></div>
+<div data-hf-id="hf-bjyi" class="step clip" id="st-w7" data-start="71.92" data-duration="6.32" data-track-index="6"><div data-hf-id="hf-u1r3" class="step-in"><span data-hf-id="hf-0qiz" class="step-no">06</span><span data-hf-id="hf-5f7r" class="step-rule"></span><span data-hf-id="hf-n4jx" class="step-ti">Keputusan di tangan Anda</span></div></div>
+
+      <!-- ===== klip video AI (hook + penutup) ===== -->
+      <div data-hf-id="hf-feuv" class="layer" id="hooks" style="z-index: 20">
+<div data-hf-id="hf-t2pi" class="shot" id="sh-h1a"><div data-hf-id="hf-lhtv" class="inner" id="in-h1a" data-layout-allow-overflow=""><video data-hf-id="hf-3s25" id="h1a" class="clip" src="assets/video/h1-hd.mp4" muted playsinline data-start="0.0" data-duration="3.05" data-media-start="0.0" data-playback-rate="0.85" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;muted-editorial&quot;, &quot;intensity&quot;: 0.5, &quot;adjust&quot;: {&quot;contrast&quot;: 0.1, &quot;shadows&quot;: 0.05, &quot;temperature&quot;: 0.1, &quot;saturation&quot;: -0.05}, &quot;details&quot;: {&quot;vignette&quot;: 0.3, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.12, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: 0" data-end="3.05" data-has-audio="false"></video></div></div>
+<div data-hf-id="hf-mwzp" class="shot" id="sh-h1b"><div data-hf-id="hf-amc8" class="inner" id="in-h1b" data-layout-allow-overflow=""><video data-hf-id="hf-ihqc" id="h1b" class="clip" src="assets/video/h1-hd.mp4" muted playsinline data-start="3.05" data-duration="3.17" data-media-start="2.65" data-playback-rate="0.92" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;muted-editorial&quot;, &quot;intensity&quot;: 0.5, &quot;adjust&quot;: {&quot;contrast&quot;: 0.1, &quot;shadows&quot;: 0.05, &quot;temperature&quot;: 0.1, &quot;saturation&quot;: -0.05}, &quot;details&quot;: {&quot;vignette&quot;: 0.3, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.12, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: 0" data-end="6.22" data-has-audio="false"></video></div></div>
+<div data-hf-id="hf-gu0j" class="shot" id="sh-h2a"><div data-hf-id="hf-lsjq" class="inner" id="in-h2a" data-layout-allow-overflow=""><video data-hf-id="hf-yrt3" id="h2a" class="clip" src="assets/video/h2-hd.mp4" muted playsinline data-start="5.82" data-duration="1.56" data-media-start="0.0" data-playback-rate="0.8" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;muted-editorial&quot;, &quot;intensity&quot;: 0.5, &quot;adjust&quot;: {&quot;contrast&quot;: 0.1, &quot;shadows&quot;: 0.05, &quot;temperature&quot;: 0.1, &quot;saturation&quot;: -0.05}, &quot;details&quot;: {&quot;vignette&quot;: 0.3, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.12, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: 0" data-end="7.380000000000001" data-has-audio="false"></video></div></div>
+<div data-hf-id="hf-864o" class="shot" id="sh-h2b"><div data-hf-id="hf-hufp" class="inner" id="in-h2b" data-layout-allow-overflow=""><video data-hf-id="hf-15ks" id="h2b" class="clip" src="assets/video/h2-hd.mp4" muted playsinline data-start="7.38" data-duration="4.49" data-media-start="1.25" data-playback-rate="0.82" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;muted-editorial&quot;, &quot;intensity&quot;: 0.5, &quot;adjust&quot;: {&quot;contrast&quot;: 0.1, &quot;shadows&quot;: 0.05, &quot;temperature&quot;: 0.1, &quot;saturation&quot;: -0.05}, &quot;details&quot;: {&quot;vignette&quot;: 0.3, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.12, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: 0" data-end="11.870000000000001" data-has-audio="false"></video></div></div>
+<div data-hf-id="hf-0x36" class="shot" id="sh-pn"><div data-hf-id="hf-v3vl" class="inner" id="in-pn" data-layout-allow-overflow=""><video data-hf-id="hf-8mw1" id="pn" class="clip" src="assets/video/screen.mp4" muted playsinline data-start="11.37" data-duration="9.1" data-media-start="18.2" data-playback-rate="1.0" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;muted-editorial&quot;, &quot;intensity&quot;: 0.5, &quot;adjust&quot;: {&quot;contrast&quot;: 0.1, &quot;shadows&quot;: 0.05, &quot;temperature&quot;: 0.1, &quot;saturation&quot;: -0.05}, &quot;details&quot;: {&quot;vignette&quot;: 0.3, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.12, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: -0.2" data-end="20.47" data-has-audio="false"></video></div></div>
+<div data-hf-id="hf-rfws" class="shot" id="sh-zv"><div data-hf-id="hf-yti3" class="inner" id="in-zv" data-layout-allow-overflow=""><video data-hf-id="hf-lsd5" id="zv" class="clip" src="assets/video/z-hd.mp4" muted playsinline data-start="77.99" data-duration="4.14" data-media-start="0.2" data-playback-rate="0.85" data-track-index="1" data-color-grading="{&quot;preset&quot;: &quot;warm-daylight&quot;, &quot;intensity&quot;: 0.45, &quot;adjust&quot;: {&quot;contrast&quot;: 0.06, &quot;temperature&quot;: 0.08}, &quot;details&quot;: {&quot;vignette&quot;: 0.22, &quot;vignetteFeather&quot;: 0.75, &quot;grain&quot;: 0.1, &quot;grainSize&quot;: 0.22, &quot;grainRoughness&quot;: 0.6}}" style="--hf-color-grading-exposure: 0" data-end="82.13" data-has-audio="false"></video></div></div>
+      </div>
+      <div data-hf-id="hf-y82s" class="lb clip" id="lb1" data-start="0" data-duration="20.47" data-track-index="5"><i data-hf-id="hf-wt6k"></i><i data-hf-id="hf-zeb8"></i></div>
+      <div data-hf-id="hf-onnq" class="tag clip" id="tag1" data-start="0.4" data-duration="20.47" data-track-index="5">Ilustrasi</div>
+      <div data-hf-id="hf-kgrc" class="lb clip" id="lb2" data-start="77.99" data-duration="4.14" data-track-index="5"><i data-hf-id="hf-y7e5"></i><i data-hf-id="hf-ylp6"></i></div>
+      <div data-hf-id="hf-v3de" class="tag clip" id="tag2" data-start="77.99" data-duration="4.14" data-track-index="5">Ilustrasi</div>
+      <div data-hf-id="hf-t94y" id="black"></div>
+
+      <!-- ===== H3: pindai lalu kunci ===== -->
+      <div data-hf-id="hf-osjk" class="card clip" id="h3" data-start="19.72" data-duration="7.44" data-track-index="4">
+        <div data-hf-id="hf-oeb3" class="card-in" id="h3-in">
+          <div data-hf-id="hf-3m4x" class="card-bg" id="h3-bg"></div>
+          <div data-hf-id="hf-lz3t" class="card-glow" id="h3-glow"></div>
+          <div data-hf-id="hf-zidb" class="card-grid" id="h3-grid"></div>
+          <div data-hf-id="hf-74oc" class="lock" id="h3-lock"><div data-hf-id="hf-e6ha" class="mark-wrap" id="h3-mw"><svg data-hf-id="hf-0knx" class="mark" id="h3-mark" viewBox="0 0 48 48" overflow="visible"><path data-hf-id="hf-z58r" id="h3-wl" fill="#fff" d="M5 5h13l6 26-5 11L5 11V5Z" /><path data-hf-id="hf-wbmy" id="h3-wr" fill="#fff" d="M43 5H30l-6 26 5 11L43 11V5Z" /><circle data-hf-id="hf-7phh" id="h3-ring" cx="24" cy="33" r="3.4" fill="none" stroke="#F3B441" stroke-width="0.8" /><circle data-hf-id="hf-xv02" id="h3-dot" cx="24" cy="33" r="3.4" fill="#F3B441" stroke="#0F3D3E" stroke-width="1.5" /></svg></div><div data-hf-id="hf-m60b" class="words"><div data-hf-id="hf-05nr" class="wm-line"><div data-hf-id="hf-6ds6" class="wm-in" id="h3-w1"><span data-hf-id="hf-mser" class="wm">Vedika</span><span data-hf-id="hf-8xzv" class="wm wm-sh">Vedika</span></div></div><div data-hf-id="hf-4rpj" class="wm-line"><div data-hf-id="hf-2fo5" class="wm-in" id="h3-w2"><span data-hf-id="hf-8d3y" class="wm">Autentik</span><span data-hf-id="hf-xcza" class="wm wm-sh">Autentik</span></div></div><span data-hf-id="hf-pjvq" class="oline" id="h3-line"></span></div></div>
+          <div data-hf-id="hf-iyg6" class="flash" id="h3-flash"></div>
+        </div>
+        <div data-hf-id="hf-pyfb" class="scan-v" id="h3-scan"></div>
+        <div data-hf-id="hf-gxit" class="scan-h" id="h3-scan2"></div>
+      </div>
+
+      <!-- ===== Z: logo + slogan ===== -->
+      <div data-hf-id="hf-gfaq" class="card clip" id="zc" data-start="81.43" data-duration="6.84" data-track-index="4" style="z-index: 52">
+        <div data-hf-id="hf-cyr4" class="card-in" id="zc-in">
+          <div data-hf-id="hf-6r2q" class="card-bg" id="z-bg"></div>
+          <div data-hf-id="hf-o3b2" class="card-glow" id="z-glow"></div>
+          <div data-hf-id="hf-03k6" class="card-grid" id="z-grid"></div>
+          <div data-hf-id="hf-c0ph" class="lock" id="z-lock"><div data-hf-id="hf-4uip" class="mark-wrap" id="z-mw"><svg data-hf-id="hf-rvjo" class="mark" id="z-mark" viewBox="0 0 48 48" overflow="visible"><path data-hf-id="hf-uxy8" id="z-wl" fill="#fff" d="M5 5h13l6 26-5 11L5 11V5Z" /><path data-hf-id="hf-0f7n" id="z-wr" fill="#fff" d="M43 5H30l-6 26 5 11L43 11V5Z" /><circle data-hf-id="hf-y3ms" id="z-ring" cx="24" cy="33" r="3.4" fill="none" stroke="#F3B441" stroke-width="0.8" /><circle data-hf-id="hf-9amf" id="z-dot" cx="24" cy="33" r="3.4" fill="#F3B441" stroke="#0F3D3E" stroke-width="1.5" /></svg></div><div data-hf-id="hf-m3m3" class="words"><div data-hf-id="hf-4dei" class="wm-line"><div data-hf-id="hf-ezpx" class="wm-in" id="z-w1"><span data-hf-id="hf-52ur" class="wm">Vedika</span><span data-hf-id="hf-j9zv" class="wm wm-sh">Vedika</span></div></div><div data-hf-id="hf-3z3h" class="wm-line"><div data-hf-id="hf-ixty" class="wm-in" id="z-w2"><span data-hf-id="hf-g0g2" class="wm">Autentik</span><span data-hf-id="hf-uq8q" class="wm wm-sh">Autentik</span></div></div><span data-hf-id="hf-bpzp" class="oline" id="z-line"></span></div></div>
+          <div data-hf-id="hf-brmi" class="slogan"><span data-hf-id="hf-j5ef" id="z-slogan">Lengkap belum tentu asli</span></div>
+          <div data-hf-id="hf-cpyc" class="credit" id="z-credit">Tim ADA healthkathon</div>
+          <div data-hf-id="hf-srir" class="flash" id="z-flash"></div>
+        </div>
+        <div data-hf-id="hf-h7cs" class="scan-v" id="z-scan"></div>
+      </div>
+
+      <!-- ===== subtitle per kalimat ===== -->
+<div data-hf-id="hf-71iq" class="sub sub-hook clip" id="sub-00" data-start="0.47" data-duration="5.18" data-track-index="8"><p data-hf-id="hf-hn4d">Bapak bilang, waktu rehabilitasi dulu, petugasnya yang tanda tangan sendiri.</p></div>
+<div data-hf-id="hf-zgno" class="sub sub-hook clip" id="sub-01" data-start="5.99" data-duration="1.62" data-track-index="8"><p data-hf-id="hf-5ldr">Berkasnya tampak lengkap.</p></div>
+<div data-hf-id="hf-ne2o" class="sub sub-hook clip" id="sub-02" data-start="7.65" data-duration="3.2" data-track-index="8"><p data-hf-id="hf-4cdq">Tapi siapa yang memastikan berkasnya asli?</p></div>
+<div data-hf-id="hf-mnlq" class="sub sub-hook clip" id="sub-03" data-start="11.39" data-duration="3.85" data-track-index="8"><p data-hf-id="hf-4vlr">Setiap hari, verifikator BPJS memeriksa berkas yang menumpuk.</p></div>
+<div data-hf-id="hf-9x0n" class="sub sub-hook clip" id="sub-04" data-start="15.36" data-duration="4.14" data-track-index="8"><p data-hf-id="hf-q071">Mustahil teliti satu per satu, jadi yang janggal bisa lolos.</p></div>
+<div data-hf-id="hf-w1jt" class="sub sub-logo clip" id="sub-05" data-start="19.79" data-duration="3.08" data-track-index="8"><p data-hf-id="hf-02w1">Karena itu, hadirlah Vedika Autentik.</p></div>
+<div data-hf-id="hf-f6ji" class="sub sub-logo clip" id="sub-06" data-start="22.99" data-duration="3.75" data-track-index="8"><p data-hf-id="hf-y6gm">Teman kerja verifikator untuk memeriksa keaslian berkas.</p></div>
+<div data-hf-id="hf-6shv" class="sub sub-demo clip" id="sub-07" data-start="27.33" data-duration="4.48" data-track-index="8"><p data-hf-id="hf-d6zj">Anda tak perlu lagi memeriksa manual, cukup unggah berkas di tab Autentik.</p></div>
+<div data-hf-id="hf-4zmn" class="sub sub-demo clip" id="sub-08" data-start="31.85" data-duration="3.4" data-track-index="8"><p data-hf-id="hf-m6my">Satu klik, tujuh pemeriksaan berjalan sekaligus.</p></div>
+<div data-hf-id="hf-z88t" class="sub sub-demo clip" id="sub-09" data-start="35.64" data-duration="1.73" data-track-index="8"><p data-hf-id="hf-f2ii">Pertama, kualitas scan.</p></div>
+<div data-hf-id="hf-axxf" class="sub sub-demo clip" id="sub-10" data-start="37.45" data-duration="3.98" data-track-index="8"><p data-hf-id="hf-zjz8">Kalau buram, cukup minta scan ulang, tanpa menuduh siapa pun.</p></div>
+<div data-hf-id="hf-r1r7" class="sub sub-demo clip" id="sub-11" data-start="41.67" data-duration="4.75" data-track-index="8"><p data-hf-id="hf-9knl">Hasilnya berlabel jelas: lolos, perlu dicek, atau prioritas.</p></div>
+<div data-hf-id="hf-ptx7" class="sub sub-demo clip" id="sub-12" data-start="46.55" data-duration="2.58" data-track-index="8"><p data-hf-id="hf-ex99">Yang paling mendesak selalu di atas.</p></div>
+<div data-hf-id="hf-uq23" class="sub sub-demo clip" id="sub-13" data-start="49.47" data-duration="3.09" data-track-index="8"><p data-hf-id="hf-fsns">Buka satu berkas, buktinya langsung terlihat.</p></div>
+<div data-hf-id="hf-uyon" class="sub sub-demo clip" id="sub-14" data-start="52.74" data-duration="4.56" data-track-index="8"><p data-hf-id="hf-v8ph">Lima sesi yang diubah jadi delapan, ditandai tepat di tempatnya.</p></div>
+<div data-hf-id="hf-jjho" class="sub sub-demo clip" id="sub-15" data-start="57.69" data-duration="2.51" data-track-index="8"><p data-hf-id="hf-lrz4">Berkas yang dipakai ulang untuk pasien lain?</p></div>
+<div data-hf-id="hf-zsid" class="sub sub-demo clip" id="sub-16" data-start="60.28" data-duration="3.24" data-track-index="8"><p data-hf-id="hf-wulv">Disandingkan, kembarannya langsung ketahuan.</p></div>
+<div data-hf-id="hf-1gwg" class="sub sub-demo clip" id="sub-17" data-start="63.96" data-duration="4.45" data-track-index="8"><p data-hf-id="hf-mxr5">Untuk berkas prioritas, tanyai peserta lewat WhatsApp resmi BPJS.</p></div>
+<div data-hf-id="hf-fvj3" class="sub sub-demo clip" id="sub-18" data-start="68.45" data-duration="3.25" data-track-index="8"><p data-hf-id="hf-rkuc">Satu balasan, dan Anda tahu yang sebenarnya.</p></div>
+<div data-hf-id="hf-ia61" class="sub sub-demo clip" id="sub-19" data-start="72.09" data-duration="1.58" data-track-index="8"><p data-hf-id="hf-u52i">Sistem hanya menyarankan.</p></div>
+<div data-hf-id="hf-hf8w" class="sub sub-demo clip" id="sub-20" data-start="73.71" data-duration="4.21" data-track-index="8"><p data-hf-id="hf-ybuz">Keputusan akhir tetap di tangan Anda, lengkap dengan alasan tertulis.</p></div>
+<div data-hf-id="hf-r8us" class="sub sub-hook clip" id="sub-21" data-start="78.66" data-duration="3.31" data-track-index="8"><p data-hf-id="hf-snwk">Memeriksa lebih tenang, memutuskan lebih adil.</p></div>
+
+      <div data-hf-id="hf-kn72" id="endfade"></div>
+
+      <!-- ===== audio: narasi, SFX, musik ===== -->
+<audio data-hf-id="hf-45q9" id="vo-h1" src="assets/vo/h1.wav" data-start="0.55" data-duration="4.92" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="5.47"></audio>
+<audio data-hf-id="hf-5vbb" id="vo-h2" src="assets/vo/h2.wav" data-start="6.07" data-duration="4.6" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="10.67"></audio>
+<audio data-hf-id="hf-a19r" id="vo-h2b" src="assets/vo/h2b.wav" data-start="11.47" data-duration="7.85" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="19.32"></audio>
+<audio data-hf-id="hf-3w6k" id="vo-h3" src="assets/vo/h3.wav" data-start="19.87" data-duration="6.69" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="26.560000000000002"></audio>
+<audio data-hf-id="hf-ksxp" id="vo-w1" src="assets/vo/w1.wav" data-start="27.41" data-duration="7.66" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="35.07"></audio>
+<audio data-hf-id="hf-qqyw" id="vo-w2" src="assets/vo/w2.wav" data-start="35.72" data-duration="5.53" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="41.25"></audio>
+<audio data-hf-id="hf-qaj4" id="vo-w3" src="assets/vo/w3.wav" data-start="41.75" data-duration="7.2" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="48.95"></audio>
+<audio data-hf-id="hf-9k50" id="vo-w4" src="assets/vo/w4.wav" data-start="49.55" data-duration="7.57" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="57.12"></audio>
+<audio data-hf-id="hf-71zb" id="vo-w5" src="assets/vo/w5.wav" data-start="57.77" data-duration="5.57" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="63.34"></audio>
+<audio data-hf-id="hf-si67" id="vo-w6" src="assets/vo/w6.wav" data-start="64.04" data-duration="7.48" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="71.52000000000001"></audio>
+<audio data-hf-id="hf-9jv4" id="vo-w7" src="assets/vo/w7.wav" data-start="72.17" data-duration="5.57" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="77.74000000000001"></audio>
+<audio data-hf-id="hf-nba4" id="vo-z1" src="assets/vo/z1.wav" data-start="78.74" data-duration="7.23" data-track-index="20" data-volume="1" data-audio-group="voiceover" data-end="85.97"></audio>
+<audio data-hf-id="hf-yp23" id="fx-00-whoosh" src="assets/sfx/whoosh.wav" data-start="5.42" data-duration="0.8" data-track-index="22" data-volume="0.55" data-audio-group="sfx" data-end="6.22"></audio>
+<audio data-hf-id="hf-injd" id="fx-01-whoosh" src="assets/sfx/whoosh.wav" data-start="19.32" data-duration="0.8" data-track-index="23" data-volume="0.8" data-audio-group="sfx" data-end="20.12"></audio>
+<audio data-hf-id="hf-yh07" id="fx-02-sting" src="assets/sfx/sting.wav" data-start="21.37" data-duration="2.2" data-track-index="24" data-volume="0.42" data-audio-group="sfx" data-end="23.57"></audio>
+<audio data-hf-id="hf-rr5m" id="fx-03-whoosh" src="assets/sfx/whoosh.wav" data-start="26.46" data-duration="0.8" data-track-index="22" data-volume="0.7" data-audio-group="sfx" data-end="27.26"></audio>
+<audio data-hf-id="hf-slfo" id="fx-04-click" src="assets/sfx/click.wav" data-start="31.76" data-duration="0.09" data-track-index="23" data-volume="0.32" data-audio-group="sfx" data-end="31.85"></audio>
+<audio data-hf-id="hf-1w76" id="fx-05-whoosh" src="assets/sfx/whoosh.wav" data-start="35.07" data-duration="0.8" data-track-index="24" data-volume="0.55" data-audio-group="sfx" data-end="35.87"></audio>
+<audio data-hf-id="hf-rk18" id="fx-06-whoosh" src="assets/sfx/whoosh.wav" data-start="41.25" data-duration="0.8" data-track-index="22" data-volume="0.55" data-audio-group="sfx" data-end="42.05"></audio>
+<audio data-hf-id="hf-hjix" id="fx-07-click" src="assets/sfx/click.wav" data-start="45.93" data-duration="0.09" data-track-index="23" data-volume="0.32" data-audio-group="sfx" data-end="46.02"></audio>
+<audio data-hf-id="hf-9krl" id="fx-08-whoosh" src="assets/sfx/whoosh.wav" data-start="48.90" data-duration="0.8" data-track-index="24" data-volume="0.55" data-audio-group="sfx" data-end="49.699999999999996"></audio>
+<audio data-hf-id="hf-wc9s" id="fx-09-click" src="assets/sfx/click.wav" data-start="49.84" data-duration="0.09" data-track-index="22" data-volume="0.32" data-audio-group="sfx" data-end="49.93000000000001"></audio>
+<audio data-hf-id="hf-ovnb" id="fx-10-whoosh" src="assets/sfx/whoosh.wav" data-start="57.12" data-duration="0.8" data-track-index="23" data-volume="0.55" data-audio-group="sfx" data-end="57.919999999999995"></audio>
+<audio data-hf-id="hf-r0wn" id="fx-11-whoosh" src="assets/sfx/whoosh.wav" data-start="63.39" data-duration="0.8" data-track-index="24" data-volume="0.55" data-audio-group="sfx" data-end="64.19"></audio>
+<audio data-hf-id="hf-pu9o" id="fx-12-click" src="assets/sfx/click.wav" data-start="68.01" data-duration="0.09" data-track-index="22" data-volume="0.32" data-audio-group="sfx" data-end="68.10000000000001"></audio>
+<audio data-hf-id="hf-4o4e" id="fx-13-whoosh" src="assets/sfx/whoosh.wav" data-start="71.52" data-duration="0.8" data-track-index="23" data-volume="0.55" data-audio-group="sfx" data-end="72.32"></audio>
+<audio data-hf-id="hf-7w5h" id="fx-14-click" src="assets/sfx/click.wav" data-start="75.08" data-duration="0.09" data-track-index="24" data-volume="0.32" data-audio-group="sfx" data-end="75.17"></audio>
+<audio data-hf-id="hf-83sh" id="fx-15-whoosh" src="assets/sfx/whoosh.wav" data-start="77.69" data-duration="0.8" data-track-index="22" data-volume="0.4" data-audio-group="sfx" data-end="78.49"></audio>
+<audio data-hf-id="hf-vuh1" id="fx-16-whoosh" src="assets/sfx/whoosh.wav" data-start="81.23" data-duration="0.8" data-track-index="23" data-volume="0.7" data-audio-group="sfx" data-end="82.03"></audio>
+<audio data-hf-id="hf-zhe0" id="fx-17-sting" src="assets/sfx/sting.wav" data-start="82.03" data-duration="2.2" data-track-index="24" data-volume="0.38" data-audio-group="sfx" data-end="84.23"></audio>
+<audio data-hf-id="hf-yz77" id="fx-18-ding" src="assets/sfx/ding.wav" data-start="83.62" data-duration="0.9" data-track-index="22" data-volume="0.26" data-audio-group="sfx" data-end="84.52000000000001"></audio>
+<audio data-hf-id="hf-2q9h" id="bgm" src="assets/sfx/bgm.wav" data-start="0" data-duration="88.27" data-track-index="21" data-volume="0.42" data-audio-group="music" data-automation="{&quot;version&quot;: 1, &quot;lanes&quot;: [{&quot;target&quot;: &quot;volume&quot;, &quot;points&quot;: [{&quot;t&quot;: 0, &quot;v&quot;: 0}, {&quot;t&quot;: 1.4, &quot;v&quot;: 1}, {&quot;t&quot;: 85.87, &quot;v&quot;: 1}, {&quot;t&quot;: 88.27, &quot;v&quot;: 0}]}]}" data-end="88.27"></audio>
+    </div>
+
+    
+  <script type="text/hf-after-fonts">const C = { "T": { "h1": { "s": 0, "e": 5.82, "vo": 0.55, "id": "h1" }, "h2": { "s": 5.82, "e": 11.17, "vo": 6.07, "id": "h2" }, "h2b": { "s": 11.17, "e": 19.77, "vo": 11.47, "id": "h2b" }, "h3": { "s": 19.77, "e": 27.11, "vo": 19.87, "id": "h3" }, "w1": { "s": 27.11, "e": 35.47, "vo": 27.41, "id": "w1" }, "w2": { "s": 35.47, "e": 41.65, "vo": 35.72, "id": "w2" }, "w3": { "s": 41.65, "e": 49.3, "vo": 41.75, "id": "w3" }, "w4": { "s": 49.3, "e": 57.52, "vo": 49.55, "id": "w4" }, "w5": { "s": 57.52, "e": 63.79, "vo": 57.77, "id": "w5" }, "w6": { "s": 63.79, "e": 71.92, "vo": 64.04, "id": "w6" }, "w7": { "s": 71.92, "e": 78.24, "vo": 72.17, "id": "w7" }, "z": { "s": 78.24, "e": 88.27, "vo": 78.74, "id": "z1" } }, "TOTAL": 88.27, "STAGE_IN": 26.66, "W1_CUT": 29.41, "W1_CLICK": 31.78, "W2_CUT": 38.47, "W3_CUT": 45.35, "W4_CUT": 52.55, "W6_CLICK": 68.03, "W6_CUT": 68.2, "W7_CLICK": 75.1, "H1A_END": 3.05, "H2A_END": 7.38, "H2B_END": 11.87, "H3_LOCK": 20.99, "Z_CLIP_IN": 77.99, "Z_SCAN": 81.43, "Z_SLOGAN": 83.57, "Z_CREDIT": 86.17, "SUB": [{ "t": "Bapak bilang, waktu rehabilitasi dulu, petugasnya yang tanda tangan sendiri.", "s": 0.47, "e": 5.65, "k": "hook" }, { "t": "Berkasnya tampak lengkap.", "s": 5.99, "e": 7.61, "k": "hook" }, { "t": "Tapi siapa yang memastikan berkasnya asli?", "s": 7.65, "e": 10.85, "k": "hook" }, { "t": "Setiap hari, verifikator BPJS memeriksa berkas yang menumpuk.", "s": 11.39, "e": 15.24, "k": "hook" }, { "t": "Mustahil teliti satu per satu, jadi yang janggal bisa lolos.", "s": 15.36, "e": 19.5, "k": "hook" }, { "t": "Karena itu, hadirlah Vedika Autentik.", "s": 19.79, "e": 22.87, "k": "logo" }, { "t": "Teman kerja verifikator untuk memeriksa keaslian berkas.", "s": 22.99, "e": 26.74, "k": "logo" }, { "t": "Anda tak perlu lagi memeriksa manual, cukup unggah berkas di tab Autentik.", "s": 27.33, "e": 31.81, "k": "demo" }, { "t": "Satu klik, tujuh pemeriksaan berjalan sekaligus.", "s": 31.85, "e": 35.25, "k": "demo" }, { "t": "Pertama, kualitas scan.", "s": 35.64, "e": 37.37, "k": "demo" }, { "t": "Kalau buram, cukup minta scan ulang, tanpa menuduh siapa pun.", "s": 37.45, "e": 41.43, "k": "demo" }, { "t": "Hasilnya berlabel jelas: lolos, perlu dicek, atau prioritas.", "s": 41.67, "e": 46.42, "k": "demo" }, { "t": "Yang paling mendesak selalu di atas.", "s": 46.55, "e": 49.13, "k": "demo" }, { "t": "Buka satu berkas, buktinya langsung terlihat.", "s": 49.47, "e": 52.56, "k": "demo" }, { "t": "Lima sesi yang diubah jadi delapan, ditandai tepat di tempatnya.", "s": 52.74, "e": 57.3, "k": "demo" }, { "t": "Berkas yang dipakai ulang untuk pasien lain?", "s": 57.69, "e": 60.2, "k": "demo" }, { "t": "Disandingkan, kembarannya langsung ketahuan.", "s": 60.28, "e": 63.52, "k": "demo" }, { "t": "Untuk berkas prioritas, tanyai peserta lewat WhatsApp resmi BPJS.", "s": 63.96, "e": 68.41, "k": "demo" }, { "t": "Satu balasan, dan Anda tahu yang sebenarnya.", "s": 68.45, "e": 71.7, "k": "demo" }, { "t": "Sistem hanya menyarankan.", "s": 72.09, "e": 73.67, "k": "demo" }, { "t": "Keputusan akhir tetap di tangan Anda, lengkap dengan alasan tertulis.", "s": 73.71, "e": 77.92, "k": "demo" }, { "t": "Memeriksa lebih tenang, memutuskan lebih adil.", "s": 78.66, "e": 81.97, "k": "hook" }], "XF": [{ "id": "w2a", "s": 35.47 }, { "id": "w2b", "s": 38.47 }, { "id": "w3a", "s": 41.65 }, { "id": "w3b", "s": 45.35 }, { "id": "w4a", "s": 49.3 }, { "id": "w4b", "s": 52.55 }, { "id": "w5", "s": 57.52 }, { "id": "w6a", "s": 63.79 }, { "id": "w7", "s": 71.92 }], "XFD": 0.3, "VS": { "h1": [[0.55, 5.47]], "h2": [[6.07, 7.45], [7.73, 10.67]], "h2b": [[11.47, 15.06], [15.44, 19.32]], "h3": [[19.87, 22.69], [23.07, 26.56]], "w1": [[27.41, 31.65], [31.93, 35.07]], "w2": [[35.72, 37.19], [37.53, 41.25]], "w3": [[41.75, 46.24], [46.63, 48.95]], "w4": [[49.55, 52.38], [52.82, 57.12]], "w5": [[57.77, 60.02], [60.36, 63.34]], "w6": [[64.04, 68.25], [68.53, 71.52]], "w7": [[72.17, 73.64], [73.79, 77.74]], "z": [[78.74, 81.79], [82.18, 83.29], [83.67, 85.97]] } };
+const T = C.T;
+const W = 1920, H = 1080;
+const tl = gsap.timeline({ paused: true });
+const camKeys = [];
+function ck(t, cx, cy, s) {
+  camKeys.push({ t, cx, cy, lz: Math.log(s) });
+}
+function camPrep() {
+  camKeys.sort((a, b) => a.t - b.t);
+  const n = camKeys.length;
+  for (const ch of ["cx", "cy", "lz"]) {
+    const h2 = [], d = [], m = new Array(n).fill(0);
+    for (let i = 0; i < n - 1; i++) {
+      h2[i] = camKeys[i + 1].t - camKeys[i].t;
+      d[i] = (camKeys[i + 1][ch] - camKeys[i][ch]) / h2[i];
+    }
+    for (let i = 1; i < n - 1; i++) {
+      if (d[i - 1] * d[i] <= 0) m[i] = 0;
+      else {
+        const w1 = 2 * h2[i] + h2[i - 1], w2 = h2[i] + 2 * h2[i - 1];
+        m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]);
+      }
+    }
+    camKeys.forEach((k, i) => {
+      k["m" + ch] = m[i];
+    });
+  }
+}
+function camAt(t) {
+  const n = camKeys.length;
+  if (t <= camKeys[0].t) return camKeys[0];
+  if (t >= camKeys[n - 1].t) return camKeys[n - 1];
+  let i = 0;
+  while (camKeys[i + 1].t <= t) i++;
+  const a = camKeys[i], b = camKeys[i + 1], h2 = b.t - a.t, u = (t - a.t) / h2;
+  const u2 = u * u, u3 = u2 * u;
+  const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+  const f = (ch) => h00 * a[ch] + h10 * h2 * a["m" + ch] + h01 * b[ch] + h11 * h2 * b["m" + ch];
+  return { cx: f("cx"), cy: f("cy"), lz: f("lz") };
+}
+function camApply(c) {
+  const s = Math.exp(c.lz);
+  let x, y;
+  if (s < 1) {
+    x = W * (1 - s) / 2;
+    y = H * (1 - s) / 2 + 24 * (1 - s);
+  } else {
+    x = Math.min(0, Math.max(W - s * W, W / 2 - s * c.cx));
+    y = Math.min(0, Math.max(H - s * H, H / 2 - s * c.cy));
+  }
+  gsap.set("#win", { x, y, scale: s });
+}
+function camPlay() {
+  camPrep();
+  const t0 = camKeys[0].t, t1 = camKeys[camKeys.length - 1].t, o = { v: 0 };
+  tl.fromTo(o, { v: 0 }, {
+    v: 1,
+    duration: t1 - t0,
+    ease: "none",
+    immediateRender: false,
+    modifiers: { v: (v) => {
+      camApply(camAt(t0 + v * (t1 - t0)));
+      return v;
+    } }
+  }, t0);
+}
+C.XF.forEach((x) => tl.fromTo("#" + x.id, { opacity: 0 }, { opacity: 1, duration: C.XFD, ease: "sine.inOut" }, x.s));
+tl.fromTo("#w3b", { y: -297 }, { y: 0, duration: 0.3, ease: "power2.inOut" }, C.W3_CUT);
+tl.fromTo("#w3a", { y: 0 }, { y: 297, duration: 0.3, ease: "power2.inOut" }, C.W3_CUT);
+tl.set("#black", { opacity: 1 }, 0);
+tl.to("#black", { opacity: 0, duration: 0.9, ease: "power1.out" }, 0.05);
+tl.fromTo("#lb1 i", { scaleY: 1.6 }, { scaleY: 1, duration: 1.4, ease: "power2.out" }, 0);
+tl.fromTo("#tag1", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.4);
+tl.fromTo("#in-h1a", { scale: 1.04, xPercent: 0 }, { scale: 1.13, xPercent: -1.2, duration: C.H1A_END, ease: "none" }, 0);
+tl.fromTo("#in-h1b", { scale: 1.34 }, { scale: 1.42, duration: T.h2.s + 0.4 - C.H1A_END, ease: "none" }, C.H1A_END);
+tl.set("#sh-h2a", { opacity: 0 }, 0);
+tl.to("#sh-h2a", { opacity: 1, duration: 0.45, ease: "sine.inOut" }, T.h2.s - 0.05);
+tl.to("#in-h1b", { filter: "blur(6px)", duration: 0.45, ease: "sine.in" }, T.h2.s - 0.05);
+tl.fromTo("#in-h2a", { scale: 1.05 }, { scale: 1.12, duration: C.H2A_END - T.h2.s, ease: "none" }, T.h2.s);
+tl.fromTo("#in-h2b", { scale: 1.36 }, { scale: 1.5, duration: C.H2B_END - C.H2A_END, ease: "sine.in" }, C.H2A_END);
+tl.to("#h2b", { "--hf-color-grading-exposure": -0.55, duration: 0.9, ease: "sine.in" }, T.h2b.s - 0.2);
+tl.set("#sh-pn", { opacity: 0 }, 0);
+tl.to("#sh-pn", { opacity: 1, duration: 0.8, ease: "sine.inOut" }, T.h2b.s + 0.2);
+tl.fromTo("#in-pn", { scale: 1.3 }, { scale: 1.42, duration: T.h3.s + 0.7 - T.h2b.s - 0.2, ease: "none" }, T.h2b.s + 0.2);
+tl.set("#sh-pn", { opacity: 0 }, T.h3.s + 0.7);
+tl.to("#lb1 i", { scaleY: 1.9, duration: 0.7, ease: "power2.in" }, T.h3.s - 0.6);
+tl.to("#tag1", { opacity: 0, duration: 0.3 }, T.h2b.s + 0.1);
+const h = T.h3.s;
+function lockIn(p, t0, opt) {
+  tl.fromTo(
+    `#${p}-wl`,
+    { x: -14, rotation: -7, opacity: 0, transformOrigin: "50% 100%" },
+    { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+    t0
+  );
+  tl.fromTo(
+    `#${p}-wr`,
+    { x: 14, rotation: 7, opacity: 0, transformOrigin: "50% 100%" },
+    { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
+    t0
+  );
+  tl.fromTo(`#${p}-mw`, { scale: 1 }, { scale: 1.04, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.42);
+  tl.fromTo(`#${p}-flash`, { opacity: 0 }, { opacity: 0.32, duration: 0.033, ease: "none", yoyo: true, repeat: 1 }, t0 + 0.42);
+  tl.fromTo(
+    `#${p}-dot`,
+    { scale: 0, y: -9, transformOrigin: "50% 50%" },
+    { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" },
+    t0 + 0.5
+  );
+  tl.set(`#${p}-ring`, { opacity: 0 }, 0);
+  tl.fromTo(
+    `#${p}-ring`,
+    { scale: 1, opacity: 0.95, transformOrigin: "50% 50%" },
+    { scale: 4.2, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false },
+    t0 + 0.62
+  );
+  tl.fromTo(`#${p}-w1`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.7);
+  tl.fromTo(`#${p}-w2`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.82);
+  tl.fromTo(`#${p}-line`, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, t0 + 1.3);
+  tl.fromTo(`#${p}-mw`, { y: 0 }, { y: -4, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: opt.floats }, t0 + 1.9);
+  tl.fromTo(
+    `#${p}-lock .wm-sh`,
+    { backgroundPosition: "150% 0%" },
+    { backgroundPosition: "-50% 0%", duration: 1.2, ease: "power1.inOut", stagger: 0.08 },
+    t0 + opt.shine
+  );
+}
+tl.fromTo("#h3-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, h);
+tl.fromTo("#h3-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, h);
+tl.fromTo("#h3-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }, h + 0.4);
+tl.set("#h3-scan", { opacity: 0 }, h + 0.56);
+tl.set(["#h3-scan2", "#z-scan"], { opacity: 0 }, 0);
+tl.fromTo("#h3-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, h + 0.5);
+lockIn("h3", C.H3_LOCK, { floats: 2, shine: 3.4 });
+tl.set("#h3-scan2", { opacity: 1, y: -10 }, C.STAGE_IN);
+tl.to("#h3-scan2", { y: H + 10, duration: 0.5, ease: "power1.inOut" }, C.STAGE_IN);
+tl.to("#h3-in", { clipPath: "inset(100% 0% 0% 0%)", duration: 0.5, ease: "power1.inOut" }, C.STAGE_IN);
+tl.set("#stage", { opacity: 0 }, 0);
+tl.set("#stage", { opacity: 1 }, C.STAGE_IN);
+tl.fromTo("#mint-dots", { x: 0, y: 0 }, { x: -34, y: -34, duration: T.w7.e - C.STAGE_IN, ease: "none" }, C.STAGE_IN);
+tl.fromTo("#scrim-top", { opacity: 0 }, { opacity: 1, duration: 0.6 }, T.w1.s + 0.4);
+const BASE = [1100, 640, 1.2];
+ck(C.STAGE_IN, BASE[0], BASE[1], BASE[2] * 0.94);
+ck(C.STAGE_IN + 1.4, ...BASE);
+ck(T.w7.e, ...BASE);
+camPlay();
+document.querySelectorAll(".step").forEach((el) => {
+  const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+  const inner = el.querySelector(".step-in");
+  tl.fromTo(inner, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.out" }, s + 0.12);
+  tl.fromTo(el.querySelector(".step-rule"), { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power2.out" }, s + 0.2);
+  tl.to(inner, { opacity: 0, duration: 0.2 }, s + d - 0.22);
+});
+tl.set("#sh-zv", { opacity: 0 }, 0);
+tl.to("#sh-zv", { opacity: 1, duration: 0.6, ease: "sine.inOut" }, C.Z_CLIP_IN);
+tl.fromTo("#in-zv", { scale: 1.1 }, { scale: 1.02, duration: C.Z_SCAN + 0.7 - C.Z_CLIP_IN, ease: "sine.out" }, C.Z_CLIP_IN);
+tl.fromTo("#lb2 i", { scaleY: 0 }, { scaleY: 1, duration: 0.8, ease: "power3.out" }, C.Z_CLIP_IN + 0.1);
+tl.fromTo("#tag2", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.Z_CLIP_IN + 0.5);
+tl.set("#stage", { opacity: 0 }, C.Z_CLIP_IN + 0.7);
+const z = C.Z_SCAN;
+tl.fromTo("#z-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, z);
+tl.fromTo("#zc-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, z);
+tl.fromTo("#z-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6 }, z + 0.4);
+tl.set("#z-scan", { opacity: 0 }, z + 0.56);
+tl.fromTo("#z-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, z + 0.5);
+lockIn("z", z + 0.55, { floats: 2, shine: 4.4 });
+tl.fromTo("#z-slogan", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power3.out" }, C.Z_SLOGAN);
+tl.fromTo("#z-credit", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, C.Z_CREDIT);
+tl.set("#endfade", { opacity: 0 }, 0);
+tl.to("#endfade", { opacity: 1, duration: 0.6, ease: "sine.in" }, C.TOTAL - 0.6);
+document.querySelectorAll(".sub").forEach((el) => {
+  const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+  const p = el.querySelector("p");
+  tl.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, s);
+  tl.to(p, { opacity: 0, duration: 0.14, ease: "power1.in" }, s + d - 0.14);
+});
+window.__timelines["main"] = tl;</script></body>
+</html>

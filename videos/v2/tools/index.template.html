@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <!-- Dibuat oleh tools/build.py dari tools/index.template.html. Edit template, lalu jalankan build.py. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Poppins"; font-weight: 400; src: url("assets/fonts/Poppins-Regular.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 500; src: url("assets/fonts/Poppins-Medium.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 600; src: url("assets/fonts/Poppins-SemiBold.ttf") format("truetype"); }
+      @font-face { font-family: "Poppins"; font-weight: 700; src: url("assets/fonts/Poppins-Bold.ttf") format("truetype"); }
+      :root {
+        --teal: #0f3d3e; --teal-lt: #145558; --teal-dk: #082a2b; --green: #0e7c3a; --orange: #f26b21;
+        --navy: #1b2d4f; --mint: #eaf3f1; --mint-2: #d3e3df; --grey: #5b6b6a; --gold: #f3b441;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #070d0d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Poppins", sans-serif; background: #070d0d; }
+      .layer { position: absolute; inset: 0; }
+
+      /* ---------- hook dan penutup: klip video AI ---------- */
+      .shot { position: absolute; inset: 0; overflow: hidden; }
+      .shot .inner { position: absolute; inset: 0; }
+      .shot video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #sh-h1b .inner { transform-origin: 58% 30%; }
+      #sh-h2a .inner { transform-origin: 66% 40%; }
+      #sh-h2b .inner { transform-origin: 69% 36%; }
+      #sh-pn .inner { transform-origin: 46% 80%; filter: blur(2.5px) saturate(0.7); }
+      #sh-pn::after { content: ""; position: absolute; inset: 0; background: rgba(15, 61, 62, 0.58); }
+      #sh-zv { z-index: 30; }
+      #black { position: absolute; inset: 0; background: #050808; z-index: 40; pointer-events: none; }
+      .lb { position: absolute; inset: 0; pointer-events: none; z-index: 45; }
+      .lb i { position: absolute; left: 0; right: 0; height: 118px; background: #040706; display: block; }
+      .lb i:first-child { top: 0; transform-origin: 50% 0%; }
+      .lb i:last-child { bottom: 0; transform-origin: 50% 100%; }
+      .tag { position: absolute; top: 44px; right: 56px; z-index: 46; color: rgba(255, 255, 255, 0.72);
+        font-size: 20px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+
+      /* ---------- kartu logo (H3 dan penutup) ---------- */
+      .card { position: absolute; inset: 0; z-index: 50; }
+      .card-in { position: absolute; inset: 0; }
+      .card-bg { position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 80% at 50% 45%, var(--teal-lt) 0%, var(--teal) 62%, var(--teal-dk) 100%); }
+      .card-glow { position: absolute; left: 50%; top: 45%; width: 1400px; height: 1400px; margin: -700px 0 0 -700px;
+        border-radius: 50%; background: radial-gradient(circle, rgba(46, 140, 132, 0.42) 0%, rgba(20, 85, 88, 0) 62%); }
+      .card-grid { position: absolute; inset: 0; opacity: 0.16;
+        background-image: radial-gradient(rgba(234, 243, 241, 0.55) 1.2px, transparent 1.4px); background-size: 36px 36px;
+        -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%);
+        mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%); }
+      .lock { position: absolute; left: 0; right: 0; top: 0; height: 900px; display: flex; align-items: center;
+        justify-content: center; gap: 70px; }
+      .mark-wrap { width: 300px; height: 300px; position: relative; }
+      .mark { width: 300px; height: 300px; display: block; overflow: visible; }
+      .words { position: relative; padding: 10px 40px 14px 0; overflow: hidden; }
+      .wm-line { overflow: hidden; height: 158px; }
+      .wm { display: block; color: #e4f0ed; font-weight: 700; font-size: 150px; line-height: 158px; letter-spacing: -0.03em; }
+      .oline { display: block; width: 260px; height: 8px; border-radius: 4px; background: var(--orange); margin-top: 30px; transform-origin: 0% 50%; }
+      .wm-in { position: relative; }
+      .wm-sh { position: absolute; left: 0; top: 0; color: transparent; -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 38%, #ffffff 50%, rgba(255, 255, 255, 0) 62%);
+        background-size: 300% 100%; background-repeat: no-repeat; background-position: 150% 0%;
+        -webkit-background-clip: text; background-clip: text; }
+      .scan-v { position: absolute; top: 0; bottom: 0; left: 0; width: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .scan-h { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 55%); }
+      #z-lock { height: 760px; }
+      #z-lock .mark-wrap, #z-lock .mark { width: 240px; height: 240px; }
+      #z-lock .wm { font-size: 122px; line-height: 130px; }
+      #z-lock .wm-line { height: 130px; }
+      .slogan { position: absolute; left: 0; right: 0; top: 700px; text-align: center; overflow: hidden; height: 110px; }
+      .slogan span { display: inline-block; color: var(--mint); font-weight: 600; font-size: 76px; line-height: 104px; letter-spacing: -0.015em; }
+      .credit { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; color: rgba(234, 243, 241, 0.78);
+        font-size: 26px; font-weight: 500; letter-spacing: 0.06em; }
+
+      /* ---------- panggung demo ---------- */
+      #stage { position: absolute; inset: 0; z-index: 10; background: var(--mint); overflow: hidden; }
+      #mint-dots { position: absolute; inset: -60px; opacity: 0.55;
+        background-image: radial-gradient(rgba(15, 61, 62, 0.16) 1.6px, transparent 1.8px); background-size: 34px 34px; }
+      #mint-glow { position: absolute; left: 50%; top: 50%; width: 2200px; height: 1500px; margin: -750px 0 0 -1100px;
+        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 60%); }
+      #win { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 22px; overflow: hidden;
+        background: #fff; transform-origin: 0 0;
+        box-shadow: 0 50px 140px rgba(15, 61, 62, 0.26), 0 8px 30px rgba(15, 61, 62, 0.12), 0 0 0 2px rgba(15, 61, 62, 0.1); }
+      #win video, #win img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      #scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 170px; pointer-events: none;
+        background: linear-gradient(180deg, rgba(234, 243, 241, 0.96) 0%, rgba(234, 243, 241, 0.86) 45%, rgba(234, 243, 241, 0) 100%); }
+      .step { position: absolute; left: 60px; top: 44px; z-index: 20; }
+      .step-in { display: flex; align-items: center; gap: 20px; }
+      .step-no { color: var(--orange); font-weight: 700; font-size: 34px; letter-spacing: 0.02em; }
+      .step-rule { display: block; width: 3px; height: 38px; background: var(--teal); opacity: 0.35; }
+      .step-ti { color: var(--teal); font-weight: 600; font-size: 34px; letter-spacing: -0.01em; }
+      .foot { position: absolute; right: 52px; bottom: 22px; z-index: 20; display: flex; align-items: center; gap: 12px;
+        color: var(--grey); font-size: 20px; font-weight: 500; background: rgba(255, 255, 255, 0.92); padding: 6px 16px 6px 10px; border-radius: 12px; }
+      .foot svg { width: 26px; height: 26px; }
+
+      /* ---------- subtitle ---------- */
+      .sub { position: absolute; left: 0; right: 0; z-index: 60; text-align: center; pointer-events: none; }
+      .sub p { display: inline-block; max-width: 1500px; }
+      .sub-hook { bottom: 150px; }
+      .sub-hook p { color: #fff; font-size: 46px; font-weight: 500; line-height: 1.32;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 22px rgba(0, 0, 0, 0.55); }
+      .sub-logo { bottom: 104px; }
+      .sub-logo p { color: var(--mint); font-size: 42px; font-weight: 500; line-height: 1.32; }
+      .sub-demo { bottom: 44px; }
+      .sub-demo p { background: rgba(15, 61, 62, 0.95); color: #fff; font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      #endfade { position: absolute; inset: 0; background: #050808; z-index: 90; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-ghvk" id="root" data-composition-id="main" data-start="0" data-duration="__TOTAL__" data-width="1920" data-height="1080">
+
+      <!-- ===== panggung demo (W1–W7): jendela prototipe di latar mint, kamera = transform #win ===== -->
+      <div data-hf-id="hf-1rt5" id="stage">
+        <div data-hf-id="hf-rluu" id="mint-glow" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-vqs1" id="mint-dots" data-layout-allow-overflow=""></div>
+        <div data-hf-id="hf-fs56" id="win" data-layout-allow-overflow="">
+          <img data-hf-id="hf-kwbo" id="w1a" class="clip" src="assets/video/w1-still.png" alt="" data-start="__STILL_S__" data-duration="__STILL_D__" data-track-index="3">
+__SCREEN__
+        </div>
+        <div data-hf-id="hf-1djr" id="scrim-top"></div>
+      </div>
+__STEPS__
+
+      <!-- ===== klip video AI (hook + penutup) ===== -->
+      <div data-hf-id="hf-feuv" class="layer" id="hooks" style="z-index: 20">
+__SHOTS__
+      </div>
+      <div data-hf-id="hf-y82s" class="lb clip" id="lb1" data-start="0" data-duration="__LB1_D__" data-track-index="5"><i data-hf-id="hf-wt6k"></i><i data-hf-id="hf-zeb8"></i></div>
+      <div data-hf-id="hf-onnq" class="tag clip" id="tag1" data-start="0.4" data-duration="__LB1_D__" data-track-index="5">Ilustrasi</div>
+      <div data-hf-id="hf-kgrc" class="lb clip" id="lb2" data-start="__LB2_S__" data-duration="__LB2_D__" data-track-index="5"><i data-hf-id="hf-y7e5"></i><i data-hf-id="hf-ylp6"></i></div>
+      <div data-hf-id="hf-v3de" class="tag clip" id="tag2" data-start="__LB2_S__" data-duration="__LB2_D__" data-track-index="5">Ilustrasi</div>
+      <div data-hf-id="hf-t94y" id="black"></div>
+
+      <!-- ===== H3: pindai lalu kunci ===== -->
+      <div data-hf-id="hf-osjk" class="card clip" id="h3" data-start="__H3_S__" data-duration="__H3_D__" data-track-index="4">
+        <div data-hf-id="hf-oeb3" class="card-in" id="h3-in">
+          <div data-hf-id="hf-3m4x" class="card-bg" id="h3-bg"></div>
+          <div data-hf-id="hf-lz3t" class="card-glow" id="h3-glow"></div>
+          <div data-hf-id="hf-zidb" class="card-grid" id="h3-grid"></div>
+          __H3LOCK__
+          <div data-hf-id="hf-iyg6" class="flash" id="h3-flash"></div>
+        </div>
+        <div data-hf-id="hf-pyfb" class="scan-v" id="h3-scan"></div>
+        <div data-hf-id="hf-gxit" class="scan-h" id="h3-scan2"></div>
+      </div>
+
+      <!-- ===== Z: logo + slogan ===== -->
+      <div data-hf-id="hf-gfaq" class="card clip" id="zc" data-start="__Z_S__" data-duration="__Z_D__" data-track-index="4" style="z-index: 52">
+        <div data-hf-id="hf-cyr4" class="card-in" id="zc-in">
+          <div data-hf-id="hf-6r2q" class="card-bg" id="z-bg"></div>
+          <div data-hf-id="hf-o3b2" class="card-glow" id="z-glow"></div>
+          <div data-hf-id="hf-03k6" class="card-grid" id="z-grid"></div>
+          __ZLOCK__
+          <div data-hf-id="hf-brmi" class="slogan"><span data-hf-id="hf-j5ef" id="z-slogan">Lengkap belum tentu asli</span></div>
+          <div data-hf-id="hf-cpyc" class="credit" id="z-credit">Tim ADA healthkathon</div>
+          <div data-hf-id="hf-srir" class="flash" id="z-flash"></div>
+        </div>
+        <div data-hf-id="hf-h7cs" class="scan-v" id="z-scan"></div>
+      </div>
+
+      <!-- ===== subtitle per kalimat ===== -->
+__SUBS__
+
+      <div data-hf-id="hf-kn72" id="endfade"></div>
+
+      <!-- ===== audio: narasi, SFX, musik ===== -->
+__AUDIO__
+    </div>
+
+    <script>
+      const C = __CFG__;
+      const T = C.T;
+      const W = 1920, H = 1080;
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------------------------------------------------------------- kamera demo
+      // Kamera virtual = SATU lintasan kontinu (cx, cy, ln zoom) pada rekaman 1920x1080, dibangun dari titik singgah
+      // (waypoint) dengan interpolasi kubik monoton (PCHIP, kecepatan kontinu, tanpa overshoot). Kamera tidak pernah
+      // berhenti-lalu-jalan di tiap pergantian adegan; ia hanya melambat alami di titik fokus dan saat arah berbalik.
+      // Zoom diinterpolasi di ruang logaritmik, x/y dihitung ulang tiap frame dari titik fokus.
+      const camKeys = [];
+      function ck(t, cx, cy, s) { camKeys.push({ t, cx, cy, lz: Math.log(s) }); }
+      function camPrep() {
+        camKeys.sort((a, b) => a.t - b.t);
+        const n = camKeys.length;
+        for (const ch of ["cx", "cy", "lz"]) {
+          const h = [], d = [], m = new Array(n).fill(0);
+          for (let i = 0; i < n - 1; i++) { h[i] = camKeys[i + 1].t - camKeys[i].t; d[i] = (camKeys[i + 1][ch] - camKeys[i][ch]) / h[i]; }
+          for (let i = 1; i < n - 1; i++) {
+            if (d[i - 1] * d[i] <= 0) m[i] = 0;
+            else {
+              const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1];
+              m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]);
+            }
+          }
+          camKeys.forEach((k, i) => { k["m" + ch] = m[i]; });
+        }
+      }
+      function camAt(t) {
+        const n = camKeys.length;
+        if (t <= camKeys[0].t) return camKeys[0];
+        if (t >= camKeys[n - 1].t) return camKeys[n - 1];
+        let i = 0;
+        while (camKeys[i + 1].t <= t) i++;
+        const a = camKeys[i], b = camKeys[i + 1], h = b.t - a.t, u = (t - a.t) / h;
+        const u2 = u * u, u3 = u2 * u;
+        const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+        const f = (ch) => h00 * a[ch] + h10 * h * a["m" + ch] + h01 * b[ch] + h11 * h * b["m" + ch];
+        return { cx: f("cx"), cy: f("cy"), lz: f("lz") };
+      }
+      function camApply(c) {
+        const s = Math.exp(c.lz);
+        let x, y;
+        if (s < 1) { x = W * (1 - s) / 2; y = H * (1 - s) / 2 + 24 * (1 - s); }   // jendela utuh, rata tengah di latar mint
+        else {
+          x = Math.min(0, Math.max(W - s * W, W / 2 - s * c.cx));
+          y = Math.min(0, Math.max(H - s * H, H / 2 - s * c.cy));
+        }
+        gsap.set("#win", { x, y, scale: s });
+      }
+      function camPlay() {
+        camPrep();
+        const t0 = camKeys[0].t, t1 = camKeys[camKeys.length - 1].t, o = { v: 0 };
+        tl.fromTo(o, { v: 0 }, {
+          v: 1, duration: t1 - t0, ease: "none", immediateRender: false,
+          modifiers: { v: (v) => { camApply(camAt(t0 + v * (t1 - t0))); return v; } },
+        }, t0);
+      }
+      // potongan isi rekaman: lebur singkat (klip berikutnya naik di atas klip sebelumnya), tanpa blur
+      C.XF.forEach((x) => tl.fromTo("#" + x.id, { opacity: 0 }, { opacity: 1, duration: C.XFD, ease: "sine.inOut" }, x.s));
+      // W3: rekaman aslinya scroll instan (tabel → daftar di atas). Tiruan scroll halus: klip keluar dan masuk
+      // bergeser 297 px berlawanan sehingga baris filter keduanya berimpit sepanjang lebur, tanpa bayangan ganda.
+      tl.fromTo("#w3b", { y: -297 }, { y: 0, duration: 0.3, ease: "power2.inOut" }, C.W3_CUT);
+      tl.fromTo("#w3a", { y: 0 }, { y: 297, duration: 0.3, ease: "power2.inOut" }, C.W3_CUT);
+
+      // ---------------------------------------------------------------- H1 / H2: hook sinematik
+      tl.set("#black", { opacity: 1 }, 0);
+      tl.to("#black", { opacity: 0, duration: 0.9, ease: "power1.out" }, 0.05);
+      tl.fromTo("#lb1 i", { scaleY: 1.6 }, { scaleY: 1, duration: 1.4, ease: "power2.out" }, 0);
+      tl.fromTo("#tag1", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.4);
+      tl.fromTo("#in-h1a", { scale: 1.04, xPercent: 0 }, { scale: 1.13, xPercent: -1.2, duration: C.H1A_END, ease: "none" }, 0);
+      tl.fromTo("#in-h1b", { scale: 1.34 }, { scale: 1.42, duration: T.h2.s + 0.4 - C.H1A_END, ease: "none" }, C.H1A_END);
+      // H1 → H2: lebur 0,45 dtk dengan sedikit blur, bukan potong keras
+      tl.set("#sh-h2a", { opacity: 0 }, 0);
+      tl.to("#sh-h2a", { opacity: 1, duration: 0.45, ease: "sine.inOut" }, T.h2.s - 0.05);
+      tl.to("#in-h1b", { filter: "blur(6px)", duration: 0.45, ease: "sine.in" }, T.h2.s - 0.05);
+      tl.fromTo("#in-h2a", { scale: 1.05 }, { scale: 1.12, duration: C.H2A_END - T.h2.s, ease: "none" }, T.h2.s);
+      // pertanyaan: potong lebih dekat ke wajah, dorongan pelan, warna meredup menjelang pindai
+      tl.fromTo("#in-h2b", { scale: 1.36 }, { scale: 1.5, duration: C.H2B_END - C.H2A_END, ease: "sine.in" }, C.H2A_END);
+      tl.to("#h2b", { "--hf-color-grading-exposure": -0.55, duration: 0.9, ease: "sine.in" }, T.h2b.s - 0.2);
+      // beban verifikator: antrean berkas di-dim di bawah letterbox, dorongan sangat pelan
+      tl.set("#sh-pn", { opacity: 0 }, 0);
+      tl.to("#sh-pn", { opacity: 1, duration: 0.8, ease: "sine.inOut" }, T.h2b.s + 0.2);
+      tl.fromTo("#in-pn", { scale: 1.3 }, { scale: 1.42, duration: T.h3.s + 0.7 - T.h2b.s - 0.2, ease: "none" }, T.h2b.s + 0.2);
+      tl.set("#sh-pn", { opacity: 0 }, T.h3.s + 0.7);   // overlay peredam ikut hilang setelah kartu logo menutup
+      tl.to("#lb1 i", { scaleY: 1.9, duration: 0.7, ease: "power2.in" }, T.h3.s - 0.6);
+      tl.to("#tag1", { opacity: 0, duration: 0.3 }, T.h2b.s + 0.1);
+
+      // ---------------------------------------------------------------- H3: pindai lalu kunci
+      const h = T.h3.s;
+      function lockIn(p, t0, opt) {
+        // sayap V bertemu, titik emas jatuh seperti stempel + cincin, wordmark naik dari masker, garis oranye
+        tl.fromTo(`#${p}-wl`, { x: -14, rotation: -7, opacity: 0, transformOrigin: "50% 100%" },
+          { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-wr`, { x: 14, rotation: 7, opacity: 0, transformOrigin: "50% 100%" },
+          { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-mw`, { scale: 1 }, { scale: 1.04, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-flash`, { opacity: 0 }, { opacity: 0.32, duration: 0.033, ease: "none", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-dot`, { scale: 0, y: -9, transformOrigin: "50% 50%" },
+          { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" }, t0 + 0.5);
+        tl.set(`#${p}-ring`, { opacity: 0 }, 0);
+        tl.fromTo(`#${p}-ring`, { scale: 1, opacity: 0.95, transformOrigin: "50% 50%" },
+          { scale: 4.2, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, t0 + 0.62);
+        tl.fromTo(`#${p}-w1`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.7);
+        tl.fromTo(`#${p}-w2`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.82);
+        tl.fromTo(`#${p}-line`, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, t0 + 1.3);
+        // hold yang hidup: logo melayang, glow bernapas, satu kilau lewat
+        tl.fromTo(`#${p}-mw`, { y: 0 }, { y: -4, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: opt.floats }, t0 + 1.9);
+        tl.fromTo(`#${p}-lock .wm-sh`, { backgroundPosition: "150% 0%" },
+          { backgroundPosition: "-50% 0%", duration: 1.2, ease: "power1.inOut", stagger: 0.08 }, t0 + opt.shine);
+      }
+      // garis pindai menyapu kiri → kanan; di belakangnya frame terakhir H2 jadi teal lalu pekat
+      tl.fromTo("#h3-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, h);
+      tl.fromTo("#h3-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, h);
+      tl.fromTo("#h3-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }, h + 0.4);
+      tl.set("#h3-scan", { opacity: 0 }, h + 0.56);
+      tl.set(["#h3-scan2", "#z-scan"], { opacity: 0 }, 0);
+      tl.fromTo("#h3-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, h + 0.5);
+      lockIn("h3", C.H3_LOCK, { floats: 2, shine: 3.4 });
+      // keluar: garis pindai turun atas → bawah, membuka jendela demo
+      tl.set("#h3-scan2", { opacity: 1, y: -10 }, C.STAGE_IN);
+      tl.to("#h3-scan2", { y: H + 10, duration: 0.5, ease: "power1.inOut" }, C.STAGE_IN);
+      tl.to("#h3-in", { clipPath: "inset(100% 0% 0% 0%)", duration: 0.5, ease: "power1.inOut" }, C.STAGE_IN);
+
+      // ---------------------------------------------------------------- panggung demo
+      tl.set("#stage", { opacity: 0 }, 0);
+      tl.set("#stage", { opacity: 1 }, C.STAGE_IN);
+      tl.fromTo("#mint-dots", { x: 0, y: 0 }, { x: -34, y: -34, duration: T.w7.e - C.STAGE_IN, ease: "none" }, C.STAGE_IN);
+      tl.fromTo("#scrim-top", { opacity: 0 }, { opacity: 1, duration: 0.6 }, T.w1.s + 0.4);
+
+      // Kamera sengaja tenang: satu framing lebar per bagian, bergeser hanya saat pindah bagian (bersamaan dengan lebur
+      // isi rekaman), lalu dorongan sangat pelan (4%) supaya tidak mati. Tidak ada zoom keluar-masuk di dalam bagian.
+      // Kunci terakhir sebuah bagian = kunci pertama bagian berikutnya, jadi pergantian tidak memuat loncatan zoom.
+      // Satu framing tetap untuk seluruh demo (zoom 1.2, fokus agak ke bawah supaya titik klik W6 di dasar ponsel
+      // tetap di atas caption): tidak ada geser atau zoom antarbagian, jadi tidak ada goyang.
+      const BASE = [1100, 640, 1.2];
+      ck(C.STAGE_IN, BASE[0], BASE[1], BASE[2] * 0.94);   // settle kecil saat kartu logo tersapu
+      ck(C.STAGE_IN + 1.4, ...BASE);
+      ck(T.w7.e, ...BASE);
+      camPlay();
+
+      // label langkah: dibuka dengan masker dari kiri, tanpa terbang masuk
+      document.querySelectorAll(".step").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+        const inner = el.querySelector(".step-in");
+        tl.fromTo(inner, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.out" }, s + 0.12);
+        tl.fromTo(el.querySelector(".step-rule"), { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power2.out" }, s + 0.2);
+        tl.to(inner, { opacity: 0, duration: 0.2 }, s + d - 0.22);
+      });
+
+      // ---------------------------------------------------------------- Z: adegan hangat → logo + slogan
+      tl.set("#sh-zv", { opacity: 0 }, 0);
+      tl.to("#sh-zv", { opacity: 1, duration: 0.6, ease: "sine.inOut" }, C.Z_CLIP_IN);
+      tl.fromTo("#in-zv", { scale: 1.1 }, { scale: 1.02, duration: C.Z_SCAN + 0.7 - C.Z_CLIP_IN, ease: "sine.out" }, C.Z_CLIP_IN);
+      tl.fromTo("#lb2 i", { scaleY: 0 }, { scaleY: 1, duration: 0.8, ease: "power3.out" }, C.Z_CLIP_IN + 0.1);
+      tl.fromTo("#tag2", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.Z_CLIP_IN + 0.5);
+      tl.set("#stage", { opacity: 0 }, C.Z_CLIP_IN + 0.7);
+      const z = C.Z_SCAN;
+      tl.fromTo("#z-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#zc-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#z-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6 }, z + 0.4);
+      tl.set("#z-scan", { opacity: 0 }, z + 0.56);
+      tl.fromTo("#z-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, z + 0.5);
+      lockIn("z", z + 0.55, { floats: 2, shine: 4.4 });
+      tl.fromTo("#z-slogan", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power3.out" }, C.Z_SLOGAN);
+      tl.fromTo("#z-credit", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, C.Z_CREDIT);
+      tl.set("#endfade", { opacity: 0 }, 0);
+      tl.to("#endfade", { opacity: 1, duration: 0.6, ease: "sine.in" }, C.TOTAL - 0.6);
+
+      // ---------------------------------------------------------------- subtitle: muncul halus, hilang cepat
+      document.querySelectorAll(".sub").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+        const p = el.querySelector("p");
+        tl.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, s);
+        tl.to(p, { opacity: 0, duration: 0.14, ease: "power1.in" }, s + d - 0.14);
+      });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

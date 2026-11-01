@@ -3,3 +3,9 @@ node_modules/
 .vercel
 videos/.env.local
 videos/v3/renders/
+videos/**/*.mp4
+videos/**/*.mov
+videos/**/renders/
+videos/scratch/
+videos/raw/
+*.pptx

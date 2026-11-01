@@ -1,0 +1,23 @@
+{
+  "mulai": 0,
+  "d1": 0,
+  "d2": 10.74,
+  "panggilan-mulai": 11.87,
+  "d3": 17.07,
+  "d5-sebelum": 26.7,
+  "d5-sebelum-selesai": 35.41,
+  "d3-panggilan-lagi": 43.65,
+  "d4": 87.29,
+  "d5": 102.26,
+  "d6": 112.44,
+  "d6-putusan": 117.59,
+  "selesai": 122.09,
+  "klik": [
+    11.55,
+    17.88,
+    103.06,
+    108.91,
+    116.76
+  ],
+  "panggilanMulai": 11.87
+}

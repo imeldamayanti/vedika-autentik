@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <!-- Dibuat oleh tools/build.py dari tools/index.template.html. Edit template, lalu jalankan build.py. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "PJS"; font-weight: 400; src: url("assets/fonts/plus-jakarta-sans-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 500; src: url("assets/fonts/plus-jakarta-sans-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 600; src: url("assets/fonts/plus-jakarta-sans-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 700; src: url("assets/fonts/plus-jakarta-sans-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 800; src: url("assets/fonts/plus-jakarta-sans-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "JBM"; font-weight: 500; src: url("assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+      :root {
+        --teal: #0f3d3e; --teal-lt: #145558; --teal-dk: #082a2b; --green: #0e7c3a; --orange: #f26b21; --red: #d93a2f;
+        --navy: #1b2d4f; --mint: #eaf3f1; --mint-2: #d3e3df; --grey: #5b6b6a; --gold: #f3b441;
+        /* token website (app.css) untuk babak 1 dan penutup */
+        --w-bg: oklch(100% 0 0); --w-muted: oklch(98% .002 90); --w-fg: oklch(14% .002 90); --w-fg2: oklch(34% .004 90); --w-mfg: oklch(52% .006 90);
+        --w-border: oklch(92% .004 90); --w-border2: oklch(86% .006 90); --w-primary: oklch(48% .075 205); --w-psub: oklch(96% .018 205); --w-brand: oklch(64% .11 184);
+        --w-cek-bg: oklch(96.8% .045 85); --w-cek-fg: oklch(46% .1 60); --w-pri: oklch(55% .19 27); --w-pri-bg: oklch(96.5% .025 27); --w-pri-fg: oklch(46% .17 27);
+        --w-shadow: 0 12px 32px oklch(20% .02 205 / .14), 0 2px 6px oklch(20% .02 205 / .08);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #070d0d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "PJS", sans-serif; background: #070d0d; }
+      .layer { position: absolute; inset: 0; }
+
+      /* ---------- babak 1 + penutup: komponen website (kartu, lencana, kalender, tabel klaim) ---------- */
+      #black { position: absolute; inset: 0; background: #050808; z-index: 40; pointer-events: none; }
+      #b1, #zb { position: absolute; inset: 0; z-index: 20; background: var(--w-muted); color: var(--w-fg); overflow: hidden; }
+      #zb { z-index: 30; }
+      .b1-dots { position: absolute; inset: -40px; opacity: 0.6; background-image: radial-gradient(oklch(48% .075 205 / .13) 1.5px, transparent 1.7px); background-size: 34px 34px; }
+      #b1-s2, #b1-s3 { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+      .lencana { position: absolute; left: 80px; top: 56px; z-index: 3; font-size: 20px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 9px 16px;
+        border-radius: 8px; background: var(--w-cek-bg); color: var(--w-cek-fg); border: 2px solid oklch(86% .07 85); white-space: nowrap; }
+      .panel { position: absolute; background: var(--w-bg); border: 2px solid var(--w-border); border-radius: 20px; box-shadow: var(--w-shadow); }
+      .kapital { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-fg2); }
+      .angka { font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
+      .hijau { color: var(--w-brand); }
+      .mono { font-family: "JBM", monospace; }
+      .avatar { width: 84px; height: 84px; flex: none; border-radius: 50%; background: var(--w-psub); color: var(--w-primary); display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+      .pas { left: 80px; top: 150px; width: 660px; padding: 22px 30px; display: flex; gap: 24px; align-items: center; }
+      .pas .nm { font-size: 38px; font-weight: 800; }
+      .pas .sb { font-size: 23px; font-weight: 500; color: var(--w-mfg); margin-top: 2px; }
+      .rek { left: 80px; top: 316px; width: 660px; padding: 24px 30px; }
+      .wv { display: flex; align-items: center; gap: 2.6px; height: 150px; margin-top: 12px; }
+      .wv i { display: block; width: 4.4px; border-radius: 3px; background: var(--w-border2); }
+      .ver { left: 80px; top: 580px; width: 660px; padding: 24px 30px 26px; }
+      .vr { display: flex; align-items: baseline; gap: 14px; margin-top: 6px; }
+      .vr .angka { font-size: 128px; }
+      .vr .sesi { font-size: 42px; font-weight: 700; color: var(--w-fg2); }
+      #b1-kal { position: absolute; left: 880px; top: 118px; transform-origin: 0 0; }
+      .kal-t { font-size: 40px; font-weight: 800; margin-bottom: 16px; letter-spacing: -.01em; }
+      .kal-g { position: relative; display: grid; grid-template-columns: repeat(7, 104px); gap: 10px; }
+      .kh { height: 34px; font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-mfg); text-align: center; line-height: 34px; }
+      .kd { position: relative; height: 92px; border-radius: 14px; border: 2px solid var(--w-border); background: var(--w-bg); font-size: 27px; font-weight: 700; color: var(--w-fg2);
+        padding: 9px 12px; font-variant-numeric: tabular-nums; }
+      .kd.x { visibility: hidden; }
+      .kd.min { color: var(--w-pri-fg); }
+      .kd .tg { position: absolute; left: 11px; right: 6px; bottom: 8px; font-size: 13px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; line-height: 1.1; opacity: 0; }
+      .kd.t { background: var(--w-fg); border-color: var(--w-fg); color: #fff; }
+      .kd.t.lb { background: var(--w-cek-fg); border-color: var(--w-cek-fg); }
+      .kd.t .tg { opacity: 1; }
+      .pita { position: absolute; border-radius: 17px; background: oklch(64% .11 184 / .14); border: 4px solid var(--w-brand); z-index: 2; }
+      .pita span { position: absolute; right: -4px; bottom: -4px; background: var(--w-brand); color: #fff; font-size: 19px; font-weight: 800; padding: 6px 13px; border-radius: 12px 0 15px 0; white-space: nowrap; }
+      #b1-klaim { position: absolute; left: 80px; top: 128px; width: 940px; }
+      #b1-klaim .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+      .klaim { display: grid; grid-template-columns: 240px 170px 290px 1fr; align-items: center; height: 58px; padding: 0 22px; background: var(--w-bg);
+        border: 2px solid var(--w-border); border-radius: 12px; font-size: 22px; font-weight: 600; color: var(--w-fg2); box-shadow: 0 2px 6px oklch(20% .02 205 / .06); }
+      .klaim .mono { font-size: 19px; color: var(--w-mfg); }
+      .klaim b { color: var(--w-fg); font-weight: 700; }
+      .klaim.lb { background: var(--w-cek-bg); border-color: oklch(86% .07 85); }
+      .klaim .rp { text-align: right; font-variant-numeric: tabular-nums; }
+      .cntp { left: 1090px; top: 762px; width: 750px; padding: 20px 28px; display: flex; align-items: center; gap: 40px; }
+      .cntp .angka { font-size: 96px; }
+      .cntp .win { height: 100px; overflow: hidden; }
+      .cntp .strip div { height: 100px; line-height: 100px; font-size: 96px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+      .cntp .sel { margin-left: auto; background: var(--w-pri-bg); border-radius: 14px; padding: 12px 24px; }
+      .cntp .sel .kapital, .cntp .sel .angka { color: var(--w-pri-fg); }
+      .kpi { position: absolute; left: 80px; top: 140px; display: flex; gap: 16px; }
+      .kpi .panel { position: relative; padding: 16px 26px; display: flex; align-items: center; gap: 16px; }
+      .kpi .panel.teal { background: var(--w-psub); border-color: oklch(88% .035 205); }
+      .kpi .panel.teal .angka { color: var(--w-primary); }
+      .kpi .angka { font-size: 58px; }
+      .kpi span:last-child { font-size: 22px; font-weight: 600; color: var(--w-fg2); line-height: 1.25; }
+      .grid { position: absolute; left: 80px; top: 290px; display: flex; gap: 28px; }
+      .rsg .cells { display: grid; grid-template-columns: repeat(6, 26px); gap: 7px; }
+      .rsg .cells i { display: block; width: 26px; height: 26px; border-radius: 6px; background: var(--w-bg); border: 2px solid var(--w-border2); }
+      .rsg .cells i.on { background: var(--w-primary); border-color: var(--w-primary); }
+      .rsg .cells i.andi { background: var(--w-pri); border-color: var(--w-pri); box-shadow: 0 0 0 4px var(--w-pri-bg); }
+      .rsn { margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--w-fg2); line-height: 1.3; }
+      .rsn b { color: var(--w-primary); }
+      .rsn b.nol { color: var(--w-mfg); }
+      .andi-tag { position: absolute; left: 118px; top: 250px; background: var(--w-pri); color: #fff; font-size: 19px; font-weight: 800; padding: 5px 12px; border-radius: 10px; }
+      #kpk { left: 1250px; top: 290px; width: 600px; padding: 32px 36px; }
+      #kpk .src { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-cek-fg); }
+      #kpk .n { font-size: 96px; font-weight: 800; line-height: 1.05; margin: 8px 0 6px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+      #kpk .n small { font-size: 44px; font-weight: 600; color: var(--w-mfg); letter-spacing: 0; }
+      #kpk .t { font-size: 32px; font-weight: 600; line-height: 1.3; }
+      #kpk .t b { color: var(--w-pri-fg); font-weight: 700; }
+      #kpk .t2 { font-size: 24px; font-weight: 500; color: var(--w-fg2); margin-top: 10px; }
+      #kpk .cr { margin-top: 14px; font-size: 18px; color: var(--w-mfg); }
+      /* penutup */
+      #zt { position: absolute; left: 0; right: 0; top: 112px; text-align: center; font-size: 66px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+      #zt .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 6px; }
+      #zt .w i { display: inline-block; font-style: normal; }
+      #zt em { font-style: normal; color: var(--w-primary); }
+      #z-kiri .zk { left: 190px; width: 520px; padding: 22px 30px; }
+      #zk1 { top: 300px; } #zk2 { top: 520px; }
+      #z-kiri .vr .angka { font-size: 112px; }
+      .zsel { position: absolute; left: 190px; top: 744px; width: 520px; background: var(--w-pri-bg); color: var(--w-pri-fg); border: 2px solid oklch(88% .05 27); border-radius: 16px;
+        padding: 18px 26px; font-size: 28px; font-weight: 600; }
+      .zsel b { font-weight: 800; }
+      #z-kal { position: absolute; left: 830px; top: 270px; transform: scale(.86); transform-origin: 0 0; }
+      #z-kal .leg { display: flex; gap: 26px; align-items: center; margin-top: 20px; font-size: 22px; font-weight: 600; color: var(--w-fg2); }
+      #z-kal .leg i { display: inline-block; width: 26px; height: 26px; border-radius: 7px; vertical-align: -6px; margin-right: 10px; }
+      .lg-t { background: var(--w-fg); } .lg-p { background: oklch(64% .11 184 / .14); border: 4px solid var(--w-brand); }
+      #z-kal .leg .by { color: var(--w-mfg); font-weight: 500; }
+
+      /* ---------- kartu logo ---------- */
+      .card { position: absolute; inset: 0; z-index: 50; }
+      .card-in { position: absolute; inset: 0; }
+      .card-bg { position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 80% at 50% 45%, var(--teal-lt) 0%, var(--teal) 62%, var(--teal-dk) 100%); }
+      .card-glow { position: absolute; left: 50%; top: 45%; width: 1400px; height: 1400px; margin: -700px 0 0 -700px;
+        border-radius: 50%; background: radial-gradient(circle, rgba(46, 140, 132, 0.42) 0%, rgba(20, 85, 88, 0) 62%); }
+      .card-grid { position: absolute; inset: 0; opacity: 0.16;
+        background-image: radial-gradient(rgba(234, 243, 241, 0.55) 1.2px, transparent 1.4px); background-size: 36px 36px;
+        -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%);
+        mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%); }
+      .lock { position: absolute; left: 0; right: 0; top: 0; height: 780px; display: flex; align-items: center;
+        justify-content: center; gap: 60px; }
+      .mark-wrap { width: 250px; height: 250px; position: relative; }
+      .mark { width: 250px; height: 250px; display: block; overflow: visible; }
+      .words { position: relative; padding: 10px 40px 14px 0; overflow: hidden; }
+      .wm-line { overflow: hidden; height: 132px; }
+      .wm { display: block; color: #e4f0ed; font-weight: 700; font-size: 124px; line-height: 132px; letter-spacing: -0.03em; }
+      .oline { display: block; width: 220px; height: 8px; border-radius: 4px; background: var(--orange); margin-top: 26px; transform-origin: 0% 50%; }
+      .wm-in { position: relative; }
+      .wm-sh { position: absolute; left: 0; top: 0; color: transparent; -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 38%, #ffffff 50%, rgba(255, 255, 255, 0) 62%);
+        background-size: 300% 100%; background-repeat: no-repeat; background-position: 150% 0%;
+        -webkit-background-clip: text; background-clip: text; }
+      .scan-v { position: absolute; top: 0; bottom: 0; left: 0; width: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .scan-h { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 55%); }
+      .tagline { position: absolute; left: 0; right: 0; top: 770px; text-align: center; color: var(--mint); font-size: 66px; font-weight: 500; letter-spacing: -0.01em; }
+      .tagline b { color: var(--orange); font-weight: 700; }
+      .tagline .in { display: inline-block; }
+      .phone-ic { position: absolute; left: 50%; top: 390px; width: 230px; height: 230px; margin: -115px 0 0 -115px; color: #e4f0ed; }
+      .phone-ic svg { width: 230px; height: 230px; display: block; overflow: visible; }
+      .wave { position: absolute; left: 50%; top: 390px; width: 230px; height: 230px; margin: -115px 0 0 -115px; border-radius: 50%; border: 4px solid rgba(243, 180, 65, 0.8); }
+      .slogan { position: absolute; left: 0; right: 0; top: 740px; text-align: center; overflow: hidden; height: 110px; }
+      .slogan span { display: inline-block; color: var(--mint); font-weight: 600; font-size: 72px; line-height: 104px; letter-spacing: -0.015em; }
+      .credit { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; color: rgba(234, 243, 241, 0.8);
+        font-size: 28px; font-weight: 500; letter-spacing: 0.06em; }
+
+      /* ---------- panggung demo ---------- */
+      #stage { position: absolute; inset: 0; z-index: 10; background: var(--mint); overflow: hidden; }
+      #mint-dots { position: absolute; inset: -60px; opacity: 0.55;
+        background-image: radial-gradient(rgba(15, 61, 62, 0.16) 1.6px, transparent 1.8px); background-size: 34px 34px; }
+      #win { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 18px; overflow: hidden;
+        background: #fff; transform-origin: 0 0;
+        box-shadow: 0 50px 140px rgba(15, 61, 62, 0.26), 0 8px 30px rgba(15, 61, 62, 0.12), 0 0 0 2px rgba(15, 61, 62, 0.1); }
+      #win video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      #scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 150px; pointer-events: none; z-index: 12;
+        background: linear-gradient(180deg, rgba(234, 243, 241, 0.97) 0%, rgba(234, 243, 241, 0.88) 50%, rgba(234, 243, 241, 0) 100%); }
+      .step { position: absolute; left: 60px; top: 38px; z-index: 20; }
+      .step-in { display: flex; align-items: center; gap: 20px; }
+      .step-no { color: var(--orange); font-weight: 700; font-size: 36px; }
+      .step-rule { display: block; width: 3px; height: 40px; background: var(--teal); opacity: 0.35; }
+      .step-ti { color: var(--teal); font-weight: 600; font-size: 36px; letter-spacing: -0.01em; }
+      .simpill { position: absolute; right: 52px; top: 40px; z-index: 20; background: var(--teal); color: #fff; font-size: 20px; font-weight: 600;
+        letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 18px; border-radius: 999px; }
+
+      /* sorot di dalam jendela (ikut kamera) */
+      .ring { position: absolute; z-index: 5; border: 4px solid var(--orange); border-radius: 12px; pointer-events: none;
+        box-shadow: 0 0 0 7px rgba(242, 107, 33, 0.2), 0 0 40px rgba(242, 107, 33, 0.45); }
+
+      /* overlay layar (tidak ikut kamera) */
+      .ov { position: absolute; z-index: 25; }
+      .callout { display: flex; gap: 14px; }
+      .callout span { background: var(--teal); color: #fff; font-size: 31px; font-weight: 600; padding: 14px 24px; border-radius: 16px;
+        box-shadow: 0 14px 40px rgba(15, 61, 62, 0.35); white-space: nowrap; }
+      .callout span b { color: var(--gold); font-weight: 700; }
+      .leader { width: 4px; background: var(--orange); border-radius: 2px; transform-origin: 50% 100%; }
+      .phone { width: 372px; height: 760px; border-radius: 52px; background: #0b1414; padding: 14px; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45); }
+      .phone .scr { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: #e8e1d6; display: flex; flex-direction: column; }
+      .phone .hd { background: #0f5b4f; color: #fff; padding: 46px 20px 16px; display: flex; gap: 12px; align-items: center; }
+      .phone .hd i { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); display: block; }
+      .phone .hd b { display: block; font-size: 19px; font-weight: 600; }
+      .phone .hd span { font-size: 14px; opacity: 0.8; }
+      .phone .bd { padding: 18px 14px; flex: 1; }
+      .bub { background: #fff; border-radius: 6px 18px 18px 18px; padding: 14px 16px 22px; font-size: 16.5px; line-height: 1.38; color: #1c2b2b; position: relative; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); }
+      .bub small { position: absolute; right: 12px; bottom: 6px; font-size: 12px; color: #7a8a8a; }
+      .dayt { text-align: center; margin: 0 0 12px; }
+      .dayt span { background: rgba(255, 255, 255, 0.8); font-size: 13px; padding: 4px 12px; border-radius: 8px; color: #55655f; }
+      .safe { display: flex; flex-direction: column; gap: 14px; }
+      .safe div { background: #fff; color: var(--teal); font-size: 30px; font-weight: 600; padding: 14px 26px 14px 20px; border-radius: 18px;
+        box-shadow: 0 14px 40px rgba(15, 61, 62, 0.28); display: flex; align-items: center; gap: 14px; }
+      .safe div i { width: 38px; height: 38px; border-radius: 50%; background: var(--green); color: #fff; font-style: normal; font-size: 24px; line-height: 38px; text-align: center; }
+      .waveb { display: flex; align-items: flex-end; gap: 6px; height: 74px; padding: 16px 22px 12px; background: var(--teal); border-radius: 22px; box-shadow: 0 16px 44px rgba(15, 61, 62, 0.4); }
+      .waveb i { display: block; width: 7px; border-radius: 4px; background: var(--gold); height: 70%; transform-origin: 50% 100%; }
+      .wavel { margin-top: 8px; color: var(--teal); font-size: 20px; font-weight: 600; background: rgba(255, 255, 255, 0.9); padding: 4px 12px; border-radius: 10px; display: inline-block; }
+      .cnt { background: var(--teal); color: #fff; border-radius: 24px; padding: 18px 30px 20px; box-shadow: 0 18px 50px rgba(15, 61, 62, 0.38); }
+      .cnt .row { display: flex; align-items: center; gap: 22px; }
+      .cnt .win { width: 150px; height: 112px; overflow: hidden; border-radius: 16px; background: rgba(255, 255, 255, 0.1); }
+      .cnt .strip div { height: 112px; line-height: 112px; text-align: center; font-size: 92px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .cnt .tx { font-size: 28px; font-weight: 500; line-height: 1.25; color: var(--mint-2); }
+      .cnt .sel { margin-top: 10px; font-size: 44px; font-weight: 700; color: #fff; position: relative; display: inline-block; }
+      .cnt .sel u { position: absolute; left: 0; right: 0; bottom: -4px; height: 6px; background: var(--orange); border-radius: 3px; transform-origin: 0 50%; }
+      .badge { background: #fff; border-radius: 26px; padding: 22px 30px 24px; width: 560px; box-shadow: 0 22px 60px rgba(15, 61, 62, 0.35); border: 2px solid rgba(15, 61, 62, 0.1); }
+      .badge .rs { font-size: 26px; font-weight: 600; color: var(--grey); }
+      .badge .st { position: relative; height: 150px; }
+      .badge .st > div { position: absolute; left: 0; right: 0; top: 0; }
+      .badge .big { font-size: 74px; font-weight: 700; color: var(--teal); line-height: 1.15; letter-spacing: -0.02em; }
+      .badge .big small { font-size: 34px; font-weight: 500; color: var(--grey); }
+      .chipst { display: inline-block; font-size: 30px; font-weight: 700; padding: 6px 20px; border-radius: 999px; }
+      .chipst.ok { background: #d7efe0; color: var(--green); }
+      .chipst.no { background: #fde1d6; color: #b8350f; border: 3px solid #b8350f; }
+      .note { background: var(--teal); color: #fff; font-size: 30px; font-weight: 600; padding: 16px 28px; border-radius: 18px; box-shadow: 0 14px 40px rgba(15, 61, 62, 0.35); line-height: 1.3; }
+      .note b { color: var(--gold); }
+
+      /* ---------- subtitle ---------- */
+      .sub { position: absolute; left: 0; right: 0; z-index: 60; text-align: center; pointer-events: none; }
+      .sub p { display: inline-block; max-width: 1500px; }
+      .sub-hook { bottom: 150px; }
+      .sub-hook p { color: #fff; font-size: 46px; font-weight: 500; line-height: 1.32;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 22px rgba(0, 0, 0, 0.55); }
+      .sub-logo { bottom: 90px; }
+      .sub-logo p { color: var(--mint); font-size: 42px; font-weight: 500; line-height: 1.32; }
+      .sub-demo { bottom: 44px; }
+      .sub-demo p { background: rgba(15, 61, 62, 0.95); color: #fff; font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      .sub-call { bottom: 44px; }
+      .sub-call p { background: rgba(255, 255, 255, 0.97); color: var(--teal); font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; border: 3px solid var(--teal); box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      .sub-call p b { color: var(--orange); font-weight: 700; margin-right: 10px; }
+      #endfade { position: absolute; inset: 0; background: #050808; z-index: 90; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="__TOTAL__" data-width="1920" data-height="1080">
+
+      <!-- ===== panggung demo: jendela rekaman layar, kamera = transform #win ===== -->
+      <div id="stage">
+        <div id="mint-dots" data-layout-allow-overflow=""></div>
+        <div id="win" data-layout-allow-overflow="">
+__SCREEN__
+__RINGS__
+        </div>
+        <div id="scrim-top"></div>
+        <div class="simpill clip" id="simpill" data-start="__STAGE_S__" data-duration="__STAGE_D__" data-track-index="9">Simulasi · data sintetis</div>
+      </div>
+__STEPS__
+__OVERLAYS__
+
+      <!-- ===== babak 1 dan penutup: motion graphic dari data uji ===== -->
+      <div id="black"></div>
+__BABAK1__
+__ZTEXT__
+
+      <!-- ===== kartu solusi (S) ===== -->
+      <div class="card clip" id="sc" data-start="__SC_S__" data-duration="__SC_D__" data-track-index="4">
+        <div class="card-in" id="sc-in">
+          <div class="card-bg" id="sc-bg"></div>
+          <div class="card-glow" id="sc-glow"></div>
+          <div class="card-grid" id="sc-grid"></div>
+          <div class="wave" id="sc-w1"></div><div class="wave" id="sc-w2"></div>
+          <div class="phone-ic" id="sc-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          __SLOCK__
+          <div class="tagline" id="sc-tag"><span class="in" id="sc-tag-in">AI menelepon pasien. <b>Kamu yang memutuskan.</b></span></div>
+          <div class="flash" id="s-flash"></div>
+        </div>
+        <div class="scan-h" id="sc-scan2"></div>
+      </div>
+
+      <!-- ===== kartu penutup ===== -->
+      <div class="card clip" id="zc" data-start="__Z_S__" data-duration="__Z_D__" data-track-index="4" style="z-index: 52">
+        <div class="card-in" id="zc-in">
+          <div class="card-bg" id="z-bg"></div>
+          <div class="card-glow" id="z-glow"></div>
+          <div class="card-grid" id="z-grid"></div>
+          __ZLOCK__
+          <div class="slogan"><span id="z-slogan">Dengar langsung dari pasien.</span></div>
+          <div class="credit" id="z-credit">Tim Veritas · Richard · Zahra · Imelda</div>
+          <div class="flash" id="z-flash"></div>
+        </div>
+        <div class="scan-v" id="z-scan"></div>
+      </div>
+
+      <!-- ===== subtitle ===== -->
+__SUBS__
+
+      <div id="endfade"></div>
+
+      <!-- ===== audio ===== -->
+__AUDIO__
+    </div>
+
+    <script>
+      const C = __CFG__;
+      const T = C.T, S = C.S, W = 1920, H = 1080;
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------------------------------------------------------------- kamera: lintasan kontinu antar pose (PCHIP)
+      const camKeys = [];
+      function ck(t, cx, cy, s) { camKeys.push({ t, cx, cy, lz: Math.log(s) }); }
+      function camPrep() {
+        camKeys.sort((a, b) => a.t - b.t);
+        const n = camKeys.length;
+        for (const ch of ["cx", "cy", "lz"]) {
+          const h = [], d = [], m = new Array(n).fill(0);
+          for (let i = 0; i < n - 1; i++) { h[i] = camKeys[i + 1].t - camKeys[i].t; d[i] = (camKeys[i + 1][ch] - camKeys[i][ch]) / h[i]; }
+          for (let i = 1; i < n - 1; i++) {
+            if (d[i - 1] * d[i] <= 0) m[i] = 0;
+            else { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+          }
+          camKeys.forEach((k, i) => { k["m" + ch] = m[i]; });
+        }
+      }
+      function camAt(t) {
+        const n = camKeys.length;
+        if (t <= camKeys[0].t) return camKeys[0];
+        if (t >= camKeys[n - 1].t) return camKeys[n - 1];
+        let i = 0;
+        while (camKeys[i + 1].t <= t) i++;
+        const a = camKeys[i], b = camKeys[i + 1], h = b.t - a.t, u = (t - a.t) / h, u2 = u * u, u3 = u2 * u;
+        const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+        const f = (ch) => h00 * a[ch] + h10 * h * a["m" + ch] + h01 * b[ch] + h11 * h * b["m" + ch];
+        return { cx: f("cx"), cy: f("cy"), lz: f("lz") };
+      }
+      function camApply(c) {
+        const s = Math.exp(c.lz);
+        let x, y;
+        if (s < 1) { x = W * (1 - s) / 2; y = H * (1 - s) / 2 + 24 * (1 - s); }
+        else { x = Math.min(0, Math.max(W - s * W, W / 2 - s * c.cx)); y = Math.min(0, Math.max(H - s * H, H / 2 - s * c.cy)); }
+        gsap.set("#win", { x, y, scale: s });
+      }
+      function camPlay() {
+        camPrep();
+        const t0 = camKeys[0].t, t1 = camKeys[camKeys.length - 1].t, o = { v: 0 };
+        tl.fromTo(o, { v: 0 }, { v: 1, duration: t1 - t0, ease: "none", immediateRender: false,
+          modifiers: { v: (v) => { camApply(camAt(t0 + v * (t1 - t0))); return v; } } }, t0);
+      }
+
+      // ---------------------------------------------------------------- babak 1: suara Pak Andi -> kalender -> 11 klaim -> 300 pasien
+      const B = C.B1, TG = C.TGL;
+      TG.forEach((d) => document.getElementById("k2-d" + d).classList.add("t"));   // kalender penutup: tagihan sudah terisi
+      tl.set("#black", { opacity: 1 }, 0);
+      tl.to("#black", { opacity: 0, duration: 0.6, ease: "power1.out" }, 0.05);
+      tl.fromTo("#b1-len", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.2);
+      // hook: kartu peserta + gelombang rekaman, playhead ikut audio
+      tl.fromTo("#b1-pas", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.hook - 0.1);
+      tl.fromTo("#b1-rek", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.hook);
+      const bars = document.querySelectorAll("#b1-wv i");
+      bars.forEach((b, i) => tl.set(b, { backgroundColor: "oklch(48% .075 205)" }, B.hook + 0.1 + (i / bars.length) * 3.35));
+      // kalender Agustus + tiga pita jawaban Pak Andi (awal bulan, pertengahan, dua puluhan)
+      tl.fromTo("#b1-kal .kal-t", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4 }, B.kal);
+      tl.fromTo("#b1-kal .kd:not(.x), #b1-kal .kh", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out", stagger: 0.008 }, B.kal);
+      B.pita.forEach((t, i) => tl.fromTo("#k1-pita" + i, { opacity: 0, scale: 1.12, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.8)" }, t));
+      tl.fromTo("#b1-ver", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.ver - 0.2);
+      tl.fromTo("#b1-ver3", { scale: 0.3, opacity: 0, transformOrigin: "0% 80%" }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, B.ver);
+      // P2: kolom kiri keluar, 11 baris klaim RS Melati masuk, kalender ikut terisi, counter naik melewati 3 (merah)
+      tl.to("#b1-kiri", { opacity: 0, x: -60, duration: 0.35, ease: "power2.in" }, B.p2);
+      tl.to("#b1-kal", { x: 210, scale: 0.86, duration: 0.6, ease: "power3.inOut" }, B.p2);
+      tl.fromTo("#b1-klaim .kapital", { opacity: 0 }, { opacity: 1, duration: 0.3 }, B.p2 + 0.2);
+      tl.fromTo("#b1-cnt", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, B.p2 + 0.3);
+      tl.set("#b1-sel", { opacity: 0 }, 0);
+      TG.forEach((d, i) => {
+        const t = B.kl0 + i * B.kl_dt;
+        tl.fromTo("#kl" + i, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, t);
+        const isi = d === 16 || d === 17 ? "oklch(46% .1 60)" : "oklch(14% .002 90)";
+        tl.set("#k1-d" + d, { backgroundColor: isi, borderColor: isi, color: "#fff" }, t + 0.08);
+        if (d === 16 || d === 17) tl.set("#k1-d" + d + " .tg", { opacity: 1 }, t + 0.08);
+        tl.fromTo("#k1-d" + d, { scale: 1.15 }, { scale: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t + 0.08);
+        tl.set("#b1-cnt .strip", { y: -100 * (i + 1) }, t + 0.08);
+        if (i + 1 === 4) tl.set("#b1-cnt .strip", { color: "oklch(55% .19 27)" }, t + 0.08);
+      });
+      tl.fromTo("#b1-cnt .win", { scale: 1 }, { scale: 1.12, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 60%" }, B.kl0 + 10 * B.kl_dt + 0.1);
+      tl.fromTo("#b1-sel", { opacity: 0, scale: 0.6, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" }, B.sel);
+      // P3: semuanya mengecil jadi satu kotak (Pak Andi) di antara 300 pasien aktif; 30 terpicu menyala
+      tl.set("#b1-s3", { opacity: 0 }, 0);
+      tl.to("#b1-s2", { scale: 26 / 1920, x: 80, y: 296, duration: 1.0, ease: "power3.inOut" }, B.zoom);
+      tl.to("#b1-s2", { opacity: 0, duration: 0.25 }, B.zoom + 0.8);
+      tl.fromTo("#b1-s3", { opacity: 0, scale: 1.6, transformOrigin: "93px 303px" }, { opacity: 1, scale: 1, duration: 1.0, ease: "power3.inOut" }, B.zoom);
+      tl.set("#b1-s3 .cells i.on", { opacity: 0 }, 0);
+      tl.to("#b1-s3 .cells i.on", { opacity: 1, duration: 0.18, stagger: 0.035 }, B.zoom + 1.0);
+      tl.fromTo("#b1-andi", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, B.zoom + 0.95);
+      tl.fromTo("#kpk", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, B.kpk);
+      tl.fromTo("#kpk .n", { scale: 0.92, transformOrigin: "0% 50%" }, { scale: 1, duration: 0.7, ease: "power2.out" }, B.kpk + 0.1);
+
+      // ---------------------------------------------------------------- S: telepon berdering -> logo
+      tl.set("#sc-in", { clipPath: "inset(0% 0% 0% 0%)" }, 0);
+      tl.fromTo("#sc", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, S.sc);
+      tl.fromTo("#sc-phone", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }, S.sc + 0.2);
+      tl.fromTo("#sc-phone svg", { rotation: -12, transformOrigin: "50% 50%" }, { rotation: 12, duration: 0.09, ease: "none", yoyo: true, repeat: 13 }, S.sc + 0.5);
+      tl.fromTo("#sc-w1", { scale: 0.6, opacity: 0.9 }, { scale: 2.3, opacity: 0, duration: 0.8, ease: "power1.out", repeat: 1, repeatDelay: 0.1 }, S.sc + 0.5);
+      tl.fromTo("#sc-w2", { scale: 0.6, opacity: 0.9 }, { scale: 2.3, opacity: 0, duration: 0.8, ease: "power1.out", repeat: 1, repeatDelay: 0.1 }, S.sc + 0.9);
+      tl.to("#sc-phone", { scale: 0.3, opacity: 0, duration: 0.25, ease: "power2.in" }, C.HIT - 0.55);
+      tl.set(["#sc-w1", "#sc-w2"], { opacity: 0 }, C.HIT - 0.45);
+      tl.set("#sc-scan2", { opacity: 0 }, 0);
+      tl.fromTo("#sc-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, S.sc + 0.5);
+      function lockIn(p, t0, opt) {
+        tl.fromTo(`#${p}-wl`, { x: -14, rotation: -7, opacity: 0, transformOrigin: "50% 100%" }, { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-wr`, { x: 14, rotation: 7, opacity: 0, transformOrigin: "50% 100%" }, { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-mw`, { scale: 1 }, { scale: 1.04, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-flash`, { opacity: 0 }, { opacity: 0.32, duration: 0.033, ease: "none", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-dot`, { scale: 0, y: -9, transformOrigin: "50% 50%" }, { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" }, t0 + 0.5);
+        tl.set(`#${p}-ring`, { opacity: 0 }, 0);
+        tl.fromTo(`#${p}-ring`, { scale: 1, opacity: 0.95, transformOrigin: "50% 50%" }, { scale: 4.2, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, t0 + 0.62);
+        tl.fromTo(`#${p}-w1`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.7);
+        tl.fromTo(`#${p}-w2`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.82);
+        tl.fromTo(`#${p}-line`, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, t0 + 1.3);
+        tl.fromTo(`#${p}-mw`, { y: 0 }, { y: -4, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: opt.floats }, t0 + 1.9);
+        tl.fromTo(`#${p}-lock .wm-sh`, { backgroundPosition: "150% 0%" }, { backgroundPosition: "-50% 0%", duration: 1.2, ease: "power1.inOut", stagger: 0.08 }, t0 + opt.shine);
+      }
+      lockIn("s", C.HIT - 0.42, { floats: 2, shine: 3.2 });
+      tl.fromTo("#sc-tag-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power2.inOut" }, C.TAG_S);
+      // keluar: garis pindai turun atas -> bawah membuka jendela demo
+      tl.set("#sc-scan2", { opacity: 1, y: -10 }, S.d1 - 0.05);
+      tl.to("#sc-scan2", { y: H + 10, duration: 0.5, ease: "power1.inOut" }, S.d1 - 0.05);
+      tl.to("#sc-in", { clipPath: "inset(100% 0% 0% 0%)", duration: 0.5, ease: "power1.inOut" }, S.d1 - 0.05);
+
+      // ---------------------------------------------------------------- panggung demo
+      tl.set("#stage", { opacity: 0 }, 0);
+      tl.set("#stage", { opacity: 1 }, S.d1 - 0.1);
+      tl.fromTo("#mint-dots", { x: 0, y: 0 }, { x: -34, y: -34, duration: C.STAGE_D, ease: "none" }, C.STAGE_S);
+      C.XF.forEach((x) => tl.fromTo("#" + x.id, { opacity: 0 }, { opacity: 1, duration: C.XFD, ease: "sine.inOut" }, x.s));
+      C.CAM.forEach((k) => ck(k[0], k[1], k[2], k[3]));
+      camPlay();
+      document.querySelectorAll(".step").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), inner = el.querySelector(".step-in");
+        tl.fromTo(inner, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power3.out" }, s + 0.1);
+        tl.fromTo(el.querySelector(".step-rule"), { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.out" }, s + 0.18);
+        tl.to(inner, { opacity: 0, duration: 0.2 }, s + d - 0.22);
+      });
+      // sorot dalam jendela
+      document.querySelectorAll(".ring").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+        tl.fromTo(el, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, s);
+        tl.to(el, { opacity: 0, duration: 0.25 }, s + d - 0.25);
+      });
+      // overlay layar: masuk dari bawah/samping, keluar memudar
+      document.querySelectorAll(".ov").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), dx = parseFloat(el.dataset.dx || 0), dy = parseFloat(el.dataset.dy || 24);
+        tl.fromTo(el, { opacity: 0, x: dx, y: dy }, { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }, s);
+        tl.to(el, { opacity: 0, duration: 0.25 }, s + d - 0.25);
+      });
+      tl.fromTo("#call-leader", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power2.out" }, C.CALLOUT_S + 0.2);
+      // gelombang suara: batang bergerak selama rekaman telepon diputar
+      document.querySelectorAll(".waveb i").forEach((b, i) => {
+        tl.fromTo(b, { scaleY: 0.25 + (i % 5) * 0.08 }, { scaleY: 0.95 - (i % 4) * 0.12, duration: 0.18 + (i % 6) * 0.045, ease: "sine.inOut", yoyo: true, repeat: 40 }, C.WAVE_S + (i % 7) * 0.02);
+      });
+      // D4: counter 11 -> 3, garis bawah "Selisih 8"
+      tl.fromTo("#c2 .strip", { y: 0 }, { y: -112 * 8, duration: 0.9, ease: "steps(8)" }, C.C2_T0);
+      tl.fromTo("#c2 .sel u", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, C.C2_T0 + 1.0);
+      // D5: 2/4 Normal -> 3/5 Perlu klarifikasi RS (stempel)
+      tl.set("#bd-after", { opacity: 0 }, 0);
+      tl.to("#bd-before", { opacity: 0, duration: 0.15 }, C.STAMP_T - 0.25);
+      tl.set("#bd-after", { opacity: 1 }, C.STAMP_T);
+      tl.fromTo("#bd-after .chipst", { scale: 2.4, rotation: -9, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, rotation: -3, opacity: 1, duration: 0.22, ease: "power4.in" }, C.STAMP_T);
+      tl.fromTo("#bd-after .big", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, C.STAMP_T);
+      tl.fromTo("#bd", { scale: 1 }, { scale: 1.04, duration: 0.07, yoyo: true, repeat: 1, transformOrigin: "0% 100%" }, C.STAMP_T + 0.2);
+
+      // ---------------------------------------------------------------- penutup
+      tl.fromTo("#zb", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, S.z - 0.3);
+      tl.fromTo("#zb", { scale: 1.04 }, { scale: 1, duration: 1.2, ease: "power2.out", transformOrigin: "50% 50%" }, S.z - 0.3);
+      tl.set("#stage", { opacity: 0 }, S.z + 0.7);
+      document.querySelectorAll("#zt .w i").forEach((el, i) => {
+        tl.fromTo(el, { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: "power3.out" }, T.z0 + 0.05 + i * 0.14);
+      });
+      tl.fromTo("#zk1", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, S.z + 0.1);
+      tl.fromTo("#zk2", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, S.z + 0.3);
+      tl.fromTo("#z-kal", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, S.z + 0.2);
+      tl.fromTo("#zk3", { opacity: 0, scale: 0.8, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, S.z + 1.1);
+      const z = C.Z_SCAN;
+      tl.fromTo("#z-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#zc-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#z-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6 }, z + 0.4);
+      tl.set("#z-scan", { opacity: 0 }, z + 0.56);
+      tl.fromTo("#z-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, z + 0.5);
+      lockIn("z", C.Z_HIT - 0.42, { floats: 2, shine: 3.0 });
+      tl.fromTo("#z-slogan", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power3.out" }, T.z1);
+      tl.fromTo("#z-credit", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, T.z1 + 1.6);
+      tl.set("#endfade", { opacity: 0 }, 0);
+      tl.to("#endfade", { opacity: 1, duration: 0.55, ease: "sine.in" }, C.TOTAL - 0.55);
+
+      // ---------------------------------------------------------------- subtitle
+      document.querySelectorAll(".sub").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), p = el.querySelector("p");
+        tl.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, s);
+        tl.to(p, { opacity: 0, duration: 0.12, ease: "power1.in" }, s + d - 0.12);
+      });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
