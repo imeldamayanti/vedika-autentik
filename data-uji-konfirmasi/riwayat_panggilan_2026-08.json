@@ -1,0 +1,90 @@
+[
+  {
+    "id_panggilan": "CALL-LATAR-001",
+    "id_peserta": "P0002",
+    "id_rs": "RS01",
+    "bulan_layanan": "2026-08",
+    "sesi_ditagih": 11,
+    "jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 1,
+      "jumlah_maks": 1,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "kutipan_kunci": "Seingat saya cuma 1 kali.",
+      "ringkasan": "Jumlah sesi versi peserta jauh di bawah tagihan."
+    },
+    "label": "Tidak sesuai",
+    "alasan": "Ditagih 11 sesi, versi penerima paling banyak 1 sesi (selisih 10).",
+    "sumber": "sintetis-riwayat (bukan panggilan nyata)"
+  },
+  {
+    "id_panggilan": "CALL-LATAR-002",
+    "id_peserta": "P0003",
+    "id_rs": "RS01",
+    "bulan_layanan": "2026-08",
+    "sesi_ditagih": 9,
+    "jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 3,
+      "jumlah_maks": 3,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "kutipan_kunci": "Seingat saya cuma 3 kali.",
+      "ringkasan": "Jumlah sesi versi peserta jauh di bawah tagihan."
+    },
+    "label": "Tidak sesuai",
+    "alasan": "Ditagih 9 sesi, versi penerima paling banyak 3 sesi (selisih 6).",
+    "sumber": "sintetis-riwayat (bukan panggilan nyata)"
+  },
+  {
+    "id_panggilan": "CALL-LATAR-003",
+    "id_peserta": "P0012",
+    "id_rs": "RS01",
+    "bulan_layanan": "2026-08",
+    "sesi_ditagih": 9,
+    "jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 8,
+      "jumlah_maks": 10,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "kutipan_kunci": "Kurang lebih 9 kali.",
+      "ringkasan": "Jumlah sesi sesuai tagihan."
+    },
+    "label": "Sesuai",
+    "alasan": "Ditagih 9 sesi, versi penerima 8-10 sesi. Masih dalam toleransi.",
+    "sumber": "sintetis-riwayat (bukan panggilan nyata)"
+  },
+  {
+    "id_panggilan": "CALL-LATAR-004",
+    "id_peserta": "P0065",
+    "id_rs": "RS01",
+    "bulan_layanan": "2026-08",
+    "sesi_ditagih": 11,
+    "jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 10,
+      "jumlah_maks": 12,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "kutipan_kunci": "Kurang lebih 11 kali.",
+      "ringkasan": "Jumlah sesi sesuai tagihan."
+    },
+    "label": "Sesuai",
+    "alasan": "Ditagih 11 sesi, versi penerima 10-12 sesi. Masih dalam toleransi.",
+    "sumber": "sintetis-riwayat (bukan panggilan nyata)"
+  }
+]

@@ -1,0 +1,9 @@
+AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan keluarga Ibu Karti Lestari?
+Penerima: Iya, saya Bayu, anaknya.
+AI: Terima kasih, Pak Bayu. Saya mau konfirmasi singkat soal fisioterapi Ibu Karti di RS Melati Sehat bulan Agustus. Apakah Ibu Karti menjalani fisioterapi di sana bulan Agustus?
+Penerima: Iya.
+AI: Kira-kira berapa kali Ibu Karti terapi di bulan Agustus?
+Penerima: Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya.
+AI: Tidak apa-apa, Pak. Apakah Ibu Karti pernah terapi di hari Minggu, tanggal 16 Agustus?
+Penerima: Kurang tahu juga, Mbak.
+AI: Baik, terima kasih, Pak Bayu. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang.

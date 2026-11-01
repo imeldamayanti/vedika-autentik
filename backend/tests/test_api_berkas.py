@@ -280,4 +280,5 @@ def test_keputusan_untuk_berkas_belum_selesai_ditolak(unggah, klien):
 
 def test_kesehatan(klien):
     h = klien.get("/api/v1/kesehatan").json()
-    assert h == {"api": "ok", "db": "ok", "mesin": "ok"}
+    # v3 menambah pembaca dan versi_aturan di respons yang sama (Kontrak A v3); field v2 tidak berubah.
+    assert {k: h[k] for k in ("api", "db", "mesin")} == {"api": "ok", "db": "ok", "mesin": "ok"}

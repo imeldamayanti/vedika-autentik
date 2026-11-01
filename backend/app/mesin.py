@@ -40,6 +40,10 @@ class KlienMesin:
     def bandingkan(self, nama_a: str, isi_a: bytes, nama_b: str, isi_b: bytes) -> dict:
         return self._kirim("/v1/bandingkan", files={"file_a": (nama_a, isi_a), "file_b": (nama_b, isi_b)})
 
+    def baca(self, permintaan: dict, batas_detik: float = 30) -> dict:
+        """Kontrak B2: transkrip masuk, jawaban terstruktur keluar. Pembaca tidak mengirim label."""
+        return self._kirim("/v1/baca", json=permintaan, timeout=batas_detik)
+
     def sehat(self) -> bool:
         try:
             r = self.klien.get("/v1/kesehatan", headers=self.headers)

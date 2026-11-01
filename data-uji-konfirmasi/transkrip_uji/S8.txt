@@ -1,0 +1,5 @@
+AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Hendra Wijaya?
+Penerima: Ini penipuan ya? BPJS kok nelpon.
+AI: Wajar Bapak waspada. Saya tidak akan meminta data pribadi, kode OTP, atau uang. Bapak bisa memastikan panggilan ini lewat Care Center 165 atau aplikasi Mobile JKN. Apakah Bapak bersedia menjawab dua pertanyaan singkat soal fisioterapi bulan Agustus?
+Penerima: Nggak, saya nggak mau. Nanti saya telepon 165 aja.
+AI: Baik, Pak, tidak apa-apa. Terima kasih atas waktunya. Selamat siang.

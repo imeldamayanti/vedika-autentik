@@ -21,6 +21,8 @@ htmlcov/
 # JavaScript tooling and deploy output
 node_modules/
 .vercel/
+videos/.env.local
+videos/v3/renders/
 playwright-report/
 test-results/
 

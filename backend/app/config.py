@@ -1,5 +1,6 @@
 """Pengaturan dan konstanta API. Rahasia dibaca dari backend/.env (tidak di-commit)."""
 import os
+from datetime import timedelta, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -41,3 +42,35 @@ def kunci_mesin() -> str | None:
 
 def upload_dir() -> Path:
     return Path(os.environ.get("UPLOAD_DIR", AKAR / "backend" / "uploads"))
+
+
+# ---- v3: konfirmasi suara (docs/api-contract-v3.md) ----
+
+ZONA = timezone(timedelta(hours=7))  # WIB; waktu di kontrak selalu berzona +07:00
+VERSI_ATURAN_V3 = "2026.10"
+BULAN_BAWAAN = "2026-08"
+MAKS_REKAMAN = 10 * 1024 * 1024
+KUNCI_AMBIL_MENIT = 5  # kunci ambil agen lepas bila tidak ada laporan selama ini
+BATAS_PANGGILAN_DETIK = 150  # R3.3: panggilan paling lama 2,5 menit
+WAKTU_PEMBACA_DETIK = 30
+BULAN_NAMA = {
+    "01": "Januari", "02": "Februari", "03": "Maret", "04": "April", "05": "Mei", "06": "Juni",
+    "07": "Juli", "08": "Agustus", "09": "September", "10": "Oktober", "11": "November", "12": "Desember",
+}
+
+
+def kunci_agen() -> str | None:
+    return os.environ.get("AGEN_KEY") or None
+
+
+def nomor_penguji() -> str:
+    """Prototipe: semua panggilan dan WA menuju satu nomor penguji (R2.1), bukan nomor peserta."""
+    return os.environ.get("NOMOR_PENGUJI", "0800-0000-0000")
+
+
+def nomor_penelepon() -> str:
+    return os.environ.get("NOMOR_PENELEPON", "0800-0000-0165")
+
+
+def rekaman_dir() -> Path:
+    return upload_dir() / "rekaman"
