@@ -348,6 +348,81 @@ test("session handles a binary setup frame before marking itself ready", async (
   assert.deepEqual(statuses, ["tersambung"]);
 });
 
+test("session cues the AI to open the call once the session is set up", async () => {
+  const sent = [];
+  const session = new VedikaVoiceSession({});
+  session.socket = { send: (message) => sent.push(JSON.parse(message)) };
+
+  await session.handleMessage(JSON.stringify({ setupComplete: {} }));
+  await session.handleMessage(JSON.stringify({ setupComplete: {} }));
+
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].clientContent.turnComplete, true);
+  assert.equal(sent[0].clientContent.turns[0].role, "user");
+  assert.match(sent[0].clientContent.turns[0].parts[0].text, /pembuka/);
+});
+
+function startWithContext(audioContext, errors) {
+  return new VedikaVoiceSession({
+    audioContext,
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({ token: "t", websocket_url: "wss://example", model: "live" }),
+    }),
+    AudioContextImpl: class { constructor() { throw new Error("must reuse the click-time context"); } },
+    mediaDevices: { getUserMedia: async () => { throw new Error("stop after audio setup"); } },
+    onError: (error) => errors.push(error.message),
+  }).start();
+}
+
+test("session reuses the audio context created at the operator's click", async () => {
+  const errors = [];
+  const context = { state: "running", close: async () => {} };
+
+  await assert.rejects(startWithContext(context, errors), /stop after audio setup/);
+
+  assert.deepEqual(errors, ["stop after audio setup"]);
+});
+
+test("session reports a locked browser audio context instead of failing silently", async () => {
+  const errors = [];
+  const context = { state: "suspended", resume: async () => {}, close: async () => {} };
+
+  await assert.rejects(startWithContext(context, errors), /audio Chrome terkunci/);
+
+  assert.match(errors[0], /audio Chrome terkunci/);
+});
+
+test("session captures the call line without Chrome echo cancellation or processing", async () => {
+  let constraints;
+  const session = new VedikaVoiceSession({
+    inputDeviceId: "bh2",
+    audioContext: { state: "running", close: async () => {} },
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({ token: "t", websocket_url: "wss://example", model: "live" }),
+    }),
+    mediaDevices: {
+      getUserMedia: async (requested) => {
+        constraints = requested;
+        throw new Error("stop after capture");
+      },
+    },
+  });
+
+  await assert.rejects(session.start(), /stop after capture/);
+
+  assert.deepEqual(constraints, {
+    audio: {
+      deviceId: { exact: "bh2" },
+      channelCount: 1,
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+    },
+  });
+});
+
 test("stopping an actual session closes a CONNECTING socket", async () => {
   class ConnectingSocket {
     static CONNECTING = 0;
@@ -486,3 +561,34 @@ test("LiveEventReducer maps provider events to required lifecycle and clear acti
   assert.deepEqual(reducer.close(), { status: "selesai", clearPlayback: true });
 });
 
+function installStrictGlobalFetch(t) {
+  const calls = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = function (url, init) {
+    if (this !== undefined && this !== globalThis) throw new TypeError("Illegal invocation");
+    calls.push([url, init]);
+    return Promise.resolve({ ok: false, status: 503, json: async () => ({}) });
+  };
+  t.after(() => { globalThis.fetch = originalFetch; });
+  return calls;
+}
+
+test("session calls the global fetch without rebinding it to the session", async (t) => {
+  const calls = installStrictGlobalFetch(t);
+  const session = new VedikaVoiceSession({ context: { nama_penerima: "Andi" } });
+
+  await assert.rejects(session.start(), /token endpoint 503/);
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], "/v1/suara/token");
+});
+
+test("createAgentApi calls the global fetch without rebinding it", async (t) => {
+  const calls = installStrictGlobalFetch(t);
+  const api = createAgentApi({ baseUrl: "http://api", agentKey: "k" });
+
+  await assert.rejects(api.ambil(), /API 503/);
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], "http://api/api/v1/agen/ambil");
+});

@@ -16,6 +16,7 @@ LIVE_WEBSOCKET_URL = (
     "google.ai.generativelanguage.v1beta.GenerativeService."
     "BidiGenerateContentConstrained"
 )
+VOICE = "Kore"
 
 
 class VoiceContext(BaseModel):
@@ -71,7 +72,8 @@ def build_voice_instruction(context: VoiceContext) -> str:
             f"{context.sapaan_pasien} {context.nama_pasien.split()[0]}."
         )
 
-    return f"""Peran: Kamu asisten otomatis untuk simulasi konfirmasi layanan fisioterapi.
+    return f"""Peran: Kamu asisten otomatis BPJS Kesehatan yang menelepon untuk konfirmasi
+singkat layanan fisioterapi.
 Gunakan Bahasa Indonesia sopan, sederhana, dan santai.
 
 Data panggilan:
@@ -129,6 +131,7 @@ class GeminiTokenIssuer:
         self.now = now
 
     def issue(self, context: VoiceContext) -> VoiceTokenResponse:
+        instruction = build_voice_instruction(context)
         issued_at = self.now().astimezone(UTC)
         expire_time = issued_at + timedelta(minutes=5)
         new_session_expire_time = issued_at + timedelta(minutes=1)
@@ -136,9 +139,15 @@ class GeminiTokenIssuer:
             "uses": 1,
             "expireTime": expire_time.isoformat().replace("+00:00", "Z"),
             "newSessionExpireTime": new_session_expire_time.isoformat().replace("+00:00", "Z"),
+            # Gemini takes the whole session setup from the token and ignores the browser's
+            # setup message, so the call script and voice must be locked in here.
             "bidiGenerateContentSetup": {
                 "model": f"models/{self.model}",
-                "generationConfig": {"responseModalities": ["AUDIO"]},
+                "generationConfig": {
+                    "responseModalities": ["AUDIO"],
+                    "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}}},
+                },
+                "systemInstruction": {"parts": [{"text": instruction}]},
                 "inputAudioTranscription": {},
                 "outputAudioTranscription": {},
             },
@@ -165,7 +174,7 @@ class GeminiTokenIssuer:
             token=token,
             model=self.model,
             websocket_url=LIVE_WEBSOCKET_URL,
-            instruksi=build_voice_instruction(context),
+            instruksi=instruction,
             kedaluwarsa=expire_time,
         )
 
