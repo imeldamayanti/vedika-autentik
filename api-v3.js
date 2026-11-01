@@ -89,8 +89,16 @@
     return { tindakan: k.tindakan, alasan: k.alasan, ikutSaran: k.ikut_saran, oleh: k.verifikator, waktu: waktuTeks(k.waktu) };
   }
 
+  /* Penerima bilang tidak pernah datang (hadir false) tanpa angka: versinya 0 sesi, selisihnya seluruh tagihan. */
+  function jawabanTerhitung(d) {
+    const j = d.jawaban;
+    if (!j || j.hadir !== false || j.jumlah_maks != null) return { jawaban: j, selisih: d.selisih };
+    return { jawaban: Object.assign({}, j, { jumlah_min: 0, jumlah_maks: 0 }), selisih: d.selisih != null ? d.selisih : d.ditagih };
+  }
+
   function kePasien(d) {
     const skenario = (/^CALL-P-(S\d)-/.exec(d.id) || [])[1];
+    const hitung = jawabanTerhitung(d);
     const tanda = {};
     Object.keys(d.tanda_tanggal).forEach((iso) => { tanda[angkaHari(iso)] = d.tanda_tanggal[iso]; });
     return {
@@ -99,8 +107,8 @@
       penerima: d.penerima, status: d.status, st: KELOMPOK[d.status], percobaan: d.percobaan, log: d.log,
       waktu: waktuTeks(d.waktu), waktuIso: d.waktu, durasi: d.durasi,
       transkrip: d.transkrip.map((t) => [t.pembicara === "ai" ? "A" : "P", t.detik, t.teks]),
-      tangkapan: d.tangkapan_sementara, jawaban: d.jawaban, label: d.label, alasan: d.alasan,
-      selisih: d.selisih, toleransi: d.toleransi, saran: d.saran,
+      tangkapan: d.tangkapan_sementara, jawaban: hitung.jawaban, label: d.label, alasan: d.alasan,
+      selisih: hitung.selisih, toleransi: d.toleransi, saran: d.saran,
       rekaman: d.rekaman ? url(d.rekaman) : null, hapusPada: d.hapus_pada,
       suara_langsung: skenario && SKENARIO_SUARA.indexOf(skenario) >= 0 ? "assets/rekaman/" + skenario : null,
       konteksRs: d.konteks_rs, pesanWa: d.pesan_wa, keputusan: keKeputusan(d.keputusan), galatPembaca: d.galat_pembaca
