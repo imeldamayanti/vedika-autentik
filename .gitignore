@@ -1,11 +1,51 @@
-.DS_Store
+# Local document source bundle. The canonical, sanitized fixtures live in dataset/.
+Folder Data Dokumen/
+Folder Data Asli/
+
+# Local AI data and model artifacts. Only privacy-reviewed reference aggregates are tracked.
+/ai-service/data/raw/
+/ai-service/data/processed/
+/ai-service/data/volunteer/
+/ai-service/model-cache/
+/ai-service/models/
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Generated evaluation output
+/ai-service/evaluation.json
+
+# JavaScript tooling and deploy output
 node_modules/
-.vercel
+.vercel/
 videos/.env.local
 videos/v3/renders/
+playwright-report/
+test-results/
+
+# Editors, operating system files, and logs
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Video: hanya sumber komposisi yang dilacak, bukan render atau rekaman mentah
 videos/**/*.mp4
 videos/**/*.mov
 videos/**/renders/
 videos/scratch/
 videos/raw/
+
+# Slide lokal
 *.pptx

@@ -1,0 +1,101 @@
+icd10,diagnosis,count
+Z501,Other physical therapy,94291
+Z098,Follow-up examination after other treatment for other conditions,25524
+Z509,"Care involving use of rehabilitation procedure, unspecified",14938
+Z508,Care involving use of other rehabilitation procedures,5987
+Z873,Personal history of diseases of the musculoskeletal system and connective tissue,1067
+M545,Low back pain,704
+Z099,Follow-up examination after unspecified treatment for other conditions,702
+Z507,"Occupational therapy and vocational rehabilitation, not elsewhere classified",519
+Z719,"Counselling, unspecified",365
+Z097,Follow-up examination after combined treatment for other conditions,291
+Z518,Other specified medical care,284
+Z866,Personal history of diseases of the nervous system and sense organs,284
+Z048,Examination and observation for other specified reasons,250
+Z549,Convalescence following unspecified treatment,219
+M5459,"Low back pain, site unspecified",210
+M179,"narthrosis, unspecified",194
+Z033,Observation for suspected nervous system disorder,190
+Z505,Speech therapy,164
+M750,Adhesive capsulitis of shoulder,145
+G819,"Hemiplegia, unspecified",139
+I64,"Stroke, not specified as haemorrhage or infarction",120
+M512,Other specified intervertebral disc displacement,120
+Z470,Follow-up care involving removal of fracture plate and other internal fixation device,108
+M199,"Arthrosis, unspecified",103
+Z478,Other specified orthopaedic follow-up care,103
+Z093,Follow-up examination after psychotherapy,98
+M5416,"Radiculopathy, lumbar region",84
+Z506,Orthoptic training,68
+M543,Sciatica,66
+G510,Bell's palsy,63
+G560,Carpal tunnel syndrome,63
+Z038,Observation for other suspected diseases and conditions,61
+M5456,"Low back pain, lumbar region",59
+M1996,"Arthrosis, unspecified, lower leg",59
+M170,"Primary narthrosis, bilateral",58
+Z094,Follow-up examination after treatment of fracture,55
+M791,Myalgia,52
+R252,Cramp and spasm,50
+Z090,Follow-up examination after surgery for other conditions,50
+Z710,Person consulting on behalf of another person,47
+G822,"Paraplegia, unspecified",45
+G811,Spastic hemiplegia,43
+M501,Cervical disc disorder with radiculopathy,42
+G629,"Polyneuropathy, unspecified",42
+M6539,"Trigger finger, site unspecified",42
+Z867,Personal history of diseases of the circulatory system,42
+I694,"Sequelae of stroke, not specified as haemorrhage or infarction",39
+G542,"Cervical root disorders, not elsewhere classified",39
+Z988,Other specified postsurgical states,39
+M542,Cervicalgia,38
+Q660,Talipes equinovarus,38
+Z018,Other specified special examinations,35
+M5412,"Radiculopathy, cervical region",33
+M653,Trigger finger,33
+I972,Postmastectomy lymphoedema syndrome,32
+S835,Sprain and strain involving (anterior) (posterior) cruciate ligament of knee,30
+G800,Spastic cerebral palsy,29
+Z500,Cardiac rehabilitation,29
+M751,Rotator cuff syndrome,28
+M255,Pain in joint,27
+I639,"Cerebral infarction, unspecified",26
+M519,"Intervertebral disc disorder, unspecified",24
+Z736,Limitation of activities due to disability,23
+M6536,"Trigger finger, lower leg",22
+M722,Plantar fascial fibromatosis,20
+M171,Other primary narthrosis,20
+M6534,"Trigger finger, hand",20
+G570,Lesion of sciatic nerve,19
+M5429,"Cervicalgia, site unspecified",19
+M541,Radiculopathy,19
+M759,"Shoulder lesion, unspecified",19
+M2559,"Pain in joint, unspecified site",19
+M5457,"Low back pain, lumbosacral region",18
+Z878,Personal history of other specified conditions,18
+G809,"Infantile cerebral palsy, unspecified",18
+I693,Sequelae of cerebral infarction,17
+M1999,"Arthrosis, unspecified, unspecified site",17
+M4722,"Other spondylosis with radiculopathy, cervical region",16
+M6530,"Trigger finger, multiple sites",16
+M2566,"Stiffness of joint, not elsewhere classified, lower leg",16
+M5312,"Cervicobrachial syndrome, cervical region",16
+M256,"Stiffness of joint, not elsewhere classified",15
+M5439,"Sciatica, site unspecified",15
+Z489,"Surgical follow-up care, unspecified",14
+M531,Cervicobrachial syndrome,14
+G500,Trigeminal neuralgia,14
+M510,Lumbar and other intervertebral disc disorders with myelopathy,13
+M4806,"Spinal stenosis, lumbar region",12
+M753,Calcific tendinitis of shoulder,12
+M511,Lumbar and other intervertebral disc disorders with radiculopathy,12
+M518,Other specified intervertebral disc disorders,12
+M419,"Scoliosis, unspecified",12
+Z870,Personal history of diseases of the respiratory system,12
+Z510,Radiotherapy session,11
+Z871,Personal history of diseases of the digestive system,11
+K076,Temporomandibular joint disorders,11
+M2564,"Stiffness of joint, not elsewhere classified, hand",11
+R262,"Difficulty in walking, not elsewhere classified",11
+T080,"Fracture of spine, level unspecified , closed",11
+F809,"Developmental disorder of speech and language, unspecified",10

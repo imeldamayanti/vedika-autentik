@@ -21,6 +21,46 @@ KALIMAT_GAGAL = "Berkas tidak bisa diproses oleh mesin pemeriksa. Ditandai Perlu
 ALASAN_GAGAL = "Berkas tidak bisa diproses, sehingga tidak bisa dinyatakan Lolos."
 
 
+def _gabungkan_hasil_banding(temuan: list[dict], banding: dict, pasangan_id: str) -> None:
+    """Ubah bukti pasangan dari mesin menjadi temuan yang disimpan API."""
+    if not banding.get("sama"):
+        return
+
+    region_a = banding.get("region_a") or []
+    temuan.append(
+        {
+            "cek": "berkas_kembar",
+            "kekuatan": "kuat",
+            "kalimat": banding["kalimat"],
+            "region": region_a[0] if region_a else None,
+            "skor": banding["kemiripan"],
+            "pasangan": pasangan_id,
+        }
+    )
+
+    tempelan = banding.get("tempelan") or []
+    if tempelan and not any(item["cek"] == "tempelan" for item in temuan):
+        area = [item["region_a"] for item in tempelan]
+        temuan.append(
+            {
+                "cek": "tempelan",
+                "kekuatan": "kuat",
+                "kalimat": (
+                    f"{len(area)} bagian memiliki pola piksel yang sama dengan "
+                    "berkas pembanding."
+                ),
+                "region": area[0],
+                "area": area,
+                "skor": max(item["kemiripan"] for item in tempelan),
+                "pasangan": pasangan_id,
+            }
+        )
+
+    for item in temuan:
+        if item["cek"] == "tempelan":
+            item["pasangan"] = pasangan_id
+
+
 def _ambil_job(conn):
     job = conn.execute(
         "select id, berkas_id from job"
@@ -49,15 +89,23 @@ def _proses(conn, job, mesin: KlienMesin, penyimpanan):
     berkas = repo.ambil_berkas(conn, job["berkas_id"])
     isi = penyimpanan.baca(berkas["path_storage"])
     klaim_awal = data_klaim.cari(berkas["sep"])  # SEP dari unggahan, bila ada
+    konteks_mesin = dict(klaim_awal or {})
+    konteks_mesin["kode_faskes"] = berkas["kode_faskes"]
     try:
-        hasil = mesin.analisis(berkas["nama_file"], isi, klaim_awal)
+        hasil = mesin.analisis(berkas["nama_file"], isi, konteks_mesin)
     except MesinGalat as e:
         _gagal(conn, berkas["id"], job["id"], e.kode)
         return
 
     # Berkas kembar bukan sinyal dari satu berkas. Dibuktikan API: sidik jari di arsip, lalu perbandingan.
     temuan = [dict(t) for t in hasil["temuan"] if t["cek"] != "berkas_kembar"]
-    kembar = repo.cari_kembar(conn, (hasil.get("sidik_jari") or {}).get("halaman"), berkas["id"])
+    kembar = None
+    if hasil["kualitas_scan"]["status"] == "baik":
+        kembar = repo.cari_kembar(
+            conn,
+            (hasil.get("sidik_jari") or {}).get("halaman"),
+            berkas["id"],
+        )
     if kembar:
         try:
             banding = mesin.bandingkan(
@@ -66,14 +114,7 @@ def _proses(conn, job, mesin: KlienMesin, penyimpanan):
         except MesinGalat:
             banding = None
         if banding and banding["sama"]:
-            region_a = banding.get("region_a") or []
-            temuan.append({
-                "cek": "berkas_kembar", "kekuatan": "kuat", "kalimat": banding["kalimat"],
-                "region": region_a[0] if region_a else None, "skor": banding["kemiripan"], "pasangan": kembar["id"],
-            })
-            for t in temuan:
-                if t["cek"] == "tempelan":
-                    t["pasangan"] = kembar["id"]
+            _gabungkan_hasil_banding(temuan, banding, kembar["id"])
 
     label = hitung_label({"kualitas_scan": hasil["kualitas_scan"], "temuan": temuan})
     repo.simpan_hasil(

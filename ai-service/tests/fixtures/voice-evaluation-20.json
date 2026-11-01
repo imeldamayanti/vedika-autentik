@@ -1,0 +1,193 @@
+[
+  {
+    "id": "V01-tepat-tiga",
+    "tags": ["peserta", "santai"],
+    "sesi_ditagih": 11,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Bapak datang fisioterapi bulan ini?"},
+      {"detik": 1.2, "pembicara": "penerima", "teks": "Cuma tiga kali kok."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 3, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V02-anak-tanda-tangan",
+    "tags": ["keluarga", "tanda_bahaya"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Apakah Ibu menjalani fisioterapi di rumah sakit itu?"},
+      {"detik": 0.9, "pembicara": "penerima", "teks": "Saya anaknya yang mengantar. Ibu terapi dua kali."},
+      {"detik": 1.8, "pembicara": "penerima", "teks": "Ibu juga disuruh tanda tangan beberapa lembar untuk kunjungan berikutnya."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hadir": true, "jumlah_maks": 2, "keyakinan": "tinggi", "tanda_bahaya": ["tanda_tangan_tanpa_layanan"]}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V03-rentang-yakin",
+    "tags": ["peserta"],
+    "sesi_ditagih": 9,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya rutin datang, sembilan atau sepuluh kali. Saya yakin."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 10, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Sesuai"}
+  },
+  {
+    "id": "V04-anak-ragu",
+    "tags": ["keluarga", "ragu"],
+    "sesi_ditagih": 9,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya anaknya. Kurang tahu persis, mungkin lima atau enam kali."},
+      {"detik": 1, "pembicara": "penerima", "teks": "Kadang adik saya yang mengantar, jadi saya tidak yakin."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hadir": true, "jumlah_maks": 6, "keyakinan": "rendah", "tanda_bahaya": []}, "label": "Tidak yakin"}
+  },
+  {
+    "id": "V05-menolak",
+    "tags": ["peserta", "menolak"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Apakah benar saya berbicara langsung dengan Bapak?"},
+      {"detik": 0.8, "pembicara": "penerima", "teks": "Iya, saya sendiri, tetapi saya tidak mau menjawab. Saya telepon 165 saja."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "menolak", "penerima": "peserta", "hadir": null, "jumlah_maks": null, "keyakinan": null, "tanda_bahaya": []}, "label": "Menolak"}
+  },
+  {
+    "id": "V06-bahasa-santai",
+    "tags": ["peserta", "santai"],
+    "sesi_ditagih": 8,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Iya mas, cuma dua kali tok. Kaki saya sudah enakan."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 2, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V07-tidak-pernah-hadir",
+    "tags": ["peserta"],
+    "sesi_ditagih": 6,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Apakah Ibu pernah fisioterapi di RS tersebut bulan Agustus?"},
+      {"detik": 1, "pembicara": "penerima", "teks": "Tidak pernah. Saya sama sekali tidak terapi di sana."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": false, "jumlah_maks": null, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V08-diminta-membayar",
+    "tags": ["peserta", "tanda_bahaya"],
+    "sesi_ditagih": 4,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya terapi empat kali."},
+      {"detik": 0.9, "pembicara": "penerima", "teks": "Petugas meminta saya membayar tambahan tunai setiap datang."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 4, "keyakinan": "tinggi", "tanda_bahaya": ["diminta_membayar"]}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V09-layanan-berbeda",
+    "tags": ["peserta", "tanda_bahaya"],
+    "sesi_ditagih": 5,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya pasiennya. Saya datang sekali, tapi hanya konsultasi dokter. Tidak ada fisioterapi."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": false, "jumlah_maks": null, "keyakinan": "tinggi", "tanda_bahaya": ["layanan_berbeda"]}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V10-toleransi-dua",
+    "tags": ["peserta"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya hadir delapan kali, saya catat di kalender."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 8, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Sesuai"}
+  },
+  {
+    "id": "V11-selisih-tiga",
+    "tags": ["peserta"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya pasiennya. Tujuh kali, tidak lebih. Saya ingat jelas."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 7, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V12-tidak-ingat-jumlah",
+    "tags": ["peserta", "ragu"],
+    "sesi_ditagih": 8,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya memang terapi, tetapi benar-benar tidak ingat berapa kali."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": null, "keyakinan": "rendah", "tanda_bahaya": []}, "label": "Tidak yakin"}
+  },
+  {
+    "id": "V13-pasangan",
+    "tags": ["keluarga"],
+    "sesi_ditagih": 6,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya suaminya dan selalu mengantar. Istri saya terapi empat kali."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hadir": true, "jumlah_maks": 4, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Sesuai"}
+  },
+  {
+    "id": "V14-orang-tua-anak",
+    "tags": ["keluarga"],
+    "sesi_ditagih": 5,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya ibunya. Anak saya hanya terapi satu kali bulan itu."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hadir": true, "jumlah_maks": 1, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V15-audio-bising",
+    "tags": ["peserta", "bising"],
+    "sesi_ditagih": 6,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Maaf, suaranya kurang jelas. Berapa kali terapinya?"},
+      {"detik": 1.3, "pembicara": "penerima", "teks": "Saya pasiennya. [suara kendaraan] Tiga kali. Tiga, ya."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 3, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V16-mengoreksi-angka",
+    "tags": ["peserta", "santai"],
+    "sesi_ditagih": 5,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya pasiennya. Tadi saya bilang lima? Bukan, maaf. Yang benar dua kali."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 2, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V17-rentang-tujuh-delapan",
+    "tags": ["peserta"],
+    "sesi_ditagih": 9,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya pasiennya. Sekitar tujuh sampai delapan kali."},
+      {"detik": 0.8, "pembicara": "penerima", "teks": "Rentangnya itu yang saya ingat."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 8, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Sesuai"}
+  },
+  {
+    "id": "V18-keluarga-tidak-hadir",
+    "tags": ["keluarga"],
+    "sesi_ditagih": 7,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya anaknya. Ayah tidak pernah menjalani fisioterapi bulan Agustus."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hadir": false, "jumlah_maks": null, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Tidak sesuai"}
+  },
+  {
+    "id": "V19-curiga-lalu-menjawab",
+    "tags": ["peserta", "santai"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Ini bukan minta OTP kan?"},
+      {"detik": 0.9, "pembicara": "ai", "teks": "Tidak. Kami tidak meminta data atau uang."},
+      {"detik": 1.8, "pembicara": "penerima", "teks": "Baik, saya terapi sepuluh kali dan saya ingat jelas."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 10, "keyakinan": "tinggi", "tanda_bahaya": []}, "label": "Sesuai"}
+  },
+  {
+    "id": "V20-rentang-ragu",
+    "tags": ["peserta", "ragu", "bising"],
+    "sesi_ditagih": 8,
+    "transkrip": [
+      {"detik": 0, "pembicara": "penerima", "teks": "Saya pasiennya. [putus-putus] Mungkin enam atau tujuh kali, tetapi saya tidak yakin."}
+    ],
+    "expected": {"hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hadir": true, "jumlah_maks": 7, "keyakinan": "rendah", "tanda_bahaya": []}, "label": "Tidak yakin"}
+  }
+]

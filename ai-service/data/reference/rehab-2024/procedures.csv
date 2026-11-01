@@ -1,0 +1,101 @@
+procedure,count
+9339 - Other physical therapy,14711
+9335 - Other heat therapy;9339 - Other physical therapy,13914
+9334 - Diathermy;9339 - Other physical therapy,12822
+9335 - Other heat therapy,8160
+9334 - Diathermy,5612
+9312 - Other active musculoskeletal exercise,4130
+9312 - Other active musculoskeletal exercise;9335 - Other heat therapy;9339 - Other physical therapy,3628
+9312 - Other active musculoskeletal exercise;9339 - Other physical therapy,3544
+9338 - Combined physical therapy without mention of the components,3278
+9311 - Assisting exercise;9335 - Other heat therapy;9339 - Other physical therapy,3202
+9312 - Other active musculoskeletal exercise;9335 - Other heat therapy,2877
+9312 - Other active musculoskeletal exercise;9334 - Diathermy;9339 - Other physical therapy,2867
+9312 - Other active musculoskeletal exercise;9334 - Diathermy,2749
+9311 - Assisting exercise;9339 - Other physical therapy,2610
+9334 - Diathermy;9335 - Other heat therapy,2385
+9311 - Assisting exercise;9334 - Diathermy;9339 - Other physical therapy,2279
+9311 - Assisting exercise;9335 - Other heat therapy,2242
+9375 - Other speech training and therapy,1726
+9311 - Assisting exercise;9334 - Diathermy,1713
+9383 - Occupational therapy,1599
+9313 - Resistive exercise;9334 - Diathermy;9339 - Other physical therapy,1451
+9334 - Diathermy;9335 - Other heat therapy;9339 - Other physical therapy,1391
+9317 - Other passive musculoskeletal exercise;9335 - Other heat therapy;9339 - Other physical therapy,1284
+9317 - Other passive musculoskeletal exercise;9339 - Other physical therapy,1080
+9317 - Other passive musculoskeletal exercise,991
+9317 - Other passive musculoskeletal exercise;9334 - Diathermy;9339 - Other physical therapy,902
+"9319 - Exercise, not elsewhere classified;9339 - Other physical therapy",860
+9317 - Other passive musculoskeletal exercise;9335 - Other heat therapy,836
+9313 - Resistive exercise;9335 - Other heat therapy;9339 - Other physical therapy,835
+"9319 - Exercise, not elsewhere classified;9335 - Other heat therapy;9339 - Other physical therapy",776
+"9319 - Exercise, not elsewhere classified;9334 - Diathermy;9339 - Other physical therapy",770
+9314 - Training in joint movements;9335 - Other heat therapy;9339 - Other physical therapy,723
+9327 - Stretching of muscle or tendon;9334 - Diathermy;9339 - Other physical therapy,684
+9311 - Assisting exercise,662
+9313 - Resistive exercise;9339 - Other physical therapy,639
+9327 - Stretching of muscle or tendon;9335 - Other heat therapy;9339 - Other physical therapy,633
+9312 - Other active musculoskeletal exercise;9334 - Diathermy;9335 - Other heat therapy,569
+9311 - Assisting exercise;9334 - Diathermy;9335 - Other heat therapy,552
+9314 - Training in joint movements;9335 - Other heat therapy,550
+9327 - Stretching of muscle or tendon;9339 - Other physical therapy,547
+9327 - Stretching of muscle or tendon;9335 - Other heat therapy,544
+"9319 - Exercise, not elsewhere classified;9335 - Other heat therapy",530
+9317 - Other passive musculoskeletal exercise;9334 - Diathermy,526
+9375 - Other speech training and therapy;9383 - Occupational therapy,503
+9315 - Mobilization of spine;9334 - Diathermy;9339 - Other physical therapy,485
+9313 - Resistive exercise;9335 - Other heat therapy,462
+"9339 - Other physical therapy;9389 - Rehabilitation, not elsewhere classified",445
+9321 - Manual and mechanical traction;9334 - Diathermy,418
+9301 - Functional evaluation,400
+9313 - Resistive exercise,383
+9317 - Other passive musculoskeletal exercise;9334 - Diathermy;9335 - Other heat therapy,382
+9314 - Training in joint movements;9334 - Diathermy;9339 - Other physical therapy,366
+"9319 - Exercise, not elsewhere classified;9334 - Diathermy;9339 - Other physical therapy;9389 - Rehabilitation, not elsewhere classified",366
+9313 - Resistive exercise;9334 - Diathermy,345
+"8907 - Consultation, described as comprehensive;9339 - Other physical therapy",325
+9314 - Training in joint movements;9339 - Other physical therapy,322
+"9319 - Exercise, not elsewhere classified;9334 - Diathermy",312
+9314 - Training in joint movements;9334 - Diathermy,304
+9327 - Stretching of muscle or tendon;9334 - Diathermy,296
+"9319 - Exercise, not elsewhere classified",296
+9334 - Diathermy;9338 - Combined physical therapy without mention of the components,282
+9335 - Other heat therapy;9338 - Combined physical therapy without mention of the components,270
+9321 - Manual and mechanical traction;9339 - Other physical therapy,265
+9315 - Mobilization of spine;9335 - Other heat therapy;9339 - Other physical therapy,260
+9309 - Other diagnostic physical therapy procedure,245
+9339 - Other physical therapy;9383 - Occupational therapy,244
+"9389 - Rehabilitation, not elsewhere classified",244
+9338 - Combined physical therapy without mention of the components;9339 - Other physical therapy,243
+9312 - Other active musculoskeletal exercise;9317 - Other passive musculoskeletal exercise,220
+9316 - Mobilization of other joints;9335 - Other heat therapy;9339 - Other physical therapy,213
+9316 - Mobilization of other joints;9334 - Diathermy;9339 - Other physical therapy,201
+9301 - Functional evaluation;9335 - Other heat therapy;9339 - Other physical therapy,188
+897 - General physical examination;9339 - Other physical therapy,186
+"8907 - Consultation, described as comprehensive;9335 - Other heat therapy",181
+9334 - Diathermy;9986 - Non-invasive placement of bone growth stimulator,180
+9327 - Stretching of muscle or tendon,163
+9335 - Other heat therapy;9339 - Other physical therapy;9383 - Occupational therapy,163
+9305 - Range of motion testing;9335 - Other heat therapy,161
+9312 - Other active musculoskeletal exercise;9335 - Other heat therapy;9986 - Non-invasive placement of bone growth stimulator,160
+9321 - Manual and mechanical traction;9334 - Diathermy;9339 - Other physical therapy,159
+9327 - Stretching of muscle or tendon;9334 - Diathermy;9335 - Other heat therapy,157
+"9334 - Diathermy;9339 - Other physical therapy;9389 - Rehabilitation, not elsewhere classified",155
+9339 - Other physical therapy;9981 - Hypothermia (central) (local),153
+9321 - Manual and mechanical traction;9335 - Other heat therapy,151
+9374 - Speech defect training,142
+9335 - Other heat therapy;9338 - Combined physical therapy without mention of the components;9339 - Other physical therapy,142
+"8909 - Consultation, not otherwise specified;9335 - Other heat therapy;9339 - Other physical therapy",140
+9335 - Other heat therapy;9336 - Cardiac retraining;9339 - Other physical therapy,139
+9314 - Training in joint movements,133
+9315 - Mobilization of spine;9334 - Diathermy,132
+9315 - Mobilization of spine;9335 - Other heat therapy,131
+"8907 - Consultation, described as comprehensive;9314 - Training in joint movements;9335 - Other heat therapy",129
+9312 - Other active musculoskeletal exercise;9327 - Stretching of muscle or tendon;9335 - Other heat therapy;9339 - Other physical therapy,128
+9331 - Assisted exercise in pool,128
+9316 - Mobilization of other joints;9335 - Other heat therapy,125
+9312 - Other active musculoskeletal exercise;9317 - Other passive musculoskeletal exercise;9339 - Other physical therapy,123
+9313 - Resistive exercise;9314 - Training in joint movements;9334 - Diathermy;9339 - Other physical therapy,123
+9318 - Breathing exercise;9335 - Other heat therapy,121
+9305 - Range of motion testing;9339 - Other physical therapy,119
+0009 - Other therapeutic ultrasound,116

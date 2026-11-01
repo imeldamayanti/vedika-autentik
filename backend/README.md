@@ -4,13 +4,15 @@ Kontrak lengkap: [docs/api-contract.md](../docs/api-contract.md). Rencana: [docs
 
 ```
 FE  ──Kontrak A──▶  API (app/)  ──Kontrak B──▶  Mesin AI
-                    + worker                    (stub_mesin/ sekarang, mesin PRAMANA nanti)
+                    + worker                    (`ai-service/`; `stub_mesin/` untuk fallback demo)
                     + Supabase
 ```
 
 ## Untuk AI engineering (Zahra)
 
-Yang harus dibuat: **mesin AI** yang memenuhi Kontrak B (`POST /v1/analisis`, `POST /v1/bandingkan`, `GET /v1/kesehatan`). `stub_mesin/` adalah contoh jawaban yang sudah benar bentuknya: membaca ground truth dari `dataset/manifest.json`, berkas dikenali dari nama file (`VA-XXX-NN`). Ganti isinya dengan analisis nyata, pertahankan bentuk responsnya.
+Mesin nyata ada di `../ai-service/` dan memenuhi Kontrak B (`POST /v1/analisis`,
+`POST /v1/bandingkan`, `GET /v1/kesehatan`). `stub_mesin/` tetap tersedia sebagai
+fallback demo berbasis `dataset/manifest.json`.
 
 Aturan yang paling sering terlewat (lengkapnya di kontrak, bagian "Aturan untuk mesin AI"):
 
