@@ -698,8 +698,23 @@
     else if (a.paused) ganti("akhir", "Rekaman dijeda", "Sisa " + mmss(Math.ceil(a.duration - a.currentTime)));
     else ganti("aktif", "Tersambung", "Sisa " + mmss(Math.ceil(a.duration - a.currentTime)));
   }
-  /* Sorot baris transkrip yang sedang diucapkan dan gulirkan daftar ke sana (hanya di dalam daftar, halaman tidak ikut bergeser). */
   let barisSorot = -1;
+
+  /* Buka atau tutup daftar transkrip di kartu Kutipan kunci tanpa menggambar ulang halaman. */
+  function bukaTranskrip(buka) {
+    const d = document.getElementById("transkripSinkron"), b = document.querySelector('[data-aksi="transkrip"]');
+    if (!d || !b) return;
+    d.hidden = !buka;
+    b.setAttribute("aria-expanded", String(buka));
+    b.lastChild.nodeValue = buka ? "Sembunyikan transkrip" : "Transkrip lengkap";
+    if (buka) {
+      barisSorot = -1;
+      const a = document.querySelector(".pemutar--ponsel audio");
+      if (a) sorotTranskrip(a, "");
+    }
+  }
+
+  /* Sorot baris transkrip yang sedang diucapkan dan gulirkan daftar ke sana (hanya di dalam daftar, halaman tidak ikut bergeser). */
   function sorotTranskrip(a, nama) {
     const daftar = document.getElementById("transkripSinkron");
     if (!daftar) return;
@@ -714,7 +729,11 @@
   }
 
   ["play", "pause", "ended", "timeupdate", "seeked"].forEach((n) => document.addEventListener(n, (e) => {
-    if (e.target.tagName === "AUDIO" && e.target.closest(".pemutar--ponsel")) { ponselRekaman(e.target, n); sorotTranskrip(e.target, n); }
+    if (e.target.tagName === "AUDIO" && e.target.closest(".pemutar--ponsel")) {
+      const d = document.getElementById("transkripSinkron");
+      if (n === "play" && d && d.hidden) bukaTranskrip(true);
+      ponselRekaman(e.target, n); sorotTranskrip(e.target, n);
+    }
   }, true));
 
   function isiPanggilan(p, t) {
@@ -938,15 +957,18 @@
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
     else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>'; }
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
-    /* Transkrip mengikuti rekaman: baris yang sedang diucapkan disorot (lihat sorotTranskrip), klik baris untuk melompat. */
-    const transkrip = simpanTeks && !latar && p.rekaman
-      ? '<section class="transkrip-sinkron"><div class="panel-kepala"><h2>Transkrip</h2><div class="kanan">' + p.transkrip.length + " ucapan · klik baris untuk melompat</div></div>" +
-        '<div class="transkrip transkrip--sinkron" id="transkripSinkron">' + p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '" data-aksi="loncat" data-detik="' + l[1] + '" role="button" tabindex="0"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div></section>" : "";
+    /* Transkrip menyatu di kartu Kutipan kunci: tombol membuka daftar, baris yang sedang diucapkan disorot saat rekaman
+       diputar (lihat sorotTranskrip), klik baris untuk melompat. */
+    const adaTranskrip = simpanTeks && !latar && p.rekaman;
+    const tombolTranskrip = adaTranskrip
+      ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="false" aria-controls="transkripSinkron">' + ikon("berkas") + "Transkrip lengkap</button></div>" : "";
+    const transkrip = adaTranskrip
+      ? '<div class="transkrip transkrip--sinkron" id="transkripSinkron" hidden>' + p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '" data-aksi="loncat" data-detik="' + l[1] + '" role="button" tabindex="0"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div>" : "";
 
     const kutipan = '<section class="panel"><div class="panel-kepala"><h2>Kutipan kunci</h2></div>' +
       (j.kutipan_kunci ? '<blockquote class="kutipan">' + esc(j.kutipan_kunci) + '</blockquote><p class="kutipan-ringkasan">' + esc(j.ringkasan) + "</p>"
         : '<p class="kutipan-ringkasan" style="padding-top:16px">Tidak ada kutipan. ' + esc(j.ringkasan) + "</p>") +
-      bukti +
+      bukti + tombolTranskrip + transkrip +
       '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke RS.</span></div></section>";
 
     const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai · Status <b>" + rs.status + "</b></span></div>";
@@ -958,7 +980,7 @@
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan"><div class="kartu-atas">' + ringkasan + sarankan + "</div>" + kutipan + transkrip + "</div></div>";
+      '<div class="kartu-kanan"><div class="kartu-atas">' + ringkasan + sarankan + "</div>" + kutipan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
@@ -1193,6 +1215,7 @@
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
+    transkrip() { const d = document.getElementById("transkripSinkron"); if (d) bukaTranskrip(d.hidden); },
     loncat(el) {
       const a = document.querySelector(".pemutar--ponsel audio");
       if (!a) return;
