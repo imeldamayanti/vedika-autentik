@@ -74,6 +74,11 @@ bunx wrangler secret put GEMINI_API_KEY
 bunx wrangler secret put AI_SERVICE_KEY   # same value as KUNCI_MESIN in backend/.env
 ```
 
+Deployed at `https://vedika-ai.sfatimaple.workers.dev` (2026-11-01; `uji.py jawaban`
+7/7 against the live URL). `AI_SERVICE_KEY` is required on every `/v1/*` call. Clients
+must send a normal `User-Agent`: Cloudflare answers bare `Python-urllib` with
+`403 error code: 1010` (the backend's `httpx` client is fine).
+
 Point the backend at it with `MESIN_URL=https://vedika-ai.<account>.workers.dev`
 and add that origin to `CORS_ORIGINS` so the hosted agent page can reach the API.
 On the agent page, enter the same `AI_SERVICE_KEY` under **Kunci layanan**.
