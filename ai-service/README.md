@@ -54,6 +54,30 @@ does not export participant IDs, visit IDs, or row-level claims.
 | `POST /v1/baca` | Kontrak B2: transcript in, structured answer plus `versi_pembaca` out; no label |
 | `POST /v1/suara/token` | Takes the B1 `skrip`; returns a one-use Gemini Live credential and call prompt |
 
+## Cloudflare Worker (deployment)
+
+`worker/` is the deployable version of the voice parts: `GET /v1/kesehatan`,
+`POST /v1/baca`, `POST /v1/suara/token`, and the agent page at `/voice/`. It is a
+JavaScript port of this service; Python stays the reference.
+`scripts/export_worker_fixtures.py` writes the answer schema and parity fixtures
+(reader prompt, call scripts, answer validation) that `bun test` checks the Worker
+against. Rerun it after changing the prompt, call script, or answer schema.
+
+```bash
+cd ai-service/worker
+bun install
+bun test                      # parity + contract tests
+bun run dev                   # local, needs .dev.vars with GEMINI_API_KEY
+bunx wrangler login           # once
+bun run deploy
+bunx wrangler secret put GEMINI_API_KEY
+bunx wrangler secret put AI_SERVICE_KEY   # same value as KUNCI_MESIN in backend/.env
+```
+
+Point the backend at it with `MESIN_URL=https://vedika-ai.<account>.workers.dev`
+and add that origin to `CORS_ORIGINS` so the hosted agent page can reach the API.
+On the agent page, enter the same `AI_SERVICE_KEY` under **Kunci layanan**.
+
 ## Voice confirmation prototype
 
 ### Answer reader (Kontrak B2)
