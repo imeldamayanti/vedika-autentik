@@ -130,7 +130,7 @@
         '<header class="atas">' +
           '<button class="tombol-menu" type="button" data-aksi="menu" aria-label="Buka menu">' + ikon("menu") + "</button>" +
           '<div class="jejak-rute">' + jejak + "</div>" +
-          '<div class="atas-kanan"><span class="lencana-prototipe">Prototipe · data sintetis</span>' +
+          '<div class="atas-kanan">' +
             '<div class="pengguna"><span class="avatar"><img src="assets/foto/verifikator.png" alt="" width="34" height="34"></span><div><b>' + D.VERIFIKATOR.nama + "</b><span>" + D.VERIFIKATOR.peran + " · " + D.VERIFIKATOR.kantor + "</span></div></div></div>" +
         "</header>" +
         '<main class="isi" id="isi">' + isi + "</main>" +

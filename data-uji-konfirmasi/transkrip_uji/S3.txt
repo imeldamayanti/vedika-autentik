@@ -1,0 +1,7 @@
+AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Budi Santoso?
+Penerima: Iya, betul.
+AI: Terima kasih, Pak Budi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RSU Bakti Mulia bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?
+Penerima: Iya betul.
+AI: Kira-kira berapa kali Bapak datang terapi di bulan Agustus?
+Penerima: Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.
+AI: Baik, sekitar sembilan sampai sepuluh kali. Terima kasih, Pak Budi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang.

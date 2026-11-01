@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-from . import config, repo, tampilan
+from . import config, repo, router_agen, router_v3, tampilan
 from .deps import get_conn, get_mesin, get_penyimpanan
 from .galat import Galat
 from .label import SARAN
@@ -19,8 +19,10 @@ TINDAKAN = {"scanUlang", "klarifikasi", "telaah", "wajar"}
 
 app = FastAPI(title="Vedika Autentik API", version="0.1")
 app.add_middleware(
-    CORSMiddleware, allow_origins=config.cors_origins(), allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"]
+    CORSMiddleware, allow_origins=config.cors_origins(), allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["*"]
 )
+app.include_router(router_v3.router)
+app.include_router(router_agen.router)
 
 
 @app.exception_handler(Galat)
@@ -127,4 +129,6 @@ def kesehatan(conn=Depends(get_conn), mesin=Depends(get_mesin)):
         db = "ok"
     except Exception:
         db = "mati"
-    return {"api": "ok", "db": db, "mesin": "ok" if mesin.sehat() else "mati"}
+    pembaca = "ok" if mesin.sehat() else "mati"
+    # mesin = nama v2, pembaca = nama v3: mesin AI yang sama melayani keduanya.
+    return {"api": "ok", "db": db, "mesin": pembaca, "pembaca": pembaca, "versi_aturan": config.VERSI_ATURAN_V3}

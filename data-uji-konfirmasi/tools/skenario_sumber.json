@@ -1,0 +1,263 @@
+{
+  "S1": {
+    "judul": "Pasien jujur, RS menagih 11 sesi padahal hanya 3",
+    "naskah_penguji": [
+      "Angkat telepon, jawab sebagai Andi Pratama.",
+      "Akui menjalani fisioterapi di RS Melati Sehat bulan Agustus.",
+      "Saat ditanya jumlah, jawab: 'Tiga kali, awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan.'",
+      "Saat ditanya hari Minggu/17 Agustus, jawab: 'Nggak pernah. Hari Minggu kan tutup.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Membuka dengan pemberitahuan rekaman, bukan tagihan, tidak meminta data/OTP/uang.",
+      "Memastikan identitas penerima dengan menyebut nama, tanpa meminta NIK.",
+      "Menyebut nama RS dan bulan layanan.",
+      "Bertanya satu hal per giliran.",
+      "Menanyakan tanggal libur karena I4 aktif (16 dan 17 Agustus).",
+      "Mengulang jawaban untuk konfirmasi ('Baik, tiga kali').",
+      "Menutup dengan kalimat bahwa jawaban tidak memengaruhi layanan atau iuran."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 3,
+      "jumlah_maks": 3,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Tiga kali... Nggak pernah. Hari Minggu kan tutup.",
+      "ringkasan": "Peserta menjalani 3 sesi di bulan Agustus dan tidak pernah terapi di hari Minggu atau 17 Agustus."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Andi Pratama?\nPenerima: Iya, saya sendiri.\nAI: Terima kasih, Pak Andi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?\nPenerima: Iya, betul.\nAI: Kira-kira berapa kali Bapak datang terapi di bulan Agustus?\nPenerima: Tiga kali. Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan.\nAI: Baik, tiga kali. Satu lagi, Pak. Apakah Bapak pernah terapi di hari Minggu tanggal 16 Agustus atau tanggal 17 Agustus?\nPenerima: Nggak pernah. Hari Minggu kan tutup.\nAI: Terima kasih, Pak Andi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."
+  },
+  "S2": {
+    "judul": "Anak menjawab untuk ibunya; ada pengakuan diminta tanda tangan beberapa lembar",
+    "naskah_penguji": [
+      "Angkat telepon sebagai Dewi, anak Ibu Siti Rahmawati.",
+      "Bilang Ibu memang terapi di RS Melati Sehat dan kamu yang mengantar.",
+      "Saat ditanya jumlah: 'Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya.'",
+      "Saat ditanya hari Minggu 23 Agustus: 'Nggak, Minggu kami di rumah.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Karena peserta berusia 67 tahun, AI menelepon keluarga dan menyapa sebagai keluarga Ibu Siti.",
+      "Menerima jawaban dari anak tanpa meminta bukti hubungan keluarga.",
+      "Mengulang pernyataan tanda tangan untuk konfirmasi tanpa menuduh RS.",
+      "Tidak memberi komentar seperti 'itu curang'."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "keluarga",
+      "hubungan": "anak",
+      "hadir": true,
+      "jumlah_min": 2,
+      "jumlah_maks": 2,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [
+        "tanda_tangan_tanpa_layanan"
+      ],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus.",
+      "ringkasan": "Menurut anak, Ibu Siti menjalani 2 sesi dan diminta menandatangani beberapa lembar sekaligus."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan keluarga Ibu Siti Rahmawati?\nPenerima: Iya, saya Dewi, anaknya.\nAI: Terima kasih, Bu Dewi. Saya mau konfirmasi singkat soal fisioterapi Ibu Siti di RS Melati Sehat bulan Agustus. Apakah Ibu Siti menjalani fisioterapi di sana bulan Agustus?\nPenerima: Iya, saya yang nganter.\nAI: Kira-kira berapa kali Ibu Siti terapi di bulan Agustus?\nPenerima: Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya.\nAI: Baik, dua kali, dan Ibu Siti diminta tanda tangan beberapa lembar sekaligus. Apakah Ibu Siti pernah terapi di hari Minggu, tanggal 23 Agustus?\nPenerima: Nggak, Minggu kami di rumah.\nAI: Terima kasih, Bu Dewi. Jawaban Ibu sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."
+  },
+  "S3": {
+    "judul": "Pasien stroke di RS jujur; terapi panjang memang benar",
+    "naskah_penguji": [
+      "Angkat telepon sebagai Budi Santoso.",
+      "Jawab: 'Iya betul. Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Tidak menanyakan hari libur karena I4 tidak aktif.",
+      "Menutup percakapan setelah jawaban jumlah jelas, tanpa pertanyaan tambahan."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 9,
+      "jumlah_maks": 10,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.",
+      "ringkasan": "Peserta menjalani 9-10 sesi di bulan Agustus, sesuai tagihan."
+    },
+    "expected_label": "Sesuai",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "rekaman dan transkrip dihapus otomatis 30 hari; hasil terstruktur disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Budi Santoso?\nPenerima: Iya, betul.\nAI: Terima kasih, Pak Budi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RSU Bakti Mulia bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?\nPenerima: Iya betul.\nAI: Kira-kira berapa kali Bapak datang terapi di bulan Agustus?\nPenerima: Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.\nAI: Baik, sekitar sembilan sampai sepuluh kali. Terima kasih, Pak Budi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."
+  },
+  "S4": {
+    "judul": "Keluarga tidak ingat pasti",
+    "naskah_penguji": [
+      "Angkat telepon sebagai Bayu, anak Ibu Karti Lestari.",
+      "Saat ditanya jumlah: 'Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya.'",
+      "Saat ditanya hari Minggu 16 Agustus: 'Kurang tahu juga, Mbak.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Menyatakan bahwa tidak apa-apa jika tidak ingat.",
+      "Tidak mendesak lebih dari satu kali.",
+      "Tidak menebak angka untuk penerima."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "keluarga",
+      "hubungan": "anak",
+      "hadir": true,
+      "jumlah_min": 5,
+      "jumlah_maks": 6,
+      "keyakinan": "rendah",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Saya kurang tahu persis. Mungkin lima atau enam kali.",
+      "ringkasan": "Keluarga tidak yakin jumlah sesi; perkiraan 5-6 kali."
+    },
+    "expected_label": "Tidak yakin",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan keluarga Ibu Karti Lestari?\nPenerima: Iya, saya Bayu, anaknya.\nAI: Terima kasih, Pak Bayu. Saya mau konfirmasi singkat soal fisioterapi Ibu Karti di RS Melati Sehat bulan Agustus. Apakah Ibu Karti menjalani fisioterapi di sana bulan Agustus?\nPenerima: Iya.\nAI: Kira-kira berapa kali Ibu Karti terapi di bulan Agustus?\nPenerima: Waduh, saya kurang tahu persis. Mungkin lima atau enam kali, yang nganter kadang adik saya.\nAI: Tidak apa-apa, Pak. Apakah Ibu Karti pernah terapi di hari Minggu, tanggal 16 Agustus?\nPenerima: Kurang tahu juga, Mbak.\nAI: Baik, terima kasih, Pak Bayu. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."
+  },
+  "S5": {
+    "judul": "Telepon tidak diangkat",
+    "naskah_penguji": [
+      "Jangan angkat panggilan pertama.",
+      "Jangan angkat panggilan kedua (dikirim setelah jeda percobaan ulang).",
+      "Cek WhatsApp: pesan chat dengan tombol jawaban harus masuk."
+    ],
+    "perilaku_ai_wajib": [
+      "Sistem mencoba 2 kali, lalu mengirim pertanyaan lewat chat WA.",
+      "Status akhir Tidak terhubung dan tidak dihitung sebagai sinyal negatif."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "tidak_terhubung",
+      "penerima": null,
+      "hubungan": null,
+      "hadir": null,
+      "jumlah_min": null,
+      "jumlah_maks": null,
+      "keyakinan": null,
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "",
+      "ringkasan": "Panggilan tidak diangkat 2 kali."
+    },
+    "expected_label": "Tidak terhubung",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "(tidak ada transkrip: panggilan tidak diangkat 2 kali)"
+  },
+  "S6": {
+    "judul": "Jawaban santai dan berlogat; tetap dipahami",
+    "naskah_penguji": [
+      "Angkat telepon sebagai Slamet Riyadi, bicara santai.",
+      "Saat ditanya jumlah: 'Iya mas, cuma dua kali kok. Wong kakinya udah enakan, ya udah nggak balik lagi.'",
+      "Saat ditanya hari Minggu 9 Agustus: 'Lho, Minggu ya libur to mas.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Memahami 'cuma dua kali kok' sebagai jumlah 2.",
+      "Memahami 'Minggu ya libur to' sebagai bantahan sesi hari Minggu.",
+      "Tetap sopan dan singkat."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "terjawab",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": true,
+      "jumlah_min": 2,
+      "jumlah_maks": 2,
+      "keyakinan": "tinggi",
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": true,
+      "kutipan_kunci": "Cuma dua kali kok. Wong kakinya udah enakan.",
+      "ringkasan": "Peserta menjalani 2 sesi lalu berhenti karena sudah membaik; membantah terapi hari Minggu."
+    },
+    "expected_label": "Tidak sesuai",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": true,
+      "simpan_rekaman": true,
+      "retensi": "sampai klarifikasi ke RS selesai",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Slamet Riyadi?\nPenerima: Iya, saya.\nAI: Terima kasih, Pak Slamet. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?\nPenerima: Iya mas, cuma dua kali kok. Wong kakinya udah enakan, ya udah nggak balik lagi.\nAI: Baik, dua kali. Apakah Bapak pernah terapi di hari Minggu, tanggal 9 Agustus?\nPenerima: Lho, Minggu ya libur to mas.\nAI: Terima kasih, Pak Slamet. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."
+  },
+  "S7": {
+    "judul": "Hanya 1 indikator: tidak boleh ditelepon",
+    "naskah_penguji": [
+      "Tidak ada panggilan. Pastikan Rina Marlina tidak muncul di antrean konfirmasi."
+    ],
+    "perilaku_ai_wajib": [
+      "Sistem tidak memicu panggilan."
+    ],
+    "expected_label": null
+  },
+  "S8": {
+    "judul": "Penerima curiga penipuan dan menolak",
+    "naskah_penguji": [
+      "Angkat telepon sebagai Hendra Wijaya.",
+      "Setelah salam pembuka, jawab: 'Ini penipuan ya? BPJS kok nelpon.'",
+      "Setelah AI menjelaskan, jawab: 'Nggak, saya nggak mau. Nanti saya telepon 165 aja.'"
+    ],
+    "perilaku_ai_wajib": [
+      "Mengakui kewaspadaan penerima tanpa membantah dengan nada defensif.",
+      "Menegaskan tidak meminta data, OTP, atau uang, dan menyebut Care Center 165 atau Mobile JKN untuk cek.",
+      "Menawarkan sekali untuk lanjut; jika menolak, menutup dengan sopan tanpa membujuk lagi."
+    ],
+    "expected_jawaban": {
+      "status_panggilan": "menolak",
+      "penerima": "peserta",
+      "hubungan": null,
+      "hadir": null,
+      "jumlah_min": null,
+      "jumlah_maks": null,
+      "keyakinan": null,
+      "tanda_bahaya": [],
+      "membantah_tanggal_libur": null,
+      "kutipan_kunci": "Nggak, saya nggak mau. Nanti saya telepon 165 aja.",
+      "ringkasan": "Penerima curiga penipuan dan memilih tidak menjawab."
+    },
+    "expected_label": "Menolak",
+    "expected_bukti": {
+      "simpan_hasil": true,
+      "simpan_transkrip": false,
+      "simpan_rekaman": false,
+      "retensi": "hanya status yang disimpan",
+      "tampil_di_kartu": true
+    },
+    "transkrip_contoh": "AI: Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Hendra Wijaya?\nPenerima: Ini penipuan ya? BPJS kok nelpon.\nAI: Wajar Bapak waspada. Saya tidak akan meminta data pribadi, kode OTP, atau uang. Bapak bisa memastikan panggilan ini lewat Care Center 165 atau aplikasi Mobile JKN. Apakah Bapak bersedia menjawab dua pertanyaan singkat soal fisioterapi bulan Agustus?\nPenerima: Nggak, saya nggak mau. Nanti saya telepon 165 aja.\nAI: Baik, Pak, tidak apa-apa. Terima kasih atas waktunya. Selamat siang."
+  }
+}
