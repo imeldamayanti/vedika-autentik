@@ -100,36 +100,47 @@
     kirimWa: (task) => ask(`Kirim pesan pemberitahuan ke ${task.no_tujuan}, lalu tekan kirim di WhatsApp.`, [["Pesan WA terkirim", true]], task.wa.tautan),
     telepon: async (task) => {
       if (!task.wa.lewati) await countdown(task.jeda_wa_menit * 60);
-      return ask(`Telepon ${task.no_tujuan} lewat WhatsApp Desktop.`, [["Saya menelepon", true]]);
+      await ask(`Telepon ${task.no_tujuan} lewat WhatsApp Web, lalu klik tombol ini.`, [["Saya menelepon", true]]);
+      clickAudio = new AudioContext();
     },
-    diangkat: () => ask("Apakah telepon diangkat?", [["Diangkat", true], ["Tidak diangkat", false]]).then((answered) => {
-      if (answered) clickAudio = new AudioContext();
-      return answered;
-    }),
     kirimChatCadangan: (chat) => ask("Dua kali tidak diangkat. Kirim chat cadangan.", [["Chat cadangan terkirim", true]], chat.tautan),
   };
 
-  function converse(task, { onStarted, onTurn }) {
+  // The AI listens from the moment the operator dials; the recipient's first words count
+  // as the answer. No words within ANSWER_TIMEOUT_MS means not answered.
+  const ANSWER_TIMEOUT_MS = 40000;
+  function converse(task, { onAnswered, onTurn }) {
     return new Promise((resolve) => {
       $("transkrip").textContent = "";
       const kunciLayanan = $("kunciLayanan").value;
+      let answered = false;
       const session = new VedikaVoiceSession({
         audioContext: clickAudio,
+        greetFirst: false,
         context: task.skrip,
         headers: kunciLayanan ? { "X-Kunci-Layanan": kunciLayanan } : {},
         inputDeviceId: $("inputDevice").value,
         outputDeviceId: $("outputDevice").value,
         onStatus: (value) => setStatus(`${task.id}: ${value}`),
+        onAnswer: () => {
+          answered = true;
+          clearTimeout(noAnswer);
+          onAnswered().catch(showError);
+          ask("Panggilan berlangsung.", [["Akhiri panggilan", true]]).then(() => session.stop("selesai"));
+        },
         onTranscript: (turn) => {
           $("transkrip").textContent += `[${turn.detik}] ${turn.pembicara}: ${turn.teks}\n`;
           onTurn(turn);
         },
         onError: showError,
-        onComplete: ({ transkrip, recording, durasi }) => resolve({ transkrip, rekaman: recording, durasi }),
+        onComplete: ({ transkrip, recording, durasi }) => resolve({ answered, transkrip, rekaman: recording, durasi }),
       });
       clickAudio = null;
-      ask("Panggilan berlangsung.", [["Akhiri panggilan", true]]).then(() => session.stop("selesai"));
-      session.start().then(() => onStarted()).catch(showError);
+      const noAnswer = setTimeout(() => session.stop("tidak_diangkat"), ANSWER_TIMEOUT_MS);
+      ask("Menunggu penerima mengangkat dan bicara…", [["Tidak diangkat", true]]).then(() => {
+        if (!answered) session.stop("tidak_diangkat");
+      });
+      session.start().catch(showError);
     });
   }
 

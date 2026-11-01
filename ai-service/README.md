@@ -99,10 +99,11 @@ URL and `AGEN_KEY` on the page and press **Mulai agen**. The page:
    (skipped on the second attempt);
 3. waits `jeda_wa_menit`, asks the operator to dial, and reports `menelepon`,
    retrying each second on `409 jeda_belum_lewat`;
-4. reports `tidak_diangkat` and sends `chat_cadangan` when offered, or reports
-   `tersambung`, starts Gemini Live with the task's `skrip`, and reports `merekam`.
-   Once the session is set up, the page sends a text cue so the AI opens the call
-   without waiting for the recipient to speak;
+4. starts Gemini Live with the task's `skrip` as soon as the operator dials and
+   listens on the line. The recipient's first transcribed words count as the
+   answer: it reports `tersambung` and `merekam` and the AI opens the call. No words
+   within 40 seconds (ringback does not count) reports `tidak_diangkat` and sends
+   `chat_cadangan` when offered;
 5. posts one `…/transkrip` line per speaking turn (`detik` from connection,
    `pembicara` `ai` or `penerima`);
 6. uploads the two-way `.webm`, final transcript, and `durasi` to `…/hasil`.
@@ -147,15 +148,16 @@ Tab 1: WhatsApp Web (the line)                Tab 2: agent page /voice/ (the AI)
 5. Run `./dev.sh`, then on the agent page enter `AGEN_KEY`, click **Muat perangkat
    audio**, choose input BlackHole 2ch and output BlackHole 16ch, and click
    **Mulai agen**. Hard-reload (Cmd+Shift+R) after any agent code change.
-6. Send the notice and place the voice call from WhatsApp Web. Click **Diangkat**
-   only when the recipient answers; the AI opens within about 3 seconds.
+6. Send the notice and place the voice call from WhatsApp Web, then click
+   **Saya menelepon**. The AI starts when the recipient says "Halo"; there is no
+   answer button. **Tidak diangkat** ends the attempt early.
 7. Afterwards restore the Mac:
    `swift scripts/set_audio.swift "MacBook Pro Speakers" "MacBook Pro Microphone"`.
 
 The agent page captures the line with Chrome's echo cancellation, noise
 suppression, and auto-gain disabled; otherwise Chrome erases the recipient's voice
 as echo of WhatsApp Web's playback. It creates its audio context at the
-**Diangkat** click, because Chrome keeps a context created later suspended (silent
+**Saya menelepon** click, because Chrome keeps a context created later suspended (silent
 in both directions).
 
 ### Acceptance commands
@@ -236,6 +238,7 @@ covered by the deterministic answer-rule tests.
 | Kontrak B1 agent flow against the live backend | Pass for S1 (2026-11-01): `runTask` drove all six status reports, transcript, and `hasil`; backend read it through `/v1/baca` and labelled `tidak_sesuai`; RS Melati became Perlu klarifikasi RS; recording plays. Browser audio and Gemini Live were replayed, not live |
 | Gemini Live call with synthetic recipient audio | Pass for S1 (2026-11-01): `gemini-3.8-live` followed script A-F, transcribed the recipient accurately, and the transcript was labelled `Tidak sesuai` |
 | Agent page in Chrome + BlackHole + Gemini Live, robot recipient (`agent_e2e.mjs`) | Pass for S1 (2026-11-01): 37 s of AI audio, 4/4 recipient lines transcribed, label `tidak_sesuai` |
+| Automatic answer detection (`agent_e2e.mjs`, ringback then "Halo?") | Pass (2026-11-01): S4 answered after 8 s of ringback, label `tidak_yakin`; S5 never answered, two attempts, fallback chat, label `tidak_terhubung`, no AI speech during ringing |
 | Real call: WhatsApp Web + BlackHole + agent page | Pass, 1 call (2026-11-01): two-way audio, 5-line transcript, recipient denied August, label `tidak_sesuai`. Three consecutive scripted calls still pending |
 
 `gemini-3.8-flash` was the original text model. On 2026-10-31 and 2026-11-01 it

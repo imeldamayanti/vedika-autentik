@@ -43,6 +43,8 @@ if (before.status !== "antre") {
 
 // Recipient voice clips.
 const work = mkdtempSync(join(tmpdir(), "agent-e2e-"));
+const halo = join(work, "halo.aiff");
+execFileSync("say", ["-v", "Damayanti", "-r", "170", "-o", halo, "Halo?"]);
 const clips = lines.map((text, i) => {
   const file = join(work, `p${i}.aiff`);
   execFileSync("say", ["-v", "Damayanti", "-r", "170", "-o", file, text]);
@@ -57,6 +59,13 @@ const deviceIndex = (name) => {
 const blackhole2 = deviceIndex("BlackHole 2ch");
 const speak = (file) => new Promise((resolve) => {
   spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-i", file, "-f", "audiotoolbox", "-audio_device_index", blackhole2, "-"])
+    .on("close", resolve);
+});
+// Indonesian ringback (425 Hz, 1 s on / 3 s off) while the phone "rings": it must not count as an answer.
+const ringback = (seconds) => new Promise((resolve) => {
+  spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+    `aevalsrc=0.3*sin(2*PI*425*t)*lt(mod(t\\,4)\\,1):d=${seconds}:s=48000`, "-af", "aformat=sample_fmts=s16",
+    "-f", "audiotoolbox", "-audio_device_index", blackhole2, "-"])
     .on("close", resolve);
 });
 
@@ -142,8 +151,13 @@ const waitForAiTurnEnd = async (timeoutMs) => {
   return false;
 };
 
-let inCall = false, done = false, pageTranscript = "";
+let inCall = false, answeredLogged = false, done = false, pageTranscript = "";
 const robot = async () => {
+  log("robot: phone rings (ringback tone)");
+  await ringback(8);
+  if (!clips.length) { log("robot: recipient never picks up"); return; }
+  log('robot: recipient picks up -> "Halo?"');
+  await speak(halo);
   for (const [i, clip] of clips.entries()) {
     if (!(await waitForAiTurnEnd(40000))) { log("robot: AI went quiet / never spoke; stopping"); break; }
     log(`robot: AI turn ended -> recipient says: "${lines[i]}"`);
@@ -155,18 +169,17 @@ const robot = async () => {
   await click("Akhiri panggilan");
 };
 
-const deadline = Date.now() + 6 * 60 * 1000;
+const deadline = Date.now() + 9 * 60 * 1000;
 while (!done && Date.now() < deadline) {
   const galat = await page(`document.getElementById("galat").textContent`);
   if (galat) log("agent page:", galat);
   const actions = await buttons();
   if (actions.includes("Pesan WA terkirim")) { log("operator: WA sent"); await click("Pesan WA terkirim"); }
   else if (actions.includes("Saya menelepon")) { log("operator: dialing"); await click("Saya menelepon"); }
-  else if (actions.includes("Diangkat")) {
-    const answer = clips.length ? "Diangkat" : "Tidak diangkat";
-    log(`operator: ${answer}`); await click(answer);
-  } else if (actions.includes("Chat cadangan terkirim")) { log("operator: fallback chat sent"); await click("Chat cadangan terkirim"); }
-  else if (actions.includes("Akhiri panggilan") && !inCall) { inCall = true; log("call live; robot listening"); robot().catch((e) => log("robot error:", e.message)); }
+  else if (actions.includes("Chat cadangan terkirim")) { log("operator: fallback chat sent"); await click("Chat cadangan terkirim"); }
+  else if (actions.includes("Tidak diangkat") && !inCall) { inCall = true; log("dialled; agent listening for an answer"); robot().catch((e) => log("robot error:", e.message)); }
+  else if (actions.includes("Akhiri panggilan") && !answeredLogged) { answeredLogged = true; log("agent detected the answer"); }
+  if (!actions.includes("Tidak diangkat") && !actions.includes("Akhiri panggilan")) inCall = false;
   const call = await getCall();
   if (call.status === "selesai" || call.status === "tidak_terhubung") done = !!call.label;
   if (!done) await sleep(500);
