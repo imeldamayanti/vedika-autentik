@@ -142,26 +142,16 @@
 .ponsel--dering .telp-foto { animation: cincin 1.4s ease-out infinite; }
 @keyframes cincin { from { box-shadow: 0 0 0 0 oklch(100% 0 0 / .35); } to { box-shadow: 0 0 0 26px oklch(100% 0 0 / 0); } }
 
-/* Layar kunci saat menunggu panggilan. */
-.telp-kunci { display: flex; flex-direction: column; align-items: center; padding: 58px 18px 0; text-align: center; }
-.telp-kunci > span { font-size: 15px; font-weight: 600; opacity: .8; }
-.telp-kunci > b { margin-top: 2px; font-size: 64px; line-height: 1.05; font-weight: 300; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
-.telp-notif { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 56px; padding: 10px 12px; border-radius: 16px; background: oklch(100% 0 0 / .16); text-align: left; animation: muncul .3s ease-out; }
-.telp-notif i { flex: none; width: 34px; height: 34px; border-radius: 9px; background: oklch(62% .15 150); display: grid; place-items: center; }
-.telp-notif i svg { width: 18px; height: 18px; }
-.telp-notif b { display: block; font-size: 13px; font-variant-numeric: tabular-nums; }
-.telp-notif span { display: block; font-size: 12px; opacity: .75; }
-
-/* Tombol ala telepon: grid 3x2 saat tersambung, memudar saat panggilan berakhir. */
+/* Tombol ala telepon: grid 3x2 yang sama di semua fase, memudar saat tidak ada panggilan aktif. */
 .telp-opsi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; padding: 14px 22px 0; }
-.ponsel--akhir .telp-opsi { opacity: .35; }
+.ponsel--diam .telp-opsi, .ponsel--tak .telp-opsi, .ponsel--akhir .telp-opsi { opacity: .35; }
 .tombol-telp { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .tombol-telp svg { box-sizing: content-box; width: 22px; height: 22px; padding: 11px; border-radius: 50%; background: oklch(100% 0 0 / .16); }
 .tombol-telp small { font-size: 11px; opacity: .85; }
 .tombol-telp.merah svg { background: oklch(58% .2 27); transform: rotate(135deg); }
 .tombol-telp.hijau svg { background: oklch(62% .17 150); }
-.ponsel--akhir .tombol-telp.merah svg { background: oklch(100% 0 0 / .16); }
-.ponsel--akhir .telp-aksi { opacity: .45; }
+.ponsel--diam .tombol-telp.merah svg, .ponsel--tak .tombol-telp.merah svg, .ponsel--akhir .tombol-telp.merah svg { background: oklch(100% 0 0 / .16); }
+.ponsel--diam .telp-aksi, .ponsel--tak .telp-aksi, .ponsel--akhir .telp-aksi { opacity: .45; }
 .ponsel--dering .tombol-telp.hijau svg { animation: denyut 1s ease-in-out infinite; }
 .telp-aksi { display: flex; justify-content: center; gap: 70px; margin-top: auto; padding: 14px 0 28px; }
 .telp-aksi--dering { padding-bottom: 44px; }

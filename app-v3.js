@@ -675,16 +675,13 @@
       bulat("", "Tambah", ikon("tambah")) + bulat("", "Video", ikon("video")) + bulat("", "Kontak", ikon("pengguna")) + "</div>";
     const akhiri = '<div class="telp-aksi">' + bulat("merah", "Akhiri", ikon("telepon")) + "</div>";
     const bawah = k.mode === "dering" ? '<div class="telp-aksi telp-aksi--dering">' + bulat("merah", "Tolak", ikon("telepon")) + bulat("hijau", "Jawab", ikon("telepon")) + "</div>"
-      : k.mode === "aktif" || k.mode === "akhir" ? opsi + akhiri : "";
-    /* Menunggu panggilan: layar kunci. Setelah pesan WA terkirim, muncul notifikasinya. */
-    const kunci = '<div class="telp-kunci"><span>' + esc(hariIniTeks().replace(/ \d{4}$/, "")) + "</span><b>" + jam + "</b>" +
-      (k.teks === "Menunggu jeda pesan" ? '<div class="telp-notif"><i>' + ikon("telepon") + "</i><div><b>" + esc(nomor) + "</b><span>Pesan baru dari nomor tim · Simulasi</span></div></div>" : "") + "</div>";
+      : opsi + akhiri;
     const info = '<div class="telp-info"><span class="telp-foto">' + ikon("telepon") + "</span><b>" + esc(nomor) + "</b><span>Nomor tim · Simulasi</span>" +
       '<p class="telp-status">' + k.teks + '</p><p class="telp-durasi">' + baris + "</p>" +
       '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>';
     return '<div class="kol-ponsel"><div class="ponsel ponsel--telp ponsel--' + k.mode + '" role="img" aria-label="Simulasi layar telepon penerima: ' + k.teks + '">' +
       '<div class="ponsel-layar"><span class="poni"></span><div class="status-ponsel"><b>' + jam + "</b><span>" + STATUS_HP + "</span></div>" +
-      (k.mode === "diam" ? kunci : info + bawah) + "</div></div>" +
+      info + bawah + "</div></div>" +
       '<p class="ponsel-ket">Layar HP penerima: <b>' + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</b></p>" + (tambahan || "") + "</div>";
   }
 
