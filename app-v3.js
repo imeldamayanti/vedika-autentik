@@ -302,7 +302,7 @@
     const panah = '<svg class="panah" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
     return kepala("Beranda", hariIniTeks() + ", " + D.VERIFIKATOR.kantor) +
       '<div class="pengumuman"><span class="merek-ikon merek-ikon--veritas">' + logoVeritas + "</span>" +
-        "<div><b>Autentik kini bertanya langsung ke peserta</b><p>AI menelepon peserta atau keluarganya dan menanyakan berapa sesi fisioterapi yang benar-benar dijalani. Keputusan tetap di tangan Anda.</p></div>" +
+        "<div><b>Autentik kini bertanya langsung ke peserta</b><p>AI menanyakan berapa sesi fisioterapi yang benar-benar dijalani. Keputusan tetap di tangan Anda.</p></div>" +
         '<a class="btn btn--primer" href="#/autentik">Buka antrean</a></div>' +
       '<div class="judul-seksi"><h2>Layanan ' + D.BULAN + "</h2></div>" +
       kartuAngka() +
@@ -376,7 +376,7 @@
     const keadaan = jd ? "Dijeda. Panggilan yang berjalan diselesaikan dulu." : sibuk ? "1 panggilan berjalan." : M.hidup && !M.antrean.pengaturan.dalam_jam ? "Di luar jam panggilan otomatis." : "Menyiapkan panggilan berikutnya.";
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien masuk antrean bila dua indikator atau lebih aktif. Panggilan otomatis berjalan pukul 09.00–17.00, satu panggilan dalam satu waktu.</p></div></div>" +
+        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih. Panggilan otomatis pukul 09.00–17.00.</p></div></div>" +
       '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
@@ -389,7 +389,7 @@
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
-        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari Minggu atau libur nasional. Pasien dengan satu indikator tidak ditelepon.</p>' +
+        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur.</p>' +
       "</section>";
   }
   /* ============================================================== panggilan */
@@ -872,13 +872,13 @@
     else {
       versi = j.jumlah_min === j.jumlah_maks ? j.jumlah_min : j.jumlah_min + "–" + j.jumlah_maks;
       versiKet = p.label === "tidak_yakin" ? "Perkiraan, keyakinan rendah."
-        : j.membantah_tanggal_libur === true ? "Membantah sesi pada " + daftarTanggal(p.tanggalLibur) + "." : "";
+        : j.membantah_tanggal_libur === true ? "Membantah sesi " + daftarTanggal(p.tanggalLibur) + "." : "";
     }
     const sel = selisihP(p), tol = toleransiP(p);
     let selisihTeks = "–", selisihKet = "Tidak dihitung.";
     if (dihitung) {
       selisihTeks = sel;
-      selisihKet = "Toleransi " + tol + " sesi, " + (sel > tol ? "terlampaui." : "dalam batas.");
+      selisihKet = (sel > tol ? "Melebihi" : "Dalam") + " toleransi " + tol + " sesi.";
       gaya = sel > tol ? "beda" : "sama";
     }
     return { versi: versi, versiKet: versiKet, selisih: selisihTeks, selisihKet: selisihKet, gaya: gaya, versiGaya: p.label === "tidak_sesuai" ? "beda" : p.label === "sesuai" ? "sama" : "netral" };
@@ -897,8 +897,8 @@
     return '<div class="pilihan-lain" role="radiogroup" aria-label="Tindakan lain">' +
       lain.map((x) => '<label class="' + (ui.tindakanLain === x ? "dipilih" : "") + '"><input type="radio" name="tindakan" data-aksi="tindakan-lain" value="' + x + '"' + (ui.tindakanLain === x ? " checked" : "") + ">" +
         "<span><b>" + D.TINDAKAN[x].nama + "</b><span>" + D.TINDAKAN[x].akibat + "</span></span></label>").join("") +
-      '<label class="catatan-medan"><span class="kapital">Alasan tidak mengikuti saran</span><textarea data-aksi="catatan" rows="3" placeholder="Contoh: pasien baru pindah RS bulan ini, sudah dikonfirmasi lewat telepon ke RS.">' + esc(ui.catatan || "") + "</textarea>" +
-        '<span class="petunjuk-alasan">Alasan wajib diisi. Catatan ini masuk ke riwayat keputusan.</span></label>' +
+      '<label class="catatan-medan"><span class="kapital">Alasan</span><textarea data-aksi="catatan" rows="3" placeholder="Contoh: pasien pindah RS bulan ini">' + esc(ui.catatan || "") + "</textarea>" +
+        '<span class="petunjuk-alasan">Wajib diisi. Tercatat di riwayat keputusan.</span></label>' +
       '<div class="saran-tombol"><button class="btn btn--primer" type="button" data-aksi="simpan-lain" data-id="' + p.id + '"' + (alasanTerisi() ? "" : " disabled") + ">Simpan keputusan</button>" +
       '<button class="btn btn--hantu" type="button" data-aksi="batal-lain">Kembali ke saran</button></div></div>';
   }
@@ -948,18 +948,17 @@
 
     const peringatan = bahaya ? '<div class="tanda-bahaya" role="alert">' + ikon("awas") + "<div><b>Tanda bahaya: " + esc(j.tanda_bahaya.map((x) => TANDA_BAHAYA[x]).join(", ")) + "</b><p>" + esc(j.ringkasan) + "</p></div></div>" : "";
 
-    const ketTgl = nTanda ? nTanda + " tanggal jatuh di hari Minggu atau libur nasional." : "Tidak ada sesi di hari Minggu atau libur nasional.";
-    /* Tiap angka membawa penjelasannya sendiri tepat di bawahnya, jadi tidak ada daftar keterangan terpisah. */
+    /* Tiap angka membawa penjelasannya sendiri tepat di bawahnya. Tanggal Minggu/libur sudah berlabel di chipnya. */
     const angka = (nama, nilai, gaya, ket) => '<div class="' + gaya + '"><span class="kapital">' + nama + '</span><div class="besar">' + nilai + (nilai === "–" ? "" : "<small>sesi</small>") + "</div>" +
       (ket ? '<p class="ket-angka">' + esc(ket) + "</p>" : "") + "</div>";
     const ringkasan = '<section class="ringkasan-tagihan"><div class="angka-tiga">' +
-      angka("Ditagih RS", p.ditagih, "netral", p.tanggal.length + " tanggal sesi.") + angka("Versi peserta", rk.versi, rk.versiGaya, rk.versiKet) + angka("Selisih", rk.selisih, rk.gaya, rk.selisihKet) + "</div>" +
-      '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + '<p class="ket-angka">' + ketTgl + "</p></div></section>";
+      angka("Ditagih RS", p.ditagih, "netral", "") + angka("Versi peserta", rk.versi, rk.versiGaya, rk.versiKet) + angka("Selisih", rk.selisih, rk.gaya, rk.selisihKet) + "</div>" +
+      '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + "</div></section>";
 
     let bukti, pemutar = "";
-    if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
-    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>'; }
-    else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
+    if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
+    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Suara buatan (ElevenLabs).</small></div>'; }
+    else bukti = '<p class="tanpa-rekaman">Rekaman dan transkrip tidak disimpan untuk hasil ' + D.LABEL[p.label].nama + ".</p>";
     /* Transkrip menyatu di kartu Kutipan kunci: tombol membuka daftar, baris yang sedang diucapkan disorot saat rekaman
        diputar (lihat sorotTranskrip), klik baris untuk melompat. */
     const adaTranskrip = simpanTeks && !latar && p.rekaman;
@@ -977,13 +976,15 @@
     const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai. Status: <b>" + rs.status + "</b>.</span></div>";
     const keputusan = M.hidup ? p.keputusan : S.keputusan[id];
     const tampilPutusan = keputusan && ui.ubah !== id;
+    /* Untuk Sesuai/Tidak sesuai, alasannya hanya mengulang angka di ringkasan, jadi cukup akibat tindakannya. */
+    const ulangAngka = p.label === "tidak_sesuai" || p.label === "sesuai";
     const sarankan = '<section class="panel saran saran-kartu"><div class="saran-isi"><span class="kapital">Saran sistem</span><h3>' + saran.nama + "</h3>" +
-      "<p>" + esc(p.alasan) + " " + esc(saran.akibat) + "</p>" + konteks + (tampilPutusan ? "" : aksiKeputusan(p)) +
-      '<p class="catatan-saran">Rekaman hanya bukti awal, bukan satu-satunya dasar menolak klaim.</p></div>' +
+      "<p>" + (ulangAngka ? "" : esc(p.alasan) + " ") + esc(saran.akibat) + "</p>" + konteks + (tampilPutusan ? "" : aksiKeputusan(p)) +
+      '<p class="catatan-saran">Rekaman adalah bukti awal, bukan dasar tunggal menolak klaim.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan">' + ringkasan + sarankan + kutipan + "</div></div>";
+      '<div class="kartu-kanan">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
@@ -1037,9 +1038,9 @@
     return '<div class="kepala"><div><h1>Ringkasan rumah sakit</h1>' +
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Normal (2 dari 4).</div>' : "") +
-      '<div class="keterangan-aturan"><b>Satu jawaban belum cukup.</b> Status berubah menjadi Perlu klarifikasi RS bila ada minimal 3 jawaban tidak sesuai dan jumlahnya minimal 10% dari yang terjawab. Jawaban Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
+      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
       '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
-        '<p class="catatan-kaki">Terpicu: pasien dengan dua indikator atau lebih aktif. Identitas penerima telepon tidak pernah dibagikan ke rumah sakit.</p></section>';
+        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
   }
   /* ============================================================== riwayat */
 
@@ -1061,8 +1062,8 @@
           '<td class="sembunyi-hp">' + esc(x.namaRs) + "</td><td>" + labelChip(x.label) + "</td><td><b>" + D.TINDAKAN[x.tindakan].nama + '</b></td><td class="sembunyi-hp">' +
           (x.ikutSaran ? "Diikuti" : '<b class="tidak-diikuti">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp">' + esc(x.oleh) + "</td></tr>").join("") +
         "</tbody></table></div>"
-      : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Setiap keputusan di kartu bukti tercatat di sini, lengkap dengan waktu, tindakan, dan alasannya.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
-    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Setiap keputusan atas panggilan konfirmasi, lengkap dengan verifikator, waktu, dan alasan. Dipakai untuk audit.</p></div></div><section class="panel">' + isi + "</section>";
+      : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Keputusan dari kartu bukti akan muncul di sini.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
+    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Jejak audit semua keputusan verifikator.</p></div></div><section class="panel">' + isi + "</section>";
   }
 
   /* ============================================================== render */

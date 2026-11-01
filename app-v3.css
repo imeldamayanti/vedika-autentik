@@ -115,8 +115,12 @@
 /* Layar Panggilan dan kartu bukti berbagi tata letak tiga seksi: HP, bukti di tengah, panel di kanan. */
 .panggilan-grid, .kartu-grid { display: grid; gap: 16px; align-items: start; }
 .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr) 380px; }
-/* Kartu bukti: HP di kiri; kanan tiga baris bertumpuk: ringkasan tagihan, kutipan kunci + transkrip, langkah yang disarankan. */
-.kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
+/* Kartu bukti: HP | ringkasan tagihan + kutipan kunci | saran sistem. Kolom saran sedikit lebih lebar dari panel
+   layar Panggilan supaya form "Pilih tindakan lain" tidak sesak. */
+.kartu-grid { grid-template-columns: 306px minmax(0, 1fr) 400px; }
+.kartu-saran { min-width: 0; }
+.saran-kartu .saran-isi h3 { font-size: 20px; }
+.saran-kartu .saran-isi > p { font-size: 14px; line-height: 1.55; }
 .panggilan-grid .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
 .kol-kiri { display: grid; gap: 16px; min-width: 0; }
 .kol-trans { min-width: 0; }
@@ -246,7 +250,7 @@
 .angka-tiga > div:first-child { padding-left: 0; border-left: 0; }
 .angka-tiga .kapital { display: block; margin-bottom: 4px; white-space: nowrap; }
 .angka-tiga .besar { font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.ket-angka { margin-top: 6px; font-size: 13px; line-height: 1.45; color: var(--fg-2); text-wrap: pretty; }
+.ket-angka { margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--fg-2); text-wrap: pretty; }
 .angka-tiga .besar small { font-size: 14px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
 .angka-tiga .beda .besar { color: var(--prioritas-fg); }
 .angka-tiga .sama .besar { color: var(--lolos-fg); }
@@ -362,15 +366,10 @@
   .panggilan-grid > .kol-trans { grid-column: 2; grid-row: 1; }
   .panggilan-grid > .kol-kiri { grid-column: 2; grid-row: 2; }
   .panggilan-grid .transkrip { height: 420px; }
-}
-
-/* Layar lebar: ringkasan dan kutipan berdampingan, panel saran dibagi dua (penjelasan kiri, tombol keputusan kanan). */
-/* Layar lebar: panel saran dibagi dua, penjelasan di kiri dan tombol keputusan di kanan. Baris terakhir (1fr) menyerap
-   tinggi sisa supaya isi kolom kiri tetap rapat. Tanpa tombol (sudah diputuskan) tetap satu kolom. */
-@media (min-width: 1340px) {
-  .saran-kartu .saran-isi:has(> .saran-tombol, > .pilihan-lain) { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: repeat(4, auto) 1fr; column-gap: 32px; align-items: start; }
-  .saran-kartu .saran-isi:has(> .saran-tombol, > .pilihan-lain) > :not(.saran-tombol):not(.pilihan-lain) { grid-column: 1; }
-  .saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { grid-column: 2; grid-row: 1 / -1; margin-top: 0; padding-top: 0; border-top: 0; }
+  .kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
+  .kartu-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
+  .kartu-grid > .kartu-kanan { grid-column: 2; grid-row: 1; }
+  .kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
 }
 
 @media (max-width: 960px) {
@@ -383,6 +382,7 @@
   .panggilan-grid, .kartu-grid { grid-template-columns: minmax(0, 1fr); }
   .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri { grid-column: auto; grid-row: auto; }
   .panggilan-grid .transkrip { height: 380px; }
+  .kartu-grid > .kol-ponsel, .kartu-grid > .kartu-kanan, .kartu-grid > .kartu-saran { grid-column: auto; grid-row: auto; }
   .kartu-grid > .kol-ponsel { order: 3; }
 }
 
