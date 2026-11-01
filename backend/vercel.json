@@ -1,0 +1,3 @@
+{
+  "buildCommand": "rm -rf data-uji-konfirmasi && cp -R ../data-uji-konfirmasi data-uji-konfirmasi && rm -f data-uji-konfirmasi/kunci_kebenaran_*"
+}

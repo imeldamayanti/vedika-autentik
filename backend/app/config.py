@@ -7,6 +7,12 @@ from dotenv import load_dotenv
 
 AKAR = Path(__file__).resolve().parents[2]
 load_dotenv(AKAR / "backend" / ".env")
+# Di Vercel root proyek adalah backend/, jadi folder data uji disalin ke backend/ saat build (backend/vercel.json).
+DATA_UJI = next(
+    (p for p in (AKAR / "data-uji-konfirmasi", Path(__file__).resolve().parents[1] / "data-uji-konfirmasi")
+     if (p / "tools" / "aturan.py").exists()),
+    AKAR / "data-uji-konfirmasi",
+)
 
 VERSI_ATURAN = "2026.09"
 MAKS_UKURAN = 10 * 1024 * 1024
