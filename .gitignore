@@ -49,3 +49,6 @@ videos/raw/
 
 # Slide lokal
 *.pptx
+
+# Salinan data uji untuk build Vercel backend (dibuat oleh backend/vercel.json)
+backend/data-uji-konfirmasi/

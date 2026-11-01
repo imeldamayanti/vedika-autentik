@@ -7,7 +7,7 @@ import importlib.util
 from functools import lru_cache
 from urllib.parse import quote
 
-from .config import AKAR, BULAN_NAMA
+from .config import BULAN_NAMA, DATA_UJI
 
 STATUS_BERJALAN = ("wa_terkirim", "menelepon", "tersambung", "merekam", "membaca_jawaban")
 STATUS_SELESAI = ("selesai", "tidak_terhubung")
@@ -43,7 +43,7 @@ ATURAN_RS = "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tidak sesuai/
 
 @lru_cache
 def aturan():
-    spec = importlib.util.spec_from_file_location("aturan", AKAR / "data-uji-konfirmasi" / "tools" / "aturan.py")
+    spec = importlib.util.spec_from_file_location("aturan", DATA_UJI / "tools" / "aturan.py")
     modul = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(modul)
     return modul

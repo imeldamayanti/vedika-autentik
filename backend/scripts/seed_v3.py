@@ -18,8 +18,9 @@ from pathlib import Path
 import psycopg
 from psycopg.types.json import Jsonb
 
+from app.config import DATA_UJI as DATA  # noqa: E402
+
 AKAR = Path(__file__).resolve().parents[2]
-DATA = AKAR / "data-uji-konfirmasi"
 BULAN = "2026-08"
 RETENSI_SESUAI = timedelta(days=30)
 WIB = timezone(timedelta(hours=7))
