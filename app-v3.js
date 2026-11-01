@@ -704,12 +704,11 @@
 
   function isiPanggilan(p, t) {
     const tanpaSuara = tanpaSuaraP(p);
-    return '<div class="panggilan-grid" id="panggilan">' +
+    return '<div class="panggilan-grid" id="panggilan">' + htmlPonsel(p, t) +
+      '<section class="panel kol-trans"><div class="panel-kepala"><h2>' + (tanpaSuara ? "Log panggilan" : "Transkrip langsung") + "</h2>" + (p.suara_langsung ? '<div class="kanan">' + tombolBisu() + "</div>" : "") + '</div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
       '<div class="kol-kiri"><section class="panel"><div class="panel-kepala"><h2>Progres</h2></div><ol class="progres">' + htmlLangkah(p, t) + "</ol>" +
         '<p class="catatan-simulasi">' + catatanSimulasi(p) + "</p></section>" +
       '<section class="panel"><div class="panel-kepala"><h2>Yang ditangkap AI</h2></div><dl class="isian">' + htmlIsian(p, t) + "</dl></section></div>" +
-      htmlPonsel(p, t) +
-      '<section class="panel kol-trans"><div class="panel-kepala"><h2>' + (tanpaSuara ? "Log panggilan" : "Transkrip langsung") + "</h2>" + (p.suara_langsung ? '<div class="kanan">' + tombolBisu() + "</div>" : "") + '</div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
     "</div>";
   }
 
