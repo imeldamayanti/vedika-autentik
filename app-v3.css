@@ -107,39 +107,64 @@
 
 /* Mockup layar telepon penerima. Bingkai dari .ponsel v2, isi layar khusus panggilan. */
 .kol-ponsel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.ponsel--telp { width: min(300px, 100%); }
-.ponsel--telp .ponsel-layar { position: relative; height: 560px; background: linear-gradient(180deg, oklch(31% .05 205), oklch(16% .02 205)); color: #fff; }
-.ponsel--telp .poni { position: absolute; top: 10px; left: 50%; width: 84px; height: 22px; margin-left: -42px; border-radius: 14px; background: oklch(11% .01 205); }
-.status-ponsel { display: flex; justify-content: space-between; padding: 14px 24px 0; font-size: 12px; font-variant-numeric: tabular-nums; }
-.status-ponsel span { font-size: 11px; font-weight: 700; opacity: .85; }
-.telp-info { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 54px 16px 0; text-align: center; }
-.telp-foto { width: 76px; height: 76px; margin-bottom: 18px; border-radius: 50%; background: oklch(100% 0 0 / .14); display: grid; place-items: center; }
-.telp-foto svg { width: 32px; height: 32px; }
-.telp-info > b { font-size: 21px; font-weight: 700; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
-.telp-info > span:not(.telp-foto) { margin-top: 4px; font-size: 12.5px; opacity: .7; }
-.telp-status { margin: 26px 0 0; font-size: 15px; font-weight: 600; }
-.telp-durasi { margin: 4px 0 0; min-height: 22px; font-size: 15px; opacity: .8; font-variant-numeric: tabular-nums; }
+.ponsel--telp { position: relative; width: min(300px, 100%); padding: 10px; border-radius: 46px;
+  background: linear-gradient(145deg, oklch(34% .01 205), oklch(13% .01 205));
+  box-shadow: inset 0 0 0 1.5px oklch(46% .01 205), inset 0 0 0 4px oklch(10% .01 205), var(--shadow-pop); }
+/* Tombol samping: volume di kiri, daya di kanan. */
+.ponsel--telp::before { content: ""; position: absolute; left: -3px; top: 104px; width: 3px; height: 46px; border-radius: 2px 0 0 2px; background: oklch(28% .01 205); box-shadow: 0 62px 0 oklch(28% .01 205); }
+.ponsel--telp::after { content: ""; position: absolute; right: -3px; top: 150px; width: 3px; height: 78px; border-radius: 0 2px 2px 0; background: oklch(28% .01 205); }
+.ponsel--telp .ponsel-layar { position: relative; display: flex; flex-direction: column; height: 580px; border-radius: 37px; color: #fff;
+  background: radial-gradient(120% 60% at 15% 0%, oklch(46% .09 190 / .6), transparent 60%), radial-gradient(90% 50% at 100% 75%, oklch(40% .08 260 / .4), transparent 60%), linear-gradient(180deg, oklch(28% .04 205), oklch(14% .02 205)); }
+.ponsel--telp .ponsel-layar::after { content: ""; position: absolute; left: 50%; bottom: 8px; width: 112px; height: 4px; margin-left: -56px; border-radius: 2px; background: oklch(100% 0 0 / .6); }
+.ponsel--telp .poni { position: absolute; top: 10px; left: 50%; width: 88px; height: 25px; margin-left: -44px; border-radius: 14px; background: oklch(8% .01 205); }
+.ponsel--telp .poni::after { content: ""; position: absolute; right: 9px; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, oklch(40% .05 260), oklch(14% .02 260) 70%); }
+.status-ponsel { display: flex; justify-content: space-between; align-items: center; padding: 14px 26px 0 28px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.status-ponsel > span { display: inline-flex; align-items: center; gap: 5px; }
+.status-ponsel .sinyal { width: 16px; height: 11px; }
+.status-ponsel .baterai { width: 24px; height: 11px; }
+.telp-info { display: flex; flex-direction: column; align-items: center; padding: 30px 16px 0; text-align: center; }
+.telp-foto { width: 60px; height: 60px; margin-bottom: 12px; border-radius: 50%; background: oklch(100% 0 0 / .16); display: grid; place-items: center; }
+.telp-foto svg { width: 26px; height: 26px; }
+.telp-info > b { font-size: 22px; font-weight: 600; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+.telp-info > span:not(.telp-foto) { margin-top: 3px; font-size: 13px; opacity: .7; }
+.telp-status { margin: 14px 0 0; font-size: 15px; font-weight: 600; }
+.telp-durasi { margin: 3px 0 0; min-height: 22px; font-size: 15px; opacity: .8; font-variant-numeric: tabular-nums; }
 .ponsel--tak .telp-status { color: oklch(82% .1 27); }
-.ponsel--diam .telp-info, .ponsel--akhir .telp-info { opacity: .85; }
 .gelombang { display: none; }
-.ponsel--aktif .gelombang { display: flex; align-items: center; gap: 5px; height: 44px; margin-top: 22px; }
+.ponsel--aktif .gelombang { display: flex; align-items: center; gap: 5px; height: 28px; margin-top: 6px; }
 .gelombang i { width: 4px; height: 10px; border-radius: 2px; background: oklch(82% .12 184); animation: gelombang 1s ease-in-out infinite; }
 .gelombang i:nth-child(2) { animation-delay: .12s; }
 .gelombang i:nth-child(3) { animation-delay: .24s; }
 .gelombang i:nth-child(4) { animation-delay: .36s; }
 .gelombang i:nth-child(5) { animation-delay: .24s; }
 .gelombang i:nth-child(6) { animation-delay: .12s; }
-@keyframes gelombang { 50% { height: 40px; } }
+@keyframes gelombang { 50% { height: 26px; } }
 .ponsel--dering .telp-foto { animation: cincin 1.4s ease-out infinite; }
 @keyframes cincin { from { box-shadow: 0 0 0 0 oklch(100% 0 0 / .35); } to { box-shadow: 0 0 0 26px oklch(100% 0 0 / 0); } }
-.telp-opsi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 22px; }
-.tombol-telp { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.tombol-telp svg { box-sizing: content-box; width: 22px; height: 22px; padding: 15px; border-radius: 50%; background: oklch(100% 0 0 / .14); }
-.tombol-telp small { font-size: 11.5px; opacity: .85; }
+
+/* Layar kunci saat menunggu panggilan. */
+.telp-kunci { display: flex; flex-direction: column; align-items: center; padding: 58px 18px 0; text-align: center; }
+.telp-kunci > span { font-size: 15px; font-weight: 600; opacity: .8; }
+.telp-kunci > b { margin-top: 2px; font-size: 64px; line-height: 1.05; font-weight: 300; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.telp-notif { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 56px; padding: 10px 12px; border-radius: 16px; background: oklch(100% 0 0 / .16); text-align: left; animation: muncul .3s ease-out; }
+.telp-notif i { flex: none; width: 34px; height: 34px; border-radius: 9px; background: oklch(62% .15 150); display: grid; place-items: center; }
+.telp-notif i svg { width: 18px; height: 18px; }
+.telp-notif b { display: block; font-size: 13px; font-variant-numeric: tabular-nums; }
+.telp-notif span { display: block; font-size: 12px; opacity: .75; }
+
+/* Tombol ala telepon: grid 3x2 saat tersambung, memudar saat panggilan berakhir. */
+.telp-opsi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; padding: 14px 22px 0; }
+.ponsel--akhir .telp-opsi { opacity: .35; }
+.tombol-telp { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tombol-telp svg { box-sizing: content-box; width: 22px; height: 22px; padding: 11px; border-radius: 50%; background: oklch(100% 0 0 / .16); }
+.tombol-telp small { font-size: 11px; opacity: .85; }
 .tombol-telp.merah svg { background: oklch(58% .2 27); transform: rotate(135deg); }
 .tombol-telp.hijau svg { background: oklch(62% .17 150); }
+.ponsel--akhir .tombol-telp.merah svg { background: oklch(100% 0 0 / .16); }
+.ponsel--akhir .telp-aksi { opacity: .45; }
 .ponsel--dering .tombol-telp.hijau svg { animation: denyut 1s ease-in-out infinite; }
-.telp-aksi { display: flex; justify-content: center; gap: 70px; padding: 22px 0 34px; }
+.telp-aksi { display: flex; justify-content: center; gap: 70px; margin-top: auto; padding: 14px 0 28px; }
+.telp-aksi--dering { padding-bottom: 44px; }
 .ponsel-ket { margin: 0; font-size: 12.5px; color: var(--muted-fg); text-align: center; }
 .ponsel-ket b { color: var(--fg); font-weight: 700; }
 
