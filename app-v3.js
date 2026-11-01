@@ -957,8 +957,8 @@
       '<p class="catatan-saran">Rekaman hanya bukti awal, bukan satu-satunya dasar menolak klaim.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
-    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar + transkrip) +
-      '<div class="kartu-tengah">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
+      '<div class="kartu-kanan"><div class="kartu-atas">' + ringkasan + sarankan + "</div>" + kutipan + transkrip + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 

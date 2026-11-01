@@ -103,11 +103,8 @@
 /* Layar Panggilan dan kartu bukti berbagi tata letak tiga seksi: HP, bukti di tengah, panel di kanan. */
 .panggilan-grid, .kartu-grid { display: grid; gap: 16px; align-items: start; }
 .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr) 380px; }
-/* Kartu bukti: HP di kiri; kanan bertumpuk, bukti di atas dan langkah yang disarankan paling bawah (lebar penuh). */
-.kartu-grid { grid-template-columns: 306px minmax(0, 1fr); grid-template-rows: auto 1fr; }
-.kartu-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
-.kartu-grid > .kartu-tengah { grid-column: 2; grid-row: 1; }
-.kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
+/* Kartu bukti: HP di kiri; kanan tiga seksi bertumpuk: ringkasan + langkah disarankan, kutipan kunci, transkrip. */
+.kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
 .panggilan-grid .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
 .kol-kiri { display: grid; gap: 16px; min-width: 0; }
 .kol-trans { min-width: 0; }
@@ -228,8 +225,9 @@
 .tanda-bahaya p { margin-top: 2px; font-size: 13px; color: var(--fg-2); }
 
 /* Kartu bukti memakai bingkai HP yang sama dengan layar Panggilan: HP di kiri, bukti di kanan. */
-.kartu-tengah { display: grid; gap: 16px; min-width: 0; }
-.kartu-saran { min-width: 0; }
+.kartu-kanan { display: grid; gap: 16px; min-width: 0; }
+.kartu-atas { display: grid; gap: 16px; align-items: start; min-width: 0; }
+.kartu-atas > * { min-width: 0; }
 .pemutar.pemutar--ponsel { width: min(300px, 100%); padding: 0; border-top: 0; }
 .ringkasan-tagihan { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 14px; }
 .angka-tiga { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -269,12 +267,10 @@
 .saran-kartu .konteks b { color: var(--fg); }
 .saran-kartu .catatan-saran { margin-top: 12px; font-size: 12px; color: var(--muted-fg); line-height: 1.45; }
 /* Transkrip di bawah HP: ikut rekaman, baris yang sedang diucapkan disorot. */
-.transkrip-sinkron { width: min(300px, 100%); border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
-.transkrip-sinkron .panel-kepala { padding: 12px 14px; }
-.transkrip-sinkron .panel-kepala h2 { font-size: 14px; }
-.transkrip-sinkron .panel-kepala .kanan { font-size: 11px; color: var(--muted-fg); font-weight: 600; }
-.transkrip--sinkron { height: 300px; padding: 12px; gap: 8px; border-radius: 0; }
-.transkrip--sinkron .baris-trans { max-width: 94%; padding: 7px 10px 6px; font-size: 12.5px; cursor: pointer; transition: box-shadow .15s, border-color .15s, opacity .15s; }
+.transkrip-sinkron { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+.transkrip-sinkron .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
+.transkrip--sinkron { height: 320px; padding: 14px 16px; border-radius: 0; }
+.transkrip--sinkron .baris-trans { max-width: 78%; cursor: pointer; transition: box-shadow .15s, border-color .15s, opacity .15s; }
 .transkrip--sinkron .baris-trans:hover { border-color: var(--border-strong); }
 .transkrip--sinkron .baris-trans.sedang { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(88% .06 190 / .6); }
 .transkrip--sinkron .baris-trans:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -355,11 +351,9 @@
 }
 
 /* Layar lebar: ringkasan dan kutipan berdampingan, panel saran dibagi dua (penjelasan kiri, tombol keputusan kanan). */
+/* Layar lebar: ringkasan tagihan dan langkah yang disarankan berdampingan di seksi atas. */
 @media (min-width: 1340px) {
-  .kartu-tengah { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
-  .saran-kartu .saran-isi { display: grid; grid-template-columns: minmax(0, 1fr) 360px; column-gap: 32px; align-items: start; }
-  .saran-kartu .saran-isi > .kapital, .saran-kartu .saran-isi > h3, .saran-kartu .saran-isi > p, .saran-kartu .saran-isi > .konteks { grid-column: 1; }
-  .saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; padding-top: 0; border-top: 0; }
+  .kartu-atas { grid-template-columns: minmax(0, 1fr) 380px; }
 }
 
 @media (max-width: 960px) {
@@ -370,9 +364,9 @@
   .antrean-atas .kartu-angka b { font-size: 24px; }
   .antrean-atas .kartu-angka span { margin-top: 4px; }
   .panggilan-grid, .kartu-grid { grid-template-columns: minmax(0, 1fr); }
-  .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri, .kartu-grid > .kartu-tengah, .kartu-grid > .kartu-saran { grid-column: auto; grid-row: auto; }
+  .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri { grid-column: auto; grid-row: auto; }
   .panggilan-grid .transkrip { height: 380px; }
-  .kartu-grid > .kol-ponsel { grid-column: auto; grid-row: auto; order: 3; }
+  .kartu-grid > .kol-ponsel { order: 3; }
 }
 
 @media (max-width: 760px) {
