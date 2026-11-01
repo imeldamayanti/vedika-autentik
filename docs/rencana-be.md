@@ -141,7 +141,7 @@ Setiap fitur yang selesai langsung menggantikan padanannya di stub tanpa menguba
 
 | Skenario | Target |
 |---|---|
-| 1 berkas, 1–2 halaman, CPU biasa | < 10 detik (PRD) |
+| 1 berkas, 1 halaman, CPU biasa | < 10 detik (PRD) |
 | 50 unggahan hampir bersamaan | Semua `selesai` tanpa galat, antrean tidak hilang saat restart |
 | Antrean 1.000 berkas | Daftar `GET /berkas` < 500 ms dengan filter dan halaman |
 | Pencarian kembar di 5.000 sidik jari | < 2 detik |

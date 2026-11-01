@@ -1,0 +1,73 @@
+{
+  "clinic_rows": {
+    "IRM": 149997
+  },
+  "cohort": {
+    "clinic_value_labels": {
+      "15": "IRM",
+      "8": "FIS"
+    },
+    "definition": "Outpatient FKRTL rows in FIS/IRM clinics with physiotherapy-specific diagnosis or procedure descriptions.",
+    "name": "outpatient_physiotherapy_reference",
+    "year": 2024
+  },
+  "costs": {
+    "billed": {
+      "count": 149997,
+      "median": 134300.0,
+      "p95": 201000.0,
+      "sum": 21520844800.0
+    },
+    "verified": {
+      "count": 149997,
+      "median": 134300.0,
+      "p95": 201000.0,
+      "sum": 21520838500.0
+    }
+  },
+  "counts": {
+    "outpatient_physiotherapy_rows": 149997,
+    "outpatient_rehabilitation_rows": 174026,
+    "outpatient_rows": 1503675,
+    "participant_months": 41905,
+    "source_rows": 1699219,
+    "unique_participants": 13172
+  },
+  "date_range": {
+    "maximum": "2024-12-31",
+    "minimum": "2024-01-01"
+  },
+  "monthly_rows": {
+    "2024-01": 12206,
+    "2024-02": 10931,
+    "2024-03": 11767,
+    "2024-04": 9402,
+    "2024-05": 12261,
+    "2024-06": 11586,
+    "2024-07": 14242,
+    "2024-08": 14300,
+    "2024-09": 13479,
+    "2024-10": 14662,
+    "2024-11": 13242,
+    "2024-12": 11919
+  },
+  "privacy": {
+    "minimum_category_count": 10,
+    "participant_identifiers_exported": false,
+    "row_level_records_exported": false,
+    "visit_identifiers_exported": false
+  },
+  "schema_version": "1.0",
+  "visits_per_participant_month": {
+    "1": 8473,
+    "13+": 26,
+    "2": 7585,
+    "3": 6963,
+    "4": 6030,
+    "5": 4473,
+    "6": 3591,
+    "7": 2398,
+    "8": 1514,
+    "9-12": 852
+  }
+}

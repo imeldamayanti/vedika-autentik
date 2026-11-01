@@ -211,18 +211,18 @@ def test_sep_saat_unggah_membuat_api_mengirim_klaim_ke_mesin(unggah, conn, mesin
     assert spy.klaim[0]["sep"] == "0901R0140826V583301"
 
 
-def test_tanpa_sep_klaim_dikirim_kosong(unggah, conn, mesin, tmp_path):
+def test_tanpa_sep_hanya_konteks_faskes_dikirim(unggah, conn, mesin, tmp_path):
     unggah("VA-DST-01.pdf")
     spy = MesinSpy(mesin)
     proses_satu(conn, spy, Penyimpanan(tmp_path))
-    assert not spy.klaim[0]
+    assert spy.klaim[0] == {"kode_faskes": "0901R014"}
 
 
-def test_sep_tidak_dikenal_tetap_diproses_tanpa_klaim(unggah, conn, mesin, tmp_path):
+def test_sep_tidak_dikenal_tetap_diproses_dengan_konteks_faskes(unggah, conn, mesin, tmp_path):
     unggah("VA-ASL-01.pdf", sep="0000X0000000V000000")
     spy = MesinSpy(mesin)
     assert proses_satu(conn, spy, Penyimpanan(tmp_path))
-    assert not spy.klaim[0]
+    assert spy.klaim[0] == {"kode_faskes": "0901R014"}
 
 
 # ---------- antrean ----------
