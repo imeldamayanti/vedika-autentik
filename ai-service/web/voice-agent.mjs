@@ -2,6 +2,8 @@ const INPUT_RATE = 16000;
 const OUTPUT_RATE = 24000;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// Gemini Live waits for incoming speech; this text cue makes the AI open the call itself.
+const OPENING_CUE = "Panggilan sudah tersambung dan penerima sudah mengangkat. Mulai sekarang dengan pembuka (langkah A), lalu akhiri giliran ini dengan pertanyaan langkah B.";
 const AUDIO_EXTENSIONS = { "audio/mpeg": "mp3", "audio/mp4": "m4a", "audio/ogg": "ogg", "audio/wav": "wav" };
 const audioExtension = (blob) => AUDIO_EXTENSIONS[blob.type.split(";")[0]] || "webm";
 
@@ -72,7 +74,26 @@ export async function runTask({ api, task, operator, converse, sleep = delay, on
   }
   await operator.telepon(task);
   await reportWhenAllowed(api, task.id, "menelepon", { sleep });
-  if (!(await operator.diangkat(task))) {
+  // The call counts as answered when the recipient's first words are heard. Lines spoken
+  // before that wait, because the backend only accepts transcript once "tersambung".
+  let answered = null;
+  let sent = Promise.resolve();
+  const early = [];
+  const send = (baris) => {
+    sent = sent
+      .then(() => api.kirimTranskrip(task.id, [baris]))
+      .catch((error) => onError?.(error));
+  };
+  const hasil = await converse(task, {
+    onAnswered: () => {
+      answered = api.lapor(task.id, "tersambung").then(() => api.lapor(task.id, "merekam"));
+      sent = answered;
+      early.splice(0).forEach(send);
+      return answered;
+    },
+    onTurn: (baris) => (answered ? send(baris) : early.push(baris)),
+  });
+  if (!hasil.answered) {
     const status = await api.lapor(task.id, "tidak_diangkat");
     if (status.chat_cadangan) {
       await operator.kirimChatCadangan(status.chat_cadangan);
@@ -80,16 +101,6 @@ export async function runTask({ api, task, operator, converse, sleep = delay, on
     }
     return status;
   }
-  await api.lapor(task.id, "tersambung");
-  let sent = Promise.resolve();
-  const hasil = await converse(task, {
-    onStarted: () => api.lapor(task.id, "merekam"),
-    onTurn: (baris) => {
-      sent = sent
-        .then(() => api.kirimTranskrip(task.id, [baris]))
-        .catch((error) => onError?.(error));
-    },
-  });
   await sent;
   return api.kirimHasil(task.id, hasil);
 }
@@ -213,7 +224,7 @@ export class LiveEventReducer {
 export class VedikaVoiceSession {
   constructor(options) {
     this.options = options;
-    this.fetchImpl = options.fetchImpl || fetch;
+    this.fetchImpl = options.fetchImpl || ((...args) => fetch(...args));
     this.WebSocketImpl = options.WebSocketImpl || WebSocket;
     this.AudioContextImpl = options.AudioContextImpl || globalThis.AudioContext;
     this.AudioImpl = options.AudioImpl || globalThis.Audio;
@@ -260,11 +271,22 @@ export class VedikaVoiceSession {
       const credentials = await tokenResponse.json();
       this.ensureActive();
 
-      this.audioContext = new this.AudioContextImpl();
+      // Chrome keeps an AudioContext suspended (silent both ways) unless it is created during a
+      // user gesture, so the page creates it at the operator's "Diangkat" click and passes it in.
+      this.audioContext = this.options.audioContext || new this.AudioContextImpl();
+      if (this.audioContext.state === "suspended") {
+        await Promise.race([this.audioContext.resume?.(), delay(1000)]);
+        if (this.audioContext.state !== "running") {
+          throw new Error("audio Chrome terkunci (AudioContext suspended); klik Diangkat langsung saat telepon diangkat");
+        }
+      }
+      // The input is the call line, not a room mic. Chrome's echo canceller would erase the
+      // recipient's voice whenever the call itself plays in the same Chrome (WhatsApp Web).
+      const line = { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false };
       const inputStream = await this.mediaDevices.getUserMedia({
         audio: this.options.inputDeviceId
-          ? { deviceId: { exact: this.options.inputDeviceId }, channelCount: 1 }
-          : { channelCount: 1 },
+          ? { deviceId: { exact: this.options.inputDeviceId }, ...line }
+          : line,
       });
       if (this.stopping) {
         this.stopStream(inputStream);
@@ -370,6 +392,11 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
+    if (event.setupComplete && !this.ready && this.options.greetFirst !== false) {
+      this.socket?.send(JSON.stringify({
+        clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
+      }));
+    }
     this.ready ||= event.setupComplete;
     if (action.clearPlayback) this.clearPlayback();
     this.emitStatus(action.status);
@@ -381,6 +408,11 @@ export class VedikaVoiceSession {
   // Gemini streams transcription in fragments; the backend wants one line per speaking turn.
   appendFragment({ pembicara, teks }) {
     if (this.pendingTurn?.pembicara !== pembicara) this.flushTurn();
+    if (pembicara === "penerima" && !this.answered) {
+      this.answered = true;
+      this.startedAt = performance.now();
+      this.options.onAnswer?.();
+    }
     if (this.pendingTurn) {
       this.pendingTurn.teks += teks;
       return;

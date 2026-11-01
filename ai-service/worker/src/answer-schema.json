@@ -1,0 +1,144 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "status_panggilan": {
+      "enum": [
+        "terjawab",
+        "tidak_terhubung",
+        "menolak"
+      ],
+      "title": "Status Panggilan",
+      "type": "string"
+    },
+    "penerima": {
+      "anyOf": [
+        {
+          "enum": [
+            "peserta",
+            "keluarga"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Penerima"
+    },
+    "hubungan": {
+      "anyOf": [
+        {
+          "enum": [
+            "anak",
+            "orang tua",
+            "pasangan"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hubungan"
+    },
+    "hadir": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hadir"
+    },
+    "jumlah_min": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Jumlah Min"
+    },
+    "jumlah_maks": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Jumlah Maks"
+    },
+    "keyakinan": {
+      "anyOf": [
+        {
+          "enum": [
+            "tinggi",
+            "rendah"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Keyakinan"
+    },
+    "tanda_bahaya": {
+      "items": {
+        "enum": [
+          "tanda_tangan_tanpa_layanan",
+          "diminta_membayar",
+          "layanan_berbeda"
+        ],
+        "type": "string"
+      },
+      "title": "Tanda Bahaya",
+      "type": "array"
+    },
+    "membantah_tanggal_libur": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Membantah Tanggal Libur"
+    },
+    "kutipan_kunci": {
+      "maxLength": 2000,
+      "title": "Kutipan Kunci",
+      "type": "string"
+    },
+    "ringkasan": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Ringkasan",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status_panggilan",
+    "penerima",
+    "hubungan",
+    "hadir",
+    "jumlah_min",
+    "jumlah_maks",
+    "keyakinan",
+    "tanda_bahaya",
+    "membantah_tanggal_libur",
+    "kutipan_kunci",
+    "ringkasan"
+  ],
+  "title": "JawabanTerstruktur",
+  "type": "object"
+}

@@ -1,6 +1,5 @@
-"""HTTP boundary for Contract B."""
+"""HTTP boundary for Kontrak B2 (answer reader) and the voice agent."""
 
-import json
 import secrets
 import sys
 import time
@@ -9,27 +8,17 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, FastAPI, File, Form, Header, Request, UploadFile
-from fastapi.concurrency import run_in_threadpool
+from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
-from pydantic import ValidationError
 
 from . import config
 from .answer_reader import AnswerReader, AnswerResponse, ReadAnswerRequest
 from .errors import ServiceError
 from .gemini import GeminiError, GeminiTransport
-from .indicators import IndicatorRequest, IndicatorResult, calculate_indicators
-from .pipeline import AnalysisPipeline
-from .schemas import (
-    AnalysisResponse,
-    ClaimContext,
-    ComparisonResponse,
-    ErrorResponse,
-    HealthResponse,
-)
+from .schemas import ErrorResponse, HealthResponse
 from .voice import GeminiTokenIssuer, VoiceContext, VoiceTokenResponse
 
 
@@ -49,13 +38,8 @@ configure_logging()
 app = FastAPI(
     title="PRAMANA AI Service",
     version=config.ENGINE_VERSION,
-    description="Stateless document-evidence engine for Vedika Autentik.",
+    description="Stateless answer reader and voice-agent support for Vedika Autentik.",
 )
-
-
-@lru_cache(maxsize=1)
-def get_pipeline() -> AnalysisPipeline:
-    return AnalysisPipeline()
 
 
 @lru_cache(maxsize=1)
@@ -137,41 +121,14 @@ def require_service_key(
 router = APIRouter(prefix="/v1", dependencies=[Depends(require_service_key)])
 
 
-async def read_upload(file: UploadFile) -> bytes:
-    suffix = Path(file.filename or "").suffix.lower()
-    if suffix not in config.ALLOWED_EXTENSIONS:
-        raise ServiceError(415, "format_tidak_didukung", "Hanya PDF, JPG, atau PNG yang diterima.")
-    content = await file.read(config.MAX_FILE_BYTES + 1)
-    if len(content) > config.MAX_FILE_BYTES:
-        raise ServiceError(413, "terlalu_besar", "Ukuran berkas maksimal 10 MB.")
-    if not content:
-        raise ServiceError(422, "tidak_terbaca", "Berkas kosong atau tidak dapat dibaca.")
-    return content
-
-
-def parse_claim(raw_claim: str) -> ClaimContext:
-    try:
-        value = json.loads(raw_claim)
-        if not isinstance(value, dict):
-            raise ValueError
-        return ClaimContext.model_validate(value)
-    except (json.JSONDecodeError, ValidationError, ValueError) as error:
-        raise ServiceError(422, "klaim_tidak_valid", "Konteks klaim tidak valid.") from error
-
-
 @router.get("/kesehatan", response_model=HealthResponse)
-def health(pipeline: Annotated[AnalysisPipeline, Depends(get_pipeline)]) -> HealthResponse:
+def health() -> HealthResponse:
     return HealthResponse(
         status="ok",
         versi_mesin=config.ENGINE_VERSION,
-        model=pipeline.models,
-        siap_analisis=pipeline.ready,
+        versi_pembaca=config.READER_VERSION,
+        pembaca_siap=bool(config.gemini_api_key()),
     )
-
-
-@router.post("/indikator", response_model=IndicatorResult)
-def indicators(request: IndicatorRequest) -> IndicatorResult:
-    return calculate_indicators(request)
 
 
 @router.post(
@@ -200,57 +157,6 @@ def voice_token(
         return issuer.issue(context)
     except GeminiError as error:
         raise ServiceError(503, error.code, "Koneksi agen suara belum tersedia.") from error
-
-
-@router.post(
-    "/analisis",
-    response_model=AnalysisResponse,
-    responses={
-        413: {"model": ErrorResponse},
-        415: {"model": ErrorResponse},
-        422: {"model": ErrorResponse},
-    },
-)
-async def analyze(
-    file: Annotated[UploadFile, File(...)],
-    pipeline: Annotated[AnalysisPipeline, Depends(get_pipeline)],
-    klaim: Annotated[str, Form()] = "{}",
-    template: Annotated[str, Form()] = "",
-) -> AnalysisResponse:
-    content = await read_upload(file)
-    claim = parse_claim(klaim)
-    return await run_in_threadpool(
-        pipeline.analyze,
-        content,
-        file.filename or "berkas",
-        claim,
-        template,
-    )
-
-
-@router.post(
-    "/bandingkan",
-    response_model=ComparisonResponse,
-    responses={
-        413: {"model": ErrorResponse},
-        415: {"model": ErrorResponse},
-        422: {"model": ErrorResponse},
-    },
-)
-async def compare(
-    file_a: Annotated[UploadFile, File(...)],
-    file_b: Annotated[UploadFile, File(...)],
-    pipeline: Annotated[AnalysisPipeline, Depends(get_pipeline)],
-) -> ComparisonResponse:
-    content_a = await read_upload(file_a)
-    content_b = await read_upload(file_b)
-    return await run_in_threadpool(
-        pipeline.compare,
-        content_a,
-        file_a.filename or "berkas-a",
-        content_b,
-        file_b.filename or "berkas-b",
-    )
 
 
 app.include_router(router)
