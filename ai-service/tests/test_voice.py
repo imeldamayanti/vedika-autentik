@@ -32,7 +32,7 @@ def test_voice_instruction_contains_required_flow_safety_and_seven_branches():
     instruction = build_voice_instruction(context())
 
     for required in [
-        "asisten otomatis",
+        "asisten otomatis BPJS Kesehatan",
         "direkam",
         "bukan tagihan",
         "NIK",
@@ -154,12 +154,11 @@ def test_token_issuer_sends_bidi_generate_content_setup():
 
     body = captured["body"]
     assert "liveConnectConstraints" not in body
-    assert body["bidiGenerateContentSetup"] == {
-        "model": "models/gemini-live-test",
-        "generationConfig": {"responseModalities": ["AUDIO"]},
-        "inputAudioTranscription": {},
-        "outputAudioTranscription": {},
-    }
+    setup = body["bidiGenerateContentSetup"]
+    assert setup["model"] == "models/gemini-live-test"
+    assert setup["generationConfig"]["responseModalities"] == ["AUDIO"]
+    assert setup["inputAudioTranscription"] == {}
+    assert setup["outputAudioTranscription"] == {}
 
 
 def test_token_issuer_uses_requested_expiry_when_response_has_only_name():
@@ -177,3 +176,29 @@ def test_token_issuer_uses_requested_expiry_when_response_has_only_name():
 
     assert result.token == "auth_tokens/ephemeral-one-use"
     assert result.kedaluwarsa == datetime(2026, 10, 28, 11, 35, tzinfo=UTC)
+
+
+def test_token_locks_the_call_instruction_and_voice_into_the_session_setup():
+    captured = {}
+
+    def opener(request, timeout):
+        captured["body"] = json.loads(request.data)
+        return Response(json.dumps({"name": "auth_tokens/ephemeral-one-use"}).encode())
+
+    issuer = GeminiTokenIssuer(
+        api_key="permanent-server-key",
+        model="gemini-live-test",
+        opener=opener,
+        now=lambda: datetime(2026, 10, 28, 11, 30, tzinfo=UTC),
+    )
+
+    issuer.issue(context())
+
+    body = captured["body"]
+    setup = body["bidiGenerateContentSetup"]
+    assert "fieldMask" not in body
+    assert setup["systemInstruction"] == {"parts": [{"text": build_voice_instruction(context())}]}
+    assert setup["generationConfig"] == {
+        "responseModalities": ["AUDIO"],
+        "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}}},
+    }

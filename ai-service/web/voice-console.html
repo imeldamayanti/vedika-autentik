@@ -44,6 +44,7 @@
   const $ = (id) => document.getElementById(id);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   let running = false;
+  let clickAudio = null;
 
   const setStatus = (text) => { $("status").textContent = text; };
   const showError = (error) => { $("galat").textContent = `Galat: ${error.message}`; };
@@ -101,7 +102,10 @@
       if (!task.wa.lewati) await countdown(task.jeda_wa_menit * 60);
       return ask(`Telepon ${task.no_tujuan} lewat WhatsApp Desktop.`, [["Saya menelepon", true]]);
     },
-    diangkat: () => ask("Apakah telepon diangkat?", [["Diangkat", true], ["Tidak diangkat", false]]),
+    diangkat: () => ask("Apakah telepon diangkat?", [["Diangkat", true], ["Tidak diangkat", false]]).then((answered) => {
+      if (answered) clickAudio = new AudioContext();
+      return answered;
+    }),
     kirimChatCadangan: (chat) => ask("Dua kali tidak diangkat. Kirim chat cadangan.", [["Chat cadangan terkirim", true]], chat.tautan),
   };
 
@@ -110,6 +114,7 @@
       $("transkrip").textContent = "";
       const kunciLayanan = $("kunciLayanan").value;
       const session = new VedikaVoiceSession({
+        audioContext: clickAudio,
         context: task.skrip,
         headers: kunciLayanan ? { "X-Kunci-Layanan": kunciLayanan } : {},
         inputDeviceId: $("inputDevice").value,
@@ -122,6 +127,7 @@
         onError: showError,
         onComplete: ({ transkrip, recording, durasi }) => resolve({ transkrip, rekaman: recording, durasi }),
       });
+      clickAudio = null;
       ask("Panggilan berlangsung.", [["Akhiri panggilan", true]]).then(() => session.stop("selesai"));
       session.start().then(() => onStarted()).catch(showError);
     });
