@@ -8,8 +8,6 @@ ENGINE_VERSION = f"pramana-{__version__}"
 READER_VERSION = f"pembaca-{__version__}"
 # The backend waits 30 seconds per /v1/baca attempt; answer before that.
 READER_TIMEOUT_SECONDS = 25
-MAX_FILE_BYTES = 10 * 1024 * 1024
-ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
 
 
 def service_key() -> str | None:

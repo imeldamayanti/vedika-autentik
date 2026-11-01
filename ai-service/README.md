@@ -1,19 +1,13 @@
 # Vedika AI Service
 
-Stateless PRAMANA AI service for Vedika Autentik. It implements Contract B
-between `backend/` and `ai-service/`.
+Stateless AI service for Vedika Autentik v3 voice confirmation. It implements
+Kontrak B2 (`POST /v1/baca`) and serves the browser voice agent for Kontrak B1
+(`../docs/api-contract-v3.md`). The backend owns the queue, retries, labels
+(`data-uji-konfirmasi/tools/aturan.py`), and retention; this service only reads
+transcripts and runs the call. `backend/stub_mesin` remains the demo fallback.
 
-The v3 voice-confirmation path implements Kontrak B2 (`POST /v1/baca`) and the
-browser voice agent for Kontrak B1 in `../docs/api-contract-v3.md`. The backend
-owns the queue, retries, labels (`data-uji-konfirmasi/tools/aturan.py`), and
-retention; this service only reads transcripts and runs the call. The older document endpoints remain available for
-branch compatibility but are outside the v3 product flow.
-
-Version 0.5 provides the typed contract, perspective-aware canonical rendering,
-scan-quality gating, conservative field/session extraction, claim consistency,
-repeated-region checks, robust masked fingerprints, pairwise duplicate
-confirmation, and metadata/template-integrity signals. The existing
-`backend/stub_mesin` remains available as a demo fallback.
+The v2 document engine (`/v1/analisis`, `/v1/bandingkan`, OCR) was removed; the
+v3 PRD discontinued document detection. It remains in git history.
 
 ## Development
 
@@ -22,13 +16,11 @@ cd ai-service
 uv sync
 uv run pytest
 uv run ruff check .
-uv run python scripts/evaluate.py --check
+node --test web/voice-agent.test.mjs
 uv run uvicorn vedika_ai.main:app --reload --port 8001
 ```
 
 Open <http://localhost:8001/docs> for the generated OpenAPI contract.
-
-Use `--skip-ocr` only for a faster vision-only regression run.
 
 Set `AI_SERVICE_KEY` to require the `X-Kunci-Layanan` request header. Local
 development permits requests without a key when the variable is empty.
@@ -58,12 +50,9 @@ does not export participant IDs, visit IDs, or row-level claims.
 
 | Endpoint | Behavior |
 |---|---|
-| `GET /v1/kesehatan` | Returns service and OCR readiness |
-| `POST /v1/analisis` | Runs the single-document evidence pipeline |
-| `POST /v1/bandingkan` | Confirms a duplicate candidate and shared regions |
+| `GET /v1/kesehatan` | `{"status": "ok"}` plus versions and whether the reader is configured |
 | `POST /v1/baca` | Kontrak B2: transcript in, structured answer plus `versi_pembaca` out; no label |
 | `POST /v1/suara/token` | Takes the B1 `skrip`; returns a one-use Gemini Live credential and call prompt |
-| `POST /v1/indikator` | I1-I4 reference; unused by the backend, which computes them with `aturan.py` |
 
 ## Voice confirmation prototype
 
@@ -206,8 +195,8 @@ commit `7ca9f91`. Run the service-level acceptance coverage with:
 uv run pytest tests/test_official_voice_fixtures.py
 ```
 
-This checks all 300 indicator rows and the structured answer/label contracts for
-S1-S6 and S8 against the official data, without reading the evaluator-only
+This checks the structured answer/label contracts for S1-S6 and S8 against the
+official data (indicators are computed by the backend with `aturan.py`), without reading the evaluator-only
 `kunci_kebenaran_2026-08.csv` from production code.
 
 Run the official transcript extraction against Gemini only when provider access
@@ -231,7 +220,7 @@ covered by the deterministic answer-rule tests.
 | Gate | Status |
 |---|---|
 | Offline Python, Ruff, Node suites | Pass (2026-11-01) |
-| Official 300-row indicators and S1-S6/S8 contracts | Pass (2026-11-01) |
+| Official S1-S6/S8 answer and label contracts | Pass (2026-11-01) |
 | Live official `uji.py jawaban` (S1-S6/S8) | Pass 7/7, two consecutive runs, `gemini-3.5-flash-lite` (2026-11-01) |
 | Live 20-case extraction >=90% | Pass: 115/120 key fields (95.8%), labels 19/20 (2026-11-01) |
 | Kontrak B2 through backend `KlienMesin` + `baca_dengan_ulang` | Pass over HTTP: S1/S2/S8 in about 1.2 s, schema valid, labels match; empty transcript not retried |
@@ -247,14 +236,7 @@ backend's 30-second budget. `gemini-3.5-flash-lite` answers in about 1.3 seconds
 and passes both gates, so it is the default. Set `GEMINI_TEXT_MODEL` to switch,
 then rerun both live commands.
 
-The baseline deployment is CPU-only. Tesseract 5 is the current OCR adapter;
-PaddleOCR remains a benchmark candidate and is not a runtime dependency.
-
-OCR fields are nullable by design. A low-confidence handwritten value is omitted
-instead of guessed. The reproducible evaluator reports both coverage and accuracy
-for returned values.
-
 ## Logging
 
 Logs contain request IDs, route, status, duration, and error codes only. Do not
-log filenames, claim fields, OCR text, images, or uploaded bytes.
+log transcripts, names, phone numbers, claim values, or tokens.

@@ -1,57 +1,14 @@
-from typing import ClassVar
-
 import pytest
 from fastapi.testclient import TestClient
-from loguru import logger
 
 from vedika_ai import config
 from vedika_ai.answer_reader import AnswerReader
 from vedika_ai.answers import JawabanTerstruktur
 from vedika_ai.gemini import GeminiError
-from vedika_ai.main import app, get_answer_reader, get_pipeline, get_token_issuer
-from vedika_ai.schemas import AnalysisResponse, ComparisonResponse
+from vedika_ai.main import app, get_answer_reader, get_token_issuer
 from vedika_ai.voice import VoiceTokenResponse
 
 client = TestClient(app)
-
-
-class FakePipeline:
-    ready = True
-    models: ClassVar[list[str]] = ["fake-ocr"]
-
-    def analyze(self, content, filename, claim, template):
-        del content, filename, claim, template
-        return AnalysisResponse.model_validate(
-            {
-                "versi_mesin": "pramana-0.5.0",
-                "ukuran": [1240, 1754],
-                "halaman_jpg": "jpeg-base64",
-                "kualitas_scan": {"status": "baik", "catatan": "Terbaca."},
-                "isi_lembar": {"baris_terisi": 8},
-                "temuan": [],
-                "metadata_file": {},
-                "sidik_jari": {
-                    "algoritma": "phash64-visual",
-                    "halaman": "a3f09c",
-                    "baris": [],
-                    "teks": "7d21",
-                },
-                "waktu_proses_ms": 10,
-                "template_id": "melati-v1",
-                "versi_template": "1.0",
-            }
-        )
-
-    def compare(self, content_a, filename_a, content_b, filename_b):
-        del content_a, filename_a, content_b, filename_b
-        return ComparisonResponse(
-            kemiripan=0.98,
-            sama=True,
-            kalimat="Isi berkas 98% sama dengan berkas pembanding.",
-            region_a=[(85, 540, 1070, 782)],
-            region_b=[(85, 540, 1070, 782)],
-            tempelan=[],
-        )
 
 
 class FakeAnswerReader:
@@ -94,61 +51,31 @@ class FakeTokenIssuer:
 
 
 @pytest.fixture(autouse=True)
-def fake_pipeline():
-    app.dependency_overrides[get_pipeline] = FakePipeline
+def fake_providers():
     app.dependency_overrides[get_answer_reader] = FakeAnswerReader
     app.dependency_overrides[get_token_issuer] = FakeTokenIssuer
     yield
     app.dependency_overrides.clear()
 
 
-def pdf_file(name: str = "sample.pdf", content: bytes = b"%PDF-1.4\n%%EOF"):
-    return {"file": (name, content, "application/pdf")}
-
-
-def test_health_reports_analysis_readiness():
+def test_health_reports_reader_readiness(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "server-key")
     response = client.get("/v1/kesehatan")
 
     assert response.status_code == 200
     assert response.json() == {
         "status": "ok",
-        "versi_mesin": "pramana-0.5.0",
-        "model": ["fake-ocr"],
-        "siap_analisis": True,
+        "versi_mesin": config.ENGINE_VERSION,
+        "versi_pembaca": config.READER_VERSION,
+        "pembaca_siap": True,
     }
     assert response.headers["X-Request-ID"]
 
 
-def test_openapi_contains_all_contract_b_endpoints():
+def test_openapi_contains_only_current_contract_endpoints():
     paths = client.get("/openapi.json").json()["paths"]
 
-    assert {
-        "/v1/kesehatan",
-        "/v1/analisis",
-        "/v1/bandingkan",
-        "/v1/indikator",
-        "/v1/baca",
-        "/v1/suara/token",
-    } <= paths.keys()
-
-
-def test_indicator_endpoint_returns_auditable_flags():
-    response = client.post(
-        "/v1/indikator",
-        json={
-            "bulan": "2026-08",
-            "sesi": [
-                {"tanggal": f"2026-08-{day:02d}", "hari_libur": day == 17}
-                for day in range(1, 10)
-            ],
-            "bulan_aktif": [],
-        },
-    )
-
-    assert response.status_code == 200
-    assert response.json()["i1"] is True
-    assert response.json()["masuk_antrean"] is True
-    assert response.json()["indikator_aktif"] == ["I1", "I2", "I4"]
+    assert set(paths) == {"/v1/kesehatan", "/v1/baca", "/v1/suara/token"}
 
 
 BACA_REQUEST = {
@@ -232,87 +159,6 @@ def test_voice_console_is_served_by_ai_service():
 
     assert response.status_code == 200
     assert "Vedika Agen Suara" in response.text
-
-
-def test_analysis_returns_contract_b_result():
-    response = client.post(
-        "/v1/analisis",
-        files=pdf_file(),
-        data={"klaim": '{"sesi_ditagih": 8}', "template": "melati-v1"},
-    )
-
-    assert response.status_code == 200
-    assert response.json()["kualitas_scan"]["status"] == "baik"
-    assert response.json()["template_id"] == "melati-v1"
-    assert "label" not in response.json()
-
-
-def test_analysis_rejects_invalid_claim_without_echoing_input():
-    response = client.post(
-        "/v1/analisis",
-        files=pdf_file(),
-        data={"klaim": "not-json"},
-    )
-
-    assert response.status_code == 422
-    assert response.json() == {
-        "galat": {"kode": "klaim_tidak_valid", "pesan": "Konteks klaim tidak valid."}
-    }
-
-
-def test_request_logs_do_not_contain_filename_or_claim_values():
-    messages = []
-    sink_id = logger.add(lambda message: messages.append(str(message)), format="{message}")
-    try:
-        response = client.post(
-            "/v1/analisis",
-            files=pdf_file(name="participant-987654321.pdf"),
-            data={"klaim": '{"sep":"SEP-PRIVATE-123","sesi_ditagih":8}'},
-        )
-    finally:
-        logger.remove(sink_id)
-
-    assert response.status_code == 200
-    logged = "".join(messages)
-    assert "participant-987654321.pdf" not in logged
-    assert "SEP-PRIVATE-123" not in logged
-
-
-def test_analysis_rejects_unsupported_extension():
-    response = client.post(
-        "/v1/analisis",
-        files=pdf_file(name="sample.txt"),
-        data={"klaim": "{}"},
-    )
-
-    assert response.status_code == 415
-    assert response.json()["galat"]["kode"] == "format_tidak_didukung"
-
-
-def test_analysis_rejects_oversized_file(monkeypatch):
-    monkeypatch.setattr(config, "MAX_FILE_BYTES", 4)
-    response = client.post(
-        "/v1/analisis",
-        files=pdf_file(content=b"12345"),
-        data={"klaim": "{}"},
-    )
-
-    assert response.status_code == 413
-    assert response.json()["galat"]["kode"] == "terlalu_besar"
-
-
-def test_comparison_returns_contract_b_result():
-    response = client.post(
-        "/v1/bandingkan",
-        files={
-            "file_a": ("a.pdf", b"%PDF-a", "application/pdf"),
-            "file_b": ("b.pdf", b"%PDF-b", "application/pdf"),
-        },
-    )
-
-    assert response.status_code == 200
-    assert response.json()["sama"] is True
-    assert response.json()["kemiripan"] == 0.98
 
 
 def test_service_key_is_required_only_when_configured(monkeypatch):
