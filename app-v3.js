@@ -926,12 +926,13 @@
     const tombolTranskrip = simpanTeks && !latar
       ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
     const transkrip = ui.transkripBuka && simpanTeks && !latar
-      ? '<div class="transkrip transkrip--tetap">' + p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div>" : "";
+      ? '<section class="transkrip-panel"><div class="panel-kepala"><h2>Transkrip lengkap</h2><div class="kanan">' + p.transkrip.length + " ucapan" + (p.durasi != null ? " · " + mmss(p.durasi) : "") + '</div></div><div class="transkrip transkrip--tetap">' +
+        p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div></section>" : "";
 
     const kutipan = '<section class="panel"><div class="panel-kepala"><h2>Kutipan kunci</h2></div>' +
       (j.kutipan_kunci ? '<blockquote class="kutipan">' + esc(j.kutipan_kunci) + '</blockquote><p class="kutipan-ringkasan">' + esc(j.ringkasan) + "</p>"
         : '<p class="kutipan-ringkasan" style="padding-top:16px">Tidak ada kutipan. ' + esc(j.ringkasan) + "</p>") +
-      bukti + tombolTranskrip + transkrip +
+      bukti + tombolTranskrip +
       '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke RS.</span></div></section>";
 
     const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai · Status <b>" + rs.status + "</b></span></div>";
@@ -943,7 +944,7 @@
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-tengah">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+      '<div class="kartu-tengah">' + ringkasan + kutipan + transkrip + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
