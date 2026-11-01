@@ -221,19 +221,26 @@
 .tanda-bahaya p { margin-top: 2px; font-size: 13px; color: var(--fg-2); }
 
 /* Kartu bukti memakai bingkai HP yang sama dengan layar Panggilan: HP di kiri, bukti di kanan. */
-.kartu-grid { display: grid; grid-template-columns: 316px minmax(0, 1fr); gap: 16px; align-items: start; }
-.kartu-kanan { min-width: 0; }
+.kartu-grid { display: grid; grid-template-columns: 316px minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.kartu-tengah { display: grid; gap: 16px; min-width: 0; }
+.kartu-saran { min-width: 0; }
 .pemutar.pemutar--ponsel { width: min(300px, 100%); padding: 0; border-top: 0; }
-@media (min-width: 1281px) { .kartu-kanan .bukti-bawah { grid-template-columns: minmax(0, 1fr) 320px; } }
-.tiga-kartu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
-.tiga-kartu > section { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 18px; }
-.tiga-kartu .kapital { display: block; margin-bottom: 6px; }
-.tiga-kartu .besar { font-size: 34px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
-.tiga-kartu .besar small { font-size: 16px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
-.tiga-kartu .ket { margin-top: 8px; font-size: 13px; color: var(--fg-2); }
-.tiga-kartu .beda .besar { color: var(--prioritas-fg); }
-.tiga-kartu .sama .besar { color: var(--lolos-fg); }
-.tiga-kartu .netral .besar { color: var(--muted-fg); }
+.ringkasan-tagihan { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 14px; }
+.angka-tiga { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.angka-tiga > div { padding: 0 12px; border-left: 1px solid var(--border); }
+.angka-tiga > div:first-child { padding-left: 0; border-left: 0; }
+.angka-tiga .kapital { display: block; margin-bottom: 6px; font-size: 10.5px; white-space: nowrap; }
+.angka-tiga .besar { font-size: 30px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+.angka-tiga .besar small { font-size: 14px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
+.angka-tiga .beda .besar { color: var(--prioritas-fg); }
+.angka-tiga .sama .besar { color: var(--lolos-fg); }
+.angka-tiga .netral .besar { color: var(--muted-fg); }
+.angka-tiga > .netral:first-child .besar { color: var(--fg); }
+.tgl-blok { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.tgl-blok .kapital { display: block; }
+.tgl-blok .tanggal-sesi { margin-top: 8px; }
+.ket-ringkas { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; font-size: 13px; color: var(--fg-2); }
+.ket-ringkas b { color: var(--fg); font-weight: 700; }
 .tanggal-sesi { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
 .tgl {
   display: inline-flex; align-items: baseline; gap: 5px; height: 26px; padding: 0 8px; align-items: center; border-radius: 5px;
@@ -241,9 +248,7 @@
 }
 .tgl small { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; }
 .tgl--tanda { background: var(--cek-bg); border-color: oklch(86% .07 85); color: var(--cek-fg); }
-.tanggal-sesi + .ket { margin-top: 10px; }
 
-.bukti-bawah { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
 .kutipan { margin: 0; padding: 16px 20px 6px; font-size: 17px; line-height: 1.5; font-weight: 600; color: var(--fg); }
 .kutipan::before { content: "“"; color: var(--brand); font-size: 28px; line-height: 0; vertical-align: -8px; margin-right: 3px; }
 .kutipan-ringkasan { padding: 0 20px 14px; font-size: 13px; color: var(--fg-2); }
@@ -327,18 +332,19 @@
 
 /* ---------- layar sedang dan kecil ---------- */
 
+@media (max-width: 1339px) {
+  .kartu-grid { grid-template-columns: 316px minmax(0, 1fr); }
+  .kartu-grid > .kol-ponsel { grid-row: 1 / span 2; }
+  .kartu-grid > .kartu-tengah { grid-column: 2; grid-row: 1; }
+  .kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
+}
+
 @media (max-width: 1280px) {
   .panggilan-grid { grid-template-columns: minmax(0, 1fr) 316px; }
   .panggilan-grid > .kol-kiri { grid-column: 1; grid-row: 1; }
   .panggilan-grid > .kol-ponsel { grid-column: 2; grid-row: 1; }
   .panggilan-grid > .kol-trans { grid-column: 1 / -1; grid-row: 2; }
   .panggilan-grid .transkrip { height: 420px; }
-  .kartu-grid { grid-template-columns: minmax(0, 1fr); }
-  .kartu-grid > .kol-ponsel { order: 2; }
-}
-
-@media (max-width: 1180px) {
-  .bukti-bawah { grid-template-columns: minmax(0, 1fr) 340px; }
 }
 
 @media (max-width: 960px) {
@@ -354,8 +360,9 @@
   .kol-trans { order: 2; }
   .kol-kiri { order: 3; }
   .panggilan-grid .transkrip { height: 380px; }
-  .tiga-kartu { grid-template-columns: 1fr; }
-  .bukti-bawah { grid-template-columns: 1fr; }
+  .kartu-grid { grid-template-columns: minmax(0, 1fr); }
+  .kartu-grid > .kartu-tengah, .kartu-grid > .kartu-saran { grid-column: auto; grid-row: auto; }
+  .kartu-grid > .kol-ponsel { grid-row: auto; order: 3; }
 }
 
 @media (max-width: 760px) {

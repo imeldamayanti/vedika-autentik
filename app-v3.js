@@ -912,12 +912,13 @@
 
     const peringatan = bahaya ? '<div class="tanda-bahaya" role="alert">' + ikon("awas") + "<div><b>Tanda bahaya: " + esc(j.tanda_bahaya.map((x) => TANDA_BAHAYA[x]).join(", ")) + "</b><p>" + esc(j.ringkasan) + "</p></div></div>" : "";
 
-    const tiga = '<div class="tiga-kartu">' +
-      '<section><span class="kapital">Ditagih rumah sakit</span><div class="besar">' + p.ditagih + "<small>sesi</small></div>" + tanggal +
-        '<p class="ket">' + (nTanda ? nTanda + " tanggal di Minggu atau libur (kuning)." : "Tidak ada di Minggu atau libur.") + "</p></section>" +
-      '<section class="' + rk.versiGaya + '"><span class="kapital">Versi peserta</span><div class="besar">' + rk.versi + (rk.versi === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.versiKet) + "</p></section>" +
-      '<section class="' + rk.gaya + '"><span class="kapital">Selisih</span><div class="besar">' + rk.selisih + (rk.selisih === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.selisihKet) + "</p></section>" +
-    "</div>";
+    const ketTgl = nTanda ? nTanda + " tanggal di Minggu atau libur (kuning)." : "Tidak ada di Minggu atau libur.";
+    const angka = (nama, nilai, gaya) => '<div class="' + gaya + '"><span class="kapital">' + nama + '</span><div class="besar">' + nilai + (nilai === "–" ? "" : "<small>sesi</small>") + "</div></div>";
+    const ringkasan = '<section class="ringkasan-tagihan"><div class="angka-tiga">' +
+      angka("Ditagih RS", p.ditagih, "netral") + angka("Versi peserta", rk.versi, rk.versiGaya) + angka("Selisih", rk.selisih, rk.gaya) + "</div>" +
+      '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + "</div>" +
+      '<ul class="ket-ringkas"><li>' + ketTgl + "</li>" + (rk.versiKet ? "<li><b>Versi peserta:</b> " + esc(rk.versiKet) + "</li>" : "") +
+      "<li><b>Selisih:</b> " + esc(rk.selisihKet) + "</li></ul></section>";
 
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
@@ -943,8 +944,8 @@
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan">' + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div></div></div>";
-  }
+      '<div class="kartu-tengah">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+}
   /* ============================================================ ringkasan RS */
 
   const persenRs = (x) => koma(x.toFixed(1)) + "%";
