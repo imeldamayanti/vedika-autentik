@@ -629,13 +629,56 @@
       : "Simulasi: percakapan berjalan sepanjang rekaman, " + mmss(p.durasi) + ". Suara dari rekaman buatan (ElevenLabs), bukan panggilan nyata.";
   }
 
+  /* Keadaan layar HP penerima, dibaca dari tahap progres yang sama dengan kolom Progres (simulasi dan API). */
+  function keadaanPonsel(p, t) {
+    const l = M.hidup ? langkahApi(p) : langkahSim(p, t);
+    const belum = { mode: "diam", teks: t == null && !M.hidup ? "Belum ada panggilan" : "Menunggu panggilan" };
+    if (tanpaSuaraP(p)) {
+      const coba = l.filter((x) => x.nama.indexOf("Percobaan") === 0);
+      if (coba.some((x) => x.state === "jalan")) return { mode: "dering", teks: "Berdering…" };
+      if (coba.some((x) => x.state === "gagal")) return { mode: "tak", teks: "Tidak diangkat" };
+      return belum;
+    }
+    const sambung = l[1], rekam = l[2];
+    if (rekam.state === "selesai") return { mode: "akhir", teks: "Panggilan berakhir" };
+    if (rekam.state === "jalan" || sambung.state === "selesai") return { mode: "aktif", teks: "Tersambung" };
+    if (sambung.state === "jalan") {
+      const dering = M.hidup ? sambung.ket === "Memanggil…" : t >= titik(p).sambung - 2;
+      return dering ? { mode: "dering", teks: "Berdering…" } : { mode: "diam", teks: "Menunggu jeda pesan" };
+    }
+    return belum;
+  }
+
+  /* Mockup layar telepon penerima. Pemanggil hanya nomor tim (Simulasi), bukan nama atau logo BPJS. */
+  function htmlPonsel(p, t) {
+    const k = keadaanPonsel(p, t);
+    const nomor = M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
+    const jam = M.hidup ? A3.jamTeks(M.waktuServer) : formatJam(menitPanggilan(p.id));
+    const detik = Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
+    const baris = k.mode === "aktif" ? '<span class="durasi-ponsel">' + mmss(detik) + "</span>"
+      : k.mode === "akhir" && p.durasi != null ? "Durasi " + mmss(p.durasi) : "";
+    const bulat = (kelas, nama, isi) => '<span class="tombol-telp ' + kelas + '">' + isi + "<small>" + nama + "</small></span>";
+    const kisi = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="6" cy="5" r="1.7"/><circle cx="12" cy="5" r="1.7"/><circle cx="18" cy="5" r="1.7"/><circle cx="6" cy="11" r="1.7"/><circle cx="12" cy="11" r="1.7"/><circle cx="18" cy="11" r="1.7"/><circle cx="6" cy="17" r="1.7"/><circle cx="12" cy="17" r="1.7"/><circle cx="18" cy="17" r="1.7"/></svg>';
+    const bawah = k.mode === "dering" ? '<div class="telp-aksi telp-aksi--dering">' + bulat("merah", "Tolak", ikon("telepon")) + bulat("hijau", "Jawab", ikon("telepon")) + "</div>"
+      : k.mode === "aktif" ? '<div class="telp-opsi">' + bulat("", "Speaker", ikon("suara")) + bulat("", "Keypad", kisi) + bulat("", "Kontak", ikon("pengguna")) + '</div><div class="telp-aksi">' + bulat("merah", "Akhiri", ikon("telepon")) + "</div>"
+      : "";
+    return '<div class="kol-ponsel"><div class="ponsel ponsel--telp ponsel--' + k.mode + '" role="img" aria-label="Simulasi layar telepon penerima: ' + k.teks + '">' +
+      '<div class="ponsel-layar"><span class="poni"></span><div class="status-ponsel"><b>' + jam + '</b><span>5G</span></div>' +
+      '<div class="telp-info"><span class="telp-foto">' + ikon("telepon") + "</span><b>" + esc(nomor) + "</b><span>Nomor tim · Simulasi</span>" +
+        '<p class="telp-status">' + k.teks + '</p><p class="telp-durasi">' + baris + "</p>" +
+        '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>' +
+      bawah + "</div></div>" +
+      '<p class="ponsel-ket">Layar HP penerima: <b>' + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</b></p></div>";
+  }
+
   function isiPanggilan(p, t) {
     const tanpaSuara = tanpaSuaraP(p);
     return '<div class="panggilan-grid" id="panggilan">' +
-      '<section class="panel"><div class="panel-kepala"><h2>Progres</h2></div><ol class="progres">' + htmlLangkah(p, t) + "</ol>" +
+      '<div class="kol-kiri"><section class="panel"><div class="panel-kepala"><h2>Progres</h2></div><ol class="progres">' + htmlLangkah(p, t) + "</ol>" +
         '<p class="catatan-simulasi">' + catatanSimulasi(p) + "</p></section>" +
-      '<section class="panel"><div class="panel-kepala"><h2>' + (tanpaSuara ? "Log panggilan" : "Transkrip langsung") + "</h2>" + (p.suara_langsung ? '<div class="kanan">' + tombolBisu() + "</div>" : "") + '</div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
-      '<section class="panel"><div class="panel-kepala"><h2>Yang ditangkap AI</h2></div><dl class="isian">' + htmlIsian(p, t) + "</dl></section>" +
+      '<section class="panel"><div class="panel-kepala"><h2>Yang ditangkap AI</h2></div><dl class="isian">' + htmlIsian(p, t) + "</dl></section></div>" +
+      htmlPonsel(p, t) +
+      '<section class="panel kol-trans"><div class="panel-kepala"><h2>' + (tanpaSuara ? "Log panggilan" : "Transkrip langsung") + "</h2>" + (p.suara_langsung ? '<div class="kanan">' + tombolBisu() + "</div>" : "") + '</div><div class="transkrip" id="transkrip" aria-live="polite">' + htmlTranskrip(p, t) + "</div></section>" +
     "</div>";
   }
 
@@ -724,7 +767,7 @@
   /* Perbarui hanya bagian panggilan bila ada yang berubah, supaya transkrip tidak berkedip. */
   function perbaruiPanggilan(p, t) {
     const a = ui.aktif;
-    const sig = [langkahSim(p, t).map((l) => l.state[0]).join(""), barisTampil(p, t), terisi(p, t).length, logPercobaan(p, t).length, t >= titik(p).akhir].join("|");
+    const sig = [langkahSim(p, t).map((l) => l.state[0]).join(""), barisTampil(p, t), terisi(p, t).length, logPercobaan(p, t).length, t >= titik(p).akhir, keadaanPonsel(p, t).mode].join("|");
     const el = document.getElementById("panggilan");
     if (el && sig !== a.sig) {
       a.sig = sig;
@@ -732,8 +775,7 @@
       const tr = document.getElementById("transkrip");
       if (tr) tr.scrollTop = tr.scrollHeight;
     }
-    const d = document.getElementById("durasiLive");
-    if (d) d.textContent = mmss(detikRekam(p, t));
+    document.querySelectorAll("#durasiLive, .durasi-ponsel").forEach((d) => { d.textContent = mmss(Math.max(0, detikRekam(p, t))); });
   }
 
   /* Pintasan tersembunyi Alt+L: lompat ke akhir panggilan yang sedang berjalan, hasilnya sama dengan menunggu. */
