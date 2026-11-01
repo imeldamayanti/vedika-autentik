@@ -89,7 +89,7 @@
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "",
-    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null, transkripBuka: false,
+    otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null,
     pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false, ubah: null
   };
 
@@ -698,8 +698,23 @@
     else if (a.paused) ganti("akhir", "Rekaman dijeda", "Sisa " + mmss(Math.ceil(a.duration - a.currentTime)));
     else ganti("aktif", "Tersambung", "Sisa " + mmss(Math.ceil(a.duration - a.currentTime)));
   }
-  ["play", "pause", "ended", "timeupdate"].forEach((n) => document.addEventListener(n, (e) => {
-    if (e.target.tagName === "AUDIO" && e.target.closest(".pemutar--ponsel")) ponselRekaman(e.target, n);
+  /* Sorot baris transkrip yang sedang diucapkan dan gulirkan daftar ke sana (hanya di dalam daftar, halaman tidak ikut bergeser). */
+  let barisSorot = -1;
+  function sorotTranskrip(a, nama) {
+    const daftar = document.getElementById("transkripSinkron");
+    if (!daftar) return;
+    const baris = daftar.children;
+    let idx = -1;
+    if (nama !== "ended") for (let i = 0; i < baris.length; i++) if (Number(baris[i].dataset.detik) <= a.currentTime) idx = i;
+    if (idx === barisSorot) return;
+    barisSorot = idx;
+    for (let i = 0; i < baris.length; i++) baris[i].classList.toggle("sedang", i === idx);
+    const el = baris[idx] || baris[0];
+    if (el) daftar.scrollTo({ top: Math.max(0, el.offsetTop - daftar.clientHeight / 2 + el.offsetHeight / 2), behavior: "smooth" });
+  }
+
+  ["play", "pause", "ended", "timeupdate", "seeked"].forEach((n) => document.addEventListener(n, (e) => {
+    if (e.target.tagName === "AUDIO" && e.target.closest(".pemutar--ponsel")) { ponselRekaman(e.target, n); sorotTranskrip(e.target, n); }
   }, true));
 
   function isiPanggilan(p, t) {
@@ -923,16 +938,15 @@
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
     else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>'; }
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
-    const tombolTranskrip = simpanTeks && !latar
-      ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
-    const transkrip = ui.transkripBuka && simpanTeks && !latar
-      ? '<section class="transkrip-panel"><div class="panel-kepala"><h2>Transkrip lengkap</h2><div class="kanan">' + p.transkrip.length + " ucapan" + (p.durasi != null ? " · " + mmss(p.durasi) : "") + '</div></div><div class="transkrip transkrip--tetap">' +
-        p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div></section>" : "";
+    /* Transkrip mengikuti rekaman: baris yang sedang diucapkan disorot (lihat sorotTranskrip), klik baris untuk melompat. */
+    const transkrip = simpanTeks && !latar && p.rekaman
+      ? '<section class="transkrip-sinkron"><div class="panel-kepala"><h2>Transkrip</h2><div class="kanan">' + p.transkrip.length + " ucapan · klik baris untuk melompat</div></div>" +
+        '<div class="transkrip transkrip--sinkron" id="transkripSinkron">' + p.transkrip.map((l) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + '" data-aksi="loncat" data-detik="' + l[1] + '" role="button" tabindex="0"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") + "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("") + "</div></section>" : "";
 
     const kutipan = '<section class="panel"><div class="panel-kepala"><h2>Kutipan kunci</h2></div>' +
       (j.kutipan_kunci ? '<blockquote class="kutipan">' + esc(j.kutipan_kunci) + '</blockquote><p class="kutipan-ringkasan">' + esc(j.ringkasan) + "</p>"
         : '<p class="kutipan-ringkasan" style="padding-top:16px">Tidak ada kutipan. ' + esc(j.ringkasan) + "</p>") +
-      bukti + tombolTranskrip +
+      bukti +
       '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke RS.</span></div></section>";
 
     const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai · Status <b>" + rs.status + "</b></span></div>";
@@ -943,8 +957,8 @@
       '<p class="catatan-saran">Rekaman hanya bukti awal, bukan satu-satunya dasar menolak klaim.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
-    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-tengah">' + ringkasan + kutipan + transkrip + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar + transkrip) +
+      '<div class="kartu-tengah">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
@@ -1179,7 +1193,12 @@
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
-    transkrip() { ui.transkripBuka = !ui.transkripBuka; gambar(true); },
+    loncat(el) {
+      const a = document.querySelector(".pemutar--ponsel audio");
+      if (!a) return;
+      a.currentTime = Number(el.dataset.detik);
+      a.play().catch(() => { /* autoplay ditolak */ });
+    },
     bisu() {
       ui.bisu = !ui.bisu;
       suara.klip.forEach((a) => { a.muted = ui.bisu; });
@@ -1189,7 +1208,7 @@
       if (M.hidup) {
         A3.resetDemo().then(() => {
           tutupWa(); suaraHenti();
-          Object.assign(ui, { filterRs: "", filterStatus: "", transkripBuka: false, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null });
+          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null });
           M.detail = {}; M.lalu = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
           return segarkan();
         }).then(() => { ke("#/autentik"); toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal."); }).catch(galatToast("Gagal memulai ulang demo"));
@@ -1199,7 +1218,7 @@
       clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa(); suaraHenti();
       const tetapMasuk = S.masuk;
       S = statusAwal(); S.masuk = tetapMasuk;
-      Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, transkripBuka: false, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
+      Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
       simpan();
       ke("#/autentik");
       toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal.");
@@ -1265,6 +1284,7 @@
   document.addEventListener("keydown", (e) => {
     if (e.altKey && e.code === "KeyL") { e.preventDefault(); lompatAkhir(); }
     else if (e.key === "Escape") tutupWa();
+    else if ((e.key === "Enter" || e.key === " ") && e.target.dataset && e.target.dataset.aksi === "loncat") { e.preventDefault(); AKSI.loncat(e.target); }
   });
 
   document.addEventListener("change", (e) => {
@@ -1283,7 +1303,7 @@
   });
 
   window.addEventListener("hashchange", () => {
-    ui.menuBuka = false; ui.transkripBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; ui.ubah = null;
+    ui.menuBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; ui.ubah = null;
     suaraSelaraskan(); gambar(false);
     if (M.hidup) segarkan();
   });
