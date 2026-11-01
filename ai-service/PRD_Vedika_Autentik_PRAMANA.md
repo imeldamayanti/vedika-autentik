@@ -17,6 +17,9 @@ Fitur tambahan di alur verifikasi klaim BPJS Kesehatan yang memeriksa **keaslian
 | **Versi** | v2.1 · 30 September 2026 · draf untuk proposal |
 | **Data prototipe** | Sintetis dan formulir relawan. Tidak ada data peserta JKN yang nyata. |
 
+> Dokumen induk proposal yang membedakan kemampuan terimplementasi, tervalidasi, dan roadmap
+> tersedia di [`../docs/proposal-master.md`](../docs/proposal-master.md).
+
 | Satu kalimat untuk juri Berkas yang lengkap belum tentu asli. Vedika Autentik memeriksa keaslian berkas klaim sebelum klaim dibayar, lalu menunjukkan buktinya ke verifikator. |
 | :---- |
 

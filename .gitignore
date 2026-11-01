@@ -1,5 +1,13 @@
 # Local document source bundle. The canonical, sanitized fixtures live in dataset/.
 Folder Data Dokumen/
+Folder Data Asli/
+
+# Local AI data and model artifacts. Only privacy-reviewed reference aggregates are tracked.
+/ai-service/data/raw/
+/ai-service/data/processed/
+/ai-service/data/volunteer/
+/ai-service/model-cache/
+/ai-service/models/
 
 # Python environments and caches
 .venv/
