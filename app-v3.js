@@ -798,22 +798,20 @@
   function ringkasKartu(p) {
     const j = p.jawaban, dihitung = p.label === "tidak_sesuai" || p.label === "sesuai";
     let versi = "–", versiKet = "", gaya = "netral";
-    if (p.label === "tidak_terhubung") versiKet = "Belum ada jawaban. Panggilan tidak diangkat 2 kali.";
-    else if (p.label === "menolak") versiKet = "Penerima menolak menjawab. Tidak dihitung sebagai sinyal negatif.";
+    if (p.label === "tidak_terhubung") versiKet = "Tidak diangkat 2 kali.";
+    else if (p.label === "menolak") versiKet = "Penerima menolak menjawab.";
     else {
       versi = j.jumlah_min === j.jumlah_maks ? j.jumlah_min : j.jumlah_min + "–" + j.jumlah_maks;
-      versiKet = p.label === "tidak_yakin" ? "Perkiraan saja, keyakinan rendah."
-        : j.membantah_tanggal_libur === true ? "Membantah ada sesi pada " + daftarTanggal(p.tanggalLibur) + "."
-        : !p.tanggalLibur.length ? "AI tidak menanyakan tanggal libur karena tidak ada." : "";
+      versiKet = p.label === "tidak_yakin" ? "Perkiraan, keyakinan rendah."
+        : j.membantah_tanggal_libur === true ? "Membantah sesi pada " + daftarTanggal(p.tanggalLibur) + "." : "";
     }
     const sel = selisihP(p), tol = toleransiP(p);
-    let selisihTeks = "–", selisihKet = "Tidak dihitung pada ringkasan RS.";
+    let selisihTeks = "–", selisihKet = "Tidak dihitung.";
     if (dihitung) {
       selisihTeks = sel;
-      selisihKet = "Toleransi salah ingat: " + tol + " sesi. " + (sel > tol ? "Selisih di atas toleransi." : "Masih dalam toleransi.");
+      selisihKet = "Toleransi " + tol + " sesi, " + (sel > tol ? "terlampaui." : "dalam batas.");
       gaya = sel > tol ? "beda" : "sama";
     }
-    if (p.label === "tidak_yakin") selisihKet = "Tidak dihitung karena penerima tidak yakin.";
     return { versi: versi, versiKet: versiKet, selisih: selisihTeks, selisihKet: selisihKet, gaya: gaya, versiGaya: p.label === "tidak_sesuai" ? "beda" : p.label === "sesuai" ? "sama" : "netral" };
   }
 
@@ -883,14 +881,14 @@
 
     const tiga = '<div class="tiga-kartu">' +
       '<section><span class="kapital">Ditagih rumah sakit</span><div class="besar">' + p.ditagih + "<small>sesi</small></div>" + tanggal +
-        '<p class="ket">' + (nTanda ? nTanda + " tanggal jatuh di Minggu atau libur nasional (ditandai kuning)." : "Tidak ada sesi di hari Minggu atau libur nasional.") + "</p></section>" +
+        '<p class="ket">' + (nTanda ? nTanda + " tanggal di Minggu atau libur (kuning)." : "Tidak ada di Minggu atau libur.") + "</p></section>" +
       '<section class="' + rk.versiGaya + '"><span class="kapital">Versi peserta</span><div class="besar">' + rk.versi + (rk.versi === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.versiKet) + "</p></section>" +
       '<section class="' + rk.gaya + '"><span class="kapital">Selisih</span><div class="besar">' + rk.selisih + (rk.selisih === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.selisihKet) + "</p></section>" +
     "</div>";
 
     let bukti;
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
-    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi dari suara buatan (ElevenLabs), bukan suara penerima sungguhan.</small></div>';
+    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>';
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
     const tombolTranskrip = simpanTeks && !latar
       ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
@@ -901,15 +899,14 @@
       (j.kutipan_kunci ? '<blockquote class="kutipan">' + esc(j.kutipan_kunci) + '</blockquote><p class="kutipan-ringkasan">' + esc(j.ringkasan) + "</p>"
         : '<p class="kutipan-ringkasan" style="padding-top:16px">Tidak ada kutipan. ' + esc(j.ringkasan) + "</p>") +
       bukti + tombolTranskrip + transkrip +
-      '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke rumah sakit.</span></div></section>";
+      '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke RS.</span></div></section>";
 
-    const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " jawaban tidak sesuai dari " + rs.terjawab + " terjawab.</span>" +
-      '<span>Status RS: <b>' + rs.status + "</b>. Perlu klarifikasi bila tidak sesuai ≥3 dan ≥10% dari terjawab.</span></div>";
+    const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai · Status <b>" + rs.status + "</b></span></div>";
     const keputusan = M.hidup ? p.keputusan : S.keputusan[id];
     const tampilPutusan = keputusan && ui.ubah !== id;
     const sarankan = '<section class="panel saran saran-kartu"><div class="saran-isi"><span class="kapital">Langkah yang disarankan</span><h3>' + saran.nama + "</h3>" +
       "<p>" + esc(p.alasan) + " " + esc(saran.akibat) + "</p>" + konteks + (tampilPutusan ? "" : aksiKeputusan(p)) +
-      '<p class="catatan-saran">Rekaman adalah bukti awal untuk klarifikasi, bukan satu-satunya dasar menolak klaim. Satu jawaban tidak mengubah status RS.</p></div>' +
+      '<p class="catatan-saran">Rekaman hanya bukti awal, bukan satu-satunya dasar menolak klaim.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div>";
