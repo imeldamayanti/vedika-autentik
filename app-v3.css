@@ -101,7 +101,13 @@
 .kepala-panggilan .kepala-aksi { margin-left: auto; }
 
 /* Layar Panggilan dan kartu bukti berbagi tata letak tiga seksi: HP, bukti di tengah, panel di kanan. */
-.panggilan-grid, .kartu-grid { display: grid; grid-template-columns: 306px minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.panggilan-grid, .kartu-grid { display: grid; gap: 16px; align-items: start; }
+.panggilan-grid { grid-template-columns: 306px minmax(0, 1fr) 380px; }
+/* Kartu bukti: HP di kiri; kanan bertumpuk, bukti di atas dan langkah yang disarankan paling bawah (lebar penuh). */
+.kartu-grid { grid-template-columns: 306px minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.kartu-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
+.kartu-grid > .kartu-tengah { grid-column: 2; grid-row: 1; }
+.kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
 .panggilan-grid .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
 .kol-kiri { display: grid; gap: 16px; min-width: 0; }
 .kol-trans { min-width: 0; }
@@ -333,11 +339,19 @@
 /* ---------- layar sedang dan kecil ---------- */
 
 @media (max-width: 1339px) {
-  .panggilan-grid, .kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
-  .panggilan-grid > .kol-ponsel, .kartu-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
-  .panggilan-grid > .kol-trans, .kartu-grid > .kartu-tengah { grid-column: 2; grid-row: 1; }
-  .panggilan-grid > .kol-kiri, .kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
+  .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr); }
+  .panggilan-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
+  .panggilan-grid > .kol-trans { grid-column: 2; grid-row: 1; }
+  .panggilan-grid > .kol-kiri { grid-column: 2; grid-row: 2; }
   .panggilan-grid .transkrip { height: 420px; }
+}
+
+/* Layar lebar: ringkasan dan kutipan berdampingan, panel saran dibagi dua (penjelasan kiri, tombol keputusan kanan). */
+@media (min-width: 1340px) {
+  .kartu-tengah { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .saran-kartu .saran-isi { display: grid; grid-template-columns: minmax(0, 1fr) 360px; column-gap: 32px; align-items: start; }
+  .saran-kartu .saran-isi > .kapital, .saran-kartu .saran-isi > h3, .saran-kartu .saran-isi > p, .saran-kartu .saran-isi > .konteks { grid-column: 1; }
+  .saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; padding-top: 0; border-top: 0; }
 }
 
 @media (max-width: 960px) {
