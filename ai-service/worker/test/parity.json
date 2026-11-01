@@ -1,0 +1,391 @@
+{
+  "engine_version": "pramana-0.5.0",
+  "reader_version": "pembaca-0.5.0",
+  "prompts": [
+    {
+      "request": {
+        "id": "CALL-P-S1-2026-08",
+        "transkrip": [
+          {
+            "detik": 0,
+            "pembicara": "ai",
+            "teks": "Berapa kali datang terapi?"
+          },
+          {
+            "detik": 6,
+            "pembicara": "penerima",
+            "teks": "Tiga kali."
+          },
+          {
+            "detik": 9,
+            "pembicara": "penerima",
+            "teks": "  "
+          }
+        ],
+        "konteks": {
+          "sesi_ditagih": 11,
+          "tanggal_libur": [
+            "2026-08-16",
+            "2026-08-17"
+          ],
+          "nama_pasien": "Andi Pratama",
+          "bulan": "2026-08"
+        }
+      },
+      "prompt": "Ekstrak percakapan konfirmasi fisioterapi berikut ke JSON sesuai skema. Jangan menebak. Gunakan null untuk jumlah yang tidak disebut. Keyakinan rendah jika penerima ragu atau tidak ingat. Kutipan harus berasal dari transkrip. Tanda bahaya hanya boleh memakai enum pada skema. status_panggilan menolak bila penerima menolak menjawab pertanyaan konfirmasi atau minta berhenti, tidak_terhubung bila tidak ada percakapan dengan penerima, selain itu terjawab. hubungan diisi anak, orang tua, atau pasangan bila penerima keluarga, selain itu null. membantah_tanggal_libur true bila penerima menyangkal terapi pada tanggal libur, false bila membenarkan, null bila tidak dibahas.\n\nPasien: Andi Pratama\nBulan layanan: 2026-08\nTanggal libur yang ditanyakan: 2026-08-16, 2026-08-17\n\nTRANSKRIP:\nai: Berapa kali datang terapi?\npenerima: Tiga kali."
+    },
+    {
+      "request": {
+        "transkrip": [
+          {
+            "detik": 1.5,
+            "pembicara": "penerima",
+            "teks": "Halo?"
+          }
+        ]
+      },
+      "prompt": "Ekstrak percakapan konfirmasi fisioterapi berikut ke JSON sesuai skema. Jangan menebak. Gunakan null untuk jumlah yang tidak disebut. Keyakinan rendah jika penerima ragu atau tidak ingat. Kutipan harus berasal dari transkrip. Tanda bahaya hanya boleh memakai enum pada skema. status_panggilan menolak bila penerima menolak menjawab pertanyaan konfirmasi atau minta berhenti, tidak_terhubung bila tidak ada percakapan dengan penerima, selain itu terjawab. hubungan diisi anak, orang tua, atau pasangan bila penerima keluarga, selain itu null. membantah_tanggal_libur true bila penerima menyangkal terapi pada tanggal libur, false bila membenarkan, null bila tidak dibahas.\n\nPasien: -\nBulan layanan: -\nTanggal libur yang ditanyakan: tidak ada\n\nTRANSKRIP:\npenerima: Halo?"
+    }
+  ],
+  "instructions": [
+    {
+      "context": {
+        "nama_penerima": "Andi Pratama",
+        "sapaan_penerima": "Bapak",
+        "hubungan": "peserta",
+        "nama_pasien": "Andi Pratama",
+        "sapaan_pasien": "Bapak",
+        "nama_rs": "RS Melati Sehat",
+        "bulan": "Agustus",
+        "tanggal_libur": [
+          "16 Agustus",
+          "17 Agustus"
+        ]
+      },
+      "instruction": "Peran: Kamu asisten otomatis BPJS Kesehatan yang menelepon untuk konfirmasi\nsingkat layanan fisioterapi.\nGunakan Bahasa Indonesia sopan, sederhana, dan santai.\n\nData panggilan:\n- Penerima: Bapak Andi Pratama (peserta)\n- Pasien: Bapak Andi Pratama\n- Rumah sakit: RS Melati Sehat\n- Bulan layanan: Agustus\n\nUrutan wajib:\nA. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, ini bukan tagihan,\ndan kamu tidak meminta NIK, OTP, rekening, atau uang.\nB. Pastikan kamu berbicara dengan penerima yang benar. Sapa Bapak Andi Pratama.\nC. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.\nD. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.\nE. Tanggal libur: tanyakan apakah pasien terapi pada tanggal libur yang perlu ditanyakan: 16 dan 17 Agustus.\nF. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi\nlayanan atau iuran.\n\nAturan bicara:\n- Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.\n- Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.\n- Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.\n- Jangan memakai kata curang atau fraud kepada penerima.\n- Jangan berdebat, menilai jawaban, atau mengatakan jawaban berbeda dari tagihan.\n\nCabang wajib:\n1. Jika bukan penerima yang benar, minta disambungkan sekali. Jika tidak bisa, tutup dengan sopan.\n2. Jika tidak ingat atau ragu, tenangkan dan tanyakan sekali dengan rentang. Jika tetap ragu, tutup.\n3. Jika khawatir penipuan, akui itu wajar. Tegaskan tidak meminta data atau uang.\nSarankan Care Center 165\natau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.\n4. Jika diminta berhenti, langsung tutup dengan sopan.\n5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.\n6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.\n7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup."
+    },
+    {
+      "context": {
+        "nama_penerima": "Dewi Rahmawati",
+        "sapaan_penerima": "Bapak/Ibu",
+        "hubungan": "anak",
+        "nama_pasien": "Siti Rahmawati",
+        "sapaan_pasien": "Ibu",
+        "nama_rs": "RS Melati Sehat",
+        "bulan": "Agustus",
+        "tanggal_libur": [
+          "23 Agustus"
+        ]
+      },
+      "instruction": "Peran: Kamu asisten otomatis BPJS Kesehatan yang menelepon untuk konfirmasi\nsingkat layanan fisioterapi.\nGunakan Bahasa Indonesia sopan, sederhana, dan santai.\n\nData panggilan:\n- Penerima: Bapak/Ibu Dewi Rahmawati (anak)\n- Pasien: Ibu Siti Rahmawati\n- Rumah sakit: RS Melati Sehat\n- Bulan layanan: Agustus\n\nUrutan wajib:\nA. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, ini bukan tagihan,\ndan kamu tidak meminta NIK, OTP, rekening, atau uang.\nB. Pastikan kamu berbicara dengan penerima yang benar. Penerima adalah keluarga (anak) pasien. Sapa sebagai keluarga Ibu Siti.\nC. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.\nD. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.\nE. Tanggal libur: tanyakan apakah pasien terapi pada tanggal libur yang perlu ditanyakan: 23 Agustus.\nF. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi\nlayanan atau iuran.\n\nAturan bicara:\n- Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.\n- Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.\n- Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.\n- Jangan memakai kata curang atau fraud kepada penerima.\n- Jangan berdebat, menilai jawaban, atau mengatakan jawaban berbeda dari tagihan.\n\nCabang wajib:\n1. Jika bukan penerima yang benar, minta disambungkan sekali. Jika tidak bisa, tutup dengan sopan.\n2. Jika tidak ingat atau ragu, tenangkan dan tanyakan sekali dengan rentang. Jika tetap ragu, tutup.\n3. Jika khawatir penipuan, akui itu wajar. Tegaskan tidak meminta data atau uang.\nSarankan Care Center 165\natau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.\n4. Jika diminta berhenti, langsung tutup dengan sopan.\n5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.\n6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.\n7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup."
+    },
+    {
+      "context": {
+        "nama_penerima": "Slamet Riyadi",
+        "sapaan_penerima": "Bapak",
+        "hubungan": "peserta",
+        "nama_pasien": "Slamet Riyadi",
+        "sapaan_pasien": "Bapak",
+        "nama_rs": "RS Kenanga Medika",
+        "bulan": "Agustus",
+        "tanggal_libur": []
+      },
+      "instruction": "Peran: Kamu asisten otomatis BPJS Kesehatan yang menelepon untuk konfirmasi\nsingkat layanan fisioterapi.\nGunakan Bahasa Indonesia sopan, sederhana, dan santai.\n\nData panggilan:\n- Penerima: Bapak Slamet Riyadi (peserta)\n- Pasien: Bapak Slamet Riyadi\n- Rumah sakit: RS Kenanga Medika\n- Bulan layanan: Agustus\n\nUrutan wajib:\nA. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, ini bukan tagihan,\ndan kamu tidak meminta NIK, OTP, rekening, atau uang.\nB. Pastikan kamu berbicara dengan penerima yang benar. Sapa Bapak Slamet Riyadi.\nC. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.\nD. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.\nE. Jangan bertanya tentang tanggal libur karena tidak ada tanggal aktif.\nF. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi\nlayanan atau iuran.\n\nAturan bicara:\n- Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.\n- Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.\n- Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.\n- Jangan memakai kata curang atau fraud kepada penerima.\n- Jangan berdebat, menilai jawaban, atau mengatakan jawaban berbeda dari tagihan.\n\nCabang wajib:\n1. Jika bukan penerima yang benar, minta disambungkan sekali. Jika tidak bisa, tutup dengan sopan.\n2. Jika tidak ingat atau ragu, tenangkan dan tanyakan sekali dengan rentang. Jika tetap ragu, tutup.\n3. Jika khawatir penipuan, akui itu wajar. Tegaskan tidak meminta data atau uang.\nSarankan Care Center 165\natau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.\n4. Jika diminta berhenti, langsung tutup dengan sopan.\n5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.\n6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.\n7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup."
+    },
+    {
+      "context": {
+        "nama_penerima": "Ani",
+        "sapaan_penerima": "Ibu",
+        "hubungan": "peserta",
+        "nama_pasien": "Ani",
+        "sapaan_pasien": "Ibu",
+        "nama_rs": "RS Cempaka Asri",
+        "bulan": "Agustus",
+        "tanggal_libur": [
+          "31 Agustus",
+          "1 September",
+          "Natal"
+        ]
+      },
+      "instruction": "Peran: Kamu asisten otomatis BPJS Kesehatan yang menelepon untuk konfirmasi\nsingkat layanan fisioterapi.\nGunakan Bahasa Indonesia sopan, sederhana, dan santai.\n\nData panggilan:\n- Penerima: Ibu Ani (peserta)\n- Pasien: Ibu Ani\n- Rumah sakit: RS Cempaka Asri\n- Bulan layanan: Agustus\n\nUrutan wajib:\nA. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, ini bukan tagihan,\ndan kamu tidak meminta NIK, OTP, rekening, atau uang.\nB. Pastikan kamu berbicara dengan penerima yang benar. Sapa Ibu Ani.\nC. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.\nD. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.\nE. Tanggal libur: tanyakan apakah pasien terapi pada tanggal libur yang perlu ditanyakan: 31 Agustus, 1 September dan Natal.\nF. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi\nlayanan atau iuran.\n\nAturan bicara:\n- Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.\n- Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.\n- Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.\n- Jangan memakai kata curang atau fraud kepada penerima.\n- Jangan berdebat, menilai jawaban, atau mengatakan jawaban berbeda dari tagihan.\n\nCabang wajib:\n1. Jika bukan penerima yang benar, minta disambungkan sekali. Jika tidak bisa, tutup dengan sopan.\n2. Jika tidak ingat atau ragu, tenangkan dan tanyakan sekali dengan rentang. Jika tetap ragu, tutup.\n3. Jika khawatir penipuan, akui itu wajar. Tegaskan tidak meminta data atau uang.\nSarankan Care Center 165\natau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.\n4. Jika diminta berhenti, langsung tutup dengan sopan.\n5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.\n6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.\n7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup."
+    }
+  ],
+  "answers": [
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": true
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "keluarga",
+        "hubungan": "orang tua",
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": true
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": null,
+        "jumlah_min": null,
+        "jumlah_maks": null,
+        "keyakinan": "rendah",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": true
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [
+          "diminta_membayar",
+          "layanan_berbeda"
+        ],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": true
+    },
+    {
+      "answer": {
+        "status_panggilan": "selesai",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": "tetangga",
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": true,
+        "jumlah_maks": true,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": -1,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 4,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": null,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": "false",
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [
+          "dugaan_umum"
+        ],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": ""
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali.",
+        "label": "Sesuai"
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "tanda_bahaya": [],
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    },
+    {
+      "answer": {
+        "status_panggilan": "terjawab",
+        "penerima": "peserta",
+        "hubungan": null,
+        "hadir": true,
+        "jumlah_min": 3,
+        "jumlah_maks": 3,
+        "keyakinan": "tinggi",
+        "membantah_tanggal_libur": true,
+        "kutipan_kunci": "Tiga kali.",
+        "ringkasan": "Peserta hadir tiga kali."
+      },
+      "valid": false
+    }
+  ]
+}

@@ -74,7 +74,26 @@ export async function runTask({ api, task, operator, converse, sleep = delay, on
   }
   await operator.telepon(task);
   await reportWhenAllowed(api, task.id, "menelepon", { sleep });
-  if (!(await operator.diangkat(task))) {
+  // The call counts as answered when the recipient's first words are heard. Lines spoken
+  // before that wait, because the backend only accepts transcript once "tersambung".
+  let answered = null;
+  let sent = Promise.resolve();
+  const early = [];
+  const send = (baris) => {
+    sent = sent
+      .then(() => api.kirimTranskrip(task.id, [baris]))
+      .catch((error) => onError?.(error));
+  };
+  const hasil = await converse(task, {
+    onAnswered: () => {
+      answered = api.lapor(task.id, "tersambung").then(() => api.lapor(task.id, "merekam"));
+      sent = answered;
+      early.splice(0).forEach(send);
+      return answered;
+    },
+    onTurn: (baris) => (answered ? send(baris) : early.push(baris)),
+  });
+  if (!hasil.answered) {
     const status = await api.lapor(task.id, "tidak_diangkat");
     if (status.chat_cadangan) {
       await operator.kirimChatCadangan(status.chat_cadangan);
@@ -82,16 +101,6 @@ export async function runTask({ api, task, operator, converse, sleep = delay, on
     }
     return status;
   }
-  await api.lapor(task.id, "tersambung");
-  let sent = Promise.resolve();
-  const hasil = await converse(task, {
-    onStarted: () => api.lapor(task.id, "merekam"),
-    onTurn: (baris) => {
-      sent = sent
-        .then(() => api.kirimTranskrip(task.id, [baris]))
-        .catch((error) => onError?.(error));
-    },
-  });
   await sent;
   return api.kirimHasil(task.id, hasil);
 }
@@ -383,7 +392,7 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
-    if (event.setupComplete && !this.ready) {
+    if (event.setupComplete && !this.ready && this.options.greetFirst !== false) {
       this.socket?.send(JSON.stringify({
         clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
       }));
@@ -399,6 +408,11 @@ export class VedikaVoiceSession {
   // Gemini streams transcription in fragments; the backend wants one line per speaking turn.
   appendFragment({ pembicara, teks }) {
     if (this.pendingTurn?.pembicara !== pembicara) this.flushTurn();
+    if (pembicara === "penerima" && !this.answered) {
+      this.answered = true;
+      this.startedAt = performance.now();
+      this.options.onAnswer?.();
+    }
     if (this.pendingTurn) {
       this.pendingTurn.teks += teks;
       return;

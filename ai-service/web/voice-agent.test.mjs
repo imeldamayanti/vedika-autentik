@@ -44,16 +44,17 @@ function fakeApi({ statusReplies = {}, failTranscript = false } = {}) {
   };
 }
 
-function fakeOperator({ answered = true } = {}) {
+function fakeOperator() {
   const steps = [];
   return {
     steps,
     kirimWa: async (task) => steps.push(["kirimWa", task.wa.tautan]),
     telepon: async (task) => steps.push(["telepon", task.no_tujuan]),
-    diangkat: async () => { steps.push(["diangkat"]); return answered; },
     kirimChatCadangan: async (chat) => steps.push(["kirimChatCadangan", chat.tautan]),
   };
 }
+
+const unanswered = async () => ({ answered: false, transkrip: [], rekaman: null, durasi: 0 });
 
 test("createAgentApi sends the agent key, JSON reports, and treats 204 as no task", async () => {
   const calls = [];
@@ -175,57 +176,56 @@ test("reportWhenAllowed retries each second only while the WA delay has not pass
   );
 });
 
-test("runTask reports an answered first attempt in contract order and uploads the result", async () => {
+test("runTask detects the answer from speech and reports in contract order", async () => {
   const api = fakeApi();
   const operator = fakeOperator();
-  const hasil = { transkrip: [], rekaman: new Blob(["audio"]), durasi: 90 };
+  const hasil = { answered: true, transkrip: [], rekaman: new Blob(["audio"]), durasi: 90 };
 
   const reply = await runTask({
     api,
     task: TASK,
     operator,
-    converse: async (task, { onStarted, onTurn }) => {
+    converse: async (task, { onAnswered, onTurn }) => {
       assert.equal(task, TASK);
-      await onStarted();
       onTurn({ detik: 0, pembicara: "ai", teks: "Selamat siang." });
-      onTurn({ detik: 4, pembicara: "penerima", teks: "Iya." });
+      await onAnswered();
+      onTurn({ detik: 0, pembicara: "penerima", teks: "Halo?" });
       return hasil;
     },
   });
 
   assert.deepEqual(reply, { status: "membaca_jawaban" });
-  assert.deepEqual(operator.steps.map(([name]) => name), ["kirimWa", "telepon", "diangkat"]);
+  assert.deepEqual(operator.steps.map(([name]) => name), ["kirimWa", "telepon"]);
   assert.deepEqual(api.calls, [
     ["lapor", TASK.id, "wa_terkirim"],
     ["lapor", TASK.id, "menelepon"],
     ["lapor", TASK.id, "tersambung"],
     ["lapor", TASK.id, "merekam"],
     ["transkrip", TASK.id, [{ detik: 0, pembicara: "ai", teks: "Selamat siang." }]],
-    ["transkrip", TASK.id, [{ detik: 4, pembicara: "penerima", teks: "Iya." }]],
+    ["transkrip", TASK.id, [{ detik: 0, pembicara: "penerima", teks: "Halo?" }]],
     ["hasil", TASK.id, hasil],
   ]);
 });
 
-test("runTask skips WA on the second attempt and sends the fallback chat when unanswered", async () => {
+test("runTask skips WA on the second attempt and sends the fallback chat when nobody speaks", async () => {
   const chat = { teks: "Kami belum berhasil menelepon.", tautan: "https://wa.me/62812?text=Kami" };
   const api = fakeApi({
     statusReplies: {
       tidak_diangkat: { status: "tidak_terhubung", percobaan: 2, chat_cadangan: chat },
     },
   });
-  const operator = fakeOperator({ answered: false });
+  const operator = fakeOperator();
 
   const reply = await runTask({
     api,
     task: { ...TASK, percobaan: 2, wa: { ...TASK.wa, lewati: true } },
     operator,
-    converse: async () => assert.fail("unanswered calls never start the voice agent"),
+    converse: unanswered,
   });
 
   assert.equal(reply.status, "tidak_terhubung");
   assert.deepEqual(operator.steps, [
     ["telepon", TASK.no_tujuan],
-    ["diangkat"],
     ["kirimChatCadangan", chat.tautan],
   ]);
   assert.deepEqual(api.calls.map(([, , laporan]) => laporan), [
@@ -239,12 +239,13 @@ test("runTask returns a first-attempt no-answer to the queue without a fallback 
   const api = fakeApi({
     statusReplies: { tidak_diangkat: { status: "antre", percobaan: 1, chat_cadangan: null } },
   });
-  const operator = fakeOperator({ answered: false });
+  const operator = fakeOperator();
 
-  const reply = await runTask({ api, task: TASK, operator, converse: async () => ({}) });
+  const reply = await runTask({ api, task: TASK, operator, converse: unanswered });
 
   assert.equal(reply.status, "antre");
   assert.equal(operator.steps.some(([name]) => name === "kirimChatCadangan"), false);
+  assert.equal(api.calls.some(([kind]) => kind === "transkrip" || kind === "hasil"), false);
 });
 
 test("runTask still uploads the result when a live transcript line is rejected", async () => {
@@ -256,14 +257,40 @@ test("runTask still uploads the result when a live transcript line is rejected",
     task: TASK,
     operator: fakeOperator(),
     onError: (error) => errors.push(error.message),
-    converse: async (_task, { onTurn }) => {
-      onTurn({ detik: 0, pembicara: "ai", teks: "Halo." });
-      return { transkrip: [], rekaman: null, durasi: 3 };
+    converse: async (_task, { onAnswered, onTurn }) => {
+      await onAnswered();
+      onTurn({ detik: 0, pembicara: "penerima", teks: "Halo." });
+      return { answered: true, transkrip: [], rekaman: null, durasi: 3 };
     },
   });
 
   assert.deepEqual(errors, ["bukan_berlangsung"]);
   assert.equal(api.calls.at(-1)[0], "hasil");
+});
+
+test("session treats the recipient's first words as the answer and restarts the clock", async () => {
+  const answers = [];
+  const lines = [];
+  const session = new VedikaVoiceSession({
+    greetFirst: false,
+    onAnswer: () => answers.push(session.startedAt),
+    onTranscript: (turn) => lines.push(turn),
+  });
+  const sent = [];
+  session.socket = { send: (m) => sent.push(m) };
+  session.startedAt = performance.now() - 20_000;
+  const frame = (content) => JSON.stringify({ serverContent: content });
+
+  await session.handleMessage(JSON.stringify({ setupComplete: {} }));
+  await session.handleMessage(frame({ outputTranscription: { text: "Halo, saya asisten." } }));
+  await session.handleMessage(frame({ inputTranscription: { text: "Halo?" } }));
+  await session.handleMessage(frame({ inputTranscription: { text: " Iya." } }));
+
+  assert.equal(sent.length, 0);
+  assert.equal(answers.length, 1);
+  assert.equal(lines.at(-1).detik, 20);
+  await session.stop();
+  assert.deepEqual(lines.at(-1), { detik: 0, pembicara: "penerima", teks: "Halo? Iya." });
 });
 
 test("session joins streamed fragments into one line per speaking turn", async () => {
@@ -281,11 +308,11 @@ test("session joins streamed fragments into one line per speaking turn", async (
 
   assert.deepEqual(lines, [
     { detik: 45, pembicara: "ai", teks: "Berapa kali?" },
-    { detik: 45, pembicara: "penerima", teks: "Tiga kali." },
-    { detik: 45, pembicara: "ai", teks: "Baik." },
+    { detik: 0, pembicara: "penerima", teks: "Tiga kali." },
+    { detik: 0, pembicara: "ai", teks: "Baik." },
   ]);
   assert.deepEqual(result.transkrip, lines);
-  assert.ok(result.durasi >= 45 && result.durasi <= 47);
+  assert.ok(result.durasi <= 1);
 });
 
 test("float32ToPcm16 clamps and converts little-endian samples", () => {

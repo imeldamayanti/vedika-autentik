@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "vedika-ai",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-15",
+  // The agent page at /voice/ (copied from ../web by `bun run build`).
+  "assets": { "directory": "./public" },
+  "vars": {
+    "GEMINI_TEXT_MODEL": "gemini-3.5-flash-lite",
+    "GEMINI_LIVE_MODEL": "gemini-3.8-live"
+  },
+  // Secrets, set with `wrangler secret put`: GEMINI_API_KEY, AI_SERVICE_KEY.
+  "observability": { "enabled": true }
+}
