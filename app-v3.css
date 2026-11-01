@@ -103,7 +103,7 @@
 /* Layar Panggilan dan kartu bukti berbagi tata letak tiga seksi: HP, bukti di tengah, panel di kanan. */
 .panggilan-grid, .kartu-grid { display: grid; gap: 16px; align-items: start; }
 .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr) 380px; }
-/* Kartu bukti: HP di kiri; kanan tiga seksi bertumpuk: ringkasan + langkah disarankan, kutipan kunci, transkrip. */
+/* Kartu bukti: HP di kiri; kanan tiga baris bertumpuk: ringkasan tagihan, kutipan kunci + transkrip, langkah yang disarankan. */
 .kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
 .panggilan-grid .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
 .kol-kiri { display: grid; gap: 16px; min-width: 0; }
@@ -226,8 +226,6 @@
 
 /* Kartu bukti memakai bingkai HP yang sama dengan layar Panggilan: HP di kiri, bukti di kanan. */
 .kartu-kanan { display: grid; gap: 16px; min-width: 0; }
-.kartu-atas { display: grid; gap: 16px; align-items: start; min-width: 0; }
-.kartu-atas > * { min-width: 0; }
 .pemutar.pemutar--ponsel { width: min(300px, 100%); padding: 0; border-top: 0; }
 .ringkasan-tagihan { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 14px; }
 .angka-tiga { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -351,9 +349,11 @@
 }
 
 /* Layar lebar: ringkasan dan kutipan berdampingan, panel saran dibagi dua (penjelasan kiri, tombol keputusan kanan). */
-/* Layar lebar: ringkasan tagihan dan langkah yang disarankan berdampingan di seksi atas. */
+/* Layar lebar: panel saran dibagi dua, penjelasan di kiri dan tombol keputusan di kanan. */
 @media (min-width: 1340px) {
-  .kartu-atas { grid-template-columns: minmax(0, 1fr) 380px; }
+  .saran-kartu .saran-isi { display: grid; grid-template-columns: minmax(0, 1fr) 360px; column-gap: 32px; align-items: start; }
+  .saran-kartu .saran-isi > .kapital, .saran-kartu .saran-isi > h3, .saran-kartu .saran-isi > p, .saran-kartu .saran-isi > .konteks { grid-column: 1; }
+  .saran-kartu .saran-isi > .saran-tombol, .saran-kartu .saran-isi > .pilihan-lain { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; padding-top: 0; border-top: 0; }
 }
 
 @media (max-width: 960px) {

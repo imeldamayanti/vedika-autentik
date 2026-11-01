@@ -980,7 +980,7 @@
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan"><div class="kartu-atas">' + ringkasan + sarankan + "</div>" + kutipan + "</div></div>";
+      '<div class="kartu-kanan">' + ringkasan + kutipan + sarankan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
