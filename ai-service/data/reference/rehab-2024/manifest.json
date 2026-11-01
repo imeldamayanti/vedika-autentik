@@ -1,0 +1,42 @@
+{
+  "generator_version": "0.1.0",
+  "outputs": [
+    {
+      "filename": "summary.json",
+      "sha256": "242caa25bc070ceca717451325474230d3d66111fe6b5fb692ea29621730f97a",
+      "size_bytes": 1597
+    },
+    {
+      "filename": "diagnoses.csv",
+      "sha256": "323b05588ee64bd1ac9ba2a8c521d73bff37b3136e5ff80ea472b375a61c2fd6",
+      "size_bytes": 4748
+    },
+    {
+      "filename": "procedures.csv",
+      "sha256": "343645264d51c9438bcd9ff7914039deef4d6e0878779f5a3f2c797837b8a859",
+      "size_bytes": 7412
+    },
+    {
+      "filename": "data-dictionary.json",
+      "sha256": "2dfd141160593508ee044202d3ce2816ed55d2c732576d0a8e18a1bd61d3dd77",
+      "size_bytes": 1770
+    }
+  ],
+  "parameters": {
+    "chunk_size": 200000,
+    "minimum_category_count": 10,
+    "year": 2024
+  },
+  "privacy": {
+    "minimum_category_count": 10,
+    "participant_identifiers_exported": false,
+    "row_level_records_exported": false,
+    "visit_identifiers_exported": false
+  },
+  "schema_version": "1.0",
+  "source": {
+    "filename": "202403_fkrtl.dta",
+    "sha256": "a806f7057957269b39bc82a962f7f0b2cfde300b5fa0768d09e2325a0e625f74",
+    "size_bytes": 629010868
+  }
+}

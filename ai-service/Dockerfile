@@ -18,6 +18,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 COPY src src
 COPY templates templates
+COPY web web
 RUN uv sync --frozen --no-dev
 
 EXPOSE 8001

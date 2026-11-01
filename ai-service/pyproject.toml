@@ -24,6 +24,10 @@ dev = [
     "pytest>=8,<10",
     "ruff>=0.12,<1",
 ]
+data = [
+    "pandas>=2.2,<3",
+    "pyreadstat>=1.2,<2",
+]
 
 [build-system]
 requires = ["hatchling>=1.27"]
@@ -32,9 +36,15 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/vedika_ai"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"web" = "vedika_ai/web"
+
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+markers = [
+    "live_gemini: opt-in tests that call the configured Gemini provider",
+]
 
 [tool.ruff]
 line-length = 100

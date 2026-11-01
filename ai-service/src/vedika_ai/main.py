@@ -12,12 +12,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from pydantic import ValidationError
 
 from . import config
+from .answer_reader import AnswerReader, AnswerResponse, ReadAnswerRequest
 from .errors import ServiceError
+from .gemini import GeminiError, GeminiTransport
+from .indicators import IndicatorRequest, IndicatorResult, calculate_indicators
 from .pipeline import AnalysisPipeline
 from .schemas import (
     AnalysisResponse,
@@ -26,6 +30,7 @@ from .schemas import (
     ErrorResponse,
     HealthResponse,
 )
+from .voice import GeminiTokenIssuer, VoiceContext, VoiceTokenResponse
 
 
 def configure_logging() -> None:
@@ -51,6 +56,34 @@ app = FastAPI(
 @lru_cache(maxsize=1)
 def get_pipeline() -> AnalysisPipeline:
     return AnalysisPipeline()
+
+
+@lru_cache(maxsize=1)
+def get_answer_reader() -> AnswerReader:
+    api_key = config.gemini_api_key()
+    if not api_key:
+        raise ServiceError(
+            503,
+            "gemini_tidak_dikonfigurasi",
+            "Pembaca jawaban belum dikonfigurasi.",
+        )
+    return AnswerReader(
+        GeminiTransport(
+            api_key, config.gemini_text_model(), timeout=config.READER_TIMEOUT_SECONDS
+        )
+    )
+
+
+@lru_cache(maxsize=1)
+def get_token_issuer() -> GeminiTokenIssuer:
+    api_key = config.gemini_api_key()
+    if not api_key:
+        raise ServiceError(
+            503,
+            "gemini_tidak_dikonfigurasi",
+            "Agen suara belum dikonfigurasi.",
+        )
+    return GeminiTokenIssuer(api_key, config.gemini_live_model())
 
 
 @app.exception_handler(ServiceError)
@@ -98,7 +131,7 @@ def require_service_key(
 ) -> None:
     expected = config.service_key()
     if expected and (supplied is None or not secrets.compare_digest(supplied, expected)):
-        raise ServiceError(401, "kunci_layanan_tidak_valid", "Kunci layanan tidak valid.")
+        raise ServiceError(401, "kunci_salah", "Header X-Kunci-Layanan kosong atau salah.")
 
 
 router = APIRouter(prefix="/v1", dependencies=[Depends(require_service_key)])
@@ -134,6 +167,39 @@ def health(pipeline: Annotated[AnalysisPipeline, Depends(get_pipeline)]) -> Heal
         model=pipeline.models,
         siap_analisis=pipeline.ready,
     )
+
+
+@router.post("/indikator", response_model=IndicatorResult)
+def indicators(request: IndicatorRequest) -> IndicatorResult:
+    return calculate_indicators(request)
+
+
+@router.post(
+    "/baca",
+    response_model=AnswerResponse,
+    responses={
+        422: {"model": ErrorResponse},
+        502: {"model": ErrorResponse},
+        504: {"model": ErrorResponse},
+    },
+)
+def read_answer(
+    request: ReadAnswerRequest,
+    reader: Annotated[AnswerReader, Depends(get_answer_reader)],
+) -> AnswerResponse:
+    answer = reader.read(request)
+    return AnswerResponse(**answer.model_dump(), versi_pembaca=config.READER_VERSION)
+
+
+@router.post("/suara/token", response_model=VoiceTokenResponse)
+def voice_token(
+    context: VoiceContext,
+    issuer: Annotated[GeminiTokenIssuer, Depends(get_token_issuer)],
+) -> VoiceTokenResponse:
+    try:
+        return issuer.issue(context)
+    except GeminiError as error:
+        raise ServiceError(503, error.code, "Koneksi agen suara belum tersedia.") from error
 
 
 @router.post(
@@ -188,3 +254,15 @@ async def compare(
 
 
 app.include_router(router)
+
+PACKAGE_WEB_DIR = Path(__file__).resolve().parent / "web"
+SOURCE_WEB_DIR = Path(__file__).resolve().parents[2] / "web"
+WEB_DIR = PACKAGE_WEB_DIR if PACKAGE_WEB_DIR.is_dir() else SOURCE_WEB_DIR
+
+
+@app.get("/voice/", include_in_schema=False)
+def voice_console() -> FileResponse:
+    return FileResponse(WEB_DIR / "voice-console.html")
+
+
+app.mount("/voice", StaticFiles(directory=WEB_DIR), name="voice-assets")

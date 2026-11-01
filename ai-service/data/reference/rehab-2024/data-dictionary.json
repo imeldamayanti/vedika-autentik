@@ -1,0 +1,60 @@
+{
+  "columns": [
+    {
+      "description": "Nomor peserta",
+      "exported_row_level": false,
+      "source": "PSTV01",
+      "use": "Transient unique participant and participant-month counts"
+    },
+    {
+      "description": "Tanggal datang kunjungan FKRTL",
+      "exported_row_level": false,
+      "source": "FKL03",
+      "use": "Service date and month aggregates"
+    },
+    {
+      "description": "Tingkat Pelayanan FKRTL",
+      "exported_row_level": false,
+      "source": "FKL10",
+      "use": "Outpatient filter"
+    },
+    {
+      "description": "Jenis Poli FKRTL",
+      "exported_row_level": false,
+      "source": "FKL11",
+      "use": "FIS/IRM clinic filter resolved from Stata value labels"
+    },
+    {
+      "description": "Kode ICD 10 diagnosis primer FKRTL (3-6digit)",
+      "exported_row_level": false,
+      "source": "FKL18",
+      "use": "Aggregate ICD-10 frequency"
+    },
+    {
+      "description": "Nama diagnosis primer FKRTL (3-6digit)",
+      "exported_row_level": false,
+      "source": "FKL18A",
+      "use": "Physiotherapy filter and aggregate diagnosis frequency"
+    },
+    {
+      "description": "Jenis prosedur",
+      "exported_row_level": false,
+      "source": "FKL30",
+      "use": "Physiotherapy filter and aggregate procedure frequency"
+    },
+    {
+      "description": "Biaya Tagih - oleh fasilitas kesehatan (provider)",
+      "exported_row_level": false,
+      "source": "FKL47",
+      "use": "Aggregate billed-cost statistics"
+    },
+    {
+      "description": "Biaya Verifikasi - BPJS Kesehatan setelah dilakukan verifikasi",
+      "exported_row_level": false,
+      "source": "FKL48",
+      "use": "Aggregate verified-cost statistics"
+    }
+  ],
+  "schema_version": "1.0",
+  "source_table": "FKRTL regular sample"
+}
