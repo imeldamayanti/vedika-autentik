@@ -205,6 +205,11 @@
 .tanda-bahaya b { display: block; font-size: 13.5px; }
 .tanda-bahaya p { margin-top: 2px; font-size: 13px; color: var(--fg-2); }
 
+/* Kartu bukti memakai bingkai HP yang sama dengan layar Panggilan: HP di kiri, bukti di kanan. */
+.kartu-grid { display: grid; grid-template-columns: 316px minmax(0, 1fr); gap: 16px; align-items: start; }
+.kartu-kanan { min-width: 0; }
+.pemutar.pemutar--ponsel { width: min(300px, 100%); padding: 0; border-top: 0; }
+@media (min-width: 1281px) { .kartu-kanan .bukti-bawah { grid-template-columns: minmax(0, 1fr) 320px; } }
 .tiga-kartu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
 .tiga-kartu > section { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 18px; }
 .tiga-kartu .kapital { display: block; margin-bottom: 6px; }
@@ -309,10 +314,12 @@
 
 @media (max-width: 1280px) {
   .panggilan-grid { grid-template-columns: minmax(0, 1fr) 316px; }
-  .kol-kiri { grid-column: 1; grid-row: 1; }
-  .kol-ponsel { grid-column: 2; grid-row: 1; }
-  .kol-trans { grid-column: 1 / -1; grid-row: 2; }
+  .panggilan-grid > .kol-kiri { grid-column: 1; grid-row: 1; }
+  .panggilan-grid > .kol-ponsel { grid-column: 2; grid-row: 1; }
+  .panggilan-grid > .kol-trans { grid-column: 1 / -1; grid-row: 2; }
   .panggilan-grid .transkrip { height: 420px; }
+  .kartu-grid { grid-template-columns: minmax(0, 1fr); }
+  .kartu-grid > .kol-ponsel { order: 2; }
 }
 
 @media (max-width: 1180px) {
@@ -327,7 +334,7 @@
   .antrean-atas .kartu-angka b { font-size: 24px; }
   .antrean-atas .kartu-angka span { margin-top: 4px; }
   .panggilan-grid { grid-template-columns: 1fr; }
-  .kol-kiri, .kol-ponsel, .kol-trans { grid-column: auto; grid-row: auto; }
+  .panggilan-grid > .kol-kiri, .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans { grid-column: auto; grid-row: auto; }
   .kol-ponsel { order: 1; }
   .kol-trans { order: 2; }
   .kol-kiri { order: 3; }

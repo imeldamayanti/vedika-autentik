@@ -650,11 +650,13 @@
   }
 
   /* Mockup layar telepon penerima. Pemanggil hanya nomor tim (Simulasi), bukan nama atau logo BPJS. */
-  function htmlPonsel(p, t) {
-    const k = keadaanPonsel(p, t);
+  /* kartu: pakai bingkai yang sama di kartu bukti, layar menampilkan hasil akhir panggilan; tambahan: html di bawah keterangan. */
+  function htmlPonsel(p, t, kartu, tambahan) {
+    const tak = p.label === "tidak_terhubung";
+    const k = kartu ? { mode: tak ? "tak" : "akhir", teks: tak ? "Tidak diangkat" : "Panggilan berakhir" } : keadaanPonsel(p, t);
     const nomor = M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
-    const jam = M.hidup ? A3.jamTeks(M.waktuServer) : formatJam(menitPanggilan(p.id));
-    const detik = Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
+    const jam = kartu ? waktuPanggilan(p).split(", ").pop() : M.hidup ? A3.jamTeks(M.waktuServer) : formatJam(menitPanggilan(p.id));
+    const detik = kartu ? 0 : Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
     const baris = k.mode === "aktif" ? '<span class="durasi-ponsel">' + mmss(detik) + "</span>"
       : k.mode === "akhir" && p.durasi != null ? "Durasi " + mmss(p.durasi) : "";
     const bulat = (kelas, nama, isi) => '<span class="tombol-telp ' + kelas + '">' + isi + "<small>" + nama + "</small></span>";
@@ -668,7 +670,7 @@
         '<p class="telp-status">' + k.teks + '</p><p class="telp-durasi">' + baris + "</p>" +
         '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>' +
       bawah + "</div></div>" +
-      '<p class="ponsel-ket">Layar HP penerima: <b>' + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</b></p></div>";
+      '<p class="ponsel-ket">Layar HP penerima: <b>' + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</b></p>" + (tambahan || "") + "</div>";
   }
 
   function isiPanggilan(p, t) {
@@ -886,9 +888,9 @@
       '<section class="' + rk.gaya + '"><span class="kapital">Selisih</span><div class="besar">' + rk.selisih + (rk.selisih === "–" ? "" : "<small>sesi</small>") + '</div><p class="ket">' + esc(rk.selisihKet) + "</p></section>" +
     "</div>";
 
-    let bukti;
+    let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Riwayat latar sebelum demo: rekaman dan transkrip tidak tersedia di simulasi.</p>';
-    else if (p.rekaman) bukti = '<div class="pemutar"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>';
+    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Rekaman simulasi, suara buatan (ElevenLabs).</small></div>'; }
     else bukti = '<p class="tanpa-rekaman">Tidak ada rekaman atau transkrip yang disimpan untuk label ' + D.LABEL[p.label].nama + ". Hanya status dan hasil terstruktur.</p>";
     const tombolTranskrip = simpanTeks && !latar
       ? '<div class="tombol-transkrip"><button class="btn btn--kecil" type="button" data-aksi="transkrip" aria-expanded="' + ui.transkripBuka + '">' + ikon("berkas") + (ui.transkripBuka ? "Sembunyikan transkrip lengkap" : "Transkrip lengkap") + "</button></div>" : "";
@@ -909,7 +911,8 @@
       '<p class="catatan-saran">Rekaman hanya bukti awal, bukan satu-satunya dasar menolak klaim.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
-    return kop + peringatan + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div>";
+    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
+      '<div class="kartu-kanan">' + tiga + '<div class="bukti-bawah">' + kutipan + "<div>" + sarankan + "</div></div></div></div>";
   }
   /* ============================================================ ringkasan RS */
 
