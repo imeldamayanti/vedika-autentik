@@ -502,11 +502,13 @@ describe the 17 synthetic fixtures only and are not a real-world accuracy claim.
 
 ## References
 
-- Product requirements: [`../PRD_Vedika_Autentik_PRAMANA.md`](../PRD_Vedika_Autentik_PRAMANA.md)
+- Proposal master document: [`proposal-master.md`](proposal-master.md)
+- Product requirements: [`../ai-service/PRD_Vedika_Autentik_PRAMANA.md`](../ai-service/PRD_Vedika_Autentik_PRAMANA.md)
 - API contract: [`api-contract.md`](api-contract.md)
 - Backend plan: [`rencana-be.md`](rencana-be.md)
 - Dataset guide: [`../dataset/README.md`](../dataset/README.md)
 - Real-data validation protocol: [`ai-validation-protocol.md`](ai-validation-protocol.md)
+- Advanced multimodal plan: [`ai-advanced-plan.md`](ai-advanced-plan.md)
 - PaddleOCR PP-OCRv5: <https://www.paddleocr.ai/main/en/version3.x/algorithm/PP-OCRv5/PP-OCRv5.html>
 - Tesseract OCR: <https://github.com/tesseract-ocr/tesseract>
 - pypdfium2: <https://pypdfium2.readthedocs.io/en/stable/readme.html>

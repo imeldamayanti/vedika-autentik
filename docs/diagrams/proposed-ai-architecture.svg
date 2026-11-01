@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1130" viewBox="0 0 1800 1130">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L9,5 L0,10" fill="#19394d"/></marker></defs>
+<rect width="1800" height="1130" fill="#fff"/>
+<style>text{font-family:Arial,sans-serif;fill:#123047}.title{font-size:32px;font-weight:700}.head{font-size:22px;font-weight:700}.body{font-size:18px}.small{font-size:16px}.edge{fill:none;stroke:#19394d;stroke-width:2.5;marker-end:url(#arrow)}</style>
+<text x="900" y="49" class="title" text-anchor="middle">VEDIKA AUTENTIK — PROPOSED AI ARCHITECTURE</text>
+<text x="900" y="81" class="body" text-anchor="middle">Target design • Model candidates require validation</text>
+<rect x="100" y="115" width="270" height="88" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="235.0" y="144" class="head" text-anchor="middle">Dokumen klaim</text>
+<text x="235.0" y="170" class="body" text-anchor="middle">PDF / JPG / PNG</text>
+<rect x="430" y="115" width="270" height="88" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="565.0" y="144" class="head" text-anchor="middle">FastAPI + worker</text>
+<text x="565.0" y="170" class="body" text-anchor="middle">Antrean pemrosesan</text>
+<rect x="760" y="115" width="320" height="88" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="920.0" y="144" class="head" text-anchor="middle">PDFium / image decoder</text>
+<text x="920.0" y="170" class="body" text-anchor="middle">PDF → halaman; JPG/PNG → gambar</text>
+<rect x="1140" y="115" width="350" height="88" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1315.0" y="144" class="head" text-anchor="middle">OpenCV</text>
+<text x="1315.0" y="170" class="body" text-anchor="middle">Normalisasi + quality gate</text>
+<polyline class="edge" points="370,159 430,159"/>
+<polyline class="edge" points="700,159 760,159"/>
+<text x="730" y="105" class="small" text-anchor="middle">Bytes dokumen</text>
+<polyline class="edge" points="1080,159 1140,159"/>
+<rect x="1540" y="115" width="220" height="88" rx="8" fill="#fff1ed" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1650.0" y="144" class="head" text-anchor="middle">Scan ulang</text>
+<text x="1650.0" y="170" class="body" text-anchor="middle">Status ke backend</text>
+<polyline class="edge" points="1490,159 1540,159"/>
+<text x="1515" y="140" class="small" text-anchor="middle">Buruk</text>
+<rect x="100" y="270" width="1500" height="485" rx="10" fill="#f8fbff" stroke="#7794ae" stroke-width="2"/>
+<text x="850" y="307" class="head" text-anchor="middle">AI SERVICE — PEMERIKSAAN PARALEL</text>
+<polyline class="edge" points="1300,203 1300,248 140,248 140,329"/>
+<text x="720" y="237" class="small" text-anchor="middle">Scan layak: gambar halaman normalisasi</text>
+<line x1="160" y1="432" x2="1570" y2="432" stroke="#d7e2ea"/>
+<line x1="160" y1="532" x2="1570" y2="532" stroke="#d7e2ea"/>
+<line x1="160" y1="632" x2="1570" y2="632" stroke="#d7e2ea"/>
+<line x1="160" y1="732" x2="1570" y2="732" stroke="#d7e2ea"/>
+<rect x="180" y="350" width="280" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="320.0" y="379" class="head" text-anchor="middle">Input ekstraksi</text>
+<text x="320.0" y="405" class="body" text-anchor="middle">Gambar halaman + data klaim</text>
+<rect x="520" y="350" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="750.0" y="379" class="head" text-anchor="middle">PaddleOCR + Qwen3-VL-8B-Instruct</text>
+<text x="750.0" y="405" class="body" text-anchor="middle">Qwen: gambar + teks / koordinat OCR</text>
+<rect x="1040" y="350" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1270.0" y="379" class="head" text-anchor="middle">Kecocokan dokumen–klaim</text>
+<text x="1270.0" y="405" class="body" text-anchor="middle">Ekstraksi field → validasi isi</text>
+<rect x="180" y="450" width="280" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="320.0" y="479" class="head" text-anchor="middle">Input manipulasi</text>
+<text x="320.0" y="505" class="body" text-anchor="middle">Gambar halaman normalisasi</text>
+<rect x="520" y="450" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="750.0" y="479" class="head" text-anchor="middle">Mesorch</text>
+<text x="750.0" y="505" class="body" text-anchor="middle">Lokalisasi dugaan suntingan</text>
+<rect x="1040" y="450" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1270.0" y="479" class="head" text-anchor="middle">Bukti suntingan</text>
+<text x="1270.0" y="505" class="body" text-anchor="middle">Region dugaan edit + reliabilitas</text>
+<rect x="180" y="550" width="280" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="320.0" y="579" class="head" text-anchor="middle">Fingerprint</text>
+<text x="320.0" y="605" class="body" text-anchor="middle">Mask identitas/tanggal → pHash64</text>
+<rect x="520" y="550" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="750.0" y="579" class="head" text-anchor="middle">Lookup arsip (backend)</text>
+<text x="750.0" y="605" class="body" text-anchor="middle">Cari kandidat di PostgreSQL</text>
+<rect x="1040" y="550" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1270.0" y="579" class="head" text-anchor="middle">Perbandingan pasangan (AI)</text>
+<text x="1270.0" y="605" class="body" text-anchor="middle">Konfirmasi reuse + region bersama</text>
+<rect x="180" y="650" width="280" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="320.0" y="679" class="head" text-anchor="middle">Input anomali</text>
+<text x="320.0" y="705" class="body" text-anchor="middle">Data klaim + histori dari backend</text>
+<rect x="520" y="650" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="750.0" y="679" class="head" text-anchor="middle">Isolation Forest</text>
+<text x="750.0" y="705" class="body" text-anchor="middle">Fitur klaim terstruktur</text>
+<rect x="1040" y="650" width="460" height="75" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1270.0" y="679" class="head" text-anchor="middle">Bukti anomali</text>
+<text x="1270.0" y="705" class="body" text-anchor="middle">Skor + fitur yang tidak wajar</text>
+<polyline class="edge" points="460,388 520,388"/>
+<polyline class="edge" points="980,388 1040,388"/>
+<polyline class="edge" points="460,488 520,488"/>
+<polyline class="edge" points="980,488 1040,488"/>
+<polyline class="edge" points="460,588 520,588"/>
+<polyline class="edge" points="980,588 1040,588"/>
+<polyline class="edge" points="460,688 520,688"/>
+<polyline class="edge" points="980,688 1040,688"/>
+<polyline points="1500,388 1560,388" fill="none" stroke="#19394d" stroke-width="2.5"/>
+<polyline points="1500,488 1560,488" fill="none" stroke="#19394d" stroke-width="2.5"/>
+<polyline points="1500,588 1560,588" fill="none" stroke="#19394d" stroke-width="2.5"/>
+<polyline points="1500,688 1560,688" fill="none" stroke="#19394d" stroke-width="2.5"/>
+<line x1="1560" y1="388" x2="1560" y2="785" stroke="#19394d" stroke-width="2.5"/>
+<rect x="520" y="785" width="980" height="80" rx="8" fill="#f1eaff" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1010.0" y="814" class="head" text-anchor="middle">Evidence assembly</text>
+<text x="1010.0" y="840" class="body" text-anchor="middle">Temuan + region + kekuatan + alasan</text>
+<polyline class="edge" points="1560,785 1560,825 1500,825"/>
+<rect x="100" y="905" width="400" height="88" rx="8" fill="#e7f6f4" stroke="#509b9b" stroke-width="1.5"/>
+<text x="300.0" y="934" class="head" text-anchor="middle">Backend: aturan label</text>
+<text x="300.0" y="960" class="body" text-anchor="middle">Lolos • Scan ulang • Perlu dicek • Prioritas</text>
+<rect x="560" y="905" width="310" height="88" rx="8" fill="#f1eaff" stroke="#509b9b" stroke-width="1.5"/>
+<text x="715.0" y="934" class="head" text-anchor="middle">Kartu bukti + label</text>
+<text x="715.0" y="960" class="body" text-anchor="middle">Bukti untuk peninjauan</text>
+<rect x="930" y="905" width="270" height="88" rx="8" fill="#f1eaff" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1065.0" y="934" class="head" text-anchor="middle">Verifikator</text>
+<text x="1065.0" y="960" class="body" text-anchor="middle">Periksa bukti + alasan</text>
+<rect x="1260" y="905" width="340" height="88" rx="8" fill="#f1eaff" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1430.0" y="934" class="head" text-anchor="middle">Keputusan akhir</text>
+<text x="1430.0" y="960" class="body" text-anchor="middle">Tindakan + alasan reviewer</text>
+<polyline class="edge" points="520,825 300,825 300,905"/>
+<text x="380" y="810" class="small" text-anchor="middle">Bukti terstruktur</text>
+<polyline class="edge" points="500,949 560,949"/>
+<polyline class="edge" points="870,949 930,949"/>
+<polyline class="edge" points="1200,949 1260,949"/>
+<polyline class="edge" points="1650,203 1740,203 1740,1020 70,1020 70,949 100,949"/>
+<text x="1660" y="1010" class="small" text-anchor="middle">Status scan ulang</text>
+<rect x="480" y="1045" width="1050" height="55" rx="8" fill="#eaf1f8" stroke="#509b9b" stroke-width="1.5"/>
+<text x="1005.0" y="1074" class="head" text-anchor="middle">Storage: Supabase Storage (planned) + PostgreSQL</text>
+<polyline class="edge" points="1430,993 1430,1045"/>
+<text x="1555" y="1034" class="small" text-anchor="middle">Simpan keputusan</text>
+<text x="900" y="1121" class="small" text-anchor="middle">AI menghasilkan bukti; backend menghitung label; verifikator mengambil keputusan.</text>
+</svg>
