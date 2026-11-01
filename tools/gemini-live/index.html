@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gemini Live: contoh panggilan Arunika</title>
+<style>
+  :root { --latar:#f6f7f9; --kartu:#fff; --teks:#1b2430; --redup:#667085; --garis:#e3e7ee; --aksen:#0a7d5c; --bahaya:#b42318; --ai:#eaf6f1; --peserta:#eef1f8; }
+  @media (prefers-color-scheme: dark) { :root { --latar:#12161c; --kartu:#1a2029; --teks:#e8ecf2; --redup:#98a2b3; --garis:#2a3340; --aksen:#3ccf9c; --bahaya:#f97066; --ai:#17302a; --peserta:#222a38; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--latar); color:var(--teks); font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  p.sub { margin:0 0 16px; color:var(--redup); }
+  .kartu { background:var(--kartu); border:1px solid var(--garis); border-radius:12px; padding:14px; margin-bottom:14px; }
+  .baris { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+  label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--redup); }
+  select, textarea { font:inherit; color:var(--teks); background:var(--latar); border:1px solid var(--garis); border-radius:8px; padding:7px 9px; }
+  textarea { width:100%; min-height:200px; resize:vertical; font-size:13px; line-height:1.45; }
+  button { font:inherit; font-weight:600; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; background:var(--aksen); color:#fff; }
+  button.henti { background:var(--bahaya); }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { font-size:13px; color:var(--redup); margin-left:auto; align-self:center; }
+  #status.hidup { color:var(--aksen); font-weight:600; }
+  #transkrip { min-height:220px; max-height:46vh; overflow:auto; display:flex; flex-direction:column; gap:8px; }
+  .gelembung { padding:8px 11px; border-radius:10px; max-width:88%; }
+  .gelembung small { display:block; font-size:11px; color:var(--redup); margin-bottom:1px; }
+  .gelembung.A { background:var(--ai); align-self:flex-start; }
+  .gelembung.P { background:var(--peserta); align-self:flex-end; }
+  .kosong { color:var(--redup); }
+  details summary { cursor:pointer; color:var(--redup); font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Gemini Live: contoh panggilan Arunika</h1>
+  <p class="sub">Skenario S1 (Andi Pratama). Kamu berperan jadi Pak Andi, bicara lewat mikrofon. Pakai headphone supaya suara AI tidak masuk lagi ke mic.</p>
+
+  <div class="kartu">
+    <div class="baris">
+      <label>Model
+        <select id="model">
+          <option value="models/gemini-3.8-live">gemini-3.8-live</option>
+          <option value="models/gemini-3.1-flash-live-preview">gemini-3.1-flash-live-preview</option>
+          <option value="models/gemini-2.5-flash-native-audio-latest">gemini-2.5-flash-native-audio-latest</option>
+        </select>
+      </label>
+      <label>Suara AI
+        <select id="suara">
+          <option>Kore</option><option>Aoede</option><option>Leda</option><option>Zephyr</option><option>Puck</option><option>Charon</option>
+        </select>
+      </label>
+      <button id="mulai">Mulai panggilan</button>
+      <button id="henti" class="henti" disabled>Akhiri</button>
+      <span id="status">Belum mulai</span>
+    </div>
+  </div>
+
+  <div class="kartu">
+    <div id="transkrip"><span class="kosong">Transkrip muncul di sini.</span></div>
+  </div>
+
+  <div class="kartu">
+    <details>
+      <summary>Instruksi sistem (bisa diubah sebelum mulai)</summary>
+      <textarea id="instruksi" spellcheck="false"></textarea>
+    </details>
+  </div>
+</main>
+
+<script>
+const INSTRUKSI = `Kamu "asisten otomatis BPJS Kesehatan" bernama Arunika yang menelepon peserta untuk konfirmasi layanan. Bicara Bahasa Indonesia, sopan, singkat, tenang, seperti telepon sungguhan. Satu giliran bicara maksimal dua kalimat.
+
+Aturan wajib:
+- Saat panggilan dimulai, langsung ucapkan: "Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan Bapak Andi Pratama?"
+- Jangan pernah minta NIK, OTP, kata sandi, atau uang. Kalau ditanya, tolak dengan sopan.
+- Hanya tanyakan 4 hal, satu per satu, urut, tunggu jawaban sebelum lanjut:
+  1. Apakah Bapak menjalani fisioterapi di RS Melati Sehat bulan Agustus?
+  2. Kira-kira berapa kali datang terapi di bulan Agustus?
+  3. Apakah pernah terapi di hari Minggu tanggal 16 Agustus atau tanggal 17 Agustus?
+  4. Penutup: jawaban sudah dicatat dan tidak memengaruhi layanan atau iuran. Ucapkan selamat siang lalu berhenti.
+- Jangan menyebut bahwa data dicurigai, jangan menyebut jumlah sesi yang ditagih, jangan menggiring jawaban.
+- Kalau yang menjawab bukan Pak Andi, tanya hubungannya dan apakah Pak Andi ada, jangan lanjut ke pertanyaan layanan.
+- Di luar topik: jawab singkat, arahkan kembali, atau akhiri dengan sopan.`;
+document.getElementById('instruksi').value = INSTRUKSI;
+
+const $ = id => document.getElementById(id);
+const URL_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=';
+let ws, ctxMasuk, ctxKeluar, aliran, simpul, waktuPutar = 0, sumber = [], baris = {}, hidup = false;
+
+function status(t, h) { $('status').textContent = t; $('status').className = h ? 'hidup' : ''; }
+
+function tulis(peran, teks) {
+  const kotak = $('transkrip');
+  if (kotak.querySelector('.kosong')) kotak.innerHTML = '';
+  let b = baris[peran];
+  if (!b) {
+    const el = document.createElement('div');
+    el.className = 'gelembung ' + peran;
+    el.innerHTML = '<small>' + (peran === 'A' ? 'Arunika (AI)' : 'Kamu (Pak Andi)') + '</small><span></span>';
+    kotak.appendChild(el);
+    b = baris[peran] = el.querySelector('span');
+  }
+  b.textContent += teks;
+  kotak.scrollTop = kotak.scrollHeight;
+}
+const tutupBaris = () => { baris = {}; };
+
+function putar(base64) {
+  const bin = atob(base64), n = bin.length / 2, f = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let v = bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8);
+    if (v & 0x8000) v -= 0x10000;
+    f[i] = v / 32768;
+  }
+  const buf = ctxKeluar.createBuffer(1, n, 24000);
+  buf.copyToChannel(f, 0);
+  const s = ctxKeluar.createBufferSource();
+  s.buffer = buf; s.connect(ctxKeluar.destination);
+  waktuPutar = Math.max(waktuPutar, ctxKeluar.currentTime + 0.03);
+  s.start(waktuPutar); waktuPutar += buf.duration;
+  sumber.push(s); s.onended = () => { sumber = sumber.filter(x => x !== s); };
+}
+function potongSuara() { sumber.forEach(s => { try { s.stop(); } catch (e) {} }); sumber = []; waktuPutar = 0; }
+
+const KODE_MIC = `
+class Mic extends AudioWorkletProcessor {
+  constructor() { super(); this.p = new Int16Array(1280); this.i = 0; }
+  process(inp) {
+    const c = inp[0] && inp[0][0]; if (!c) return true;
+    for (let k = 0; k < c.length; k++) {
+      this.p[this.i++] = Math.max(-1, Math.min(1, c[k])) * 32767;
+      if (this.i === this.p.length) { this.port.postMessage(this.p.slice().buffer); this.i = 0; }
+    }
+    return true;
+  }
+}
+registerProcessor('mic', Mic);`;
+
+function ke64(buf) {
+  let s = ''; const b = new Uint8Array(buf);
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+async function mulai() {
+  $('mulai').disabled = true; status('Menyiapkan…');
+  try {
+    ctxKeluar = new AudioContext({ sampleRate: 24000 });
+    ctxMasuk = new AudioContext({ sampleRate: 16000 });
+    aliran = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+    const r = await fetch('/token'); const j = await r.json();
+    if (!j.token) throw new Error(j.galat || 'token gagal');
+
+    await ctxMasuk.audioWorklet.addModule(URL.createObjectURL(new Blob([KODE_MIC], { type: 'text/javascript' })));
+    simpul = new AudioWorkletNode(ctxMasuk, 'mic');
+    ctxMasuk.createMediaStreamSource(aliran).connect(simpul);
+
+    $('transkrip').innerHTML = '<span class="kosong">Menghubungkan…</span>';
+    ws = new WebSocket(URL_WS + encodeURIComponent(j.token));
+    ws.onopen = () => ws.send(JSON.stringify({ setup: {
+      model: $('model').value,
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: $('suara').value } } }
+      },
+      systemInstruction: { parts: [{ text: $('instruksi').value }] },
+      inputAudioTranscription: {},
+      outputAudioTranscription: {}
+    }}));
+    ws.onmessage = async e => {
+      const d = JSON.parse(e.data instanceof Blob ? await e.data.text() : e.data);
+      if (d.setupComplete) {
+        hidup = true; status('Tersambung. Bicaralah.', true); $('henti').disabled = false;
+        simpul.port.onmessage = m => { if (hidup && ws.readyState === 1) ws.send(JSON.stringify({ realtimeInput: { audio: { data: ke64(m.data), mimeType: 'audio/pcm;rate=16000' } } })); };
+        ws.send(JSON.stringify({ realtimeInput: { text: 'Panggilan tersambung. Mulai sekarang.' } }));
+      }
+      const s = d.serverContent; if (!s) return;
+      if (s.interrupted) { potongSuara(); tutupBaris(); }
+      if (s.modelTurn) for (const p of s.modelTurn.parts || []) if (p.inlineData) putar(p.inlineData.data);
+      if (s.inputTranscription && s.inputTranscription.text) tulis('P', s.inputTranscription.text);
+      if (s.outputTranscription && s.outputTranscription.text) tulis('A', s.outputTranscription.text);
+      if (s.turnComplete) tutupBaris();
+    };
+    ws.onerror = () => status('Galat koneksi');
+    ws.onclose = ev => { if (hidup || ev.code !== 1000) status('Terputus' + (ev.reason ? ': ' + ev.reason.slice(0, 120) : ' (kode ' + ev.code + ')')); berhenti(true); };
+  } catch (err) { status('Gagal: ' + err.message); berhenti(true); }
+}
+
+function berhenti(tahanStatus) {
+  hidup = false;
+  try { ws && ws.readyState < 2 && ws.close(1000); } catch (e) {}
+  try { aliran && aliran.getTracks().forEach(t => t.stop()); } catch (e) {}
+  try { ctxMasuk && ctxMasuk.close(); ctxKeluar && ctxKeluar.close(); } catch (e) {}
+  potongSuara(); tutupBaris();
+  $('mulai').disabled = false; $('henti').disabled = true;
+  if (!tahanStatus) status('Selesai');
+}
+$('mulai').onclick = mulai;
+$('henti').onclick = () => berhenti(false);
+</script>
+</body>
+</html>

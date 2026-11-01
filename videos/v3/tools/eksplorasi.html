@@ -1,0 +1,276 @@
+<!doctype html>
+<!-- Still eksplorasi Babak 1 + penutup video v3. Buka dengan ?f=A1 … B4 (1920x1080).
+     Dirender ke videos/v3/renders/eksplorasi/ oleh tools/eksplorasi-render.mjs.
+     Data: data-uji-konfirmasi (klaim_sesi.csv S1 Agustus, expected_indikator 300 pasien / 30 terpicu). -->
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "PJS"; src: url(../assets/fonts/plus-jakarta-sans-latin-400-normal.woff2); font-weight: 400; }
+  @font-face { font-family: "PJS"; src: url(../assets/fonts/plus-jakarta-sans-latin-500-normal.woff2); font-weight: 500; }
+  @font-face { font-family: "PJS"; src: url(../assets/fonts/plus-jakarta-sans-latin-600-normal.woff2); font-weight: 600; }
+  @font-face { font-family: "PJS"; src: url(../assets/fonts/plus-jakarta-sans-latin-700-normal.woff2); font-weight: 700; }
+  @font-face { font-family: "PJS"; src: url(../assets/fonts/plus-jakarta-sans-latin-800-normal.woff2); font-weight: 800; }
+  @font-face { font-family: "JBM"; src: url(../assets/fonts/jetbrains-mono-latin-500-normal.woff2); font-weight: 500; }
+  :root {
+    /* token app.css */
+    --bg: oklch(100% 0 0); --muted: oklch(98% .002 90); --fg: oklch(14% .002 90); --fg-2: oklch(34% .004 90); --muted-fg: oklch(52% .006 90);
+    --border: oklch(92% .004 90); --border-strong: oklch(86% .006 90);
+    --primary: oklch(48% .075 205); --primary-subtle: oklch(96% .018 205); --brand: oklch(64% .11 184);
+    --cek-bg: oklch(96.8% .045 85); --cek-fg: oklch(46% .1 60); --prioritas: oklch(55% .19 27); --prioritas-bg: oklch(96.5% .025 27); --prioritas-fg: oklch(46% .17 27);
+    --lolos-bg: oklch(96.5% .03 150); --lolos-fg: oklch(40% .1 150);
+    --radius: 6px; --radius-panel: 10px;
+    --shadow-pop: 0 12px 32px oklch(20% .02 205 / .14), 0 2px 6px oklch(20% .02 205 / .08);
+    --teal-dk: #0b2e2f; --teal: #0f3d3e; --gold: #f3b441;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; }
+  body { font-family: "PJS", system-ui, sans-serif; color: var(--fg); background: var(--muted); -webkit-font-smoothing: antialiased; }
+  .frame { position: absolute; inset: 0; display: none; }
+  .frame.on { display: block; }
+  .abs { position: absolute; }
+  .mono { font-family: "JBM", monospace; }
+
+  /* ---------- komponen produk (sama dengan app.css / app-v3.css, diperbesar 2x) ---------- */
+  .lencana { font-size: 20px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 9px 16px; border-radius: 8px;
+             background: var(--cek-bg); color: var(--cek-fg); border: 2px solid oklch(86% .07 85); white-space: nowrap; }
+  .panel { background: var(--bg); border: 2px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-pop); }
+  .kapital { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-2); }
+  .angka { font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
+  .avatar { width: 88px; height: 88px; border-radius: 50%; background: var(--primary-subtle); color: var(--primary); display: grid; place-items: center; font-size: 32px; font-weight: 800; }
+
+  /* kalender */
+  .kal { display: grid; grid-template-columns: repeat(7, 104px); gap: 10px; }
+  .kal .hd { font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); text-align: center; padding-bottom: 4px; }
+  .kal .d { height: 92px; border-radius: 14px; border: 2px solid var(--border); background: var(--bg); position: relative; font-size: 26px; font-weight: 700; color: var(--fg-2);
+            padding: 10px 12px; font-variant-numeric: tabular-nums; }
+  .kal .d.x { visibility: hidden; }
+  .kal .d.minggu { color: var(--prioritas-fg); }
+  .kal .d.tagih { background: var(--fg); color: #fff; border-color: var(--fg); }
+  .kal .d.tagih.libur { background: var(--cek-fg); border-color: var(--cek-fg); }
+  .kal .d .tg { position: absolute; left: 12px; bottom: 9px; font-size: 15px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; opacity: .9; }
+  .band { position: absolute; border-radius: 16px; background: oklch(64% .11 184 / .16); border: 3px solid var(--brand); display: flex; align-items: flex-end; justify-content: flex-end; }
+  .band span { background: var(--brand); color: #fff; font-size: 18px; font-weight: 800; padding: 6px 12px; border-radius: 10px 0 12px 0; letter-spacing: .02em; }
+
+  /* baris klaim (gaya tabel antrean) */
+  .klaim { display: grid; grid-template-columns: 250px 170px 270px 1fr; align-items: center; height: 58px; padding: 0 22px; background: var(--bg);
+           border: 2px solid var(--border); border-radius: 12px; font-size: 22px; font-weight: 600; color: var(--fg-2); box-shadow: 0 2px 6px oklch(20% .02 205 / .06); }
+  .klaim .mono { font-size: 19px; color: var(--muted-fg); }
+  .klaim b { color: var(--fg); font-weight: 700; }
+  .klaim.libur { background: var(--cek-bg); border-color: oklch(86% .07 85); }
+  .klaim .rp { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* subtitle */
+  .sub { position: absolute; left: 50%; transform: translateX(-50%); bottom: 70px; max-width: 1500px; text-align: center; font-size: 44px; font-weight: 700; line-height: 1.3;
+         padding: 14px 30px; border-radius: 16px; }
+  .sub.terang { background: oklch(14% .002 90 / .86); color: #fff; }
+  .sub b.siapa { display: block; font-size: 22px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+
+  /* ---------- arah B: gelap ---------- */
+  .gelap { background: radial-gradient(1400px 900px at 50% 40%, #134849 0%, var(--teal) 45%, var(--teal-dk) 100%); color: #eaf3f1; }
+  .gelap .kapital { color: oklch(85% .03 190); }
+  .lencana-b { font-size: 19px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: oklch(85% .03 190); border: 2px solid oklch(85% .03 190 / .4); padding: 8px 14px; border-radius: 8px; }
+  .ledger { font-family: "JBM", monospace; font-size: 25px; line-height: 50px; color: oklch(85% .03 190 / .34); white-space: pre; }
+  .ledger .s1 { color: #fff; background: oklch(100% 0 0 / .07); }
+  .ledger .s1.lb { color: var(--gold); }
+  .kalb { display: grid; grid-template-columns: repeat(7, 118px); gap: 12px; }
+  .kalb .hd { font-size: 18px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: oklch(85% .03 190 / .6); text-align: center; }
+  .kalb .d { height: 100px; border-radius: 16px; border: 2px solid oklch(100% 0 0 / .12); font-size: 26px; font-weight: 600; padding: 10px 14px; color: oklch(85% .03 190 / .55); position: relative; }
+  .kalb .d.x { visibility: hidden; }
+  .kalb .d.tagih { background: #ff6a5e; border-color: #ff6a5e; color: #fff; box-shadow: 0 0 34px #ff6a5e88; }
+  .kalb .d.tagih.libur { background: var(--gold); border-color: var(--gold); color: var(--teal-dk); box-shadow: 0 0 34px #f3b44188; }
+</style>
+</head>
+<body>
+
+<!-- ======================= ARAH A: "Kartu bukti dirakit" (terang, komponen produk) ======================= -->
+
+<!-- A1 hook: suara asli Pak Andi -->
+<section class="frame" id="A1">
+  <div class="abs lencana" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs panel" style="left:80px;top:180px;width:620px;padding:30px 34px;display:flex;gap:26px;align-items:center">
+    <div class="avatar">AP</div>
+    <div><div style="font-size:38px;font-weight:800">Andi Pratama</div><div style="font-size:24px;color:var(--muted-fg);font-weight:500;margin-top:4px">Peserta JKN · 54 th · fisioterapi</div></div>
+  </div>
+  <div class="abs" style="left:80px;top:420px;width:1760px">
+    <div class="kapital" style="margin-bottom:22px">Rekaman panggilan · S1 · <span class="mono" style="letter-spacing:0">00:39</span></div>
+    <div id="waveA" style="display:flex;align-items:center;gap:7px;height:220px"></div>
+  </div>
+  <div class="sub terang" style="bottom:120px"><b class="siapa">Pak Andi</b><span style="color:var(--gold)">Tiga kali.</span> Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan.</div>
+</section>
+
+<!-- A2 P1: versi pasien di kalender Agustus -->
+<section class="frame" id="A2">
+  <div class="abs lencana" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs panel" style="left:80px;top:180px;width:560px;padding:30px 34px">
+    <div style="display:flex;gap:22px;align-items:center"><div class="avatar">AP</div>
+      <div><div style="font-size:34px;font-weight:800">Andi Pratama</div><div style="font-size:22px;color:var(--muted-fg);font-weight:500">RS Melati Sehat · Agustus 2026</div></div></div>
+    <div style="border-top:2px solid var(--border);margin:26px 0 22px"></div>
+    <div class="kapital">Versi peserta</div>
+    <div style="display:flex;align-items:baseline;gap:14px;margin-top:10px"><span class="angka" style="font-size:150px;color:var(--brand)">3</span><span style="font-size:44px;font-weight:700;color:var(--fg-2)">sesi</span></div>
+    <div style="font-size:24px;color:var(--fg-2);margin-top:12px;line-height:1.4">"Awal bulan, pertengahan,<br>terus tanggal dua puluhan."</div>
+  </div>
+  <div class="abs" style="left:760px;top:150px">
+    <div style="font-size:40px;font-weight:800;margin-bottom:20px">Agustus 2026</div>
+    <div class="kal" id="kalA2"></div>
+  </div>
+  <div class="sub terang">Bulan Agustus, Pak Andi terapi tiga kali.</div>
+</section>
+
+<!-- A3 P2: klaim RS Melati bertumpuk sampai 11, kalender terisi -->
+<section class="frame" id="A3">
+  <div class="abs lencana" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs" style="left:80px;top:150px;width:930px">
+    <div class="kapital" style="margin-bottom:16px">Klaim fisioterapi · RS Melati Sehat → BPJS</div>
+    <div id="klaimA3" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+  <div class="abs" style="left:1080px;top:150px">
+    <div style="font-size:34px;font-weight:800;margin-bottom:14px">Agustus 2026</div>
+    <div class="kal" id="kalA3" style="grid-template-columns:repeat(7,100px);gap:8px"></div>
+  </div>
+  <div class="abs panel" style="left:1080px;top:770px;width:756px;padding:22px 30px;display:flex;align-items:center;gap:34px">
+    <div><div class="kapital">Ditagih</div><div class="angka" style="font-size:96px;color:var(--prioritas)">11</div></div>
+    <div><div class="kapital">Versi peserta</div><div class="angka" style="font-size:96px;color:var(--brand)">3</div></div>
+    <div style="margin-left:auto;background:var(--prioritas-bg);border-radius:14px;padding:14px 22px"><div class="kapital" style="color:var(--prioritas-fg)">Selisih</div><div class="angka" style="font-size:96px;color:var(--prioritas-fg)">8</div></div>
+  </div>
+  <div class="sub terang" style="bottom:40px">Tapi yang ditagih ke BPJS: sebelas.</div>
+</section>
+
+<!-- A4 P3: skala — 300 pasien aktif, 30 terpicu, kartu KPK -->
+<section class="frame" id="A4">
+  <div class="abs lencana" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs" style="left:80px;top:150px">
+    <div style="display:flex;gap:16px;margin-bottom:26px">
+      <div class="panel" style="padding:18px 26px;display:flex;align-items:center;gap:16px"><span class="angka" style="font-size:56px">300</span><span style="font-size:22px;font-weight:600;color:var(--fg-2);line-height:1.25">pasien fisioterapi<br>aktif Agustus</span></div>
+      <div class="panel" style="padding:18px 26px;display:flex;align-items:center;gap:16px;background:var(--primary-subtle);border-color:oklch(88% .035 205)"><span class="angka" style="font-size:56px;color:var(--primary)">30</span><span style="font-size:22px;font-weight:600;color:var(--fg-2);line-height:1.25">terpicu<br>indikator</span></div>
+    </div>
+    <div id="gridA4" style="display:flex;gap:26px"></div>
+  </div>
+  <div class="abs panel" style="left:1180px;top:300px;width:660px;padding:34px 38px">
+    <div class="kapital" style="color:var(--cek-fg)">KPK · 2024</div>
+    <div class="angka" style="font-size:100px;margin-top:10px">3.269 <span style="font-size:46px;color:var(--muted-fg);font-weight:600">dari 4.341</span></div>
+    <div style="font-size:32px;font-weight:600;line-height:1.35;margin-top:10px">tagihan fisioterapi <span style="color:var(--prioritas-fg)">tak ada di rekam medis</span>.</div>
+    <div style="font-size:19px;color:var(--muted-fg);margin-top:16px">Sumber: KPK dan Itjen Kemenkes, Juli 2024</div>
+  </div>
+  <div class="sub terang" style="bottom:40px">Selisih begini baru ketahuan kalau pasiennya ditanya. Itu masih manual, dan sering telat.</div>
+</section>
+
+<!-- ======================= ARAH B: "Ledger gelap" (sinematik, data mentah) ======================= -->
+
+<section class="frame gelap" id="B1">
+  <div class="abs lencana-b" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs" style="left:0;right:0;top:300px;display:flex;justify-content:center"><div id="waveB" style="display:flex;align-items:center;gap:9px;height:300px"></div></div>
+  <div class="abs" style="left:0;right:0;top:700px;text-align:center">
+    <div style="font-size:24px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">Pak Andi · rekaman panggilan</div>
+    <div style="font-size:64px;font-weight:800;margin-top:14px;letter-spacing:-.01em">"Tiga kali. Awal bulan, pertengahan,<br>terus sekali lagi tanggal dua puluhan."</div>
+  </div>
+</section>
+
+<section class="frame gelap" id="B2">
+  <div class="abs lencana-b" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs kapital" style="left:80px;top:150px">klaim_sesi.csv · Agustus 2026</div>
+  <div class="abs ledger" id="ledgerB" style="left:80px;top:200px"></div>
+  <div class="abs" style="right:90px;top:360px;text-align:right">
+    <div style="font-size:30px;font-weight:700;color:oklch(85% .03 190)">Andi Pratama · RS Melati Sehat</div>
+    <div class="angka" style="font-size:330px;color:#ff6a5e;text-shadow:0 0 60px #ff6a5e66">11</div>
+    <div style="font-size:40px;font-weight:700">sesi ditagih</div>
+  </div>
+</section>
+
+<section class="frame gelap" id="B3">
+  <div class="abs lencana-b" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs" style="left:150px;top:170px"><div style="font-size:40px;font-weight:800;margin-bottom:20px">Agustus 2026</div><div class="kalb" id="kalB3"></div></div>
+  <div class="abs" style="left:1260px;top:260px">
+    <div class="kapital">Ditagih</div><div class="angka" style="font-size:150px;color:#ff6a5e">11</div>
+    <div class="kapital" style="margin-top:20px">Kata Pak Andi</div><div class="angka" style="font-size:150px;color:#7fe0d0">3</div>
+    <div style="margin-top:26px;font-size:64px;font-weight:800;color:var(--gold)">Selisih 8</div>
+  </div>
+</section>
+
+<section class="frame gelap" id="B4">
+  <div class="abs lencana-b" style="left:80px;top:64px">Simulasi · data sintetis</div>
+  <div class="abs" id="dotsB" style="left:110px;top:200px;display:grid;grid-template-columns:repeat(25,34px);gap:12px"></div>
+  <div class="abs" style="left:110px;top:800px;font-size:34px;font-weight:700"><span style="color:var(--gold)">30</span> dari 300 pasien aktif terpicu indikator</div>
+  <div class="abs" style="left:1240px;top:320px;width:600px">
+    <div style="font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">KPK · 2024</div>
+    <div class="angka" style="font-size:120px;margin-top:6px">3.269</div>
+    <div style="font-size:36px;font-weight:600;line-height:1.35">dari 4.341 tagihan fisioterapi tak ada di rekam medis.</div>
+    <div style="font-size:19px;opacity:.6;margin-top:14px">Sumber: KPK dan Itjen Kemenkes, Juli 2024</div>
+  </div>
+</section>
+
+<script>
+  const F = new URLSearchParams(location.search).get("f") || "A1";
+  document.getElementById(F).classList.add("on");
+
+  // klaim S1 Agustus 2026 (klaim_sesi.csv, P-S1, RS01)
+  const TGL = [3, 4, 6, 10, 11, 13, 16, 17, 20, 24, 27];
+  const TANDA = { 16: "Minggu", 17: "Libur nas." };
+  const HARI = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+  // 1 Agustus 2026 = Sabtu (kolom ke-6 bila Senin di kiri)
+  function kalender(el, opt) {
+    const hd = HARI.map((h) => `<div class="hd">${h}</div>`).join("");
+    let c = "";
+    for (let i = 0; i < 5; i++) c += `<div class="d x"></div>`;
+    for (let d = 1; d <= 31; d++) {
+      const col = (d + 4) % 7; // 0 = Senin
+      const tagih = opt.tagih && TGL.includes(d);
+      const cls = ["d", col === 6 ? "minggu" : "", tagih ? "tagih" : "", tagih && TANDA[d] ? "libur" : ""].join(" ");
+      c += `<div class="${cls}" data-d="${d}">${d}${tagih && TANDA[d] && opt.tanda ? `<span class="tg">${TANDA[d]}</span>` : ""}</div>`;
+    }
+    el.innerHTML = hd + c;
+  }
+  const ka2 = document.getElementById("kalA2"); kalender(ka2, {});
+  // versi pasien: tiga rentang samar (tanpa tanggal pasti), dari jawaban "awal bulan, pertengahan, dua puluhan"
+  requestAnimationFrame(() => {
+    const box = (a, b) => { const r1 = ka2.querySelector(`[data-d="${a}"]`).getBoundingClientRect(), r2 = ka2.querySelector(`[data-d="${b}"]`).getBoundingClientRect(); return [r1.left, r1.top, r2.right, r2.bottom]; };
+    const band = (a, b, t) => { const [l, tp, r, bt] = box(a, b); const e = document.createElement("div"); e.className = "band"; Object.assign(e.style, { left: l - 6 + "px", top: tp - 6 + "px", width: r - l + 12 + "px", height: bt - tp + 12 + "px" }); e.innerHTML = `<span>${t}</span>`; document.getElementById("A2").appendChild(e); };
+    band(3, 7, "awal bulan · 1×"); band(12, 16, "pertengahan · 1×"); band(24, 28, "dua puluhan · 1×");
+  });
+  kalender(document.getElementById("kalA3"), { tagih: true, tanda: true });
+  kalender(document.getElementById("kalB3"), { tagih: true });
+
+  document.getElementById("klaimA3").innerHTML = TGL.slice().reverse().map((d, i) => {
+    const id = "SEP-UJI-00" + (4697 + TGL.indexOf(d));
+    const hari = HARI[(d + 4) % 7];
+    return `<div class="klaim ${TANDA[d] ? "libur" : ""}" style="opacity:${1 - i * 0.035}"><span class="mono">${id}</span><b>${hari}, ${d} Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div>`;
+  }).join("");
+
+  // waveform deterministik (bentuk kasar ucapan 3,4 dtk: "Tiga kali." lalu jeda lalu kalimat panjang)
+  function wave(el, n, h, w, warna, putar, mati) {
+    let s = 7, out = "";
+    for (let i = 0; i < n; i++) {
+      s = (s * 9301 + 49297) % 233280; const r = s / 233280;
+      const t = i / n, env = t < 0.17 ? Math.sin(t / 0.17 * Math.PI) : t < 0.28 ? 0.08 : t < 0.98 ? 0.35 + 0.65 * Math.abs(Math.sin(t * 23)) : 0.05;
+      const hh = Math.max(6, h * env * (0.45 + 0.55 * r));
+      out += `<i style="display:block;width:${w}px;height:${hh}px;border-radius:${w}px;background:${t < putar ? warna : mati}"></i>`;
+    }
+    el.innerHTML = out;
+  }
+  wave(document.getElementById("waveA"), 150, 220, 5, "var(--primary)", 0.2, "oklch(86% .006 90)");
+  wave(document.getElementById("waveB"), 120, 300, 8, "#f3b441", 0.2, "oklch(85% .03 190 / .25)");
+
+  // 300 pasien aktif Agustus, 30 terpicu (expected_indikator_2026-08.csv), dikelompokkan per RS
+  const RS = [["RS Melati Sehat", 68, 27], ["RSU Bakti Mulia", 65, 1], ["RS Cempaka Asri", 59, 1], ["RSU Nusa Sejahtera", 53, 0], ["RS Kenanga Medika", 55, 1]];
+  const nyalaKah = (k, i, nyala) => k === 0 ? (i * 7) % 68 < 27 : nyala > 0 && i === 17; // sebaran visual; jumlah sama dengan data
+  document.getElementById("gridA4").innerHTML = RS.map(([n, tot, nyala], k) => {
+    let sel = "";
+    for (let i = 0; i < tot; i++) {
+      const on = nyalaKah(k, i, nyala);
+      sel += `<i style="display:block;width:30px;height:30px;border-radius:7px;${i === 0 && k === 0 ? "background:var(--prioritas);box-shadow:0 0 0 4px var(--prioritas-bg)" : on ? "background:var(--primary)" : "background:var(--bg);border:2px solid var(--border-strong)"}"></i>`;
+    }
+    return `<div><div style="display:grid;grid-template-columns:repeat(4,30px);gap:8px">${sel}</div><div style="font-size:18px;font-weight:700;color:var(--fg-2);margin-top:14px;width:170px">${n}<br><span style="color:${nyala ? "var(--primary)" : "var(--muted-fg)"}">${nyala} terpicu</span></div></div>`;
+  }).join("");
+
+  let dots = "";
+  RS.forEach(([n, tot, nyala], k) => { for (let i = 0; i < tot; i++) { const on = nyalaKah(k, i, nyala); dots += `<i style="display:block;width:34px;height:34px;border-radius:50%;${on ? "background:#f3b441;box-shadow:0 0 18px #f3b441aa" : "background:oklch(100% 0 0 / .1)"}"></i>`; } });
+  document.getElementById("dotsB").innerHTML = dots;
+
+  // ledger: baris CSV S1 di antara baris peserta lain (baris lain disamarkan)
+  const lain = (i) => `SEP-UJI-00${3100 + i * 37}  P0${(i * 53) % 400 + 100}  RS0${(i % 5) + 1}  2026-08-${String((i * 7) % 28 + 1).padStart(2, "0")}  M-3-16-0`;
+  const L = [];
+  TGL.forEach((d, i) => { L.push(`<span>${lain(i * 2)}</span>`); L.push(`<span class="s1 ${TANDA[d] ? "lb" : ""}">SEP-UJI-00${4697 + i}  P-S1   RS01  2026-08-${String(d).padStart(2, "0")}  M-3-16-0</span>`); });
+  document.getElementById("ledgerB").innerHTML = L.slice(0, 17).join("\n");
+</script>
+</body>
+</html>

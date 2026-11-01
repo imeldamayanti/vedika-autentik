@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <!-- Dibuat oleh tools/build.py dari tools/index.template.html. Edit template, lalu jalankan build.py. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "PJS"; font-weight: 400; src: url("assets/fonts/plus-jakarta-sans-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 500; src: url("assets/fonts/plus-jakarta-sans-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 600; src: url("assets/fonts/plus-jakarta-sans-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 700; src: url("assets/fonts/plus-jakarta-sans-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "PJS"; font-weight: 800; src: url("assets/fonts/plus-jakarta-sans-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "JBM"; font-weight: 500; src: url("assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+      :root {
+        --teal: #0f3d3e; --teal-lt: #145558; --teal-dk: #082a2b; --green: #0e7c3a; --orange: #f26b21; --red: #d93a2f;
+        --navy: #1b2d4f; --mint: #eaf3f1; --mint-2: #d3e3df; --grey: #5b6b6a; --gold: #f3b441;
+        /* token website (app.css) untuk babak 1 dan penutup */
+        --w-bg: oklch(100% 0 0); --w-muted: oklch(98% .002 90); --w-fg: oklch(14% .002 90); --w-fg2: oklch(34% .004 90); --w-mfg: oklch(52% .006 90);
+        --w-border: oklch(92% .004 90); --w-border2: oklch(86% .006 90); --w-primary: oklch(48% .075 205); --w-psub: oklch(96% .018 205); --w-brand: oklch(64% .11 184);
+        --w-cek-bg: oklch(96.8% .045 85); --w-cek-fg: oklch(46% .1 60); --w-pri: oklch(55% .19 27); --w-pri-bg: oklch(96.5% .025 27); --w-pri-fg: oklch(46% .17 27);
+        --w-shadow: 0 12px 32px oklch(20% .02 205 / .14), 0 2px 6px oklch(20% .02 205 / .08);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #070d0d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "PJS", sans-serif; background: #070d0d; }
+      .layer { position: absolute; inset: 0; }
+
+      /* ---------- babak 1 + penutup: komponen website (kartu, lencana, kalender, tabel klaim) ---------- */
+      #black { position: absolute; inset: 0; background: #050808; z-index: 40; pointer-events: none; }
+      #b1, #zb { position: absolute; inset: 0; z-index: 20; background: var(--w-muted); color: var(--w-fg); overflow: hidden; }
+      #zb { z-index: 30; }
+      .b1-dots { position: absolute; inset: -40px; opacity: 0.6; background-image: radial-gradient(oklch(48% .075 205 / .13) 1.5px, transparent 1.7px); background-size: 34px 34px; }
+      #b1-s2, #b1-s3 { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+      .lencana { position: absolute; left: 80px; top: 56px; z-index: 3; font-size: 20px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 9px 16px;
+        border-radius: 8px; background: var(--w-cek-bg); color: var(--w-cek-fg); border: 2px solid oklch(86% .07 85); white-space: nowrap; }
+      .panel { position: absolute; background: var(--w-bg); border: 2px solid var(--w-border); border-radius: 20px; box-shadow: var(--w-shadow); }
+      .kapital { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-fg2); }
+      .angka { font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -.02em; }
+      .hijau { color: var(--w-brand); }
+      .mono { font-family: "JBM", monospace; }
+      .avatar { width: 84px; height: 84px; flex: none; border-radius: 50%; background: var(--w-psub); color: var(--w-primary); display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+      .pas { left: 80px; top: 150px; width: 660px; padding: 22px 30px; display: flex; gap: 24px; align-items: center; }
+      .pas .nm { font-size: 38px; font-weight: 800; }
+      .pas .sb { font-size: 23px; font-weight: 500; color: var(--w-mfg); margin-top: 2px; }
+      .rek { left: 80px; top: 316px; width: 660px; padding: 24px 30px; }
+      .wv { display: flex; align-items: center; gap: 2.6px; height: 150px; margin-top: 12px; }
+      .wv i { display: block; width: 4.4px; border-radius: 3px; background: var(--w-border2); }
+      .ver { left: 80px; top: 580px; width: 660px; padding: 24px 30px 26px; }
+      .vr { display: flex; align-items: baseline; gap: 14px; margin-top: 6px; }
+      .vr .angka { font-size: 128px; }
+      .vr .sesi { font-size: 42px; font-weight: 700; color: var(--w-fg2); }
+      #b1-kal { position: absolute; left: 880px; top: 118px; transform-origin: 0 0; }
+      .kal-t { font-size: 40px; font-weight: 800; margin-bottom: 16px; letter-spacing: -.01em; }
+      .kal-g { position: relative; display: grid; grid-template-columns: repeat(7, 104px); gap: 10px; }
+      .kh { height: 34px; font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-mfg); text-align: center; line-height: 34px; }
+      .kd { position: relative; height: 92px; border-radius: 14px; border: 2px solid var(--w-border); background: var(--w-bg); font-size: 27px; font-weight: 700; color: var(--w-fg2);
+        padding: 9px 12px; font-variant-numeric: tabular-nums; }
+      .kd.x { visibility: hidden; }
+      .kd.min { color: var(--w-pri-fg); }
+      .kd .tg { position: absolute; left: 11px; right: 6px; bottom: 8px; font-size: 13px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; line-height: 1.1; opacity: 0; }
+      .kd.t { background: var(--w-fg); border-color: var(--w-fg); color: #fff; }
+      .kd.t.lb { background: var(--w-cek-fg); border-color: var(--w-cek-fg); }
+      .kd.t .tg { opacity: 1; }
+      .pita { position: absolute; border-radius: 17px; background: oklch(64% .11 184 / .14); border: 4px solid var(--w-brand); z-index: 2; }
+      .pita span { position: absolute; right: -4px; bottom: -4px; background: var(--w-brand); color: #fff; font-size: 19px; font-weight: 800; padding: 6px 13px; border-radius: 12px 0 15px 0; white-space: nowrap; }
+      #b1-klaim { position: absolute; left: 80px; top: 128px; width: 940px; }
+      #b1-klaim .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+      .klaim { display: grid; grid-template-columns: 240px 170px 290px 1fr; align-items: center; height: 58px; padding: 0 22px; background: var(--w-bg);
+        border: 2px solid var(--w-border); border-radius: 12px; font-size: 22px; font-weight: 600; color: var(--w-fg2); box-shadow: 0 2px 6px oklch(20% .02 205 / .06); }
+      .klaim .mono { font-size: 19px; color: var(--w-mfg); }
+      .klaim b { color: var(--w-fg); font-weight: 700; }
+      .klaim.lb { background: var(--w-cek-bg); border-color: oklch(86% .07 85); }
+      .klaim .rp { text-align: right; font-variant-numeric: tabular-nums; }
+      .cntp { left: 1090px; top: 762px; width: 750px; padding: 20px 28px; display: flex; align-items: center; gap: 40px; }
+      .cntp .angka { font-size: 96px; }
+      .cntp .win { height: 100px; overflow: hidden; }
+      .cntp .strip div { height: 100px; line-height: 100px; font-size: 96px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+      .cntp .sel { margin-left: auto; background: var(--w-pri-bg); border-radius: 14px; padding: 12px 24px; }
+      .cntp .sel .kapital, .cntp .sel .angka { color: var(--w-pri-fg); }
+      .kpi { position: absolute; left: 80px; top: 140px; display: flex; gap: 16px; }
+      .kpi .panel { position: relative; padding: 16px 26px; display: flex; align-items: center; gap: 16px; }
+      .kpi .panel.teal { background: var(--w-psub); border-color: oklch(88% .035 205); }
+      .kpi .panel.teal .angka { color: var(--w-primary); }
+      .kpi .angka { font-size: 58px; }
+      .kpi span:last-child { font-size: 22px; font-weight: 600; color: var(--w-fg2); line-height: 1.25; }
+      .grid { position: absolute; left: 80px; top: 290px; display: flex; gap: 28px; }
+      .rsg .cells { display: grid; grid-template-columns: repeat(6, 26px); gap: 7px; }
+      .rsg .cells i { display: block; width: 26px; height: 26px; border-radius: 6px; background: var(--w-bg); border: 2px solid var(--w-border2); }
+      .rsg .cells i.on { background: var(--w-primary); border-color: var(--w-primary); }
+      .rsg .cells i.andi { background: var(--w-pri); border-color: var(--w-pri); box-shadow: 0 0 0 4px var(--w-pri-bg); }
+      .rsn { margin-top: 14px; font-size: 19px; font-weight: 700; color: var(--w-fg2); line-height: 1.3; }
+      .rsn b { color: var(--w-primary); }
+      .rsn b.nol { color: var(--w-mfg); }
+      .andi-tag { position: absolute; left: 118px; top: 250px; background: var(--w-pri); color: #fff; font-size: 19px; font-weight: 800; padding: 5px 12px; border-radius: 10px; }
+      #kpk { left: 1250px; top: 290px; width: 600px; padding: 32px 36px; }
+      #kpk .src { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--w-cek-fg); }
+      #kpk .n { font-size: 96px; font-weight: 800; line-height: 1.05; margin: 8px 0 6px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+      #kpk .n small { font-size: 44px; font-weight: 600; color: var(--w-mfg); letter-spacing: 0; }
+      #kpk .t { font-size: 32px; font-weight: 600; line-height: 1.3; }
+      #kpk .t b { color: var(--w-pri-fg); font-weight: 700; }
+      #kpk .t2 { font-size: 24px; font-weight: 500; color: var(--w-fg2); margin-top: 10px; }
+      #kpk .cr { margin-top: 14px; font-size: 18px; color: var(--w-mfg); }
+      /* penutup */
+      #zt { position: absolute; left: 0; right: 0; top: 112px; text-align: center; font-size: 66px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+      #zt .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 6px; }
+      #zt .w i { display: inline-block; font-style: normal; }
+      #zt em { font-style: normal; color: var(--w-primary); }
+      #z-kiri .zk { left: 190px; width: 520px; padding: 22px 30px; }
+      #zk1 { top: 300px; } #zk2 { top: 520px; }
+      #z-kiri .vr .angka { font-size: 112px; }
+      .zsel { position: absolute; left: 190px; top: 744px; width: 520px; background: var(--w-pri-bg); color: var(--w-pri-fg); border: 2px solid oklch(88% .05 27); border-radius: 16px;
+        padding: 18px 26px; font-size: 28px; font-weight: 600; }
+      .zsel b { font-weight: 800; }
+      #z-kal { position: absolute; left: 830px; top: 270px; transform: scale(.86); transform-origin: 0 0; }
+      #z-kal .leg { display: flex; gap: 26px; align-items: center; margin-top: 20px; font-size: 22px; font-weight: 600; color: var(--w-fg2); }
+      #z-kal .leg i { display: inline-block; width: 26px; height: 26px; border-radius: 7px; vertical-align: -6px; margin-right: 10px; }
+      .lg-t { background: var(--w-fg); } .lg-p { background: oklch(64% .11 184 / .14); border: 4px solid var(--w-brand); }
+      #z-kal .leg .by { color: var(--w-mfg); font-weight: 500; }
+
+      /* ---------- kartu logo ---------- */
+      .card { position: absolute; inset: 0; z-index: 50; }
+      .card-in { position: absolute; inset: 0; }
+      .card-bg { position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 80% at 50% 45%, var(--teal-lt) 0%, var(--teal) 62%, var(--teal-dk) 100%); }
+      .card-glow { position: absolute; left: 50%; top: 45%; width: 1400px; height: 1400px; margin: -700px 0 0 -700px;
+        border-radius: 50%; background: radial-gradient(circle, rgba(46, 140, 132, 0.42) 0%, rgba(20, 85, 88, 0) 62%); }
+      .card-grid { position: absolute; inset: 0; opacity: 0.16;
+        background-image: radial-gradient(rgba(234, 243, 241, 0.55) 1.2px, transparent 1.4px); background-size: 36px 36px;
+        -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%);
+        mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 0%, transparent 75%); }
+      .lock { position: absolute; left: 0; right: 0; top: 0; height: 780px; display: flex; align-items: center;
+        justify-content: center; gap: 60px; }
+      .mark-wrap { width: 250px; height: 250px; position: relative; }
+      .mark { width: 250px; height: 250px; display: block; overflow: visible; }
+      .words { position: relative; padding: 10px 40px 14px 0; overflow: hidden; }
+      .wm-line { overflow: hidden; height: 132px; }
+      .wm { display: block; color: #e4f0ed; font-weight: 700; font-size: 124px; line-height: 132px; letter-spacing: -0.03em; }
+      .oline { display: block; width: 220px; height: 8px; border-radius: 4px; background: var(--orange); margin-top: 26px; transform-origin: 0% 50%; }
+      .wm-in { position: relative; }
+      .wm-sh { position: absolute; left: 0; top: 0; color: transparent; -webkit-text-fill-color: transparent;
+        background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 38%, #ffffff 50%, rgba(255, 255, 255, 0) 62%);
+        background-size: 300% 100%; background-repeat: no-repeat; background-position: 150% 0%;
+        -webkit-background-clip: text; background-clip: text; }
+      .scan-v { position: absolute; top: 0; bottom: 0; left: 0; width: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .scan-h { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--orange); z-index: 5;
+        box-shadow: 0 0 18px 4px rgba(242, 107, 33, 0.7), 0 0 80px 22px rgba(242, 107, 33, 0.28); }
+      .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 55%); }
+      .tagline { position: absolute; left: 0; right: 0; top: 770px; text-align: center; color: var(--mint); font-size: 66px; font-weight: 500; letter-spacing: -0.01em; }
+      .tagline b { color: var(--orange); font-weight: 700; }
+      .tagline .in { display: inline-block; }
+      .phone-ic { position: absolute; left: 50%; top: 390px; width: 230px; height: 230px; margin: -115px 0 0 -115px; color: #e4f0ed; }
+      .phone-ic svg { width: 230px; height: 230px; display: block; overflow: visible; }
+      .wave { position: absolute; left: 50%; top: 390px; width: 230px; height: 230px; margin: -115px 0 0 -115px; border-radius: 50%; border: 4px solid rgba(243, 180, 65, 0.8); }
+      .slogan { position: absolute; left: 0; right: 0; top: 740px; text-align: center; overflow: hidden; height: 110px; }
+      .slogan span { display: inline-block; color: var(--mint); font-weight: 600; font-size: 72px; line-height: 104px; letter-spacing: -0.015em; }
+      .credit { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; color: rgba(234, 243, 241, 0.8);
+        font-size: 28px; font-weight: 500; letter-spacing: 0.06em; }
+
+      /* ---------- panggung demo ---------- */
+      #stage { position: absolute; inset: 0; z-index: 10; background: var(--mint); overflow: hidden; }
+      #mint-dots { position: absolute; inset: -60px; opacity: 0.55;
+        background-image: radial-gradient(rgba(15, 61, 62, 0.16) 1.6px, transparent 1.8px); background-size: 34px 34px; }
+      #win { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 18px; overflow: hidden;
+        background: #fff; transform-origin: 0 0;
+        box-shadow: 0 50px 140px rgba(15, 61, 62, 0.26), 0 8px 30px rgba(15, 61, 62, 0.12), 0 0 0 2px rgba(15, 61, 62, 0.1); }
+      #win video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      #scrim-top { position: absolute; left: 0; right: 0; top: 0; height: 150px; pointer-events: none; z-index: 12;
+        background: linear-gradient(180deg, rgba(234, 243, 241, 0.97) 0%, rgba(234, 243, 241, 0.88) 50%, rgba(234, 243, 241, 0) 100%); }
+      .step { position: absolute; left: 60px; top: 38px; z-index: 20; }
+      .step-in { display: flex; align-items: center; gap: 20px; }
+      .step-no { color: var(--orange); font-weight: 700; font-size: 36px; }
+      .step-rule { display: block; width: 3px; height: 40px; background: var(--teal); opacity: 0.35; }
+      .step-ti { color: var(--teal); font-weight: 600; font-size: 36px; letter-spacing: -0.01em; }
+      .simpill { position: absolute; right: 52px; top: 40px; z-index: 20; background: var(--teal); color: #fff; font-size: 20px; font-weight: 600;
+        letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 18px; border-radius: 999px; }
+
+      /* sorot di dalam jendela (ikut kamera) */
+      .ring { position: absolute; z-index: 5; border: 4px solid var(--orange); border-radius: 12px; pointer-events: none;
+        box-shadow: 0 0 0 7px rgba(242, 107, 33, 0.2), 0 0 40px rgba(242, 107, 33, 0.45); }
+
+      /* overlay layar (tidak ikut kamera) */
+      .ov { position: absolute; z-index: 25; }
+      .callout { display: flex; gap: 14px; }
+      .callout span { background: var(--teal); color: #fff; font-size: 31px; font-weight: 600; padding: 14px 24px; border-radius: 16px;
+        box-shadow: 0 14px 40px rgba(15, 61, 62, 0.35); white-space: nowrap; }
+      .callout span b { color: var(--gold); font-weight: 700; }
+      .leader { width: 4px; background: var(--orange); border-radius: 2px; transform-origin: 50% 100%; }
+      .phone { width: 372px; height: 760px; border-radius: 52px; background: #0b1414; padding: 14px; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.45); }
+      .phone .scr { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: #e8e1d6; display: flex; flex-direction: column; }
+      .phone .hd { background: #0f5b4f; color: #fff; padding: 46px 20px 16px; display: flex; gap: 12px; align-items: center; }
+      .phone .hd i { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); display: block; }
+      .phone .hd b { display: block; font-size: 19px; font-weight: 600; }
+      .phone .hd span { font-size: 14px; opacity: 0.8; }
+      .phone .bd { padding: 18px 14px; flex: 1; }
+      .bub { background: #fff; border-radius: 6px 18px 18px 18px; padding: 14px 16px 22px; font-size: 16.5px; line-height: 1.38; color: #1c2b2b; position: relative; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); }
+      .bub small { position: absolute; right: 12px; bottom: 6px; font-size: 12px; color: #7a8a8a; }
+      .dayt { text-align: center; margin: 0 0 12px; }
+      .dayt span { background: rgba(255, 255, 255, 0.8); font-size: 13px; padding: 4px 12px; border-radius: 8px; color: #55655f; }
+      .safe { display: flex; flex-direction: column; gap: 14px; }
+      .safe div { background: #fff; color: var(--teal); font-size: 30px; font-weight: 600; padding: 14px 26px 14px 20px; border-radius: 18px;
+        box-shadow: 0 14px 40px rgba(15, 61, 62, 0.28); display: flex; align-items: center; gap: 14px; }
+      .safe div i { width: 38px; height: 38px; border-radius: 50%; background: var(--green); color: #fff; font-style: normal; font-size: 24px; line-height: 38px; text-align: center; }
+      .waveb { display: flex; align-items: flex-end; gap: 6px; height: 74px; padding: 16px 22px 12px; background: var(--teal); border-radius: 22px; box-shadow: 0 16px 44px rgba(15, 61, 62, 0.4); }
+      .waveb i { display: block; width: 7px; border-radius: 4px; background: var(--gold); height: 70%; transform-origin: 50% 100%; }
+      .wavel { margin-top: 8px; color: var(--teal); font-size: 20px; font-weight: 600; background: rgba(255, 255, 255, 0.9); padding: 4px 12px; border-radius: 10px; display: inline-block; }
+      .cnt { background: var(--teal); color: #fff; border-radius: 24px; padding: 18px 30px 20px; box-shadow: 0 18px 50px rgba(15, 61, 62, 0.38); }
+      .cnt .row { display: flex; align-items: center; gap: 22px; }
+      .cnt .win { width: 150px; height: 112px; overflow: hidden; border-radius: 16px; background: rgba(255, 255, 255, 0.1); }
+      .cnt .strip div { height: 112px; line-height: 112px; text-align: center; font-size: 92px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .cnt .tx { font-size: 28px; font-weight: 500; line-height: 1.25; color: var(--mint-2); }
+      .cnt .sel { margin-top: 10px; font-size: 44px; font-weight: 700; color: #fff; position: relative; display: inline-block; }
+      .cnt .sel u { position: absolute; left: 0; right: 0; bottom: -4px; height: 6px; background: var(--orange); border-radius: 3px; transform-origin: 0 50%; }
+      .badge { background: #fff; border-radius: 26px; padding: 22px 30px 24px; width: 560px; box-shadow: 0 22px 60px rgba(15, 61, 62, 0.35); border: 2px solid rgba(15, 61, 62, 0.1); }
+      .badge .rs { font-size: 26px; font-weight: 600; color: var(--grey); }
+      .badge .st { position: relative; height: 150px; }
+      .badge .st > div { position: absolute; left: 0; right: 0; top: 0; }
+      .badge .big { font-size: 74px; font-weight: 700; color: var(--teal); line-height: 1.15; letter-spacing: -0.02em; }
+      .badge .big small { font-size: 34px; font-weight: 500; color: var(--grey); }
+      .chipst { display: inline-block; font-size: 30px; font-weight: 700; padding: 6px 20px; border-radius: 999px; }
+      .chipst.ok { background: #d7efe0; color: var(--green); }
+      .chipst.no { background: #fde1d6; color: #b8350f; border: 3px solid #b8350f; }
+      .note { background: var(--teal); color: #fff; font-size: 30px; font-weight: 600; padding: 16px 28px; border-radius: 18px; box-shadow: 0 14px 40px rgba(15, 61, 62, 0.35); line-height: 1.3; }
+      .note b { color: var(--gold); }
+
+      /* ---------- subtitle ---------- */
+      .sub { position: absolute; left: 0; right: 0; z-index: 60; text-align: center; pointer-events: none; }
+      .sub p { display: inline-block; max-width: 1500px; }
+      .sub-hook { bottom: 150px; }
+      .sub-hook p { color: #fff; font-size: 46px; font-weight: 500; line-height: 1.32;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 22px rgba(0, 0, 0, 0.55); }
+      .sub-logo { bottom: 90px; }
+      .sub-logo p { color: var(--mint); font-size: 42px; font-weight: 500; line-height: 1.32; }
+      .sub-demo { bottom: 44px; }
+      .sub-demo p { background: rgba(15, 61, 62, 0.95); color: #fff; font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      .sub-call { bottom: 44px; }
+      .sub-call p { background: rgba(255, 255, 255, 0.97); color: var(--teal); font-size: 38px; font-weight: 500; line-height: 1.36;
+        padding: 14px 32px 16px; border-radius: 16px; max-width: 1480px; border: 3px solid var(--teal); box-shadow: 0 10px 30px rgba(15, 61, 62, 0.25); }
+      .sub-call p b { color: var(--orange); font-weight: 700; margin-right: 10px; }
+      #endfade { position: absolute; inset: 0; background: #050808; z-index: 90; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="88.21" data-width="1920" data-height="1080">
+
+      <!-- ===== panggung demo: jendela rekaman layar, kamera = transform #win ===== -->
+      <div id="stage">
+        <div id="mint-dots" data-layout-allow-overflow=""></div>
+        <div id="win" data-layout-allow-overflow="">
+<video id="sc1" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="26.22" data-duration="20.22" data-media-start="3.84" data-track-index="3"></video>
+<video id="sc2" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="46.14" data-duration="4.62" data-media-start="53.24" data-track-index="3"></video>
+<video id="sc3" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="50.46" data-duration="2.93" data-media-start="70.55" data-track-index="3"></video>
+<video id="sc4" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="53.09" data-duration="10.6" data-media-start="87.6" data-track-index="3"></video>
+<video id="sc5" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="63.39" data-duration="5.5" data-media-start="28.2" data-track-index="3"></video>
+<video id="sc6" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="68.59" data-duration="4.05" data-media-start="104.5" data-track-index="3"></video>
+<video id="sc7" class="clip scr" src="assets/screen/demo-hf.mp4" muted playsinline data-start="72.34" data-duration="7.84" data-media-start="112.44" data-track-index="3"></video>
+<div class="ring clip" id="ring-0" data-start="28.52" data-duration="4.0" data-track-index="10" style="left:846px;top:526px;width:349px;height:41px"></div>
+<div class="ring clip" id="ring-1" data-start="32.73" data-duration="1.5" data-track-index="10" style="left:1362px;top:375px;width:377px;height:65px"></div>
+<div class="ring clip" id="ring-2" data-start="56.29" data-duration="2.8" data-track-index="10" style="left:1384px;top:211px;width:504px;height:298px"></div>
+<div class="ring clip" id="ring-3" data-start="68.79" data-duration="2.8" data-track-index="10" style="left:1380px;top:482px;width:193px;height:44px"></div>
+<div class="ring clip" id="ring-4" data-start="75.46" data-duration="1.5" data-track-index="10" style="left:1395px;top:761px;width:468px;height:65px"></div>
+        </div>
+        <div id="scrim-top"></div>
+        <div class="simpill clip" id="simpill" data-start="26.12" data-duration="53.56" data-track-index="9">Simulasi · data sintetis</div>
+      </div>
+<div class="step clip" id="st-d1" data-start="26.22" data-duration="6.86" data-track-index="6"><div class="step-in"><span class="step-no">1</span><span class="step-rule"></span><span class="step-ti">Antrean</span></div></div>
+<div class="step clip" id="st-d2" data-start="33.13" data-duration="6.26" data-track-index="6"><div class="step-in"><span class="step-no">2</span><span class="step-rule"></span><span class="step-ti">Notifikasi WA</span></div></div>
+<div class="step clip" id="st-d3" data-start="39.44" data-duration="13.6" data-track-index="6"><div class="step-in"><span class="step-no">3</span><span class="step-rule"></span><span class="step-ti">Panggilan</span></div></div>
+<div class="step clip" id="st-d4" data-start="53.09" data-duration="10.25" data-track-index="6"><div class="step-in"><span class="step-no">4</span><span class="step-rule"></span><span class="step-ti">Kartu bukti</span></div></div>
+<div class="step clip" id="st-d5" data-start="63.39" data-duration="8.9" data-track-index="6"><div class="step-in"><span class="step-no">5</span><span class="step-rule"></span><span class="step-ti">Ringkasan RS</span></div></div>
+<div class="step clip" id="st-d6" data-start="72.34" data-duration="6.59" data-track-index="6"><div class="step-in"><span class="step-no">6</span><span class="step-rule"></span><span class="step-ti">Keputusan</span></div></div>
+<div class="ov callout clip" id="call-chips" data-start="28.72" data-duration="4.2" data-track-index="11" style="left:500px;top:740px" ><span><b>11</b> sesi/bulan</span><span><b>4</b> sesi/minggu</span><span>sesi <b>17 Agustus</b></span></div>
+<div class="ov leader clip" id="call-leader" data-start="28.72" data-duration="4.2" data-track-index="11" style="left:821px;top:668px;height:72px" ></div>
+<div class="ov  clip" id="wa-phone" data-start="35.13" data-duration="4.11" data-track-index="11" style="left:1370px;top:150px" data-dx="140" data-dy="0"><div class="phone"><div class="scr"><div class="hd"><i></i><div><b>0800-0000-0165</b><span>Nomor tim · Simulasi</span></div></div><div class="bd"><div class="dayt"><span>Hari ini</span></div><div class="bub">Halo Andi Pratama. Ini BPJS Kesehatan. Dalam 1 menit kami akan menelepon dari nomor 0800-0000-0165 untuk konfirmasi singkat layanan fisioterapi Andi Pratama di RS Melati Sehat bulan Agustus. Ini bukan tagihan. Kami tidak akan meminta data pribadi, kode OTP, atau pembayaran. Untuk memastikan pesan ini, hubungi Care Center 165.<small>09.20</small></div></div></div></div></div>
+<div class="ov  clip" id="wa-safe" data-start="36.23" data-duration="3.01" data-track-index="11" style="left:760px;top:430px" ><div class="safe"><div><i>✓</i>Tanpa tautan</div><div><i>✓</i>Tanpa minta data</div><div><i>✓</i>Cek ke 165</div></div></div>
+<div class="ov  clip" id="wave" data-start="46.14" data-duration="4.32" data-track-index="11" style="left:1440px;top:790px" ><div class="waveb"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="wavel">Rekaman simulasi · telepon</div></div>
+<div class="ov cnt clip" id="c2" data-start="55.39" data-duration="4.5" data-track-index="11" style="left:140px;top:690px" ><div class="cnt"><div class="row"><div class="win"><div class="strip" data-layout-allow-overflow data-layout-allow-occlusion><div>11</div><div>10</div><div>9</div><div>8</div><div>7</div><div>6</div><div>5</div><div>4</div><div>3</div></div></div><div class="tx">ditagih RS<br>kata Pak Andi: 3</div></div><div class="sel">Selisih 8<u></u></div></div></div>
+<div class="ov badge clip" id="bd" data-start="63.59" data-duration="8.65" data-track-index="11" style="left:140px;top:690px" ><div class="rs">RS Melati Sehat</div><div class="st"><div id="bd-before"><div class="big">2 dari 4<small> tidak sesuai</small></div><span class="chipst ok">Normal</span></div><div id="bd-after"><div class="big">3 dari 5<small> tidak sesuai</small></div><span class="chipst no">Perlu klarifikasi RS</span></div></div></div>
+<div class="ov note clip" id="n6" data-start="76.86" data-duration="1.87" data-track-index="11" style="left:140px;top:660px" >Tercatat: <b>siapa · kapan · alasan</b></div>
+
+      <!-- ===== babak 1 dan penutup: motion graphic dari data uji ===== -->
+      <div id="black"></div>
+<div class="clip" id="b1" data-start="0" data-duration="17.34" data-track-index="7">
+  <div class="b1-dots" data-layout-allow-overflow></div>
+  <div class="lencana" id="b1-len">Simulasi · data sintetis</div>
+  <div id="b1-s2">
+    <div id="b1-kiri">
+      <div class="panel pas" id="b1-pas"><div class="avatar">AP</div><div><div class="nm">Andi Pratama</div><div class="sb">Peserta JKN · 54 th · RS Melati Sehat</div></div></div>
+      <div class="panel rek" id="b1-rek"><div class="kapital">Rekaman panggilan · simulasi</div><div class="wv" id="b1-wv"><i style="height:6px"></i><i style="height:21px"></i><i style="height:27px"></i><i style="height:45px"></i><i style="height:67px"></i><i style="height:82px"></i><i style="height:61px"></i><i style="height:121px"></i><i style="height:100px"></i><i style="height:83px"></i><i style="height:68px"></i><i style="height:85px"></i><i style="height:61px"></i><i style="height:26px"></i><i style="height:19px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:7px"></i><i style="height:6px"></i><i style="height:6px"></i><i style="height:10px"></i><i style="height:10px"></i><i style="height:24px"></i><i style="height:46px"></i><i style="height:85px"></i><i style="height:58px"></i><i style="height:80px"></i><i style="height:95px"></i><i style="height:107px"></i><i style="height:77px"></i><i style="height:65px"></i><i style="height:105px"></i><i style="height:62px"></i><i style="height:40px"></i><i style="height:35px"></i><i style="height:42px"></i><i style="height:46px"></i><i style="height:91px"></i><i style="height:76px"></i><i style="height:81px"></i><i style="height:64px"></i><i style="height:122px"></i><i style="height:69px"></i><i style="height:100px"></i><i style="height:63px"></i><i style="height:40px"></i><i style="height:37px"></i><i style="height:44px"></i><i style="height:75px"></i><i style="height:84px"></i><i style="height:62px"></i><i style="height:73px"></i><i style="height:91px"></i><i style="height:64px"></i><i style="height:57px"></i><i style="height:72px"></i><i style="height:74px"></i><i style="height:56px"></i><i style="height:47px"></i><i style="height:41px"></i><i style="height:59px"></i><i style="height:75px"></i><i style="height:81px"></i><i style="height:115px"></i><i style="height:91px"></i><i style="height:88px"></i><i style="height:71px"></i><i style="height:62px"></i><i style="height:77px"></i><i style="height:37px"></i><i style="height:29px"></i><i style="height:56px"></i><i style="height:79px"></i><i style="height:101px"></i><i style="height:113px"></i><i style="height:117px"></i><i style="height:112px"></i><i style="height:103px"></i><i style="height:91px"></i><i style="height:50px"></i><i style="height:57px"></i><i style="height:45px"></i><i style="height:28px"></i><i style="height:43px"></i><i style="height:70px"></i><i style="height:6px"></i></div></div>
+      <div class="panel ver" id="b1-ver"><div class="kapital">Versi peserta</div><div class="vr"><span class="angka hijau" id="b1-ver3">3</span><span class="sesi">sesi</span></div></div>
+    </div>
+    <div id="b1-klaim"><div class="kapital">Klaim fisioterapi · RS Melati Sehat → BPJS</div><div class="rows"><div class="klaim" id="kl0"><span class="mono">SEP-UJI-004697</span><b>Sen, 3 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl1"><span class="mono">SEP-UJI-004698</span><b>Sel, 4 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl2"><span class="mono">SEP-UJI-004699</span><b>Kam, 6 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl3"><span class="mono">SEP-UJI-004700</span><b>Sen, 10 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl4"><span class="mono">SEP-UJI-004701</span><b>Sel, 11 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl5"><span class="mono">SEP-UJI-004702</span><b>Kam, 13 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim lb" id="kl6"><span class="mono">SEP-UJI-004703</span><b>Min, 16 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim lb" id="kl7"><span class="mono">SEP-UJI-004704</span><b>Sen, 17 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl8"><span class="mono">SEP-UJI-004705</span><b>Kam, 20 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl9"><span class="mono">SEP-UJI-004706</span><b>Sen, 24 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div><div class="klaim" id="kl10"><span class="mono">SEP-UJI-004707</span><b>Kam, 27 Agt</b><span>M54.5 · Low back pain</span><span class="rp">Rp136.900</span></div></div></div>
+    <div id="b1-kal"><div class="kal-t">Agustus 2026</div><div class="kal-g"><div class="kh">Sen</div><div class="kh">Sel</div><div class="kh">Rab</div><div class="kh">Kam</div><div class="kh">Jum</div><div class="kh">Sab</div><div class="kh">Min</div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd" id="k1-d1">1</div><div class="kd min" id="k1-d2">2</div><div class="kd" id="k1-d3">3</div><div class="kd" id="k1-d4">4</div><div class="kd" id="k1-d5">5</div><div class="kd" id="k1-d6">6</div><div class="kd" id="k1-d7">7</div><div class="kd" id="k1-d8">8</div><div class="kd min" id="k1-d9">9</div><div class="kd" id="k1-d10">10</div><div class="kd" id="k1-d11">11</div><div class="kd" id="k1-d12">12</div><div class="kd" id="k1-d13">13</div><div class="kd" id="k1-d14">14</div><div class="kd" id="k1-d15">15</div><div class="kd min lb" id="k1-d16">16<span class="tg">Minggu</span></div><div class="kd lb" id="k1-d17">17<span class="tg">Libur nasional</span></div><div class="kd" id="k1-d18">18</div><div class="kd" id="k1-d19">19</div><div class="kd" id="k1-d20">20</div><div class="kd" id="k1-d21">21</div><div class="kd" id="k1-d22">22</div><div class="kd min" id="k1-d23">23</div><div class="kd" id="k1-d24">24</div><div class="kd" id="k1-d25">25</div><div class="kd" id="k1-d26">26</div><div class="kd" id="k1-d27">27</div><div class="kd" id="k1-d28">28</div><div class="kd" id="k1-d29">29</div><div class="kd min" id="k1-d30">30</div><div class="kd" id="k1-d31">31</div><div class="pita" data-layout-allow-occlusion id="k1-pita0" style="left:-7px;top:139px;width:574px;height:106px"><span>awal bulan</span></div><div class="pita" data-layout-allow-occlusion id="k1-pita1" style="left:221px;top:241px;width:460px;height:106px"><span>pertengahan</span></div><div class="pita" data-layout-allow-occlusion id="k1-pita2" style="left:-7px;top:445px;width:574px;height:106px"><span>dua puluhan</span></div></div></div>
+    <div class="panel cntp" id="b1-cnt">
+      <div><div class="kapital">Ditagih</div><div class="win"><div class="strip" data-layout-allow-overflow data-layout-allow-occlusion><div>0</div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div></div></div>
+      <div><div class="kapital">Versi peserta</div><div class="angka hijau">3</div></div>
+      <div class="sel" id="b1-sel"><div class="kapital">Selisih</div><div class="angka">8</div></div>
+    </div>
+  </div>
+  <div id="b1-s3">
+    <div class="kpi"><div class="panel"><span class="angka">300</span><span>pasien fisioterapi<br>aktif Agustus</span></div>
+      <div class="panel teal"><span class="angka">30</span><span>terpicu<br>indikator</span></div></div>
+    <div class="grid" id="b1-grid"><div class="rsg"><div class="cells"><i class="andi"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="rsn">RS Melati Sehat<br><b class="">27 terpicu</b></div></div><div class="rsg"><div class="cells"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="rsn">RSU Bakti Mulia<br><b class="">1 terpicu</b></div></div><div class="rsg"><div class="cells"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="rsn">RS Cempaka Asri<br><b class="">1 terpicu</b></div></div><div class="rsg"><div class="cells"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="rsn">RSU Nusa Sejahtera<br><b class="nol">0 terpicu</b></div></div><div class="rsg"><div class="cells"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><div class="rsn">RS Kenanga Medika<br><b class="">1 terpicu</b></div></div></div>
+    <div class="andi-tag" id="b1-andi">Pak Andi</div>
+  </div>
+  <div class="panel" id="kpk"><div class="src">KPK · 2024</div><div class="n">3.269 <small>dari 4.341</small></div>
+    <div class="t">tagihan fisioterapi <b>tak ada di rekam medis</b>.</div><div class="t2">Terungkap setelah pasien dikonfirmasi.</div>
+    <div class="cr">Sumber: KPK dan Itjen Kemenkes, Juli 2024</div></div>
+</div>
+<div class="clip" id="zb" data-start="78.68" data-duration="4.36" data-track-index="7">
+  <div class="b1-dots" data-layout-allow-overflow></div>
+  <div class="lencana" style="left:80px;top:56px">Simulasi · data sintetis</div>
+  <div id="zt"><span class="w"><i>Yang</i></span> <span class="w"><i><em>ditagih</em></i></span> <span class="w"><i>harus</i></span> <span class="w"><i>sama</i></span> <span class="w"><i>dengan</i></span> <span class="w"><i>yang</i></span> <span class="w"><i><em>dijalani</em>.</i></span></div>
+  <div id="z-kiri">
+    <div class="panel zk" id="zk1"><div class="kapital">Ditagih rumah sakit</div><div class="vr"><span class="angka">11</span><span class="sesi">sesi</span></div></div>
+    <div class="panel zk" id="zk2"><div class="kapital">Versi pasien</div><div class="vr"><span class="angka hijau">3</span><span class="sesi">sesi</span></div></div>
+    <div class="zsel" id="zk3"><b>Selisih 8</b> · bahan klarifikasi ke RS</div>
+  </div>
+  <div id="z-kal"><div class="kal-t">Agustus 2026</div><div class="kal-g"><div class="kh">Sen</div><div class="kh">Sel</div><div class="kh">Rab</div><div class="kh">Kam</div><div class="kh">Jum</div><div class="kh">Sab</div><div class="kh">Min</div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd x"></div><div class="kd" id="k2-d1">1</div><div class="kd min" id="k2-d2">2</div><div class="kd" id="k2-d3">3</div><div class="kd" id="k2-d4">4</div><div class="kd" id="k2-d5">5</div><div class="kd" id="k2-d6">6</div><div class="kd" id="k2-d7">7</div><div class="kd" id="k2-d8">8</div><div class="kd min" id="k2-d9">9</div><div class="kd" id="k2-d10">10</div><div class="kd" id="k2-d11">11</div><div class="kd" id="k2-d12">12</div><div class="kd" id="k2-d13">13</div><div class="kd" id="k2-d14">14</div><div class="kd" id="k2-d15">15</div><div class="kd min lb" id="k2-d16">16<span class="tg">Minggu</span></div><div class="kd lb" id="k2-d17">17<span class="tg">Libur nasional</span></div><div class="kd" id="k2-d18">18</div><div class="kd" id="k2-d19">19</div><div class="kd" id="k2-d20">20</div><div class="kd" id="k2-d21">21</div><div class="kd" id="k2-d22">22</div><div class="kd min" id="k2-d23">23</div><div class="kd" id="k2-d24">24</div><div class="kd" id="k2-d25">25</div><div class="kd" id="k2-d26">26</div><div class="kd" id="k2-d27">27</div><div class="kd" id="k2-d28">28</div><div class="kd" id="k2-d29">29</div><div class="kd min" id="k2-d30">30</div><div class="kd" id="k2-d31">31</div><div class="pita" data-layout-allow-occlusion id="k2-pita0" style="left:-7px;top:139px;width:574px;height:106px"><span>awal bulan</span></div><div class="pita" data-layout-allow-occlusion id="k2-pita1" style="left:221px;top:241px;width:460px;height:106px"><span>pertengahan</span></div><div class="pita" data-layout-allow-occlusion id="k2-pita2" style="left:-7px;top:445px;width:574px;height:106px"><span>dua puluhan</span></div></div><div class="leg"><span><i class="lg-t"></i>ditagih RS</span><span><i class="lg-p"></i>kata pasien</span><span class="by">dibandingkan berdampingan oleh sistem</span></div></div>
+</div>
+
+      <!-- ===== kartu solusi (S) ===== -->
+      <div class="card clip" id="sc" data-start="16.64" data-duration="10.18" data-track-index="4">
+        <div class="card-in" id="sc-in">
+          <div class="card-bg" id="sc-bg"></div>
+          <div class="card-glow" id="sc-glow"></div>
+          <div class="card-grid" id="sc-grid"></div>
+          <div class="wave" id="sc-w1"></div><div class="wave" id="sc-w2"></div>
+          <div class="phone-ic" id="sc-phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div class="lock" id="s-lock"><div class="mark-wrap" id="s-mw"><svg class="mark" id="s-mark" viewBox="0 0 48 48" overflow="visible"><path id="s-wl" fill="#fff" d="M5 5h13l6 26-5 11L5 11V5Z"/><path id="s-wr" fill="#fff" d="M43 5H30l-6 26 5 11L43 11V5Z"/><circle id="s-ring" cx="24" cy="33" r="3.4" fill="none" stroke="#F3B441" stroke-width="0.8"/><circle id="s-dot" cx="24" cy="33" r="3.4" fill="#F3B441" stroke="#0F3D3E" stroke-width="1.5"/></svg></div><div class="words"><div class="wm-line"><div class="wm-in" id="s-w1"><span class="wm">Vedika</span><span class="wm wm-sh">Vedika</span></div></div><div class="wm-line"><div class="wm-in" id="s-w2"><span class="wm">Autentik</span><span class="wm wm-sh">Autentik</span></div></div><span class="oline" id="s-line"></span></div></div>
+          <div class="tagline" id="sc-tag"><span class="in" id="sc-tag-in">AI menelepon pasien. <b>Kamu yang memutuskan.</b></span></div>
+          <div class="flash" id="s-flash"></div>
+        </div>
+        <div class="scan-h" id="sc-scan2"></div>
+      </div>
+
+      <!-- ===== kartu penutup ===== -->
+      <div class="card clip" id="zc" data-start="82.34" data-duration="5.87" data-track-index="4" style="z-index: 52">
+        <div class="card-in" id="zc-in">
+          <div class="card-bg" id="z-bg"></div>
+          <div class="card-glow" id="z-glow"></div>
+          <div class="card-grid" id="z-grid"></div>
+          <div class="lock" id="z-lock"><div class="mark-wrap" id="z-mw"><svg class="mark" id="z-mark" viewBox="0 0 48 48" overflow="visible"><path id="z-wl" fill="#fff" d="M5 5h13l6 26-5 11L5 11V5Z"/><path id="z-wr" fill="#fff" d="M43 5H30l-6 26 5 11L43 11V5Z"/><circle id="z-ring" cx="24" cy="33" r="3.4" fill="none" stroke="#F3B441" stroke-width="0.8"/><circle id="z-dot" cx="24" cy="33" r="3.4" fill="#F3B441" stroke="#0F3D3E" stroke-width="1.5"/></svg></div><div class="words"><div class="wm-line"><div class="wm-in" id="z-w1"><span class="wm">Vedika</span><span class="wm wm-sh">Vedika</span></div></div><div class="wm-line"><div class="wm-in" id="z-w2"><span class="wm">Autentik</span><span class="wm wm-sh">Autentik</span></div></div><span class="oline" id="z-line"></span></div></div>
+          <div class="slogan"><span id="z-slogan">Dengar langsung dari pasien.</span></div>
+          <div class="credit" id="z-credit">Tim Veritas · Richard · Zahra · Imelda</div>
+          <div class="flash" id="z-flash"></div>
+        </div>
+        <div class="scan-v" id="z-scan"></div>
+      </div>
+
+      <!-- ===== subtitle ===== -->
+<div class="sub sub-call clip" id="sub-00" data-start="0.25" data-duration="3.48" data-track-index="8"><p><b>Pak Andi</b>Tiga kali. Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan.</p></div>
+<div class="sub sub-demo clip" id="sub-01" data-start="3.77" data-duration="4.39" data-track-index="8"><p>Itu kata Pak Andi soal terapinya bulan Agustus.</p></div>
+<div class="sub sub-demo clip" id="sub-02" data-start="8.25" data-duration="3.14" data-track-index="8"><p>Tapi yang ditagih ke BPJS: sebelas.</p></div>
+<div class="sub sub-demo clip" id="sub-03" data-start="11.43" data-duration="3.63" data-track-index="8"><p>Selisih begini baru ketahuan kalau pasiennya ditanya.</p></div>
+<div class="sub sub-demo clip" id="sub-04" data-start="15.29" data-duration="3.13" data-track-index="8"><p>Itu masih manual, dan sering telat.</p></div>
+<div class="sub sub-logo clip" id="sub-05" data-start="19.16" data-duration="2.53" data-track-index="8"><p>Kenalin, Vedika Autentik.</p></div>
+<div class="sub sub-logo clip" id="sub-06" data-start="21.73" data-duration="4.47" data-track-index="8"><p>AI yang menelepon pasien, jadi kamu dapat jawaban langsung.</p></div>
+<div class="sub sub-demo clip" id="sub-07" data-start="26.34" data-duration="3.78" data-track-index="8"><p>Antreanmu terisi, cuma pasien berpola janggal.</p></div>
+<div class="sub sub-demo clip" id="sub-08" data-start="30.35" data-duration="2.75" data-track-index="8"><p>Pak Andi: sebelas sesi.</p></div>
+<div class="sub sub-demo clip" id="sub-09" data-start="33.25" data-duration="2.15" data-track-index="8"><p>Nyalakan mode otomatis.</p></div>
+<div class="sub sub-demo clip" id="sub-10" data-start="35.46" data-duration="4.37" data-track-index="8"><p>Pak Andi dapat WA dulu, biar nggak dikira penipuan.</p></div>
+<div class="sub sub-demo clip" id="sub-11" data-start="40.56" data-duration="2.32" data-track-index="8"><p>Lalu AI menelepon.</p></div>
+<div class="sub sub-demo clip" id="sub-12" data-start="43.1" data-duration="3.0" data-track-index="8"><p>Kamu bisa ikuti percakapannya langsung.</p></div>
+<div class="sub sub-call clip" id="sub-13" data-start="46.14" data-duration="3.5" data-track-index="8"><p><b>AI</b>Kira-kira berapa kali Bapak datang terapi di bulan Agustus?</p></div>
+<div class="sub sub-call clip" id="sub-14" data-start="49.74" data-duration="0.75" data-track-index="8"><p><b>Pak Andi</b>Tiga kali.</p></div>
+<div class="sub sub-demo clip" id="sub-15" data-start="50.53" data-duration="2.4" data-track-index="8"><p>Jawabannya langsung tertangkap.</p></div>
+<div class="sub sub-demo clip" id="sub-16" data-start="53.21" data-duration="2.01" data-track-index="8"><p>Kartu bukti siap.</p></div>
+<div class="sub sub-demo clip" id="sub-17" data-start="55.32" data-duration="3.32" data-track-index="8"><p>Ditagih sebelas, kata Pak Andi tiga.</p></div>
+<div class="sub sub-demo clip" id="sub-18" data-start="59.04" data-duration="4.23" data-track-index="8"><p>Lengkap dengan rekaman, kutipan, dan tanggal libur.</p></div>
+<div class="sub sub-demo clip" id="sub-19" data-start="63.51" data-duration="2.08" data-track-index="8"><p>Satu jawaban belum cukup.</p></div>
+<div class="sub sub-demo clip" id="sub-20" data-start="65.82" data-duration="6.4" data-track-index="8"><p>Begitu tiga pasien RS Melati menjawab serupa, RS-nya masuk daftar klarifikasi.</p></div>
+<div class="sub sub-demo clip" id="sub-21" data-start="72.46" data-duration="2.05" data-track-index="8"><p>Sistem cuma menyarankan.</p></div>
+<div class="sub sub-demo clip" id="sub-22" data-start="74.74" data-duration="3.97" data-track-index="8"><p>Yang memutuskan tetap kamu, lengkap dengan alasannya.</p></div>
+
+      <div id="endfade"></div>
+
+      <!-- ===== audio ===== -->
+<audio id="vo-p1" src="assets/vo/p1.wav" data-start="3.85" data-duration="4.133" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-p2" src="assets/vo/p2.wav" data-start="8.33" data-duration="2.926" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-p3" src="assets/vo/p3.wav" data-start="11.51" data-duration="6.734" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-s" src="assets/vo/s.wav" data-start="19.24" data-duration="6.78" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d1" src="assets/vo/d1.wav" data-start="26.42" data-duration="6.502" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d2" src="assets/vo/d2.wav" data-start="33.33" data-duration="6.316" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d3a" src="assets/vo/d3a.wav" data-start="40.64" data-duration="5.294" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d3b" src="assets/vo/d3b.wav" data-start="50.61" data-duration="2.136" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d4" src="assets/vo/d4.wav" data-start="53.29" data-duration="9.799" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d5" src="assets/vo/d5.wav" data-start="63.59" data-duration="8.452" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-d6" src="assets/vo/d6.wav" data-start="72.54" data-duration="5.991" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-z0" src="assets/vo/z0.wav" data-start="79.08" data-duration="4.505" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="vo-z1" src="assets/vo/z1.wav" data-start="84.09" data-duration="3.622" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="hook" src="assets/call/s1-hook.wav" data-start="0.25" data-duration="3.4" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="call" src="assets/call/s1-qa.wav" data-start="46.14" data-duration="4.32" data-track-index="20" data-volume="1" data-audio-group="voiceover"></audio>
+<audio id="fx-00-tick" src="assets/sfx/tick.wav" data-start="8.48" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-01-tick" src="assets/sfx/tick.wav" data-start="8.67" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-02-tick" src="assets/sfx/tick.wav" data-start="8.85" data-duration="0.06" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-03-tick" src="assets/sfx/tick.wav" data-start="9.04" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-04-tick" src="assets/sfx/tick.wav" data-start="9.22" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-05-tick" src="assets/sfx/tick.wav" data-start="9.41" data-duration="0.06" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-06-tick" src="assets/sfx/tick.wav" data-start="9.59" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-07-tick" src="assets/sfx/tick.wav" data-start="9.78" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-08-tick" src="assets/sfx/tick.wav" data-start="9.96" data-duration="0.06" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-09-tick" src="assets/sfx/tick.wav" data-start="10.14" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-10-tick" src="assets/sfx/tick.wav" data-start="10.33" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-11-thud" src="assets/sfx/thud.wav" data-start="10.78" data-duration="0.6" data-track-index="24" data-volume="0.6" data-audio-group="sfx"></audio>
+<audio id="fx-12-whoosh" src="assets/sfx/whoosh.wav" data-start="11.31" data-duration="0.9" data-track-index="22" data-volume="0.35" data-audio-group="sfx"></audio>
+<audio id="fx-13-whoosh" src="assets/sfx/whoosh.wav" data-start="16.74" data-duration="0.9" data-track-index="23" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-14-riser" src="assets/sfx/riser.wav" data-start="17.24" data-duration="1.3" data-track-index="24" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-15-hit" src="assets/sfx/hit.wav" data-start="18.54" data-duration="1.6" data-track-index="22" data-volume="0.55" data-audio-group="sfx"></audio>
+<audio id="fx-16-whoosh" src="assets/sfx/whoosh.wav" data-start="25.87" data-duration="0.9" data-track-index="23" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-17-click" src="assets/sfx/click.wav" data-start="33.93" data-duration="0.09" data-track-index="24" data-volume="0.34" data-audio-group="sfx"></audio>
+<audio id="fx-18-ding" src="assets/sfx/ding.wav" data-start="35.28" data-duration="0.9" data-track-index="22" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-19-ring2x" src="assets/sfx/ring2x.wav" data-start="39.44" data-duration="2.6" data-track-index="23" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-20-click" src="assets/sfx/click.wav" data-start="40.26" data-duration="0.09" data-track-index="24" data-volume="0.3" data-audio-group="sfx"></audio>
+<audio id="fx-21-tick" src="assets/sfx/tick.wav" data-start="56.85" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-22-tick" src="assets/sfx/tick.wav" data-start="56.97" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-23-tick" src="assets/sfx/tick.wav" data-start="57.08" data-duration="0.06" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-24-tick" src="assets/sfx/tick.wav" data-start="57.19" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-25-tick" src="assets/sfx/tick.wav" data-start="57.3" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-26-tick" src="assets/sfx/tick.wav" data-start="57.41" data-duration="0.06" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-27-tick" src="assets/sfx/tick.wav" data-start="57.53" data-duration="0.06" data-track-index="22" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-28-tick" src="assets/sfx/tick.wav" data-start="57.64" data-duration="0.06" data-track-index="23" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-29-thud" src="assets/sfx/thud.wav" data-start="57.74" data-duration="0.6" data-track-index="24" data-volume="0.4" data-audio-group="sfx"></audio>
+<audio id="fx-30-stamp" src="assets/sfx/stamp.wav" data-start="69.09" data-duration="0.5" data-track-index="22" data-volume="0.6" data-audio-group="sfx"></audio>
+<audio id="fx-31-click" src="assets/sfx/click.wav" data-start="76.66" data-duration="0.09" data-track-index="23" data-volume="0.34" data-audio-group="sfx"></audio>
+<audio id="fx-32-pop" src="assets/sfx/pop.wav" data-start="76.71" data-duration="0.14" data-track-index="24" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-33-whoosh" src="assets/sfx/whoosh.wav" data-start="78.58" data-duration="0.9" data-track-index="22" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="fx-34-riser" src="assets/sfx/riser.wav" data-start="81.94" data-duration="1.3" data-track-index="23" data-volume="0.5" data-audio-group="sfx"></audio>
+<audio id="bgm" src="assets/music/bgm.wav" data-start="0" data-duration="87.24" data-media-start="0.243" data-track-index="21" data-volume="1" data-audio-group="music" data-automation='{"version": 1, "lanes": [{"target": "volume", "points": [{"t": 0.0, "v": 0.53}, {"t": 0.1, "v": 0.21}, {"t": 0.2, "v": 0.05}, {"t": 3.8, "v": 0.164}, {"t": 3.9, "v": 0.17}, {"t": 18.7, "v": 0.279}, {"t": 18.8, "v": 0.473}, {"t": 18.9, "v": 0.415}, {"t": 19.0, "v": 0.17}, {"t": 40.1, "v": 0.275}, {"t": 40.2, "v": 0.469}, {"t": 40.3, "v": 0.415}, {"t": 40.4, "v": 0.17}, {"t": 46.1, "v": 0.05}, {"t": 50.6, "v": 0.141}, {"t": 50.7, "v": 0.17}, {"t": 83.2, "v": 0.189}, {"t": 83.3, "v": 0.384}, {"t": 83.4, "v": 0.578}, {"t": 83.5, "v": 0.772}, {"t": 83.6, "v": 0.823}, {"t": 83.7, "v": 0.551}, {"t": 83.8, "v": 0.279}, {"t": 83.9, "v": 0.17}, {"t": 88.2, "v": 0.341}]}]}'></audio>
+    </div>
+
+    <script>
+      const C = {"T": {"hook": 0.25, "p1": 3.85, "p2": 8.33, "p3": 11.51, "s": 19.24, "d1": 26.42, "d2": 33.33, "ring": 39.44, "d3a": 40.64, "call": 46.14, "d3b": 50.61, "d4": 53.29, "d5": 63.59, "d6": 72.54, "z0": 79.08, "z1": 84.09}, "S": {"sc": 16.64, "d1": 26.22, "d2": 33.13, "d3": 39.44, "d4": 53.09, "d5": 63.39, "d6": 72.34, "z": 78.98}, "B1": {"hook": 0.25, "kal": 0.8, "pita": [1.3, 2.0, 2.85], "ver": 4.35, "p2": 8.08, "kl0": 8.48, "kl_dt": 0.185, "zoom": 11.41, "kpk": 13.61, "end": 17.34, "sel": 10.78}, "TGL": [3, 4, 6, 10, 11, 13, 16, 17, 20, 24, 27], "XF": [{"id": "sc2", "s": 46.14}, {"id": "sc3", "s": 50.46}, {"id": "sc4", "s": 53.09}, {"id": "sc5", "s": 63.39}, {"id": "sc6", "s": 68.59}, {"id": "sc7", "s": 72.34}], "XFD": 0.3, "CAM": [[26.12, 960, 540, 1.0], [26.92, 1128, 560, 1.25], [39.14, 1128, 560, 1.25], [40.14, 1150, 620, 1.2], [52.89, 1150, 620, 1.2], [53.69, 1125, 380, 1.25], [59.09, 1125, 380, 1.25], [60.49, 1110, 640, 1.3], [63.09, 1110, 640, 1.3], [63.99, 1110, 500, 1.3], [68.39, 1110, 500, 1.3], [69.09, 1110, 540, 1.3], [72.04, 1110, 540, 1.3], [72.94, 1128, 560, 1.25], [74.54, 1128, 560, 1.25], [75.54, 1500, 640, 1.5], [78.48, 1500, 640, 1.5], [79.48, 960, 540, 0.7]], "HIT": 18.54, "TAG_S": 19.54, "STAGE_S": 26.12, "STAGE_D": 53.56, "CALLOUT_S": 28.72, "WAVE_S": 46.14, "C2_T0": 56.74, "STAMP_T": 69.09, "ZB_E": 83.04, "Z_SCAN": 82.34, "Z_HIT": 83.24, "TOTAL": 88.21};
+      const T = C.T, S = C.S, W = 1920, H = 1080;
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------------------------------------------------------------- kamera: lintasan kontinu antar pose (PCHIP)
+      const camKeys = [];
+      function ck(t, cx, cy, s) { camKeys.push({ t, cx, cy, lz: Math.log(s) }); }
+      function camPrep() {
+        camKeys.sort((a, b) => a.t - b.t);
+        const n = camKeys.length;
+        for (const ch of ["cx", "cy", "lz"]) {
+          const h = [], d = [], m = new Array(n).fill(0);
+          for (let i = 0; i < n - 1; i++) { h[i] = camKeys[i + 1].t - camKeys[i].t; d[i] = (camKeys[i + 1][ch] - camKeys[i][ch]) / h[i]; }
+          for (let i = 1; i < n - 1; i++) {
+            if (d[i - 1] * d[i] <= 0) m[i] = 0;
+            else { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+          }
+          camKeys.forEach((k, i) => { k["m" + ch] = m[i]; });
+        }
+      }
+      function camAt(t) {
+        const n = camKeys.length;
+        if (t <= camKeys[0].t) return camKeys[0];
+        if (t >= camKeys[n - 1].t) return camKeys[n - 1];
+        let i = 0;
+        while (camKeys[i + 1].t <= t) i++;
+        const a = camKeys[i], b = camKeys[i + 1], h = b.t - a.t, u = (t - a.t) / h, u2 = u * u, u3 = u2 * u;
+        const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+        const f = (ch) => h00 * a[ch] + h10 * h * a["m" + ch] + h01 * b[ch] + h11 * h * b["m" + ch];
+        return { cx: f("cx"), cy: f("cy"), lz: f("lz") };
+      }
+      function camApply(c) {
+        const s = Math.exp(c.lz);
+        let x, y;
+        if (s < 1) { x = W * (1 - s) / 2; y = H * (1 - s) / 2 + 24 * (1 - s); }
+        else { x = Math.min(0, Math.max(W - s * W, W / 2 - s * c.cx)); y = Math.min(0, Math.max(H - s * H, H / 2 - s * c.cy)); }
+        gsap.set("#win", { x, y, scale: s });
+      }
+      function camPlay() {
+        camPrep();
+        const t0 = camKeys[0].t, t1 = camKeys[camKeys.length - 1].t, o = { v: 0 };
+        tl.fromTo(o, { v: 0 }, { v: 1, duration: t1 - t0, ease: "none", immediateRender: false,
+          modifiers: { v: (v) => { camApply(camAt(t0 + v * (t1 - t0))); return v; } } }, t0);
+      }
+
+      // ---------------------------------------------------------------- babak 1: suara Pak Andi -> kalender -> 11 klaim -> 300 pasien
+      const B = C.B1, TG = C.TGL;
+      TG.forEach((d) => document.getElementById("k2-d" + d).classList.add("t"));   // kalender penutup: tagihan sudah terisi
+      tl.set("#black", { opacity: 1 }, 0);
+      tl.to("#black", { opacity: 0, duration: 0.6, ease: "power1.out" }, 0.05);
+      tl.fromTo("#b1-len", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.2);
+      // hook: kartu peserta + gelombang rekaman, playhead ikut audio
+      tl.fromTo("#b1-pas", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.hook - 0.1);
+      tl.fromTo("#b1-rek", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.hook);
+      const bars = document.querySelectorAll("#b1-wv i");
+      bars.forEach((b, i) => tl.set(b, { backgroundColor: "oklch(48% .075 205)" }, B.hook + 0.1 + (i / bars.length) * 3.35));
+      // kalender Agustus + tiga pita jawaban Pak Andi (awal bulan, pertengahan, dua puluhan)
+      tl.fromTo("#b1-kal .kal-t", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4 }, B.kal);
+      tl.fromTo("#b1-kal .kd:not(.x), #b1-kal .kh", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out", stagger: 0.008 }, B.kal);
+      B.pita.forEach((t, i) => tl.fromTo("#k1-pita" + i, { opacity: 0, scale: 1.12, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.8)" }, t));
+      tl.fromTo("#b1-ver", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, B.ver - 0.2);
+      tl.fromTo("#b1-ver3", { scale: 0.3, opacity: 0, transformOrigin: "0% 80%" }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, B.ver);
+      // P2: kolom kiri keluar, 11 baris klaim RS Melati masuk, kalender ikut terisi, counter naik melewati 3 (merah)
+      tl.to("#b1-kiri", { opacity: 0, x: -60, duration: 0.35, ease: "power2.in" }, B.p2);
+      tl.to("#b1-kal", { x: 210, scale: 0.86, duration: 0.6, ease: "power3.inOut" }, B.p2);
+      tl.fromTo("#b1-klaim .kapital", { opacity: 0 }, { opacity: 1, duration: 0.3 }, B.p2 + 0.2);
+      tl.fromTo("#b1-cnt", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, B.p2 + 0.3);
+      tl.set("#b1-sel", { opacity: 0 }, 0);
+      TG.forEach((d, i) => {
+        const t = B.kl0 + i * B.kl_dt;
+        tl.fromTo("#kl" + i, { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, t);
+        const isi = d === 16 || d === 17 ? "oklch(46% .1 60)" : "oklch(14% .002 90)";
+        tl.set("#k1-d" + d, { backgroundColor: isi, borderColor: isi, color: "#fff" }, t + 0.08);
+        if (d === 16 || d === 17) tl.set("#k1-d" + d + " .tg", { opacity: 1 }, t + 0.08);
+        tl.fromTo("#k1-d" + d, { scale: 1.15 }, { scale: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t + 0.08);
+        tl.set("#b1-cnt .strip", { y: -100 * (i + 1) }, t + 0.08);
+        if (i + 1 === 4) tl.set("#b1-cnt .strip", { color: "oklch(55% .19 27)" }, t + 0.08);
+      });
+      tl.fromTo("#b1-cnt .win", { scale: 1 }, { scale: 1.12, duration: 0.09, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 60%" }, B.kl0 + 10 * B.kl_dt + 0.1);
+      tl.fromTo("#b1-sel", { opacity: 0, scale: 0.6, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" }, B.sel);
+      // P3: semuanya mengecil jadi satu kotak (Pak Andi) di antara 300 pasien aktif; 30 terpicu menyala
+      tl.set("#b1-s3", { opacity: 0 }, 0);
+      tl.to("#b1-s2", { scale: 26 / 1920, x: 80, y: 296, duration: 1.0, ease: "power3.inOut" }, B.zoom);
+      tl.to("#b1-s2", { opacity: 0, duration: 0.25 }, B.zoom + 0.8);
+      tl.fromTo("#b1-s3", { opacity: 0, scale: 1.6, transformOrigin: "93px 303px" }, { opacity: 1, scale: 1, duration: 1.0, ease: "power3.inOut" }, B.zoom);
+      tl.set("#b1-s3 .cells i.on", { opacity: 0 }, 0);
+      tl.to("#b1-s3 .cells i.on", { opacity: 1, duration: 0.18, stagger: 0.035 }, B.zoom + 1.0);
+      tl.fromTo("#b1-andi", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, B.zoom + 0.95);
+      tl.fromTo("#kpk", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, B.kpk);
+      tl.fromTo("#kpk .n", { scale: 0.92, transformOrigin: "0% 50%" }, { scale: 1, duration: 0.7, ease: "power2.out" }, B.kpk + 0.1);
+
+      // ---------------------------------------------------------------- S: telepon berdering -> logo
+      tl.set("#sc-in", { clipPath: "inset(0% 0% 0% 0%)" }, 0);
+      tl.fromTo("#sc", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, S.sc);
+      tl.fromTo("#sc-phone", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }, S.sc + 0.2);
+      tl.fromTo("#sc-phone svg", { rotation: -12, transformOrigin: "50% 50%" }, { rotation: 12, duration: 0.09, ease: "none", yoyo: true, repeat: 13 }, S.sc + 0.5);
+      tl.fromTo("#sc-w1", { scale: 0.6, opacity: 0.9 }, { scale: 2.3, opacity: 0, duration: 0.8, ease: "power1.out", repeat: 1, repeatDelay: 0.1 }, S.sc + 0.5);
+      tl.fromTo("#sc-w2", { scale: 0.6, opacity: 0.9 }, { scale: 2.3, opacity: 0, duration: 0.8, ease: "power1.out", repeat: 1, repeatDelay: 0.1 }, S.sc + 0.9);
+      tl.to("#sc-phone", { scale: 0.3, opacity: 0, duration: 0.25, ease: "power2.in" }, C.HIT - 0.55);
+      tl.set(["#sc-w1", "#sc-w2"], { opacity: 0 }, C.HIT - 0.45);
+      tl.set("#sc-scan2", { opacity: 0 }, 0);
+      tl.fromTo("#sc-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, S.sc + 0.5);
+      function lockIn(p, t0, opt) {
+        tl.fromTo(`#${p}-wl`, { x: -14, rotation: -7, opacity: 0, transformOrigin: "50% 100%" }, { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-wr`, { x: 14, rotation: 7, opacity: 0, transformOrigin: "50% 100%" }, { x: 0, rotation: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, t0);
+        tl.fromTo(`#${p}-mw`, { scale: 1 }, { scale: 1.04, duration: 0.08, ease: "power2.out", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-flash`, { opacity: 0 }, { opacity: 0.32, duration: 0.033, ease: "none", yoyo: true, repeat: 1 }, t0 + 0.42);
+        tl.fromTo(`#${p}-dot`, { scale: 0, y: -9, transformOrigin: "50% 50%" }, { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" }, t0 + 0.5);
+        tl.set(`#${p}-ring`, { opacity: 0 }, 0);
+        tl.fromTo(`#${p}-ring`, { scale: 1, opacity: 0.95, transformOrigin: "50% 50%" }, { scale: 4.2, opacity: 0, duration: 0.9, ease: "power2.out", immediateRender: false }, t0 + 0.62);
+        tl.fromTo(`#${p}-w1`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.7);
+        tl.fromTo(`#${p}-w2`, { yPercent: 105 }, { yPercent: 0, duration: 0.62, ease: "power3.out" }, t0 + 0.82);
+        tl.fromTo(`#${p}-line`, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, t0 + 1.3);
+        tl.fromTo(`#${p}-mw`, { y: 0 }, { y: -4, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: opt.floats }, t0 + 1.9);
+        tl.fromTo(`#${p}-lock .wm-sh`, { backgroundPosition: "150% 0%" }, { backgroundPosition: "-50% 0%", duration: 1.2, ease: "power1.inOut", stagger: 0.08 }, t0 + opt.shine);
+      }
+      lockIn("s", C.HIT - 0.42, { floats: 2, shine: 3.2 });
+      tl.fromTo("#sc-tag-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power2.inOut" }, C.TAG_S);
+      // keluar: garis pindai turun atas -> bawah membuka jendela demo
+      tl.set("#sc-scan2", { opacity: 1, y: -10 }, S.d1 - 0.05);
+      tl.to("#sc-scan2", { y: H + 10, duration: 0.5, ease: "power1.inOut" }, S.d1 - 0.05);
+      tl.to("#sc-in", { clipPath: "inset(100% 0% 0% 0%)", duration: 0.5, ease: "power1.inOut" }, S.d1 - 0.05);
+
+      // ---------------------------------------------------------------- panggung demo
+      tl.set("#stage", { opacity: 0 }, 0);
+      tl.set("#stage", { opacity: 1 }, S.d1 - 0.1);
+      tl.fromTo("#mint-dots", { x: 0, y: 0 }, { x: -34, y: -34, duration: C.STAGE_D, ease: "none" }, C.STAGE_S);
+      C.XF.forEach((x) => tl.fromTo("#" + x.id, { opacity: 0 }, { opacity: 1, duration: C.XFD, ease: "sine.inOut" }, x.s));
+      C.CAM.forEach((k) => ck(k[0], k[1], k[2], k[3]));
+      camPlay();
+      document.querySelectorAll(".step").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), inner = el.querySelector(".step-in");
+        tl.fromTo(inner, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power3.out" }, s + 0.1);
+        tl.fromTo(el.querySelector(".step-rule"), { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.out" }, s + 0.18);
+        tl.to(inner, { opacity: 0, duration: 0.2 }, s + d - 0.22);
+      });
+      // sorot dalam jendela
+      document.querySelectorAll(".ring").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration);
+        tl.fromTo(el, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, s);
+        tl.to(el, { opacity: 0, duration: 0.25 }, s + d - 0.25);
+      });
+      // overlay layar: masuk dari bawah/samping, keluar memudar
+      document.querySelectorAll(".ov").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), dx = parseFloat(el.dataset.dx || 0), dy = parseFloat(el.dataset.dy || 24);
+        tl.fromTo(el, { opacity: 0, x: dx, y: dy }, { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }, s);
+        tl.to(el, { opacity: 0, duration: 0.25 }, s + d - 0.25);
+      });
+      tl.fromTo("#call-leader", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power2.out" }, C.CALLOUT_S + 0.2);
+      // gelombang suara: batang bergerak selama rekaman telepon diputar
+      document.querySelectorAll(".waveb i").forEach((b, i) => {
+        tl.fromTo(b, { scaleY: 0.25 + (i % 5) * 0.08 }, { scaleY: 0.95 - (i % 4) * 0.12, duration: 0.18 + (i % 6) * 0.045, ease: "sine.inOut", yoyo: true, repeat: 40 }, C.WAVE_S + (i % 7) * 0.02);
+      });
+      // D4: counter 11 -> 3, garis bawah "Selisih 8"
+      tl.fromTo("#c2 .strip", { y: 0 }, { y: -112 * 8, duration: 0.9, ease: "steps(8)" }, C.C2_T0);
+      tl.fromTo("#c2 .sel u", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, C.C2_T0 + 1.0);
+      // D5: 2/4 Normal -> 3/5 Perlu klarifikasi RS (stempel)
+      tl.set("#bd-after", { opacity: 0 }, 0);
+      tl.to("#bd-before", { opacity: 0, duration: 0.15 }, C.STAMP_T - 0.25);
+      tl.set("#bd-after", { opacity: 1 }, C.STAMP_T);
+      tl.fromTo("#bd-after .chipst", { scale: 2.4, rotation: -9, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, rotation: -3, opacity: 1, duration: 0.22, ease: "power4.in" }, C.STAMP_T);
+      tl.fromTo("#bd-after .big", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, C.STAMP_T);
+      tl.fromTo("#bd", { scale: 1 }, { scale: 1.04, duration: 0.07, yoyo: true, repeat: 1, transformOrigin: "0% 100%" }, C.STAMP_T + 0.2);
+
+      // ---------------------------------------------------------------- penutup
+      tl.fromTo("#zb", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, S.z - 0.3);
+      tl.fromTo("#zb", { scale: 1.04 }, { scale: 1, duration: 1.2, ease: "power2.out", transformOrigin: "50% 50%" }, S.z - 0.3);
+      tl.set("#stage", { opacity: 0 }, S.z + 0.7);
+      document.querySelectorAll("#zt .w i").forEach((el, i) => {
+        tl.fromTo(el, { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: "power3.out" }, T.z0 + 0.05 + i * 0.14);
+      });
+      tl.fromTo("#zk1", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, S.z + 0.1);
+      tl.fromTo("#zk2", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, S.z + 0.3);
+      tl.fromTo("#z-kal", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, S.z + 0.2);
+      tl.fromTo("#zk3", { opacity: 0, scale: 0.8, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, S.z + 1.1);
+      const z = C.Z_SCAN;
+      tl.fromTo("#z-scan", { x: -30, opacity: 1 }, { x: W + 30, duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#zc-in", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power1.inOut" }, z);
+      tl.fromTo("#z-bg", { opacity: 0.8 }, { opacity: 1, duration: 0.6 }, z + 0.4);
+      tl.set("#z-scan", { opacity: 0 }, z + 0.56);
+      tl.fromTo("#z-glow", { scale: 0.9, opacity: 0.6 }, { scale: 1.08, opacity: 1, duration: 2.4, ease: "sine.inOut", yoyo: true, repeat: 2 }, z + 0.5);
+      lockIn("z", C.Z_HIT - 0.42, { floats: 2, shine: 3.0 });
+      tl.fromTo("#z-slogan", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power3.out" }, T.z1);
+      tl.fromTo("#z-credit", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, T.z1 + 1.6);
+      tl.set("#endfade", { opacity: 0 }, 0);
+      tl.to("#endfade", { opacity: 1, duration: 0.55, ease: "sine.in" }, C.TOTAL - 0.55);
+
+      // ---------------------------------------------------------------- subtitle
+      document.querySelectorAll(".sub").forEach((el) => {
+        const s = parseFloat(el.dataset.start), d = parseFloat(el.dataset.duration), p = el.querySelector("p");
+        tl.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, s);
+        tl.to(p, { opacity: 0, duration: 0.12, ease: "power1.in" }, s + d - 0.12);
+      });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

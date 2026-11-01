@@ -2,11 +2,24 @@
    Token, tombol, tabel, panel, dan ponsel WA dipakai ulang dari app.css; di sini hanya
    komponen yang baru di v3 (lencana Simulasi, sub-menu, kartu angka, panggilan, kartu bukti). */
 
+/* ---------- hierarki dasar v3 ----------
+   Menimpa app.css hanya untuk v3 (v2.html tetap memakai gaya lama). Label kecil memakai huruf kalimat, bukan
+   kapital berjarak; hierarki dibawa ukuran dan ketebalan. 700 untuk judul, 800 tidak dipakai lagi. */
+
+.kapital { font-size: 12.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted-fg); }
+.kepala h1 { font-weight: 700; letter-spacing: -.015em; }
+.panel-kepala h2, .panel-kepala h3 { font-size: 15px; font-weight: 700; }
+.masuk-kartu h2 { font-size: 18px; font-weight: 700; letter-spacing: -.01em; text-transform: none; }
+.pengumuman b { font-weight: 700; }
+.saran-isi h3 { font-weight: 700; }
+.sub-judul { margin-top: 2px; font-size: 14px; color: var(--fg-2); }
+.tabel th { font-size: 12.5px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+
 /* ---------- lencana Simulasi ---------- */
 
 .lencana-simulasi {
-  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-  padding: 5px 9px; border-radius: 4px; background: var(--cek-bg); color: var(--cek-fg); white-space: nowrap;
+  font-size: 12px; font-weight: 700;
+  padding: 4px 9px; border-radius: 4px; background: var(--cek-bg); color: var(--cek-fg); white-space: nowrap;
   border: 1px solid oklch(86% .07 85);
 }
 .masuk-bungkus .lencana-simulasi { display: inline-block; margin-top: 10px; }
@@ -42,18 +55,11 @@
 
 .kartu-angka { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
 .kartu-angka > div { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 14px 18px 15px; }
-.kartu-angka b { display: block; font-size: 28px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
-.kartu-angka span { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted-fg); }
-/* Tiap kartu punya warna sendiri: teal = terpicu, biru = ditelepon, merah = tidak sesuai, kuning = RS perlu klarifikasi. */
-.kartu-angka .angka-terpicu { background: var(--primary-subtle); border-color: oklch(88% .035 205); }
-.kartu-angka .angka-terpicu b { color: var(--primary); }
-.kartu-angka .angka-ditelepon { background: var(--ulang-bg); border-color: oklch(88% .04 261); }
-.kartu-angka .angka-ditelepon b { color: var(--ulang-fg); }
-.kartu-angka .angka-tidak-sesuai { background: var(--prioritas-bg); border-color: oklch(88% .05 27); }
+.kartu-angka b { display: block; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.kartu-angka span { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }
+/* Kartu netral. Warna hanya pada angka yang butuh tindakan dan bukan nol, supaya mata langsung ke sana. */
 .kartu-angka .angka-tidak-sesuai b { color: var(--prioritas-fg); }
-.kartu-angka .angka-klarifikasi { background: var(--cek-bg); border-color: oklch(88% .06 85); }
 .kartu-angka .angka-klarifikasi b { color: var(--cek-fg); }
-.kartu-angka > div span { color: var(--fg-2); }
 
 /* ---------- antrean konfirmasi ---------- */
 
@@ -63,7 +69,7 @@
 .antrean-atas .kartu-angka { gap: 10px; margin-bottom: 10px; }
 .antrean-atas .kartu-angka > div { display: flex; align-items: center; gap: 12px; padding: 14px 18px; }
 .antrean-atas .kartu-angka b { font-size: 30px; }
-.antrean-atas .kartu-angka span { margin-top: 0; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.antrean-atas .kartu-angka span { margin-top: 0; font-size: 13.5px; font-weight: 500; line-height: 1.3; }
 .antrean-atas .bar-antrean { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 8px 14px; }
 .bar-antrean { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .bar-antrean .kapital { margin-right: 2px; }
@@ -75,9 +81,15 @@
 }
 .bar-antrean .pilih:hover { border-color: oklch(80% .006 90); }
 .bar-antrean .pilih:focus-visible { outline-offset: 1px; }
-.btn--otomatis[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
-.btn--otomatis[aria-pressed="true"]:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-.btn--otomatis b { letter-spacing: .04em; }
+/* Saklar: label menyebut keadaan ON, posisi dan warna saklar menunjukkan keadaannya (aria-pressed untuk pembaca layar). */
+.btn--otomatis { gap: 10px; }
+.saklar { position: relative; flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--border-strong); transition: background .15s; }
+.saklar::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px oklch(20% .01 205 / .25); transition: transform .15s; }
+.btn--otomatis[aria-pressed="true"] { border-color: oklch(84% .05 205); background: var(--primary-subtle); color: var(--primary); }
+.btn--otomatis[aria-pressed="true"] .saklar { background: var(--primary); }
+.btn--otomatis[aria-pressed="true"] .saklar::after { transform: translateX(12px); }
+@media (prefers-reduced-motion: reduce) { .saklar, .saklar::after { transition: none; } }
+.keadaan-otomatis { font-size: 13px; color: var(--muted-fg); }
 .chip-ind-wadah { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip-ind {
   display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11.5px; font-weight: 700;
@@ -94,14 +106,77 @@
 /* ---------- panggilan berlangsung ---------- */
 
 .kepala-panggilan { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
-.kepala-panggilan h1 { font-size: 22px; font-weight: 800; }
+.kepala-panggilan h1 { font-size: 24px; font-weight: 700; letter-spacing: -.015em; }
 .meta-panggilan { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 8px; font-size: 13px; color: var(--fg-2); }
 .meta-panggilan > span > b { color: var(--muted-fg); font-weight: 600; margin-right: 6px; }
 .meta-panggilan .chip-ind-wadah { display: inline-flex; vertical-align: middle; }
 .kepala-panggilan .kepala-aksi { margin-left: auto; }
 
-.panggilan-grid { display: grid; grid-template-columns: 270px minmax(0, 1fr) 290px; gap: 16px; align-items: start; }
+/* Layar Panggilan dan kartu bukti berbagi tata letak tiga seksi: HP, bukti di tengah, panel di kanan. */
+.panggilan-grid, .kartu-grid { display: grid; gap: 16px; align-items: start; }
+.panggilan-grid { grid-template-columns: 306px minmax(0, 1fr) 380px; }
+/* Kartu bukti: HP | ringkasan tagihan + kutipan kunci | saran sistem. Kolom saran sedikit lebih lebar dari panel
+   layar Panggilan supaya form "Pilih tindakan lain" tidak sesak. */
+.kartu-grid { grid-template-columns: 306px minmax(0, 1fr) 400px; }
+.kartu-saran { min-width: 0; }
+.saran-kartu .saran-isi h3 { font-size: 20px; }
+.saran-kartu .saran-isi > p { font-size: 14px; line-height: 1.55; }
 .panggilan-grid .panel-kepala .kanan { font-size: 12px; color: var(--muted-fg); font-weight: 600; }
+.kol-kiri { display: grid; gap: 16px; min-width: 0; }
+.kol-trans { min-width: 0; }
+
+/* Mockup layar telepon penerima. Bingkai dari .ponsel v2, isi layar khusus panggilan. */
+.kol-ponsel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ponsel--telp { position: relative; width: min(300px, 100%); padding: 10px; border-radius: 46px;
+  background: linear-gradient(145deg, oklch(34% .01 205), oklch(13% .01 205));
+  box-shadow: inset 0 0 0 1.5px oklch(46% .01 205), inset 0 0 0 4px oklch(10% .01 205), var(--shadow-pop); }
+/* Tombol samping: volume di kiri, daya di kanan. */
+.ponsel--telp::before { content: ""; position: absolute; left: -3px; top: 104px; width: 3px; height: 46px; border-radius: 2px 0 0 2px; background: oklch(28% .01 205); box-shadow: 0 62px 0 oklch(28% .01 205); }
+.ponsel--telp::after { content: ""; position: absolute; right: -3px; top: 150px; width: 3px; height: 78px; border-radius: 0 2px 2px 0; background: oklch(28% .01 205); }
+.ponsel--telp .ponsel-layar { position: relative; display: flex; flex-direction: column; height: 580px; border-radius: 37px; color: #fff;
+  background: radial-gradient(120% 60% at 15% 0%, oklch(46% .09 190 / .6), transparent 60%), radial-gradient(90% 50% at 100% 75%, oklch(40% .08 260 / .4), transparent 60%), linear-gradient(180deg, oklch(28% .04 205), oklch(14% .02 205)); }
+.ponsel--telp .ponsel-layar::after { content: ""; position: absolute; left: 50%; bottom: 8px; width: 112px; height: 4px; margin-left: -56px; border-radius: 2px; background: oklch(100% 0 0 / .6); }
+.ponsel--telp .poni { position: absolute; top: 10px; left: 50%; width: 88px; height: 25px; margin-left: -44px; border-radius: 14px; background: oklch(8% .01 205); }
+.ponsel--telp .poni::after { content: ""; position: absolute; right: 9px; top: 8px; width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, oklch(40% .05 260), oklch(14% .02 260) 70%); }
+.status-ponsel { display: flex; justify-content: space-between; align-items: center; padding: 14px 26px 0 28px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.status-ponsel > span { display: inline-flex; align-items: center; gap: 5px; }
+.status-ponsel .sinyal { width: 16px; height: 11px; }
+.status-ponsel .baterai { width: 24px; height: 11px; }
+.telp-info { display: flex; flex-direction: column; align-items: center; padding: 30px 16px 0; text-align: center; }
+.telp-foto { width: 60px; height: 60px; margin-bottom: 12px; border-radius: 50%; background: oklch(100% 0 0 / .16); display: grid; place-items: center; }
+.telp-foto svg { width: 26px; height: 26px; }
+.telp-info > b { font-size: 22px; font-weight: 600; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+.telp-info > span:not(.telp-foto) { margin-top: 3px; font-size: 13px; opacity: .7; }
+.telp-status { margin: 14px 0 0; font-size: 15px; font-weight: 600; }
+.telp-durasi { margin: 3px 0 0; min-height: 22px; font-size: 15px; opacity: .8; font-variant-numeric: tabular-nums; }
+.ponsel--tak .telp-status { color: oklch(82% .1 27); }
+.gelombang { display: none; }
+.ponsel--aktif .gelombang { display: flex; align-items: center; gap: 5px; height: 28px; margin-top: 6px; }
+.gelombang i { width: 4px; height: 10px; border-radius: 2px; background: oklch(82% .12 184); animation: gelombang 1s ease-in-out infinite; }
+.gelombang i:nth-child(2) { animation-delay: .12s; }
+.gelombang i:nth-child(3) { animation-delay: .24s; }
+.gelombang i:nth-child(4) { animation-delay: .36s; }
+.gelombang i:nth-child(5) { animation-delay: .24s; }
+.gelombang i:nth-child(6) { animation-delay: .12s; }
+@keyframes gelombang { 50% { height: 26px; } }
+.ponsel--dering .telp-foto { animation: cincin 1.4s ease-out infinite; }
+@keyframes cincin { from { box-shadow: 0 0 0 0 oklch(100% 0 0 / .35); } to { box-shadow: 0 0 0 26px oklch(100% 0 0 / 0); } }
+
+/* Tombol ala telepon: grid 3x2 yang sama di semua fase, memudar saat tidak ada panggilan aktif. */
+.telp-opsi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; padding: 14px 22px 0; }
+.ponsel--diam .telp-opsi, .ponsel--tak .telp-opsi, .ponsel--akhir .telp-opsi { opacity: .35; }
+.tombol-telp { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tombol-telp svg { box-sizing: content-box; width: 22px; height: 22px; padding: 11px; border-radius: 50%; background: oklch(100% 0 0 / .16); }
+.tombol-telp small { font-size: 11px; opacity: .85; }
+.tombol-telp.merah svg { background: oklch(58% .2 27); transform: rotate(135deg); }
+.tombol-telp.hijau svg { background: oklch(62% .17 150); }
+.ponsel--diam .tombol-telp.merah svg, .ponsel--tak .tombol-telp.merah svg, .ponsel--akhir .tombol-telp.merah svg { background: oklch(100% 0 0 / .16); }
+.ponsel--diam .telp-aksi, .ponsel--tak .telp-aksi, .ponsel--akhir .telp-aksi { opacity: .45; }
+.ponsel--dering .tombol-telp.hijau svg { animation: denyut 1s ease-in-out infinite; }
+.telp-aksi { display: flex; justify-content: center; gap: 70px; margin-top: auto; padding: 14px 0 28px; }
+.telp-aksi--dering { padding-bottom: 44px; }
+.ponsel-ket { margin: 0; font-size: 12.5px; color: var(--muted-fg); text-align: center; }
+.ponsel-ket b { color: var(--fg); font-weight: 700; }
 
 .progres { list-style: none; margin: 0; padding: 14px 18px; display: grid; gap: 4px; }
 .progres li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding: 7px 0; font-size: 13px; }
@@ -119,12 +194,12 @@
 .progres li.gagal small { color: var(--ulang-fg); font-weight: 600; }
 .catatan-simulasi { padding: 0 18px 14px; font-size: 12px; line-height: 1.45; color: var(--muted-fg); }
 
-.transkrip { display: flex; flex-direction: column; gap: 10px; padding: 16px; height: 470px; overflow-y: auto; background: var(--muted); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+.transkrip { display: flex; flex-direction: column; gap: 10px; padding: 16px; height: 580px; overflow-y: auto; background: var(--muted); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
 .transkrip .kosong-trans { margin: auto; text-align: center; color: var(--muted-fg); font-size: 13px; max-width: 32ch; }
 .baris-trans { max-width: 88%; padding: 9px 12px 7px; border-radius: 10px; font-size: 13.5px; line-height: 1.5; box-shadow: var(--shadow); }
 .baris-trans.baru { animation: muncul .25s ease-out; }
-.baris-trans .peran { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
-.baris-trans .peran time { margin-left: auto; font-weight: 600; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.baris-trans .peran { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; font-size: 12px; font-weight: 700; color: var(--muted-fg); }
+.baris-trans .peran time { margin-left: auto; font-weight: 500; font-variant-numeric: tabular-nums; }
 .baris-trans--ai { align-self: flex-end; background: var(--bg); border: 1px solid var(--border); border-top-right-radius: 3px; }
 .baris-trans--p { align-self: flex-start; background: var(--primary-subtle); border: 1px solid oklch(88% .03 205); border-top-left-radius: 3px; }
 .baris-trans--p .peran { color: var(--primary); }
@@ -152,10 +227,11 @@
 
 /* ---------- kartu bukti ---------- */
 
-.kepala-kartu { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.kepala-kartu h1 { font-size: 22px; font-weight: 800; }
-.kepala-kartu .meta-panggilan { margin-top: 6px; }
-.kepala-kartu .label { margin-left: auto; }
+.kepala-kartu { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.kepala-kartu h1 { font-size: 24px; font-weight: 700; letter-spacing: -.015em; }
+/* Hasil panggilan menempel pada nama: itu jawaban pertama yang dicari verifikator. */
+.judul-label { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.kepala-kartu .meta-panggilan { margin-top: 10px; }
 
 .tanda-bahaya {
   display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; margin-bottom: 16px; padding: 12px 16px;
@@ -165,15 +241,25 @@
 .tanda-bahaya b { display: block; font-size: 13.5px; }
 .tanda-bahaya p { margin-top: 2px; font-size: 13px; color: var(--fg-2); }
 
-.tiga-kartu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
-.tiga-kartu > section { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 18px; }
-.tiga-kartu .kapital { display: block; margin-bottom: 6px; }
-.tiga-kartu .besar { font-size: 34px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
-.tiga-kartu .besar small { font-size: 16px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
-.tiga-kartu .ket { margin-top: 8px; font-size: 13px; color: var(--fg-2); }
-.tiga-kartu .beda .besar { color: var(--prioritas-fg); }
-.tiga-kartu .sama .besar { color: var(--lolos-fg); }
-.tiga-kartu .netral .besar { color: var(--muted-fg); }
+/* Kartu bukti memakai bingkai HP yang sama dengan layar Panggilan: HP di kiri, bukti di kanan. */
+.kartu-kanan { display: grid; gap: 16px; min-width: 0; }
+.pemutar.pemutar--ponsel { width: min(300px, 100%); padding: 0; border-top: 0; }
+.ringkasan-tagihan { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 16px 18px 14px; }
+.angka-tiga { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.angka-tiga > div { padding: 0 12px; border-left: 1px solid var(--border); }
+.angka-tiga > div:first-child { padding-left: 0; border-left: 0; }
+.angka-tiga .kapital { display: block; margin-bottom: 4px; white-space: nowrap; }
+.angka-tiga .besar { font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.ket-angka { margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: var(--fg-2); text-wrap: pretty; }
+.angka-tiga .besar small { font-size: 14px; font-weight: 700; color: var(--muted-fg); margin-left: 4px; }
+.angka-tiga .beda .besar { color: var(--prioritas-fg); }
+.angka-tiga .sama .besar { color: var(--lolos-fg); }
+.angka-tiga .netral .besar { color: var(--muted-fg); }
+.angka-tiga > .netral:first-child .besar { color: var(--fg); }
+.tgl-blok { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.tgl-blok .kapital { display: block; }
+.tgl-blok .tanggal-sesi { margin-top: 8px; }
+.tgl-blok .ket-angka { margin-top: 8px; }
 .tanggal-sesi { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
 .tgl {
   display: inline-flex; align-items: baseline; gap: 5px; height: 26px; padding: 0 8px; align-items: center; border-radius: 5px;
@@ -181,9 +267,7 @@
 }
 .tgl small { font-size: 10.5px; font-weight: 700; letter-spacing: .02em; }
 .tgl--tanda { background: var(--cek-bg); border-color: oklch(86% .07 85); color: var(--cek-fg); }
-.tanggal-sesi + .ket { margin-top: 10px; }
 
-.bukti-bawah { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
 .kutipan { margin: 0; padding: 16px 20px 6px; font-size: 17px; line-height: 1.5; font-weight: 600; color: var(--fg); }
 .kutipan::before { content: "“"; color: var(--brand); font-size: 28px; line-height: 0; vertical-align: -8px; margin-right: 3px; }
 .kutipan-ringkasan { padding: 0 20px 14px; font-size: 13px; color: var(--fg-2); }
@@ -197,8 +281,14 @@
 .saran-kartu .konteks { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--muted); border: 1px solid var(--border); font-size: 12.5px; color: var(--fg-2); display: grid; gap: 6px; }
 .saran-kartu .konteks b { color: var(--fg); }
 .saran-kartu .catatan-saran { margin-top: 12px; font-size: 12px; color: var(--muted-fg); line-height: 1.45; }
-.transkrip--tetap { height: auto; max-height: 520px; border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+/* Transkrip di dalam kartu Kutipan kunci: ikut rekaman, baris yang sedang diucapkan disorot. */
 .tombol-transkrip { margin: 0 20px 16px; }
+.transkrip--sinkron[hidden] { display: none; }
+.transkrip--sinkron { height: 320px; padding: 14px 16px; border-radius: 0; border-top: 1px solid var(--border); }
+.transkrip--sinkron .baris-trans { max-width: 78%; cursor: pointer; transition: box-shadow .15s, border-color .15s, opacity .15s; }
+.transkrip--sinkron .baris-trans:hover { border-color: var(--border-strong); }
+.transkrip--sinkron .baris-trans.sedang { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(88% .06 190 / .6); }
+.transkrip--sinkron .baris-trans:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 /* Label alasan ada di dalam .pilihan-lain, jadi jangan ikut gaya kartu pilihan tindakan. */
 .pilihan-lain label.catatan-medan { display: block; padding: 0; border: 0; border-radius: 0; cursor: default; }
 .pilihan-lain label.catatan-medan:hover { border-color: transparent; }
@@ -211,17 +301,19 @@
 /* ---------- beranda ---------- */
 
 .judul-seksi { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; flex-wrap: wrap; }
-.judul-seksi h2 { font-size: 16px; font-weight: 800; }
-.judul-seksi span { font-size: 12.5px; color: var(--muted-fg); }
+.judul-seksi h2 { font-size: 16px; font-weight: 700; }
+.judul-seksi span { font-size: 13px; color: var(--muted-fg); }
+/* Seluruh kartu adalah tautan: judulnya angka yang perlu ditindaklanjuti, nama halaman tujuan di bawahnya. */
 .tautan-kartu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .tautan-kartu a {
   display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; align-items: center; padding: 16px 18px; text-decoration: none; color: inherit;
   border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); transition: border-color .15s;
 }
 .tautan-kartu a:hover { border-color: var(--primary); }
-.tautan-kartu b { font-size: 15px; font-weight: 800; }
+.tautan-kartu b { font-size: 15px; font-weight: 700; }
 .tautan-kartu span { grid-column: 1; font-size: 13px; color: var(--muted-fg); }
-.tautan-kartu .btn { grid-row: 1 / 3; grid-column: 2; color: var(--fg); font-size: 12.5px; }
+.tautan-kartu .panah { grid-row: 1 / 3; grid-column: 2; width: 18px; height: 18px; color: var(--muted-fg); transition: color .15s; }
+.tautan-kartu a:hover .panah { color: var(--primary); }
 
 /* ---------- ringkasan rumah sakit ---------- */
 
@@ -229,6 +321,7 @@
 .keterangan-aturan b { color: var(--fg); }
 .perubahan-rs { margin-bottom: 16px; padding: 12px 16px; border-radius: var(--radius-panel); background: var(--cek-bg); border: 1px solid oklch(86% .07 85); font-size: 13px; color: var(--cek-fg); font-weight: 600; }
 .tabel td.lebar-angka { white-space: nowrap; }
+.tabel .tidak-diikuti { color: var(--cek-fg); }
 .tabel .redup-kecil { color: var(--muted-fg); font-size: 12px; }
 .tabel tr.rinci td { background: var(--muted); padding: 0; }
 .daftar-rinci { list-style: none; margin: 0; padding: 6px 18px 10px 32px; display: grid; }
@@ -251,7 +344,7 @@
 }
 .modal-wa-tutup { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
 .modal-wa-tutup svg { width: 16px; height: 16px; }
-.modal-wa-info h2 { font-size: 18px; font-weight: 800; margin: 4px 0 6px; }
+.modal-wa-info h2 { font-size: 18px; font-weight: 700; margin: 4px 0 6px; }
 .modal-wa-info > p { font-size: 13px; color: var(--fg-2); margin-bottom: 14px; }
 .modal-wa .ponsel { width: 320px; }
 .modal-wa .ponsel-kepala .foto { color: oklch(38% .06 170); }
@@ -267,10 +360,16 @@
 
 /* ---------- layar sedang dan kecil ---------- */
 
-@media (max-width: 1180px) {
-  .bukti-bawah { grid-template-columns: minmax(0, 1fr) 340px; }
-  .panggilan-grid { grid-template-columns: 240px minmax(0, 1fr); }
-  .panggilan-grid > :nth-child(3) { grid-column: 1 / -1; }
+@media (max-width: 1339px) {
+  .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr); }
+  .panggilan-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
+  .panggilan-grid > .kol-trans { grid-column: 2; grid-row: 1; }
+  .panggilan-grid > .kol-kiri { grid-column: 2; grid-row: 2; }
+  .panggilan-grid .transkrip { height: 420px; }
+  .kartu-grid { grid-template-columns: 306px minmax(0, 1fr); }
+  .kartu-grid > .kol-ponsel { grid-column: 1; grid-row: 1 / span 2; }
+  .kartu-grid > .kartu-kanan { grid-column: 2; grid-row: 1; }
+  .kartu-grid > .kartu-saran { grid-column: 2; grid-row: 2; }
 }
 
 @media (max-width: 960px) {
@@ -280,10 +379,11 @@
   .antrean-atas .kartu-angka > div { display: block; padding: 12px 14px; }
   .antrean-atas .kartu-angka b { font-size: 24px; }
   .antrean-atas .kartu-angka span { margin-top: 4px; }
-  .panggilan-grid { grid-template-columns: 1fr; }
-  .transkrip { height: 380px; }
-  .tiga-kartu { grid-template-columns: 1fr; }
-  .bukti-bawah { grid-template-columns: 1fr; }
+  .panggilan-grid, .kartu-grid { grid-template-columns: minmax(0, 1fr); }
+  .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri { grid-column: auto; grid-row: auto; }
+  .panggilan-grid .transkrip { height: 380px; }
+  .kartu-grid > .kol-ponsel, .kartu-grid > .kartu-kanan, .kartu-grid > .kartu-saran { grid-column: auto; grid-row: auto; }
+  .kartu-grid > .kol-ponsel { order: 3; }
 }
 
 @media (max-width: 760px) {

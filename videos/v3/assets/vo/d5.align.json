@@ -1,0 +1,15 @@
+{
+ "dur": 8.452,
+ "seg": [
+  {
+   "t": "Satu jawaban belum cukup.",
+   "s": 0.0,
+   "e": 1.823
+  },
+  {
+   "t": "Begitu tiga pasien RS Melati menjawab serupa, RS-nya masuk daftar klarifikasi.",
+   "s": 2.31,
+   "e": 8.452
+  }
+ ]
+}

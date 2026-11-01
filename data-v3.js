@@ -183,7 +183,7 @@
         ringkasan: "Peserta menjalani 9-10 sesi di bulan Agustus, sesuai tagihan."
       },
       label: "sesuai",
-      alasan: "Ditagih 9 sesi, versi penerima 9-10 sesi. Masih dalam toleransi.",
+      alasan: "Ditagih 9 sesi, versi penerima 9–10 sesi. Masih dalam toleransi.",
       transkrip: [
         ["A", 0.0, BUKA("Bapak Budi Santoso")],
         ["P", 18.8, "Iya, betul."],
@@ -342,7 +342,7 @@
         kutipan_kunci: "Kurang lebih 9 kali.",
         ringkasan: "Jumlah sesi sesuai tagihan."
       },
-      label: "sesuai", alasan: "Ditagih 9 sesi, versi penerima 8-10 sesi. Masih dalam toleransi."
+      label: "sesuai", alasan: "Ditagih 9 sesi, versi penerima 8–10 sesi. Masih dalam toleransi."
     },
     R4: {
       id: "R4", pasien: "Ratna Handayani", umur: 8, rs: "RS01",
@@ -356,7 +356,7 @@
         kutipan_kunci: "Kurang lebih 11 kali.",
         ringkasan: "Jumlah sesi sesuai tagihan."
       },
-      label: "sesuai", alasan: "Ditagih 11 sesi, versi penerima 10-12 sesi. Masih dalam toleransi."
+      label: "sesuai", alasan: "Ditagih 11 sesi, versi penerima 10–12 sesi. Masih dalam toleransi."
     }
   };
 

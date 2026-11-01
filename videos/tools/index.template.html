@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* palet mengikuti PPT tim: teal gelap, hijau, oranye, navy, mint */
+      :root { --teal: #0f3d3e; --green: #0e7c3a; --orange: #f26b21; --navy: #1b2d4f; --mint: #eaf3f1; --slate: #5b6b6a; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #fff; }
+      #root { position: relative; width: 100%; height: 100%; font-family: Poppins, Inter, ui-sans-serif, system-ui, sans-serif; color: #fff; overflow: hidden; background: var(--teal); }
+      #root > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .ov { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+      .vignette { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 40%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%), linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 32%); }
+      .tag { position: absolute; right: 34px; top: 28px; padding: 6px 16px; border-radius: 999px; font-size: 20px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(0,0,0,.4); color: rgba(255,255,255,.8); }
+
+      /* kartu logo pembuka */
+      #h3 { background: radial-gradient(90% 90% at 50% 45%, #145558 0%, var(--teal) 62%, #082a2b 100%); }
+      .lockup { position: absolute; left: 0; right: 0; top: 0; bottom: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; }
+      .lockup .row { display: flex; align-items: center; gap: 30px; }
+      .lockup svg { width: 190px; height: 190px; }
+      .lockup .name { font-size: 150px; line-height: .95; font-weight: 700; letter-spacing: -0.03em; }
+      .lockup .rule { width: 0; height: 6px; border-radius: 3px; background: var(--orange); }
+
+      /* adegan walkthrough: latar putih-mint seperti slide */
+      #demo-bg { position: absolute; inset: 0; background: linear-gradient(180deg, #ffffff 0%, var(--mint) 100%); opacity: 0; }
+      #win { position: absolute; left: 150px; top: 22px; width: 1620px; height: 911px; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 60px rgba(15,61,62,.22), 0 0 0 1px rgba(15,61,62,.12); opacity: 0; background: #fff; }
+      #zoom { position: absolute; inset: 0; transform-origin: 50% 50%; }
+      #zoom video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .strip { position: absolute; left: 150px; top: 950px; display: flex; align-items: baseline; gap: 18px; color: var(--teal); }
+      .strip .no { font-size: 26px; font-weight: 600; color: var(--green); letter-spacing: .05em; }
+      .strip .ti { font-size: 38px; font-weight: 600; letter-spacing: -0.01em; }
+      .strip-brand { position: absolute; right: 150px; top: 954px; display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 500; color: #465554; }
+      .strip-brand svg { width: 36px; height: 36px; }
+
+      /* penutup */
+      #zveil { position: absolute; inset: 0; background: radial-gradient(90% 90% at 50% 45%, #145558 0%, var(--teal) 62%, #082a2b 100%); opacity: 0; }
+      .zlock { position: absolute; left: 0; right: 0; top: 0; bottom: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; opacity: 0; }
+      .zlock .row { display: flex; align-items: center; gap: 28px; }
+      .zlock svg { width: 150px; height: 150px; }
+      .zlock .name { font-size: 118px; line-height: .95; font-weight: 700; letter-spacing: -0.03em; }
+      .zlock .slogan { margin-top: 18px; font-size: 56px; font-weight: 500; letter-spacing: -0.01em; color: #fff; }
+      .zlock .rule { width: 110px; height: 6px; border-radius: 3px; background: var(--orange); }
+      .zlock .tim { margin-top: 26px; font-size: 24px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: #bfe0c8; }
+
+      #dip { position: absolute; inset: 0; background: #06201f; opacity: 0; pointer-events: none; }
+      #caps { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; pointer-events: none; }
+      .cap { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: 1700px; text-align: center; opacity: 0; white-space: nowrap; font-weight: 500; }
+      .cap.demo { padding: 8px 26px 10px; border-radius: 12px; background: rgba(15,61,62,.92); color: #fff; font-size: 33px; line-height: 1.3; }
+      .cap.hook { font-size: 46px; line-height: 1.25; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.75), 0 0 3px rgba(0,0,0,.6); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="__TOTAL__" data-width="1920" data-height="1080">
+
+      __VIDEOS_HOOK__
+      __VIDEO_Z__
+
+      <div id="ov-h1" class="ov clip" __A_H1__><div class="vignette"></div><div class="tag">Ilustrasi</div></div>
+      <div id="ov-h2" class="ov clip" __A_H2__><div class="vignette"></div><div class="tag">Ilustrasi</div></div>
+
+      <div id="h3" class="ov clip" __A_H3__>
+        <div class="lockup">
+          <div class="row">__MARK_LOGO__<div class="name" id="h3name">Vedika<br />Autentik</div></div>
+          <div class="rule" id="h3rule"></div>
+        </div>
+      </div>
+
+      <div id="demo-bg"></div>
+      <div id="win"><div id="zoom">
+          __VIDEOS_DEMO__
+      </div></div>
+      __STRIPS__
+      <div class="strip-brand clip" id="sb" __A_SB__>__MARK_FOOT__ Vedika Autentik · prototipe, data fiktif</div>
+
+      <div id="ov-z" class="ov clip" __A_Z__>
+        <div class="vignette" id="zvig"></div><div class="tag" id="ztag">Ilustrasi</div>
+        <div id="zveil"></div>
+        <div class="zlock" id="zlock">
+          <div class="row">__MARK_Z__<div class="name">Vedika<br />Autentik</div></div>
+          <div class="rule" id="zrule"></div>
+          <div class="slogan" id="zslogan">Lengkap belum tentu asli</div>
+          <div class="tim">Tim Veritas · Healthkathon 2026</div>
+        </div>
+      </div>
+
+      <div id="dip"></div>
+      <div id="caps"></div>
+
+      __AUDIO__
+    </div>
+
+    <script>
+      const T = __T__;
+      const CAPS = __CAPS__;
+      const tl = gsap.timeline({ paused: true });
+      const S = (k) => T[k].s;
+
+      /* ---------- subtitle: tiap kalimat suara jadi satu kapsyen, waktunya sebanding panjang teks ---------- */
+      const capsEl = document.getElementById("caps");
+      const sentenceStarts = {};
+      CAPS.forEach((v) => {
+        const parts = v.t.match(/[^.?!]+[.?!]?/g).map((x) => x.trim()).filter(Boolean);
+        const total = parts.reduce((a, p) => a + p.length, 0);
+        let t = v.s;
+        parts.forEach((p, i) => {
+          const len = (p.length / total) * v.d;
+          const el = document.createElement("div");
+          el.className = "cap " + v.k;
+          el.textContent = p;
+          capsEl.appendChild(el);
+          tl.set(el, { opacity: 1 }, t);
+          tl.set(el, { opacity: 0 }, t + len - 0.02);
+          if (i === 1 && v.k === "hook" && v.s > 60) sentenceStarts.z = t;
+          t += len;
+        });
+      });
+
+      const rise = (sel, t, d = 0.7, y = 30, stagger = 0) =>
+        tl.fromTo(sel, { opacity: 0, y }, { opacity: 1, y: 0, duration: d, ease: "power3.out", stagger }, t);
+      /* potongan antar adegan: layar menggelap sebentar supaya perpindahan tidak kasar */
+      const dip = (t) => {
+        tl.fromTo("#dip", { opacity: 0 }, { opacity: 0.8, duration: 0.12, ease: "power1.in" }, t - 0.12);
+        tl.to("#dip", { opacity: 0, duration: 0.28, ease: "power1.out" }, t);
+      };
+      ["h2", "h3", "w1", "w2", "w3", "w4", "w5", "w6", "w7", "z"].forEach((k) => dip(S(k)));
+
+      /* ---------- logo pembuka ---------- */
+      tl.fromTo("#h3mark", { opacity: 0, scale: 0.6, rotate: -8 }, { opacity: 1, scale: 1, rotate: 0, duration: 0.7, ease: "back.out(1.5)" }, S("h3") + 0.25);
+      rise("#h3name", S("h3") + 0.4, 0.8, 26);
+      tl.to("#h3rule", { width: 260, duration: 0.8, ease: "power3.inOut" }, S("h3") + 1.0);
+
+      /* ---------- walkthrough ---------- */
+      tl.set("#demo-bg", { opacity: 1 }, S("w1"));
+      tl.set("#win", { opacity: 1 }, S("w1"));
+      tl.set("#demo-bg", { opacity: 0 }, T.w7.e);
+      tl.set("#win", { opacity: 0 }, T.w7.e);
+      const zoom = (k, off, origin, scale, d = 1.3) => {
+        tl.set("#zoom", { transformOrigin: origin, scale: 1 }, S(k) + off - 0.01);
+        tl.to("#zoom", { scale, duration: d, ease: "power2.inOut" }, S(k) + off);
+      };
+      zoom("w1", 0.4, "100% 10%", 1.35, 1.4);
+      zoom("w2", 0.3, "30% 70%", 1.5, 1.3);
+      zoom("w3", 1.2, "50% 55%", 1.15, 1.6);
+      zoom("w4", 4.6, "40% 58%", 1.5, 1.4);
+      zoom("w5", 0.6, "50% 62%", 1.25, 1.4);
+      zoom("w6", 0.3, "18% 56%", 1.4, 1.3);
+      zoom("w7", 0.4, "80% 28%", 1.35, 1.3);
+      ["w1", "w2", "w3", "w4", "w5", "w6", "w7"].forEach((k) => rise("#st-" + k, S(k) + 0.15, 0.5, 10));
+      tl.fromTo("#sb", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S("w1") + 0.4);
+
+      /* ---------- penutup: adegan hangat dulu, lalu logo dan slogan ---------- */
+      const zt = sentenceStarts.z || (S("z") + 3.2);
+      tl.to("#zveil", { opacity: 1, duration: 0.9, ease: "power2.inOut" }, zt - 0.3);
+      tl.to("#zvig", { opacity: 0, duration: 0.6 }, zt - 0.3);
+      tl.to("#ztag", { opacity: 0, duration: 0.4 }, zt - 0.3);
+      tl.set("#zlock", { opacity: 1 }, zt + 0.1);
+      tl.fromTo("#zmark", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, zt + 0.1);
+      rise("#zlock .name", zt + 0.2, 0.7, 24);
+      tl.to("#zrule", { opacity: 1, duration: 0.01 }, zt + 0.5);
+      rise("#zslogan", zt + 0.9, 0.7, 16);
+      rise("#zlock .tim", zt + 1.6, 0.6, 10);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

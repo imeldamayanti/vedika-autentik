@@ -39,3 +39,13 @@ test-results/
 .idea/
 .vscode/
 *.log
+
+# Video: hanya sumber komposisi yang dilacak, bukan render atau rekaman mentah
+videos/**/*.mp4
+videos/**/*.mov
+videos/**/renders/
+videos/scratch/
+videos/raw/
+
+# Slide lokal
+*.pptx

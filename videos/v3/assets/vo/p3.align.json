@@ -1,0 +1,15 @@
+{
+ "dur": 6.734,
+ "seg": [
+  {
+   "t": "Selisih begini baru ketahuan kalau pasiennya ditanya.",
+   "s": 0.0,
+   "e": 3.367
+  },
+  {
+   "t": "Itu masih manual, dan sering telat.",
+   "s": 3.855,
+   "e": 6.734
+  }
+ ]
+}

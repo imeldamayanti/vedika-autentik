@@ -1,0 +1,394 @@
+{
+ "T": {
+  "h1": {
+   "s": 0.0,
+   "e": 5.82,
+   "vo": 0.55,
+   "id": "h1"
+  },
+  "h2": {
+   "s": 5.82,
+   "e": 11.17,
+   "vo": 6.07,
+   "id": "h2"
+  },
+  "h2b": {
+   "s": 11.17,
+   "e": 19.77,
+   "vo": 11.47,
+   "id": "h2b"
+  },
+  "h3": {
+   "s": 19.77,
+   "e": 27.11,
+   "vo": 19.87,
+   "id": "h3"
+  },
+  "w1": {
+   "s": 27.11,
+   "e": 35.47,
+   "vo": 27.41,
+   "id": "w1"
+  },
+  "w2": {
+   "s": 35.47,
+   "e": 41.65,
+   "vo": 35.72,
+   "id": "w2"
+  },
+  "w3": {
+   "s": 41.65,
+   "e": 49.3,
+   "vo": 41.75,
+   "id": "w3"
+  },
+  "w4": {
+   "s": 49.3,
+   "e": 57.52,
+   "vo": 49.55,
+   "id": "w4"
+  },
+  "w5": {
+   "s": 57.52,
+   "e": 63.79,
+   "vo": 57.77,
+   "id": "w5"
+  },
+  "w6": {
+   "s": 63.79,
+   "e": 71.92,
+   "vo": 64.04,
+   "id": "w6"
+  },
+  "w7": {
+   "s": 71.92,
+   "e": 78.24,
+   "vo": 72.17,
+   "id": "w7"
+  },
+  "z": {
+   "s": 78.24,
+   "e": 88.27,
+   "vo": 78.74,
+   "id": "z1"
+  }
+ },
+ "TOTAL": 88.27,
+ "clips": [
+  {
+   "id": "w1b",
+   "s": 29.41,
+   "d": 6.36,
+   "src": 4.58,
+   "r": 1.0
+  },
+  {
+   "id": "w2a",
+   "s": 35.47,
+   "d": 3.3,
+   "src": 7.9,
+   "r": 1.5
+  },
+  {
+   "id": "w2b",
+   "s": 38.47,
+   "d": 3.48,
+   "src": 13.85,
+   "r": 0.7
+  },
+  {
+   "id": "w3a",
+   "s": 41.65,
+   "d": 4.0,
+   "src": 18.1,
+   "r": 0.608
+  },
+  {
+   "id": "w3b",
+   "s": 45.35,
+   "d": 4.25,
+   "src": 22.4,
+   "r": 0.519
+  },
+  {
+   "id": "w4a",
+   "s": 49.3,
+   "d": 3.55,
+   "src": 25.0,
+   "r": 1.0
+  },
+  {
+   "id": "w4b",
+   "s": 52.55,
+   "d": 5.27,
+   "src": 31.0,
+   "r": 0.85
+  },
+  {
+   "id": "w5",
+   "s": 57.52,
+   "d": 6.57,
+   "src": 41.9,
+   "r": 1.0
+  },
+  {
+   "id": "w6a",
+   "s": 63.79,
+   "d": 4.41,
+   "src": 48.96,
+   "r": 0.8
+  },
+  {
+   "id": "w6b",
+   "s": 68.2,
+   "d": 4.02,
+   "src": 52.49,
+   "r": 1.0
+  },
+  {
+   "id": "w7",
+   "s": 71.92,
+   "d": 6.62,
+   "src": 58.6,
+   "r": 1.0
+  }
+ ],
+ "subs": [
+  {
+   "t": "Bapak bilang, waktu rehabilitasi dulu, petugasnya yang tanda tangan sendiri.",
+   "s": 0.47,
+   "e": 5.65,
+   "k": "hook"
+  },
+  {
+   "t": "Berkasnya tampak lengkap.",
+   "s": 5.99,
+   "e": 7.61,
+   "k": "hook"
+  },
+  {
+   "t": "Tapi siapa yang memastikan berkasnya asli?",
+   "s": 7.65,
+   "e": 10.85,
+   "k": "hook"
+  },
+  {
+   "t": "Setiap hari, verifikator BPJS memeriksa berkas yang menumpuk.",
+   "s": 11.39,
+   "e": 15.24,
+   "k": "hook"
+  },
+  {
+   "t": "Mustahil teliti satu per satu, jadi yang janggal bisa lolos.",
+   "s": 15.36,
+   "e": 19.5,
+   "k": "hook"
+  },
+  {
+   "t": "Karena itu, hadirlah Vedika Autentik.",
+   "s": 19.79,
+   "e": 22.87,
+   "k": "logo"
+  },
+  {
+   "t": "Teman kerja verifikator untuk memeriksa keaslian berkas.",
+   "s": 22.99,
+   "e": 26.74,
+   "k": "logo"
+  },
+  {
+   "t": "Anda tak perlu lagi memeriksa manual, cukup unggah berkas di tab Autentik.",
+   "s": 27.33,
+   "e": 31.81,
+   "k": "demo"
+  },
+  {
+   "t": "Satu klik, tujuh pemeriksaan berjalan sekaligus.",
+   "s": 31.85,
+   "e": 35.25,
+   "k": "demo"
+  },
+  {
+   "t": "Pertama, kualitas scan.",
+   "s": 35.64,
+   "e": 37.37,
+   "k": "demo"
+  },
+  {
+   "t": "Kalau buram, cukup minta scan ulang, tanpa menuduh siapa pun.",
+   "s": 37.45,
+   "e": 41.43,
+   "k": "demo"
+  },
+  {
+   "t": "Hasilnya berlabel jelas: lolos, perlu dicek, atau prioritas.",
+   "s": 41.67,
+   "e": 46.42,
+   "k": "demo"
+  },
+  {
+   "t": "Yang paling mendesak selalu di atas.",
+   "s": 46.55,
+   "e": 49.13,
+   "k": "demo"
+  },
+  {
+   "t": "Buka satu berkas, buktinya langsung terlihat.",
+   "s": 49.47,
+   "e": 52.56,
+   "k": "demo"
+  },
+  {
+   "t": "Lima sesi yang diubah jadi delapan, ditandai tepat di tempatnya.",
+   "s": 52.74,
+   "e": 57.3,
+   "k": "demo"
+  },
+  {
+   "t": "Berkas yang dipakai ulang untuk pasien lain?",
+   "s": 57.69,
+   "e": 60.2,
+   "k": "demo"
+  },
+  {
+   "t": "Disandingkan, kembarannya langsung ketahuan.",
+   "s": 60.28,
+   "e": 63.52,
+   "k": "demo"
+  },
+  {
+   "t": "Untuk berkas prioritas, tanyai peserta lewat WhatsApp resmi BPJS.",
+   "s": 63.96,
+   "e": 68.41,
+   "k": "demo"
+  },
+  {
+   "t": "Satu balasan, dan Anda tahu yang sebenarnya.",
+   "s": 68.45,
+   "e": 71.7,
+   "k": "demo"
+  },
+  {
+   "t": "Sistem hanya menyarankan.",
+   "s": 72.09,
+   "e": 73.67,
+   "k": "demo"
+  },
+  {
+   "t": "Keputusan akhir tetap di tangan Anda, lengkap dengan alasan tertulis.",
+   "s": 73.71,
+   "e": 77.92,
+   "k": "demo"
+  },
+  {
+   "t": "Memeriksa lebih tenang, memutuskan lebih adil.",
+   "s": 78.66,
+   "e": 81.97,
+   "k": "hook"
+  }
+ ],
+ "clicks": [
+  31.78,
+  45.95,
+  49.86,
+  68.03,
+  75.1
+ ],
+ "sfx": [
+  [
+   "whoosh",
+   5.42,
+   0.55
+  ],
+  [
+   "whoosh",
+   19.32,
+   0.8
+  ],
+  [
+   "sting",
+   21.369999999999997,
+   0.42
+  ],
+  [
+   "whoosh",
+   26.46,
+   0.7
+  ],
+  [
+   "click",
+   31.76,
+   0.32
+  ],
+  [
+   "whoosh",
+   35.07,
+   0.55
+  ],
+  [
+   "whoosh",
+   41.25,
+   0.55
+  ],
+  [
+   "click",
+   45.93,
+   0.32
+  ],
+  [
+   "whoosh",
+   48.9,
+   0.55
+  ],
+  [
+   "click",
+   49.839999999999996,
+   0.32
+  ],
+  [
+   "whoosh",
+   57.120000000000005,
+   0.55
+  ],
+  [
+   "whoosh",
+   63.39,
+   0.55
+  ],
+  [
+   "click",
+   68.01,
+   0.32
+  ],
+  [
+   "whoosh",
+   71.52,
+   0.55
+  ],
+  [
+   "click",
+   75.08,
+   0.32
+  ],
+  [
+   "whoosh",
+   77.69,
+   0.4
+  ],
+  [
+   "whoosh",
+   81.23,
+   0.7
+  ],
+  [
+   "sting",
+   82.03,
+   0.38
+  ],
+  [
+   "ding",
+   83.61999999999999,
+   0.26
+  ]
+ ]
+}
