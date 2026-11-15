@@ -382,9 +382,11 @@ body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-se
    Semua ukuran di file ini ditulis pada skala 100% lalu diperkecil serentak, jadi proporsinya tetap.
    Ukuran tampil efektif: isi ~14,4px, tabel ~13,5px, teks terkecil ~11,7px, tombol ~40px.
    Tinggi berbasis 100vh dibagi skala supaya tetap penuh satu layar. */
-/* Skala dikembalikan ke 100%: zoom 90% membuat huruf terlalu kecil. Kepadatan sekarang diatur
-   lewat jarak dan skala huruf (blok "kepadatan" di bawah), bukan zoom. */
-:root { --skala: 1; }
+/* Skala 90%: tampilan yang disetujui tim adalah halaman ini dilihat dengan zoom Chrome 90%.
+   Dipasang di CSS supaya semua domain (lokal, Vercel) tampil sama tanpa mengatur zoom browser.
+   Lihat di zoom browser 100%; kalau browser juga 90%, hasilnya jadi 81%. */
+:root { --skala: .9; }
+body { zoom: var(--skala); }
 .sisi { height: calc(100vh / var(--skala)); }
 .kolom { min-height: calc(100vh / var(--skala) - 24px); }
 .masuk { min-height: calc(100vh / var(--skala)); }
