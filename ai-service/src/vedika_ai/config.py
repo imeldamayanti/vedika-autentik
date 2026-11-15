@@ -32,3 +32,40 @@ def gemini_live_model() -> str:
 
 def gemini_text_model() -> str:
     return os.environ.get("GEMINI_TEXT_MODEL", "gemini-3.5-flash-lite")
+
+
+# ---- Phone helper (saluran.py): station laptop only ----
+
+
+def line_mode() -> str | None:
+    """SALURAN_ADB: 1 = real Android phone over adb, palsu = in-memory fake, else disabled."""
+    mode = os.environ.get("SALURAN_ADB", "").strip().lower()
+    return mode if mode in ("1", "palsu") else None
+
+
+def adb_bin() -> str:
+    return os.environ.get("SALURAN_ADB_BIN") or "adb"
+
+
+def adb_serial() -> str | None:
+    return os.environ.get("SALURAN_ADB_SERIAL") or None
+
+
+def line_api_url() -> str:
+    return os.environ.get("SALURAN_API_URL") or "http://localhost:8000"
+
+
+def line_agent_key() -> str | None:
+    return os.environ.get("SALURAN_AGEN_KEY") or None
+
+
+def line_audio() -> str:
+    return "kabel" if os.environ.get("SALURAN_AUDIO", "").strip().lower() == "kabel" else "speaker"
+
+
+def line_input() -> str | None:
+    return os.environ.get("SALURAN_INPUT") or None
+
+
+def line_output() -> str | None:
+    return os.environ.get("SALURAN_OUTPUT") or None
