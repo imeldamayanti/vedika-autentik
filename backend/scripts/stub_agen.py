@@ -107,6 +107,16 @@ class StubAgen:
     def _kirim(self, jalur: str, **kw) -> httpx.Response:
         return self.klien.post(PREFIX + jalur, headers=self.headers, **kw)
 
+    def detak(self) -> None:
+        self._kirim("/agen/detak", json={"siap": True, "perangkat": "stub"})
+
+    def tunggu(self, detik: float) -> None:
+        """Tidur sambil tetap berdetak tiap 10 detik, supaya situs tidak mengira saluran terputus selama panggilan."""
+        while detik > 0:
+            self.tidur(min(detik, 10))
+            detik -= 10
+            self.detak()
+
     def lapor(self, id_: str, laporan: str, catatan: str | None = None) -> dict:
         """Lapor status; 409 jeda_belum_lewat diulang tiap detik (jeda WA diputuskan API)."""
         for _ in range(300):
@@ -131,7 +141,7 @@ class StubAgen:
         if wa.get("dikirim_server"):
             if wa.get("status"):  # percobaan ke-1: server sudah mengirim pemberitahuan, tinggal menunggu jeda
                 self.cetak(f"[{id_}] pesan WA dikirim server: {wa['status']}")
-                self.tidur(tugas["jeda_wa_menit"] * 60)
+                self.tunggu(tugas["jeda_wa_menit"] * 60)
         elif not wa["lewati"]:
             self.lapor(id_, "wa_terkirim")
             self.tidur(tugas["jeda_wa_menit"] * 60)
@@ -162,7 +172,7 @@ class StubAgen:
             baris, total, rekaman = PERCAKAPAN_UMUM, PERCAKAPAN_UMUM[-1][1] + 4.0, None
         terkirim, sebelumnya = [], 0.0
         for i, (pembicara, mulai, teks) in enumerate(baris):
-            self.tidur(max(0.0, mulai - sebelumnya) / self.kecepatan)
+            self.tunggu(max(0.0, mulai - sebelumnya) / self.kecepatan)
             sebelumnya = mulai
             terkirim.append({"detik": mulai, "pembicara": pembicara, "teks": teks})
             isi = {"baris": terkirim[-1:]}
@@ -204,7 +214,7 @@ class StubAgen:
         putaran, diam = 0, 0
         while maks_putaran is None or putaran < maks_putaran:
             putaran += 1
-            self._kirim("/agen/detak", json={"siap": True, "perangkat": "stub"})
+            self.detak()
             r = self._kirim("/agen/ambil")
             if r.status_code == 401:
                 raise GalatAgen("Kunci agen ditolak API (401 kunci_salah). Periksa AGEN_KEY.")

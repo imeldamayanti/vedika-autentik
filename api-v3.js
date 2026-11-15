@@ -45,12 +45,21 @@
     } catch (e) { return false; }
   }
 
+  /* Rincian kesehatan untuk chip di strip status; null bila API tidak menjawab. */
+  async function kesehatan() {
+    try {
+      const r = await fetch(url(PREFIX + "/kesehatan"), { signal: AbortSignal.timeout(2500) });
+      return r.ok ? await r.json() : null;
+    } catch (e) { return null; }
+  }
+
   const antrean = () => panggil("GET", "/antrean");
   const panggilan = (id) => panggil("GET", "/panggilan/" + encodeURIComponent(id));
   const ringkasanRs = () => panggil("GET", "/ringkasan-rs");
   const keputusan = () => panggil("GET", "/keputusan");
   const ubahPengaturan = (isi) => panggil("PUT", "/pengaturan", isi);
   const mulai = (id) => panggil("POST", "/panggilan/" + encodeURIComponent(id) + "/mulai");
+  const batal = (id) => panggil("POST", "/panggilan/" + encodeURIComponent(id) + "/batal");
   const putuskan = (id, isi) => panggil("POST", "/panggilan/" + encodeURIComponent(id) + "/keputusan", isi);
   const resetDemo = () => panggil("POST", "/demo/reset");
 
@@ -74,13 +83,12 @@
 
   /* Kelompok status tampilan (chip di tabel antrean), tabel "Kelompok status tampilan" di kontrak. */
   const KELOMPOK = { antre: "antre", wa_terkirim: "wa", menelepon: "menelepon", tersambung: "menelepon", merekam: "menelepon", membaca_jawaban: "menelepon", selesai: "selesai", tidak_terhubung: "tidak_terhubung" };
-  const SKENARIO_SUARA = ["S1", "S2", "S3", "S4", "S6", "S8"];
 
   function keBaris(b) {
     return {
       id: b.id, pasien: b.pasien, umur: b.umur, rs: b.rs, namaRs: b.nama_rs, ditagih: b.ditagih, indikator: b.indikator,
       penerima: b.penerima, status: b.status, st: KELOMPOK[b.status], label: b.label, keputusanTindakan: b.keputusan_tindakan,
-      prioritas: b.prioritas, percobaan: b.percobaan
+      prioritas: b.prioritas, percobaan: b.percobaan, cobaLagi: b.coba_lagi_setelah
     };
   }
 
@@ -97,7 +105,6 @@
   }
 
   function kePasien(d) {
-    const skenario = (/^CALL-P-(S\d)-/.exec(d.id) || [])[1];
     const hitung = jawabanTerhitung(d);
     const tanda = {};
     Object.keys(d.tanda_tanggal).forEach((iso) => { tanda[angkaHari(iso)] = d.tanda_tanggal[iso]; });
@@ -105,12 +112,13 @@
       id: d.id, sumber: d.sumber, pasien: d.pasien, umur: d.umur, rs: d.rs, namaRs: d.nama_rs, ditagih: d.ditagih,
       tanggal: d.tanggal.map(angkaHari), tandaTanggal: tanda, indikator: d.indikator, tanggalLibur: d.tanggal_libur.map(angkaHari),
       penerima: d.penerima, status: d.status, st: KELOMPOK[d.status], percobaan: d.percobaan, log: d.log,
+      cobaLagi: d.coba_lagi_setelah,
       waktu: waktuTeks(d.waktu), waktuIso: d.waktu, durasi: d.durasi,
       transkrip: d.transkrip.map((t) => [t.pembicara === "ai" ? "A" : "P", t.detik, t.teks]),
       tangkapan: d.tangkapan_sementara, jawaban: hitung.jawaban, label: d.label, alasan: d.alasan,
       selisih: hitung.selisih, toleransi: d.toleransi, saran: d.saran,
       rekaman: d.rekaman ? url(d.rekaman) : null, hapusPada: d.hapus_pada,
-      suara_langsung: skenario && SKENARIO_SUARA.indexOf(skenario) >= 0 ? "assets/rekaman/" + skenario : null,
+      suara_langsung: null, /* tanpa klip buatan di mode API: hanya rekaman panggilan asli di kartu bukti */
       konteksRs: d.konteks_rs, pesanWa: d.pesan_wa, keputusan: keKeputusan(d.keputusan), galatPembaca: d.galat_pembaca
     };
   }
@@ -135,7 +143,7 @@
   }
 
   global.API3 = {
-    BASE, url, sehat, antrean, panggilan, ringkasanRs, keputusan, ubahPengaturan, mulai, putuskan, resetDemo,
+    BASE, url, sehat, kesehatan, antrean, panggilan, ringkasanRs, keputusan, ubahPengaturan, mulai, batal, putuskan, resetDemo,
     keBaris, kePasien, keRingkasan, keRiwayat, hariIni, waktuTeks, jamTeks
   };
 })(window);

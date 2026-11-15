@@ -4,9 +4,9 @@
    kartu bukti → keputusan verifikator → ringkasan rumah sakit → riwayat.
 
    Tidak ada telepon atau AI yang berjalan di sini. Dua sumber data:
-   - API (api-v3.js, Kontrak A v3): dipakai bila API dan database sehat saat halaman dimuat. Agen suara dan
-     pembaca jawaban di belakangnya masih stub, jadi semua layar tetap berlabel Simulasi. Layar menyegarkan
-     data tiap 1 detik.
+   - API (api-v3.js, Kontrak A v3): dipakai bila API dan database sehat saat halaman dimuat. Panggilan dijalankan
+     stasiun saluran (HP Android) ke nomor penguji tim, jadi semua layar tetap berlabel Simulasi. Layar
+     menyegarkan data tiap 1 detik.
    - Simulasi (data-v3.js): jalur cadangan bila API mati atau terputus di tengah jalan. Panggilan adalah
      simulasi dari data tulisan tangan. */
 
@@ -20,7 +20,8 @@
      lalu = status terakhir tiap panggilan (untuk toast saat selesai). Selebihnya penanda sekali-jalan. */
   const M = {
     hidup: false, antrean: null, baris: [], detail: {}, ringkasan: null, riwayat: null, sig: {}, gagal: 0, sibuk: false,
-    timer: null, lalu: {}, tidakAda: {}, lihat: {}, terisi: {}, waDibuka: {}, kartuDibuka: {}, waktuServer: null
+    timer: null, lalu: {}, tidakAda: {}, lihat: {}, terisi: {}, waDibuka: {}, kartuDibuka: {}, waktuServer: null,
+    kesehatan: null, putaran: 0, sejak: {}
   };
 
   /* ================================================================== util */
@@ -39,6 +40,8 @@
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     awas: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
     jeda: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+    jam: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    putus: '<path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 5.2-2.7"/><path d="M19 12.9a10 10 0 0 0-2-1.5"/><path d="M2 8.8a15 15 0 0 1 4.2-2.6"/><path d="M22 8.8a15 15 0 0 0-11.3-3.9"/><path d="m2 2 20 20"/>',
     main: '<polygon points="6 3 20 12 6 21 6 3"/>',
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
     pengguna: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
@@ -144,8 +147,36 @@
   const selisihP = (p) => (p.selisih !== undefined ? p.selisih : D.selisih(p));
   const toleransiP = (p) => (p.toleransi != null ? p.toleransi : D.TOLERANSI);
   const saranP = (p) => p.saran || D.SARAN[p.label];
-  /* Percobaan tidak diangkat (S5): tanpa suara, hanya log percobaan dan chat cadangan. */
-  const modeCoba = (p) => p.status === "tidak_terhubung" || (p.log || []).some((l) => l.catatan === "tidak_diangkat");
+  /* Percobaan yang gagal: tidak diangkat, dibatalkan petugas, atau dilepas karena stasiun terputus. */
+  const GAGAL_COBA = { tidak_diangkat: "Tidak diangkat", dibatalkan_verifikator: "Dibatalkan petugas", macet: "Terputus, dilepas otomatis" };
+  const cobaGagal = (l) => l.status === "menelepon" && !!GAGAL_COBA[l.catatan];
+  /* Tampilan percobaan (S5): tanpa suara, hanya log percobaan dan chat cadangan. Bila percobaan berikutnya tersambung,
+     layar kembali ke transkrip. */
+  const modeCoba = (p) => p.status === "tidak_terhubung" ||
+    ((p.log || []).some(cobaGagal) && ["tersambung", "merekam", "membaca_jawaban", "selesai"].indexOf(p.status) < 0);
+
+  /* ---------- waktu server, hitung mundur, pemulihan ---------- */
+
+  const kiniServer = () => (M.waktuServer ? Date.parse(M.waktuServer) : Date.now());
+  const sisaDetik = (iso) => Math.ceil((Date.parse(iso) - kiniServer()) / 1000);
+  const mmssSisa = (d) => (d <= 0 ? "segera" : Math.floor(d / 60) + ":" + String(d % 60).padStart(2, "0"));
+  const hitung = (iso) => '<span class="hitung" data-hitung="' + iso + '">' + mmssSisa(sisaDetik(iso)) + "</span>";
+  const perbaruiHitung = () => document.querySelectorAll("[data-hitung]").forEach((el) => { el.textContent = mmssSisa(sisaDetik(el.dataset.hitung)); });
+  const menungguCoba = (b) => b.status === "antre" && !!b.cobaLagi && sisaDetik(b.cobaLagi) > 0;
+
+  const stasiun = () => (M.hidup ? M.antrean.pengaturan.stasiun : null);
+  const stasiunAktif = () => { const s = stasiun(); return !!(s && s.aktif); };
+  const BISA_BATAL = ["wa_terkirim", "menelepon", "tersambung", "merekam"];
+  const BASI_DETIK = 60;
+  /* Detik sejak laporan terakhir: dari log bila rinciannya sudah dimuat, selain itu sejak status terakhir berubah di layar. */
+  function umurLaporan(id) {
+    const d = M.detail[id], log = d && d.log && d.log.length ? d.log[d.log.length - 1].waktu : null;
+    const sejak = log || (M.sejak[id] && M.sejak[id].waktu);
+    return sejak ? (kiniServer() - Date.parse(sejak)) / 1000 : 0;
+  }
+  /* "Batalkan panggilan" muncul bila stasiun tidak aktif atau panggilan sudah 60 detik tanpa laporan baru. */
+  const bisaBatal = (b) => M.hidup && !!b && BISA_BATAL.indexOf(b.status) >= 0 && (!stasiunAktif() || umurLaporan(b.id) > BASI_DETIK);
+  const tombolBatal = (id, kecil) => '<button class="btn btn--bahaya' + (kecil ? " btn--kecil" : "") + '" type="button" data-aksi="batal-panggilan" data-id="' + id + '">Batalkan panggilan</button>';
   const tanpaSuaraP = (p) => (M.hidup ? modeCoba(p) : tidakTerhubung(p));
 
   function statusBaris(id) {
@@ -257,7 +288,7 @@
         '<div class="sisi-kaki nav">' +
           '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
           '<p class="catatan-prototipe"><b>Prototipe Healthkathon 2026</b><br>Semua data fiktif. ' +
-            (M.hidup ? "Data dari API; agen suara dan pembaca jawaban masih stub." : "Berjalan tanpa API, memakai data lokal.") + "</p>" +
+            (M.hidup ? "Data dari API. Panggilan uji ke nomor tim." : "Mode simulasi: tanpa API, memakai data lokal.") + "</p>" +
         "</div>" +
       "</aside>" +
       '<div class="kolom">' +
@@ -348,6 +379,55 @@
       });
   }
 
+  /* ---------- strip status: satu keadaan, yang pertama cocok ---------- */
+
+  const jamTitik = (hhmm) => hhmm.replace(":", ".");
+  const STATUS_PANJANG = { wa_terkirim: "Jeda setelah pesan WA", tersambung: "Tersambung", merekam: "Sedang berbicara dan merekam", membaca_jawaban: "Membaca jawaban" };
+  const statusPanjang = (b) => (b.status === "menelepon" ? "Memanggil, percobaan " + b.percobaan : STATUS_PANJANG[b.status] || "");
+
+  function chipSehat() {
+    const k = M.hidup ? M.kesehatan : null, s = stasiun();
+    const chip = (ok, nama) => '<span><i class="' + (ok ? "" : "no") + '"></i>' + nama + "</span>";
+    const saluran = !M.hidup ? "Saluran telepon" : !s || !s.aktif ? "Saluran telepon terputus" : !s.siap ? "Saluran telepon belum siap" : "Saluran telepon siap" + (s.perangkat ? " (" + esc(s.perangkat) + ")" : "");
+    return '<div class="sehat">' + chip(M.hidup, "API") + chip(M.hidup && (!k || k.db === "ok"), "Database") +
+      chip(M.hidup && !!k && k.pembaca === "ok", "Pembaca jawaban") + chip(!!(s && s.aktif && s.siap), saluran) + "</div>";
+  }
+
+  function stripStatus() {
+    let kelas = "ok", ico = "cek", judul, ket = "", aksi = "";
+    const peng = M.hidup ? M.antrean.pengaturan : null, s = stasiun();
+    const jalan = M.hidup ? M.baris.find((b) => berjalan(b.status)) : null;
+    const coba = M.hidup ? M.baris.filter(menungguCoba).sort((a, b) => Date.parse(a.cobaLagi) - Date.parse(b.cobaLagi))[0] : null;
+    if (!M.hidup) {
+      kelas = "warn"; ico = "awas"; judul = "Mode simulasi";
+      ket = "API tidak terjangkau. Layar memakai data contoh lokal; keputusan tidak tersimpan ke server. Muat ulang halaman setelah API kembali.";
+    } else if (!peng.dalam_jam) {
+      kelas = "warn"; ico = "jam"; judul = "Di luar jam panggilan (" + jamTitik(peng.jam_mulai) + "–" + jamTitik(peng.jam_selesai) + " WIB)";
+      ket = "Antrean dilanjutkan otomatis pada jam kerja.";
+    } else if (!s || !s.aktif) {
+      kelas = "bad"; ico = "putus"; judul = "Saluran telepon terputus" + (s ? " sejak " + A3.jamTeks(s.terakhir_terlihat) : "");
+      ket = "Antrean menunggu; tidak ada yang hilang. Tim teknis: cek laptop stasiun, kabel USB, dan baterai HP saluran.";
+      if (jalan) aksi = '<a class="btn" href="#/panggilan/' + jalan.id + '">Buka panggilan</a>' + (bisaBatal(jalan) ? tombolBatal(jalan.id) : "");
+    } else if (!s.siap) {
+      kelas = "bad"; ico = "putus"; judul = "Saluran telepon belum siap: " + esc(s.alasan || "sebab tidak diketahui");
+      ket = "Panggilan dimulai lagi begitu HP saluran siap.";
+    } else if (jalan) {
+      kelas = "jalan"; ico = "telepon"; judul = "Sedang menelepon " + esc(jalan.pasien) + " · " + statusPanjang(jalan);
+      aksi = '<a class="btn btn--primer" href="#/panggilan/' + jalan.id + '">Buka panggilan</a>' + (bisaBatal(jalan) ? tombolBatal(jalan.id) : "");
+    } else if (!peng.mode_otomatis) {
+      kelas = "warn"; ico = "jeda"; judul = "Panggilan otomatis mati";
+      ket = "Hanya pasien yang didahulukan yang ditelepon. Nyalakan Panggilan otomatis untuk menelepon antrean satu per satu.";
+    } else if (peng.jeda) {
+      kelas = "warn"; ico = "jeda"; judul = "Dijeda"; ket = "Tekan Lanjutkan untuk meneruskan antrean.";
+    } else if (coba) {
+      judul = "Siap menelepon · " + esc(coba.pasien) + " dicoba lagi dalam " + hitung(coba.cobaLagi);
+    } else {
+      kelas = "jalan"; ico = "telepon"; judul = "Panggilan otomatis aktif"; ket = "Pasien berikutnya ditelepon begitu saluran kosong.";
+    }
+    return '<section class="siap siap--' + kelas + '" id="stripStatus" aria-live="polite"><span class="siap-ikon">' + ikon(ico) + "</span><div><b>" + judul + "</b>" +
+      (ket ? "<p>" + ket + "</p>" : "") + '</div><div class="siap-aksi">' + aksi + "</div>" + chipSehat() + "</section>";
+  }
+
   const daftarRsPilihan = () => (M.hidup ? M.antrean.daftar_rs.map((r) => ({ id: r.id_rs, nama: r.nama })) : D.RS.map((r) => ({ id: r.id, nama: r.nama })));
 
   function lamanAntrean() {
@@ -355,8 +435,12 @@
     const baris = barisAntrean().map((b) => {
       const p = b.p, tujuan = b.tujuan, lab = b.lab;
       let aksi;
-      if (b.bisaTelepon) {
-        aksi = '<button class="btn btn--kecil btn--primer" type="button" data-aksi="telepon" data-id="' + p.id + '"' + (sibuk ? ' disabled title="Satu panggilan aktif pada satu waktu"' : "") + ">" + ikon("telepon") + "Telepon sekarang</button>";
+      if (M.hidup && bisaBatal(p)) {
+        aksi = tombolBatal(p.id, true);
+      } else if (b.bisaTelepon && M.hidup && p.prioritas) {
+        aksi = '<span class="redup">Didahulukan</span>';
+      } else if (b.bisaTelepon) {
+        aksi = '<button class="btn btn--kecil" type="button" data-aksi="telepon" data-id="' + p.id + '"' + (!M.hidup && sibuk ? ' disabled title="Satu panggilan aktif pada satu waktu"' : ' title="Pindahkan ke urutan berikutnya"') + ">Dahulukan</button>";
       } else if (tujuan) {
         aksi = '<a class="btn btn--kecil" href="' + tujuan + '">' + (tujuan.indexOf("#/kartu/") === 0 ? "Buka kartu" : "Lihat panggilan") + "</a>";
       } else {
@@ -368,21 +452,20 @@
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
         '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
-        '<td><div class="sel-status"><span class="status-chip status-chip--' + b.st + '">' + STATUS[b.st] + "</span>" + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
+        '<td><div class="sel-status"><span class="status-chip status-chip--' + b.st + '">' + (M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : STATUS[b.st]) + "</span>" + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
     }).join("");
 
     const oto = otomatisAktif(), jd = jedaAktif();
-    const keadaan = jd ? "Dijeda. Panggilan yang berjalan diselesaikan dulu." : sibuk ? "1 panggilan berjalan." : M.hidup && !M.antrean.pengaturan.dalam_jam ? "Di luar jam panggilan otomatis." : "Menyiapkan panggilan berikutnya.";
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih. Panggilan otomatis pukul 09.00–17.00.</p></div></div>" +
-      '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
+        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih. Antrean ditelepon otomatis satu per satu pukul 09.00–17.00; Dahulukan memindahkan pasien ke urutan berikutnya.</p></div></div>" +
+      stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
         '<select class="pilih" data-aksi="saring-status" aria-label="Saring menurut status"><option value="">Semua status</option>' +
           Object.keys(STATUS).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + STATUS[k] + "</option>").join("") + "</select>" +
-        '<div class="kanan">' + (oto ? '<span class="keadaan-otomatis">' + keadaan + "</span>" : "") +
+        '<div class="kanan">' +
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + oto + '"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>' +
           '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button></div></div></div>" +
       '<section class="panel tabel-antrean">' +
@@ -497,18 +580,24 @@
 
   /* Tahap progres dari status dan log panggilan. Percobaan yang tidak diangkat mengganti tahap tersambung/merekam
      dengan Percobaan 1, Percobaan 2, dan Chat cadangan. */
+  const WA_KET = { "wa:terkirim": "Pesan WA terkirim", "wa:simulasi": "Pesan WA (simulasi, Meta belum diatur)", "wa:gagal": "Pesan WA gagal terkirim" };
+  const CHAT_KET = { "chat:terkirim": "Chat cadangan terkirim", "chat:simulasi": "Chat cadangan (simulasi, Meta belum diatur)", "chat:gagal": "Chat cadangan gagal terkirim" };
+  /* Catatan log "wa:gagal (HTTP 401, …)" → kunci "wa:gagal". */
+  const kunciCatatan = (l) => (l && l.catatan ? l.catatan.split(" ")[0] : "");
+
   function langkahApi(p) {
     const i = idxStatus(p.status), log = p.log || [];
-    const wa = { nama: "Pesan WA terkirim", state: i >= 1 || log.some((l) => l.status === "wa_terkirim") ? "selesai" : "menunggu", jam: jamLog(p, "wa_terkirim"), ket: "" };
-    if (wa.state === "selesai") wa.ket = tautanWaBtn(p.id, "pemberitahuan", "Lihat pesan");
+    const logWa = log.filter((l) => l.status === "wa_terkirim")[0];
+    const wa = { nama: WA_KET[kunciCatatan(logWa)] || "Pesan WA terkirim", state: logWa ? (kunciCatatan(logWa) === "wa:gagal" ? "gagal" : "selesai") : i >= 1 ? "selesai" : "menunggu", jam: jamLog(p, "wa_terkirim"), ket: "" };
+    if (wa.state !== "menunggu") wa.ket = "Dikirim otomatis oleh server · " + tautanWaBtn(p.id, "pemberitahuan", "Lihat pesan");
     if (modeCoba(p)) {
-      const gagal = (n) => log.some((l) => l.status === "menelepon" && l.percobaan === n && l.catatan === "tidak_diangkat");
+      const gagal = (n) => log.filter((l) => cobaGagal(l) && l.percobaan === n)[0];
       const mulaiN = (n) => log.some((l) => l.status === "menelepon" && l.percobaan === n && !l.catatan);
-      const coba = (n) => ({ nama: "Percobaan " + n, state: gagal(n) ? "gagal" : mulaiN(n) ? "jalan" : "menunggu", jam: jamLog(p, "menelepon", (x) => x.percobaan === n && !x.catatan), ket: gagal(n) ? "Tidak diangkat" : mulaiN(n) ? "Memanggil…" : "" });
-      const chat = log.some((l) => l.status === "tidak_terhubung");
+      const coba = (n) => ({ nama: "Percobaan " + n, state: gagal(n) ? "gagal" : mulaiN(n) ? "jalan" : "menunggu", jam: jamLog(p, "menelepon", (x) => x.percobaan === n), ket: gagal(n) ? GAGAL_COBA[gagal(n).catatan] : mulaiN(n) ? "Memanggil…" : n === 2 && menungguCoba(p) ? "Dicoba lagi dalam " + hitung(p.cobaLagi) : "" });
+      const logChat = log.filter((l) => l.status === "tidak_terhubung")[0], chat = !!logChat;
       return [
         wa, coba(1), coba(2),
-        { nama: "Chat cadangan terkirim", state: chat ? "selesai" : p.status === "tidak_terhubung" ? "jalan" : "menunggu", jam: jamLog(p, "tidak_terhubung"), ket: chat ? tautanWaBtn(p.id, "cadangan", "Lihat chat · pilihan 1–6") : "" },
+        { nama: CHAT_KET[kunciCatatan(logChat)] || "Chat cadangan terkirim", state: chat ? (kunciCatatan(logChat) === "chat:gagal" ? "gagal" : "selesai") : p.status === "tidak_terhubung" ? "jalan" : "menunggu", jam: jamLog(p, "tidak_terhubung"), ket: chat ? tautanWaBtn(p.id, "cadangan", "Lihat chat · pilihan 1–6") : "" },
         { nama: "Kartu bukti", state: chat ? "selesai" : "menunggu", jam: jamLog(p, "tidak_terhubung"), ket: "" }
       ];
     }
@@ -528,8 +617,8 @@
       const baris = [];
       (p.log || []).forEach((l) => {
         if (l.status === "menelepon" && !l.catatan) baris.push("Percobaan " + l.percobaan + ": memanggil " + p.penerima.nama + "…");
-        else if (l.catatan === "tidak_diangkat") baris.push("Tidak diangkat.");
-        else if (l.status === "tidak_terhubung") baris.push("Chat cadangan dikirim ke WhatsApp penerima.");
+        else if (cobaGagal(l)) baris.push(GAGAL_COBA[l.catatan] + ".");
+        else if (l.status === "tidak_terhubung") baris.push((CHAT_KET[kunciCatatan(l)] || "Chat cadangan terkirim") + " (WhatsApp penerima).");
       });
       return baris.length ? baris.map((x) => '<div class="baris-trans baris-trans--sistem">' + esc(x) + "</div>").join("") : '<p class="kosong-trans">Menunggu percobaan pertama…</p>';
     }
@@ -630,7 +719,7 @@
   }
 
   function catatanSimulasi(p) {
-    if (M.hidup) return "Data panggilan dibaca dari API tiap detik; agen suara dan pembaca jawaban masih stub. Suara dari rekaman buatan (ElevenLabs), bukan panggilan nyata.";
+    if (M.hidup) return "Data panggilan dibaca dari API tiap detik. Panggilan uji ke nomor tim, bukan ke peserta; rekaman diputar di kartu bukti.";
     return tidakTerhubung(p) ? "Dua percobaan tanpa jawaban dipadatkan menjadi sekitar 25 detik. Tidak ada suara."
       : "Percakapan diputar dari rekaman " + mmss(p.durasi) + " dengan suara buatan (ElevenLabs), bukan panggilan nyata.";
   }
@@ -760,8 +849,11 @@
     const t = !M.hidup && berlangsung ? detikLayar() : null;
     const libur = p.tanggalLibur.length ? p.tanggalLibur.join(" dan ") + " " + D.BULAN_PENDEK : "tidak ada";
     const kodeStatus = M.hidup ? p.st : berlangsung ? ui.aktif.status : "antre";
-    const aksi = berlangsung ? '<span class="status-chip status-chip--' + kodeStatus + '">' + STATUS[kodeStatus] + "</span>"
-      : selesai ? "" : '<button class="btn btn--primer" type="button" data-aksi="telepon" data-id="' + id + '"' + (adaAktif() ? ' disabled title="Satu panggilan aktif pada satu waktu"' : "") + ">" + ikon("telepon") + "Telepon sekarang</button>";
+    const tunggu = M.hidup && menungguCoba(p);
+    const aksi = berlangsung ? '<span class="status-chip status-chip--' + kodeStatus + '">' + STATUS[kodeStatus] + "</span>" + (bisaBatal(p) ? tombolBatal(id) : "")
+      : selesai ? "" : (tunggu ? '<span class="status-chip status-chip--antre">Coba lagi ' + hitung(p.cobaLagi) + "</span>" : "") +
+        (M.hidup && (barisApi(id) || {}).prioritas ? '<span class="redup">Didahulukan</span>'
+          : '<button class="btn btn--primer" type="button" data-aksi="telepon" data-id="' + id + '"' + (!M.hidup && adaAktif() ? ' disabled title="Satu panggilan aktif pada satu waktu"' : ' title="Pindahkan ke urutan berikutnya"') + ">Dahulukan</button>");
     const kop = '<div class="kepala-panggilan"><div><h1>' + esc(p.pasien) + '</h1><p class="sub-judul">' + esc(namaRs(p.rs)) + ", fisioterapi " + D.BULAN + "</p>" +
       '<div class="meta-panggilan"><span><b>Ditagih</b>' + p.ditagih + " sesi</span>" +
         '<span><b>Indikator</b><span class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</span></span>" +
@@ -812,8 +904,14 @@
         '<div class="obrolan">' + obrolan + '</div><div class="ponsel-balas"><span class="petunjuk">' + petunjuk + "</span></div></div></div>" +
       '<div class="modal-wa-info"><span class="kapital">' + (cadangan ? "Chat cadangan" : "Pesan pemberitahuan") + "</span><h2>" + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</h2>" +
         "<p>" + (cadangan ? "Sistem tidak berhasil menelepon, lalu mengirim pertanyaan lewat chat." : "Penerima tahu akan ditelepon dan tidak mengira panggilan ini penipuan.") + "</p>" +
+        (M.hidup ? '<p class="wa-server">' + ikon("cek") + "Dikirim otomatis oleh server" + (statusKirimWa(p, cadangan) ? " · " + statusKirimWa(p, cadangan) : "") + "</p>" : "") +
         '<ul class="aturan">' + aturan.map((t) => "<li>" + ikon("cek") + "<span>" + t + "</span></li>").join("") + "</ul></div>" +
     "</div></div>";
+  }
+
+  function statusKirimWa(p, cadangan) {
+    const l = (p.log || []).filter((x) => x.status === (cadangan ? "tidak_terhubung" : "wa_terkirim"))[0];
+    return (cadangan ? CHAT_KET : WA_KET)[kunciCatatan(l)] || "";
   }
 
   let timerWa = null;
@@ -957,7 +1055,7 @@
 
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
-    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Suara buatan (ElevenLabs).</small></div>'; }
+    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>' + (M.hidup ? "Rekaman panggilan uji." : "Suara buatan (ElevenLabs).") + "</small></div>"; }
     else bukti = '<p class="tanpa-rekaman">Rekaman dan transkrip tidak disimpan untuk hasil ' + D.LABEL[p.label].nama + ".</p>";
     /* Transkrip menyatu di kartu Kutipan kunci: tombol membuka daftar, baris yang sedang diucapkan disorot saat rekaman
        diputar (lihat sorotTranskrip), klik baris untuk melompat. */
@@ -1133,6 +1231,7 @@
   function catatTransisi() {
     M.baris.forEach((b) => {
       const lama = M.lalu[b.id];
+      if (lama !== b.status) M.sejak[b.id] = { waktu: M.waktuServer };
       if (lama !== undefined && lama === "antre" && b.status === "wa_terkirim") {
         toast("Pesan WA terkirim ke " + b.penerima.nama + ". Panggilan untuk " + b.pasien + " dimulai.", "#/panggilan/" + b.id, "Buka panggilan");
       } else if (lama !== undefined && !selesaiSt(lama) && selesaiSt(b.status)) {
@@ -1168,7 +1267,10 @@
     const r = rute();
     const d = (r.nama === "panggilan" || r.nama === "kartu") && r.id ? M.detail[r.id] : null;
     if (d && r.nama === "panggilan") { catatTransisiDetail(d); suaraApi(d); }
-    if (berubah) gambar(true);
+    /* Tombol Batalkan panggilan dan hitung mundur yang habis muncul karena waktu berjalan, bukan karena data berubah. */
+    const waktu = M.baris.filter(bisaBatal).map((b) => b.id).join() + "|" + M.baris.filter(menungguCoba).map((b) => b.id).join();
+    if (M.sig.waktu !== waktu) { M.sig.waktu = waktu; berubah = true; }
+    if (berubah) gambar(true); else perbaruiHitung();
   }
 
   /* Satu putaran: antrean selalu, ditambah data layar yang sedang dibuka. Tiga kegagalan beruntun = API dianggap mati. */
@@ -1177,6 +1279,7 @@
     M.sibuk = true;
     try {
       const r = rute(), baru = {};
+      if (M.putaran++ % 10 === 0) A3.kesehatan().then((k) => { if (JSON.stringify(k) !== JSON.stringify(M.kesehatan)) { M.kesehatan = k; if (M.hidup) gambar(true); } });
       baru.antrean = await A3.antrean();
       if ((r.nama === "panggilan" || r.nama === "kartu") && r.id) {
         try { baru.detail = await A3.panggilan(r.id); delete M.tidakAda[r.id]; } catch (e) { if (e.status === 404) M.tidakAda[r.id] = true; else throw e; }
@@ -1198,7 +1301,7 @@
     clearInterval(M.timer);
     M.hidup = false;
     suaraHenti(); tutupWa();
-    toast("API tidak terjangkau. Beralih ke simulasi lokal.");
+    toast("API tidak terjangkau. Beralih ke mode simulasi.");
     gambar(true);
   }
 
@@ -1237,7 +1340,7 @@
         A3.resetDemo().then(() => {
           tutupWa(); suaraHenti();
           Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null });
-          M.detail = {}; M.lalu = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
+          M.detail = {}; M.lalu = {}; M.sejak = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
           return segarkan();
         }).then(() => { ke("#/autentik"); toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal."); }).catch(galatToast("Gagal memulai ulang demo"));
         return;
@@ -1275,9 +1378,17 @@
       if (!M.hidup) { mulaiPanggilan(el.dataset.id); return; }
       const id = el.dataset.id, b = barisApi(id);
       A3.mulai(id).then(() => {
-        toast("Panggilan untuk " + (b ? b.pasien : id) + " ditandai Telepon sekarang. Agen mengambilnya sebentar lagi.", "#/panggilan/" + id, "Buka panggilan");
+        toast((b ? b.pasien : id) + " didahulukan. Ditelepon begitu saluran kosong.", "#/panggilan/" + id, "Buka panggilan");
         return segarkan();
-      }).catch(galatToast("Gagal memulai panggilan"));
+      }).catch(galatToast("Gagal mendahulukan pasien"));
+    },
+    "batal-panggilan"(el) {
+      const id = el.dataset.id, b = barisApi(id), nama = b ? b.pasien : id;
+      if (!window.confirm("Batalkan panggilan " + nama + "?\n\nDihitung sebagai satu percobaan gagal. Antrean berlanjut ke pasien berikutnya.")) return;
+      A3.batal(id).then((baris) => {
+        toast(baris.status === "antre" ? "Panggilan " + nama + " dibatalkan. Dicoba lagi otomatis setelah jeda." : "Panggilan " + nama + " dibatalkan. Hasil: Tidak terhubung.");
+        return segarkan();
+      }).catch(galatToast("Gagal membatalkan panggilan"));
     },
     otomatis() {
       if (M.hidup) {

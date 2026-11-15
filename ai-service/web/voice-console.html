@@ -101,8 +101,14 @@
           $("tugas").textContent = `${task.id} · ${task.skrip.nama_pasien} · percobaan ${task.percobaan}`;
           $("fase").textContent = "menunggu jeda pesan WA";
           setStatus("sedang menelepon");
-          const reply = await runTask({ api, task, operator, converse: operator.converse, onError: showError, onLog: (entry) => { $("transkrip").textContent += `· ${entry}\n`; } });
-          $("fase").textContent = `selesai: ${reply?.status ?? "terkirim"}`;
+          // The loop is busy with this call, so keep the heartbeat going or the website shows the line as down.
+          const denyut = setInterval(() => api.detak({ siap: true, alasan: null, perangkat: sehat.perangkat ?? null }).catch(() => {}), 3000);
+          try {
+            const reply = await runTask({ api, task, operator, converse: operator.converse, onError: showError, onLog: (entry) => { $("transkrip").textContent += `· ${entry}\n`; } });
+            $("fase").textContent = `selesai: ${reply?.status ?? "terkirim"}`;
+          } finally {
+            clearInterval(denyut);
+          }
           continue;
         }
       } catch (error) {
