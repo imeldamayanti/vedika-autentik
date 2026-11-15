@@ -58,12 +58,7 @@
 /* ---------- kartu angka ---------- */
 
 .kartu-angka { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
-.kartu-angka > div { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 14px 18px 15px; }
-.kartu-angka b { display: block; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.kartu-angka span { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }
 /* Kartu netral. Warna hanya pada angka yang butuh tindakan dan bukan nol, supaya mata langsung ke sana. */
-.kartu-angka .angka-tidak-sesuai b { color: var(--prioritas-fg); }
-.kartu-angka .angka-klarifikasi b { color: var(--cek-fg); }
 
 /* ---------- antrean konfirmasi ---------- */
 
@@ -71,9 +66,6 @@
 /* Angka dan kontrol tetap terlihat saat tabel digulir (hanya layar lebar; di ponsel terlalu memakan tempat). */
 .antrean-atas { position: sticky; top: var(--atas); z-index: 15; margin: 0 -28px 12px; padding: 12px 28px 0; background: var(--bg); }
 .antrean-atas .kartu-angka { gap: 10px; margin-bottom: 10px; }
-.antrean-atas .kartu-angka > div { display: flex; align-items: center; gap: 12px; padding: 14px 18px; }
-.antrean-atas .kartu-angka b { font-size: 30px; }
-.antrean-atas .kartu-angka span { margin-top: 0; font-size: 13.5px; font-weight: 500; line-height: 1.3; }
 .antrean-atas .bar-antrean { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 8px 14px; }
 .bar-antrean { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .bar-antrean .kapital { margin-right: 2px; }
@@ -440,46 +432,6 @@ main.isi { padding: 8px 32px 64px; }
 
 /* ---------- kartu angka ---------- */
 
-.kartu-angka { gap: 16px; }
-.kartu-angka > div { border: 0; border-radius: 16px; box-shadow: none; padding: 20px 24px; }
-.kartu-angka b { font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
-.kartu-angka span { margin-top: 8px; font-size: 15px; }
-
-/* Kartu angka gaya referensi: kepala ikon + nama di luar, panel putih berisi angka, penyebut, pill. */
-.kartu-angka > .kpi { display: block; padding: 6px; border: 1px solid var(--border); border-radius: 18px; background: var(--muted); }
-.kpi-kepala { display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px; font-size: 15px; font-weight: 600; color: var(--fg); }
-.kpi-ikon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; }
-.kpi-ikon svg { width: 16px; height: 16px; }
-.kpi-ikon--primer { background: var(--primary-subtle); color: var(--primary); }
-.kpi-ikon--biru { background: var(--ulang-bg); color: var(--ulang-fg); }
-.kpi-ikon--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
-.kpi-ikon--kuning { background: var(--cek-bg); color: var(--cek-fg); }
-.kpi-isi { padding: 14px 16px 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--bg); }
-.kartu-angka .kpi-isi b { display: block; font-size: 36px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
-.kpi-bawah { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
-.kartu-angka .kpi-bawah span { margin: 0; font-size: 14px; color: var(--muted-fg); }
-.kartu-angka .kpi-bawah .kpi-pill {
-  flex: none; display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 8px;
-  font-size: 13px; font-weight: 600; color: var(--fg-2); background: var(--muted); border: 1px solid var(--border);
-}
-.kartu-angka .kpi-bawah .kpi-pill--merah { color: var(--prioritas-fg); background: var(--prioritas-bg); border-color: oklch(88% .05 27); }
-.kartu-angka .kpi-bawah .kpi-pill--kuning { color: var(--cek-fg); background: var(--cek-bg); border-color: oklch(88% .06 85); }
-/* Aturan lama `.kartu-angka span` (block, margin) tidak boleh mengenai ikon dan kepala. */
-.kartu-angka > .kpi { display: flex; flex-direction: column; }
-.kartu-angka .kpi-kepala span { margin-top: 0; font-size: inherit; color: inherit; }
-.kartu-angka .kpi-kepala .kpi-ikon { display: grid; }
-.kpi-isi { flex: 1; }
-/* Tata letak panel selalu sama: angka di atas; keterangan kiri bawah, pill kanan bawah.
-   Keterangan boleh dua baris, pill tidak pernah turun baris. Semua panel sama tinggi. */
-.kpi-isi { display: flex; flex-direction: column; justify-content: space-between; }
-.kpi-bawah { flex-wrap: nowrap; align-items: flex-end; }
-.kartu-angka .kpi-bawah span:first-child { min-width: 0; white-space: normal; line-height: 1.35; }
-/* Di antrean (menempel saat digulir) kartu dibuat lebih pendek. */
-.antrean-atas .kartu-angka > .kpi { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 4px; }
-.antrean-atas .kpi-kepala { padding: 6px 8px 8px; font-size: 14px; }
-.antrean-atas .kpi-isi { padding: 10px 14px; }
-.antrean-atas .kartu-angka .kpi-isi b { font-size: 30px; }
-.antrean-atas .kpi-bawah { margin-top: 4px; }
 
 /* ---------- tombol, label, chip ---------- */
 
@@ -550,9 +502,6 @@ table.tabel { font-size: 15px; }
 :root { --sisi: 268px; --atas: 68px; }
 .nav .mati { white-space: nowrap; }
 .antrean-atas { margin: 0 -32px 16px; padding: 12px 32px 0; background: var(--canvas); }
-.antrean-atas .kartu-angka > div { padding: 16px 20px; }
-.antrean-atas .kartu-angka b { font-size: 32px; }
-.antrean-atas .kartu-angka span { font-size: 15px; }
 .antrean-atas .bar-antrean { border: 0; border-radius: 16px; box-shadow: none; padding: 10px 16px; }
 .bar-antrean { border-bottom: 0; }
 .tabel .nama-berkas b { white-space: nowrap; }
@@ -597,19 +546,6 @@ main.isi { max-width: none; padding: 4px 28px 48px; }
 .btn--kecil { height: 40px; padding: 0 14px; font-size: 14px; }
 
 .kartu-angka { gap: 12px; margin-bottom: 16px; }
-.kartu-angka > .kpi { padding: 4px; border-radius: 16px; }
-.kpi-kepala { padding: 6px 8px 8px; font-size: 15px; }
-.kpi-isi { padding: 12px 14px; border-radius: 12px; }
-.kartu-angka .kpi-isi b { font-size: 32px; }
-.kpi-bawah { margin-top: 6px; gap: 6px; }
-/* Keterangan selalu satu baris supaya keempat kartu identik; pill dibuat ringkas. */
-.kartu-angka .kpi-bawah span:first-child { white-space: nowrap; }
-.kartu-angka .kpi-bawah .kpi-pill { height: 24px; padding: 0 8px; }
-.kartu-angka .kpi-kepala > span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi-isi { padding: 12px 12px 12px 14px; }
-.antrean-atas .kartu-angka .kpi-isi b { font-size: 28px; }
-.antrean-atas .kpi-isi { padding: 10px 14px; }
-.antrean-atas .bar-antrean { padding: 8px 12px; }
 
 table.tabel { font-size: 15px; }
 .tabel th { padding-top: 10px; padding-bottom: 10px; }
@@ -622,6 +558,124 @@ table.tabel { font-size: 15px; }
 .chip-ind-wadah { max-width: none; gap: 4px 6px; }
 .chip-ind { white-space: nowrap; min-height: 24px; padding: 2px 9px; }
 
+/* ================================================================
+   GAYA OPSI 3: latar putih/abu sangat terang yang rata (tanpa panel besar membulat), sidebar putih
+   bergaris tipis, menu aktif teal muda, kartu KPI dengan ikon di kanan atas dan pill, saringan satu baris,
+   tabel di dalam kartu putih dengan baris header abu lembut. Semua warna dari token yang ada;
+   token baru hanya netral (--latar, --bayangan-kartu).
+   ================================================================ */
+
+:root {
+  --latar: oklch(98.5% .003 205);
+  --bayangan-kartu: 0 1px 2px oklch(20% .01 205 / .05);
+}
+body { background: var(--latar); }
+
+/* ---------- kerangka: sidebar putih, kolom isi rata ---------- */
+
+.sisi { background: var(--bg); border-right: 1px solid var(--border); padding: 20px 14px; }
+.merek { padding: 0 8px 14px; }
+.merek .merek-ikon, .merek-ikon { border-radius: 10px; }
+.nav-judul { padding: 18px 12px 6px; }
+.nav a, .nav button { border-radius: 12px; font-weight: 500; }
+.nav a:hover, .nav button:hover { background: var(--canvas); color: var(--fg); }
+.nav a[aria-current="page"] { background: var(--primary-subtle); color: var(--primary); font-weight: 600; }
+.nav a[aria-current="page"] svg { color: var(--primary); }
+.nav-sub { margin: 2px 0 4px 22px; padding-left: 8px; border-left: 1px solid var(--border); }
+.sisi-kaki { border-top: 1px solid var(--border); padding-top: 12px; }
+.catatan-prototipe { border: 1px solid var(--border); border-radius: 12px; background: var(--latar); }
+
+.kolom { background: transparent; border-radius: 0; margin: 0; min-height: calc(100vh / var(--skala)); }
+.atas { background: var(--latar); backdrop-filter: none; border-radius: 0; border-bottom: 0; }
+
+/* ---------- kepala halaman dan pengumuman ---------- */
+
+.kepala h1 { font-weight: 700; }
+.kepala p, .keterangan-pemicu, .sub-judul { color: var(--muted-fg); }
+.pengumuman {
+  min-height: 0; gap: 16px; padding: 16px 20px; margin-bottom: 20px; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--bayangan-kartu);
+}
+.pengumuman .merek-ikon, .pengumuman .merek-ikon--veritas { width: 56px; height: 56px; border-radius: 14px; background: var(--primary-subtle); border: 0; }
+.pengumuman .merek-ikon--veritas img { width: 34px; height: 34px; }
+.pengumuman b { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.pengumuman p { margin-top: 2px; max-width: none; color: var(--fg-2); font-size: 15px; }
+.pengumuman .btn { padding: 0 18px; font-size: 15px; }
+
+/* ---------- kartu ---------- */
+
+.panel { border: 1px solid var(--border); border-radius: 16px; background: var(--bg); box-shadow: var(--bayangan-kartu); }
+.panel-kepala { padding: 18px 20px 12px; }
+.panel-kepala .kanan { font-size: 14px; font-weight: 500; color: var(--muted-fg); }
+.tautan-kartu a, .ringkasan-tagihan { box-shadow: var(--bayangan-kartu); }
+.masuk-kartu { border: 1px solid var(--border); }
+
+/* ---------- kartu KPI: label kiri atas, ikon kanan atas, angka, pill + keterangan ---------- */
+
+.kartu-angka { gap: 14px; margin-bottom: 16px; }
+.kartu-angka > .kpi {
+  display: flex; flex-direction: column; min-width: 0; padding: 16px 18px;
+  border: 1px solid var(--border); border-radius: 16px; background: var(--bg); box-shadow: var(--bayangan-kartu);
+}
+.kpi-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.kartu-angka .kpi-nama { margin: 0; min-width: 0; font-size: 14px; font-weight: 500; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kartu-angka .kpi-ikon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; margin: 0; border-radius: 50%; }
+.kpi-ikon svg { width: 18px; height: 18px; }
+.kpi-ikon--primer { background: var(--primary-subtle); color: var(--primary); }
+.kpi-ikon--biru { background: var(--ulang-bg); color: var(--ulang-fg); }
+.kpi-ikon--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.kpi-ikon--kuning { background: var(--cek-bg); color: var(--cek-fg); }
+.kartu-angka .kpi > b { display: block; margin-top: 2px; font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.kartu-angka .kpi.angka-tidak-sesuai > b { color: var(--prioritas-fg); }
+.kartu-angka .kpi.angka-klarifikasi > b { color: var(--cek-fg); }
+.kpi-bawah { display: flex; align-items: center; gap: 8px; min-height: 26px; margin-top: 8px; min-width: 0; }
+.kartu-angka .kpi-pill {
+  flex: none; display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 10px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; background: var(--primary-subtle); color: var(--primary);
+}
+.kartu-angka .kpi-pill--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.kartu-angka .kpi-pill--kuning { background: var(--cek-bg); color: var(--cek-fg); }
+.kartu-angka .kpi-ket { margin: 0; min-width: 0; font-size: 14px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- antrean: angka menempel, saringan satu baris di luar kartu ---------- */
+
+.antrean-atas { margin: 0 -28px; padding: 12px 28px; background: var(--latar); }
+.antrean-atas .kartu-angka { gap: 12px; margin-bottom: 12px; }
+.antrean-atas .kartu-angka > .kpi { padding: 12px 16px; }
+.antrean-atas .kpi-bawah { margin-top: 4px; }
+.antrean-atas .bar-antrean, .bar-antrean { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; gap: 10px; }
+.bar-antrean .pilih {
+  height: 40px; min-height: 40px; min-width: 160px; border-radius: 12px; border: 1px solid var(--border-strong);
+  background-color: var(--bg); box-shadow: var(--bayangan-kartu); font-size: 15px; font-weight: 500;
+}
+.btn { border-radius: 12px; }
+.bar-antrean .btn { box-shadow: var(--bayangan-kartu); }
+.bar-antrean .btn:disabled { box-shadow: none; }
+
+/* ---------- tabel: header abu lembut membulat, baris lega, status pill lembut, titik kategori ---------- */
+
+.tabel-bungkus { padding: 0 16px 8px; }
+table.tabel { border-collapse: separate; border-spacing: 0; }
+.tabel th { background: var(--canvas); color: var(--fg-2); font-size: 15px; font-weight: 600; letter-spacing: 0; text-transform: none; border-bottom: 0; padding-top: 12px; padding-bottom: 12px; }
+.tabel th:first-child { padding-left: 16px; border-radius: 12px 0 0 12px; }
+.tabel th:last-child { padding-right: 16px; border-radius: 0 12px 12px 0; }
+.tabel td { padding-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.tabel td:first-child { padding-left: 16px; }
+.tabel td:last-child { padding-right: 16px; }
+.tabel tbody tr:last-child td { border-bottom: 0; }
+.tabel tbody tr.bisa-klik:hover { background: var(--latar); }
+.tabel .nama-berkas span { font-size: 14px; color: var(--muted-fg); }
+.catatan-kaki { padding: 12px 20px 16px; border-top: 0; }
+
+.status-chip, .status-chip--wa, .status-chip--menelepon, .status-chip--selesai, .status-chip--tidak_terhubung { border-color: transparent; }
+.chip-ind-wadah { gap: 4px 16px; }
+.chip-ind { display: inline-flex; align-items: center; gap: 7px; height: auto; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--fg-2); font-size: 14px; font-weight: 500; }
+.chip-ind::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--titik, var(--muted-fg)); }
+.chip-ind--I1 { --titik: var(--prioritas); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I2 { --titik: var(--cek); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I3 { --titik: var(--ulang); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I4 { --titik: var(--primary); background: transparent; color: var(--fg-2); border: 0; }
+
 /* Zoom 125% di monitor 1366 (lebar efektif ~1093px): tabel antrean harus muat tanpa gulir,
    dan blok angka tidak menempel supaya tidak memakan sepertiga layar (audit S-08). */
 @media (max-width: 1279px) {
@@ -633,12 +687,18 @@ table.tabel { font-size: 15px; }
   .tabel td:first-child, .tabel th:first-child { padding-left: 16px; }
   .tabel td:last-child, .tabel th:last-child { padding-right: 16px; }
   .tabel .nama-berkas b { white-space: normal; }
-  .tabel th { letter-spacing: .03em; }
   /* Empat kartu di lebar sempit membuat judul kartu turun baris; jadikan 2×2 supaya tetap seragam. */
   .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .chip-ind-wadah { max-width: 150px; }
   .chip-ind { white-space: normal; }
   .tabel td.aksi .btn { white-space: normal; height: auto; min-height: 44px; padding: 6px 14px; line-height: 1.25; text-align: left; }
+}
+
+/* Monitor 1280–1365px: empat kartu masih sejajar, jadi pill dan jarak dirapatkan supaya keterangan tidak terpotong. */
+@media (max-width: 1365px) {
+  .kartu-angka > .kpi, .antrean-atas .kartu-angka > .kpi { padding-left: 14px; padding-right: 14px; }
+  .kpi-bawah { gap: 6px; }
+  .kartu-angka .kpi-pill { padding: 0 8px; }
 }
 
 /* Zoom 150% di monitor 1366 (~911px) dan tablet: menu tetap terlihat sebagai baris pill di atas,
@@ -647,6 +707,7 @@ table.tabel { font-size: 15px; }
   .sisi {
     position: static; transform: none; width: auto; height: auto; z-index: auto; box-shadow: none; transition: none;
     flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px;
+    border-right: 0; border-bottom: 1px solid var(--border);
   }
   .merek { padding: 0; min-height: 44px; }
   .merek > span:last-child > span { display: none; }
@@ -683,9 +744,6 @@ table.tabel { font-size: 15px; }
   .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tautan-kartu { grid-template-columns: 1fr; }
   .antrean-atas { position: static; margin: 0 0 12px; padding: 0; }
-  .antrean-atas .kartu-angka > div { display: block; padding: 12px 14px; }
-  .antrean-atas .kartu-angka b { font-size: 24px; }
-  .antrean-atas .kartu-angka span { margin-top: 4px; }
   .panggilan-grid, .kartu-grid { grid-template-columns: minmax(0, 1fr); }
   .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri { grid-column: auto; grid-row: auto; }
   .panggilan-grid .transkrip { height: 380px; }
@@ -702,8 +760,6 @@ table.tabel { font-size: 15px; }
 @media (max-width: 640px) {
   .sisi { height: auto; }
   .kartu-angka { gap: 10px; }
-  .kartu-angka > div { padding: 12px 14px; }
-  .kartu-angka b { font-size: 24px; }
   .bar-antrean .kanan { margin-left: 0; width: 100%; }
   .bar-antrean .kanan .btn { flex: 1; }
   .bar-antrean .pilih { flex: 1; min-width: 0; }
