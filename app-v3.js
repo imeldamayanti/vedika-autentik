@@ -50,6 +50,7 @@
     mik: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
     tambah: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     video: '<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+    daftarCek: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
     lencanaCek: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>'
   };
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
@@ -255,8 +256,8 @@
           '<a class="nav-autentik induk" href="#/autentik">' + logoVeritas + "Autentik" +
             (menunggu ? '<span class="lencana" title="Panggilan Tidak sesuai yang belum diputuskan">' + menunggu + "</span>" : "") + "</a>" +
           '<div class="nav-sub">' +
-            '<a href="#/autentik"' + aktif(dalamAutentik) + ">Antrean konfirmasi</a>" +
-            '<a href="#/ringkasan-rs"' + aktif(r.nama === "ringkasan-rs") + ">Ringkasan RS</a>" +
+            '<a href="#/autentik"' + aktif(dalamAutentik) + ">" + ikon("daftarCek") + "Antrean konfirmasi</a>" +
+            '<a href="#/ringkasan-rs"' + aktif(r.nama === "ringkasan-rs") + ">" + ikon("rumahSakit") + "Ringkasan RS</a>" +
           "</div>" +
           '<a href="#/riwayat"' + aktif(r.nama === "riwayat") + ">" + ikon("riwayat") + "Riwayat keputusan</a>" +
         "</nav>" +
@@ -329,17 +330,17 @@
     const persen = (n, dari) => (dari ? Math.round((n / dari) * 100) + "%" : "0%");
     const kartu = (o) =>
       '<div class="kpi' + (o.sorot ? " " + o.sorot : "") + '">' +
-        '<div class="kpi-kepala"><span class="kpi-ikon kpi-ikon--' + o.warna + '">' + ikon(o.ikon) + "</span><span>" + o.nama + "</span></div>" +
-        '<div class="kpi-isi"><b>' + o.n + "</b>" +
-          '<div class="kpi-bawah"><span>' + o.ket + "</span>" + (o.pill ? '<span class="kpi-pill' + (o.pillKelas ? " " + o.pillKelas : "") + '">' + o.pill + "</span>" : "") + "</div></div>" +
+        '<div class="kpi-kepala"><span class="kpi-nama">' + o.nama + '</span><span class="kpi-ikon kpi-ikon--' + o.warna + '">' + ikon(o.ikon) + "</span></div>" +
+        "<b>" + o.n + "</b>" +
+        '<div class="kpi-bawah">' + (o.pill ? '<span class="kpi-pill' + (o.pillKelas ? " " + o.pillKelas : "") + '">' + o.pill + "</span>" : "") + '<span class="kpi-ket">' + o.ket + "</span></div>" +
       "</div>";
     return '<div class="kartu-angka">' +
       kartu({ nama: "Pasien terpicu", ikon: "orang", warna: "primer", n: a.terpicu, ket: "dari " + a.aktif + " pasien aktif", pill: persen(a.terpicu, a.aktif) }) +
       kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon, ket: "dari " + a.terpicu + " terpicu", pill: persen(a.ditelepon, a.terpicu) }) +
       kartu({ nama: "Jawaban tidak sesuai", ikon: "awas", warna: "merah", n: a.tidakSesuai, ket: "dari " + a.ditelepon + " ditelepon",
-        sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "", pill: a.tidakSesuai ? "Perlu dicek" : "", pillKelas: "kpi-pill--merah" }) +
+        sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "", pill: a.tidakSesuai ? "Perlu dicek" : persen(a.tidakSesuai, a.ditelepon), pillKelas: a.tidakSesuai ? "kpi-pill--merah" : "" }) +
       kartu({ nama: "RS perlu klarifikasi", ikon: "rumahSakit", warna: "kuning", n: a.rsKlarifikasi, ket: "dari " + jumlahRs + " rumah sakit",
-        sorot: a.rsKlarifikasi ? "angka-klarifikasi" : "", pill: a.rsKlarifikasi ? "Perlu tindakan" : "", pillKelas: "kpi-pill--kuning" }) +
+        sorot: a.rsKlarifikasi ? "angka-klarifikasi" : "", pill: a.rsKlarifikasi ? "Perlu tindakan" : persen(a.rsKlarifikasi, jumlahRs), pillKelas: a.rsKlarifikasi ? "kpi-pill--kuning" : "" }) +
     "</div>";
   }
 
@@ -368,7 +369,8 @@
 
   function lamanAntrean() {
     const sibuk = adaAktif();
-    const baris = barisAntrean().map((b) => {
+    const daftarBaris = barisAntrean();
+    const baris = daftarBaris.map((b) => {
       const p = b.p, tujuan = b.tujuan, lab = b.lab;
       let aksi;
       if (b.bisaTelepon) {
@@ -405,6 +407,7 @@
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + oto + '"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>' +
           '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button></div></div></div>" +
       '<section class="panel tabel-antrean">' +
+        '<div class="panel-kepala"><h2>Antrean pasien</h2><span class="kanan">' + daftarBaris.length + " pasien</span></div>" +
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
@@ -1069,7 +1072,7 @@
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Normal (2 dari 4).</div>' : "") +
       '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
-      '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
+      '<section class="panel"><div class="panel-kepala"><h2>Status rumah sakit</h2><span class="kanan">' + data.rs.length + ' rumah sakit</span></div><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
         '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
   }
   /* ============================================================== riwayat */
@@ -1093,7 +1096,8 @@
           (x.ikutSaran ? "Diikuti" : '<b class="tidak-diikuti">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp">' + esc(x.oleh) + "</td></tr>").join("") +
         "</tbody></table></div>"
       : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Keputusan dari kartu bukti akan muncul di sini.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
-    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Jejak audit semua keputusan verifikator.</p></div></div><section class="panel">' + isi + "</section>";
+    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Jejak audit semua keputusan verifikator.</p></div></div><section class="panel">' +
+      (daftar.length ? '<div class="panel-kepala"><h2>Semua keputusan</h2><span class="kanan">' + daftar.length + " keputusan</span></div>" : "") + isi + "</section>";
   }
 
   /* ============================================================== render */
