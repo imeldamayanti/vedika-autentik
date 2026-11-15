@@ -42,6 +42,8 @@
     main: '<polygon points="6 3 20 12 6 21 6 3"/>',
     menu: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
     pengguna: '<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
+    orang: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    rumahSakit: '<path d="M12 6v4"/><path d="M14 14h-4"/><path d="M14 18h-4"/><path d="M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/>',
     kunci: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     suara: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
     bisu: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/>',
@@ -319,15 +321,25 @@
 
   const penerimaTeks = (p) => (p.penerima.hubungan === "peserta" ? "Peserta" : esc(p.penerima.nama) + ' <span class="redup">(' + esc(p.penerima.hubungan) + ")</span>");
 
+  /* Kartu angka: kepala (ikon + nama), lalu panel berisi angka, penyebut, dan pill.
+     Warna angka dan pill peringatan hanya muncul bila nilainya bukan nol; pill lain netral (persen). */
   function kartuAngka() {
     const a = angka();
-    /* Kartu netral; warna hanya muncul pada angka yang butuh perhatian dan bukan nol. */
-    const sorot = (n, kelas) => (n ? ' class="' + kelas + '"' : "");
+    const jumlahRs = M.hidup && M.antrean.daftar_rs ? M.antrean.daftar_rs.length : D.RS.length;
+    const persen = (n, dari) => (dari ? Math.round((n / dari) * 100) + "%" : "0%");
+    const kartu = (o) =>
+      '<div class="kpi' + (o.sorot ? " " + o.sorot : "") + '">' +
+        '<div class="kpi-kepala"><span class="kpi-ikon kpi-ikon--' + o.warna + '">' + ikon(o.ikon) + "</span><span>" + o.nama + "</span></div>" +
+        '<div class="kpi-isi"><b>' + o.n + "</b>" +
+          '<div class="kpi-bawah"><span>' + o.ket + "</span>" + (o.pill ? '<span class="kpi-pill' + (o.pillKelas ? " " + o.pillKelas : "") + '">' + o.pill + "</span>" : "") + "</div></div>" +
+      "</div>";
     return '<div class="kartu-angka">' +
-      "<div><b>" + a.terpicu + "</b><span>pasien terpicu dari " + a.aktif + " aktif</span></div>" +
-      "<div><b>" + a.ditelepon + "</b><span>sudah ditelepon</span></div>" +
-      "<div" + sorot(a.tidakSesuai, "angka-tidak-sesuai") + "><b>" + a.tidakSesuai + "</b><span>jawaban tidak sesuai</span></div>" +
-      "<div" + sorot(a.rsKlarifikasi, "angka-klarifikasi") + "><b>" + a.rsKlarifikasi + "</b><span>RS perlu klarifikasi</span></div>" +
+      kartu({ nama: "Pasien terpicu", ikon: "orang", warna: "primer", n: a.terpicu, ket: "dari " + a.aktif + " pasien aktif", pill: persen(a.terpicu, a.aktif) }) +
+      kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon, ket: "dari " + a.terpicu + " terpicu", pill: persen(a.ditelepon, a.terpicu) }) +
+      kartu({ nama: "Jawaban tidak sesuai", ikon: "awas", warna: "merah", n: a.tidakSesuai, ket: "dari " + a.ditelepon + " ditelepon",
+        sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "", pill: a.tidakSesuai ? "Perlu dicek" : "", pillKelas: "kpi-pill--merah" }) +
+      kartu({ nama: "RS perlu klarifikasi", ikon: "rumahSakit", warna: "kuning", n: a.rsKlarifikasi, ket: "dari " + jumlahRs + " rumah sakit",
+        sorot: a.rsKlarifikasi ? "angka-klarifikasi" : "", pill: a.rsKlarifikasi ? "Perlu tindakan" : "", pillKelas: "kpi-pill--kuning" }) +
     "</div>";
   }
 

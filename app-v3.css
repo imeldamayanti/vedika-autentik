@@ -432,6 +432,40 @@ main.isi { padding: 8px 32px 64px; }
 .kartu-angka b { font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
 .kartu-angka span { margin-top: 8px; font-size: 15px; }
 
+/* Kartu angka gaya referensi: kepala ikon + nama di luar, panel putih berisi angka, penyebut, pill. */
+.kartu-angka > .kpi { display: block; padding: 6px; border: 1px solid var(--border); border-radius: 18px; background: var(--muted); }
+.kpi-kepala { display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px; font-size: 15px; font-weight: 600; color: var(--fg); }
+.kpi-ikon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; }
+.kpi-ikon svg { width: 16px; height: 16px; }
+.kpi-ikon--primer { background: var(--primary-subtle); color: var(--primary); }
+.kpi-ikon--biru { background: var(--ulang-bg); color: var(--ulang-fg); }
+.kpi-ikon--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.kpi-ikon--kuning { background: var(--cek-bg); color: var(--cek-fg); }
+.kpi-isi { padding: 14px 16px 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--bg); }
+.kartu-angka .kpi-isi b { display: block; font-size: 36px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
+.kpi-bawah { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.kartu-angka .kpi-bawah span { margin: 0; font-size: 14px; color: var(--muted-fg); }
+.kartu-angka .kpi-bawah .kpi-pill {
+  flex: none; display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; color: var(--fg-2); background: var(--muted); border: 1px solid var(--border);
+}
+.kartu-angka .kpi-bawah .kpi-pill--merah { color: var(--prioritas-fg); background: var(--prioritas-bg); border-color: oklch(88% .05 27); }
+.kartu-angka .kpi-bawah .kpi-pill--kuning { color: var(--cek-fg); background: var(--cek-bg); border-color: oklch(88% .06 85); }
+/* Aturan lama `.kartu-angka span` (block, margin) tidak boleh mengenai ikon dan kepala. */
+.kartu-angka > .kpi { display: flex; flex-direction: column; }
+.kartu-angka .kpi-kepala span { margin-top: 0; font-size: inherit; color: inherit; }
+.kartu-angka .kpi-kepala .kpi-ikon { display: grid; }
+.kpi-isi { flex: 1; }
+/* Kartu sempit: pill turun ke baris bawah, keterangan tidak dipotong. */
+.kpi-bawah { flex-wrap: wrap; row-gap: 6px; }
+.kartu-angka .kpi-bawah span:first-child { white-space: nowrap; }
+/* Di antrean (menempel saat digulir) kartu dibuat lebih pendek. */
+.antrean-atas .kartu-angka > .kpi { display: block; padding: 4px; }
+.antrean-atas .kpi-kepala { padding: 6px 8px 8px; font-size: 14px; }
+.antrean-atas .kpi-isi { padding: 10px 14px; }
+.antrean-atas .kartu-angka .kpi-isi b { font-size: 30px; }
+.antrean-atas .kpi-bawah { margin-top: 4px; }
+
 /* ---------- tombol, label, chip ---------- */
 
 .btn { height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
