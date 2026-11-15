@@ -362,7 +362,163 @@
 .nav-sub a { height: 34px; font-size: 13px; }
 .nav-sub a .lencana { margin-left: auto; }
 
+/* ================================================================
+   GAYA V3 (restyle): kanvas abu-abu, kartu putih radius 16px, nav pill, Inter.
+   Warna tetap memakai token app.css; satu token baru: --canvas (netral).
+   Skala huruf dinaikkan untuk pengguna 30+: isi 16px, tabel 15px, tidak ada teks < 13px.
+   ================================================================ */
+
+:root {
+  --font: "Inter", system-ui, sans-serif;
+  --canvas: oklch(96.6% .004 205);
+  --radius: 999px;
+  --radius-panel: 16px;
+  --shadow: none;
+}
+
+body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-settings: "cv11", "ss01"; }
+.angka, .kartu-angka b, .tabel td { font-variant-numeric: tabular-nums; }
+.kapital, .nav-judul { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
+.redup-kecil { font-size: 13px; }
+
+/* ---------- kerangka ---------- */
+
+.sisi { background: var(--bg); border-right: 0; padding: 20px 16px; }
+.merek b { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+.merek span { font-size: 13px; }
+.merek .merek-ikon, .merek-ikon { border-radius: 12px; }
+.nav { gap: 4px; }
+.nav-judul { padding: 18px 14px 8px; }
+.nav a, .nav button { height: 44px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--fg-2); }
+.nav a:hover, .nav button:hover { background: var(--canvas); color: var(--fg); }
+.nav a[aria-current="page"] { background: var(--fg); color: var(--bg); box-shadow: none; }
+.nav a[aria-current="page"] svg { color: var(--bg); }
+.nav .mati small { font-size: 13px; font-weight: 500; }
+.nav-sub { margin: 2px 0 4px 26px; padding-left: 10px; }
+.nav-sub a { height: 40px; font-size: 15px; }
+.sisi-kaki { border-top: 0; }
+.catatan-prototipe { border-radius: 16px; font-size: 13px; padding: 12px 14px; background: var(--canvas); border: 0; }
+
+.kolom { background: var(--canvas); border-radius: 24px; margin: 12px 12px 12px 0; min-height: calc(100vh - 24px); }
+.atas { background: oklch(96.6% .004 205 / .92); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 0 32px; height: 68px; }
+.jejak-rute { font-size: 15px; }
+.jejak-rute b { font-weight: 600; }
+.pengguna b { font-size: 15px; font-weight: 600; }
+.pengguna span { font-size: 13px; }
+.pengguna .avatar { width: 40px; height: 40px; }
+.pengguna .avatar img { width: 40px; height: 40px; }
+.lencana-simulasi { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
+.lencana { height: 24px; padding: 0 9px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+main.isi { padding: 8px 32px 64px; }
+
+/* ---------- judul halaman ---------- */
+
+.kepala { margin-bottom: 24px; }
+.kepala h1 { font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.kepala p, .keterangan-pemicu, .sub-judul { font-size: 16px; color: var(--fg-2); }
+
+/* ---------- kartu (panel) ---------- */
+
+.panel { border: 0; border-radius: 16px; background: var(--bg); box-shadow: none; }
+.panel-kepala { padding: 20px 24px 12px; border-bottom: 0; }
+.panel-kepala h2, .panel-kepala h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.panel-isi { padding: 12px 24px 24px; }
+.catatan-kaki { font-size: 13px; }
+
+/* ---------- kartu angka ---------- */
+
+.kartu-angka { gap: 16px; }
+.kartu-angka > div { border: 0; border-radius: 16px; box-shadow: none; padding: 20px 24px; }
+.kartu-angka b { font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
+.kartu-angka span { margin-top: 8px; font-size: 15px; }
+
+/* ---------- tombol, label, chip ---------- */
+
+.btn { height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.btn--kecil { height: 40px; padding: 0 16px; font-size: 15px; }
+.btn svg { width: 18px; height: 18px; }
+.label { height: 28px; padding: 0 11px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.label--besar { height: 32px; padding: 0 14px; font-size: 14px; }
+.status-chip { height: 28px; padding: 0 11px; font-size: 13px; font-weight: 600; }
+.sel-status small { font-size: 13px; }
+input, select, textarea { font-size: 16px; }
+
+/* ---------- tabel ---------- */
+
+table.tabel { font-size: 15px; }
+.tabel th { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); background: transparent; padding: 12px 16px; }
+.tabel td { padding: 14px 16px; }
+.tabel .nama-berkas b { font-weight: 600; }
+.tabel .nama-berkas span { font-size: 13px; }
+
+/* ---------- banner keterangan ---------- */
+
+.keterangan-aturan, .perubahan-rs, .pengumuman { border-radius: 16px; font-size: 15px; }
+
+/* ---------- ukuran minimum 13px (audit S-03) ----------
+   Selektor disamakan dengan aslinya supaya menang. Isi mockup ponsel (.ponsel, .gelembung,
+   .tombol-telp) sengaja tidak diubah: meniru layar HP penerima. */
+
+.chip-ind { height: 26px; padding: 0 10px; font-size: 13px; font-weight: 600; }
+.panggilan-grid .panel-kepala .kanan { font-size: 13px; }
+.ponsel-ket { font-size: 13px; }
+.progres small, .progres time { font-size: 13px; }
+.catatan-simulasi { font-size: 13px; padding: 0 24px 16px; }
+.baris-trans .peran { font-size: 13px; font-weight: 600; }
+.baris-trans--sistem { font-size: 13px; }
+.ket-angka { font-size: 14px; }
+.tgl { font-size: 14px; font-weight: 600; border-radius: 10px; }
+.tgl small { font-size: 13px; font-weight: 600; letter-spacing: 0; }
+.pemutar small, .tanpa-rekaman { font-size: 13px; }
+.catatan-bukti { font-size: 14px; padding: 14px 24px 16px; }
+.saran-kartu .konteks { font-size: 14px; border-radius: 12px; }
+.saran-kartu .catatan-saran { font-size: 13px; }
+.pilihan-lain label.catatan-medan > .kapital { font-size: 13px; }
+.pilihan-lain label.catatan-medan > .petunjuk-alasan, .petunjuk-alasan { font-size: 13px; }
+.tabel .redup-kecil { font-size: 13px; }
+.tautan-kecil { font-size: 14px; font-weight: 600; }
+.masuk-bungkus > p, .masuk-kartu > p { font-size: 14px; }
+.masuk-catatan, .masuk-versi { font-size: 13px; }
+.masuk-kartu { border: 0; border-radius: 16px; }
+.status-keputusan { font-size: 13px; }
+.tanda-baru { font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.saklar { font-size: 14px; }
+.pilihan-lain label span { font-size: 13px; }
+.catatan-medan .galat { font-size: 13px; }
+.putusan p, .putusan blockquote { font-size: 14px; }
+.linimasa time { font-size: 13px; }
+.ringkas div span { font-size: 13px; }
+.kekuatan { font-size: 13px; font-weight: 700; }
+.tur-kartu .hitung, .tur-lewati { font-size: 13px; }
+
+/* ---------- penyesuaian tata letak untuk skala baru ---------- */
+
+:root { --sisi: 268px; --atas: 68px; }
+.nav .mati { white-space: nowrap; }
+.antrean-atas { margin: 0 -32px 16px; padding: 12px 32px 0; background: var(--canvas); }
+.antrean-atas .kartu-angka > div { padding: 16px 20px; }
+.antrean-atas .kartu-angka b { font-size: 32px; }
+.antrean-atas .kartu-angka span { font-size: 15px; }
+.antrean-atas .bar-antrean { border: 0; border-radius: 16px; box-shadow: none; padding: 10px 16px; }
+.bar-antrean { border-bottom: 0; }
+.tabel .nama-berkas b { white-space: nowrap; }
+.tabel td, .tabel th { padding-left: 12px; padding-right: 12px; }
+.tabel td:first-child, .tabel th:first-child { padding-left: 24px; }
+.tabel td:last-child, .tabel th:last-child { padding-right: 24px; }
+.chip-ind-wadah { gap: 6px; max-width: 260px; }
+
+/* Target klik minimal 40px (audit S-06). */
+.jejak-rute a { display: inline-flex; align-items: center; min-height: 40px; }
+.pilih, select { min-height: 44px; border-radius: 999px; }
+
 /* ---------- layar sedang dan kecil ---------- */
+
+@media (max-width: 960px) {
+  .kolom { margin: 0; border-radius: 0; min-height: 100vh; }
+  .atas { border-radius: 0; padding: 0 16px; }
+  main.isi { padding: 8px 16px 56px; }
+  .tombol-menu { width: 44px; height: 44px; border-radius: 999px; }
+}
 
 @media (max-width: 1339px) {
   .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr); }
