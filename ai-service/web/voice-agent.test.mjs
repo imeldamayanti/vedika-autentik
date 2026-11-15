@@ -852,6 +852,7 @@ test("isClosingLine matches a farewell at the end of a turn or 'sudah kami catat
     "Jawaban Ibu sudah kami catat. Terima kasih.",
     "Baik, sudah kami catat, tiga kali ya. Terima kasih banyak atas waktunya.",
     "SELAMAT MALAM",
+    "Terima kasih banyak atas informasinya. Informasi ini tidak memengaruhi layanan atau iuran Bapak.",
   ]) assert.equal(isClosingLine(teks), true, teks);
   for (const teks of [
     "Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam. Ini bukan tagihan, dan kami tidak meminta NIK, OTP, rekening, atau uang.",

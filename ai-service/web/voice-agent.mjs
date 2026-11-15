@@ -27,11 +27,13 @@ export const isOperatorAnnouncement = (teks) => {
   return ANNOUNCEMENTS.some((phrase) => text.includes(phrase));
 };
 
-// The AI's goodbye: a time-of-day farewell at the end of the turn, or "sudah kami catat". A question is never one.
+// The AI's goodbye: a time-of-day farewell at the end of the turn, "sudah kami catat", or the script's
+// closing promise that the answer does not affect service or dues (step F). A question is never one.
 export const isClosingLine = (teks) => {
   if (String(teks || "").trim().endsWith("?")) return false;
   const text = normalize(teks);
-  return text.includes("sudah kami catat") || /selamat (pagi|siang|sore|malam)/.test(text.slice(-60));
+  return text.includes("sudah kami catat") || text.includes("tidak memengaruhi layanan")
+    || /selamat (pagi|siang|sore|malam)/.test(text.slice(-60));
 };
 
 // The officer cancelled or the backend released the call: nothing more may be reported for it.
