@@ -382,8 +382,9 @@ body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-se
    Semua ukuran di file ini ditulis pada skala 100% lalu diperkecil serentak, jadi proporsinya tetap.
    Ukuran tampil efektif: isi ~14,4px, tabel ~13,5px, teks terkecil ~11,7px, tombol ~40px.
    Tinggi berbasis 100vh dibagi skala supaya tetap penuh satu layar. */
-:root { --skala: .9; }
-body { zoom: var(--skala); }
+/* Skala dikembalikan ke 100%: zoom 90% membuat huruf terlalu kecil. Kepadatan sekarang diatur
+   lewat jarak dan skala huruf (blok "kepadatan" di bawah), bukan zoom. */
+:root { --skala: 1; }
 .sisi { height: calc(100vh / var(--skala)); }
 .kolom { min-height: calc(100vh / var(--skala) - 24px); }
 .masuk { min-height: calc(100vh / var(--skala)); }
@@ -572,6 +573,53 @@ table.tabel { font-size: 15px; }
 
 /* ---------- layar sedang dan kecil ---------- */
 
+/* ---------- kepadatan dan hierarki huruf ----------
+   Isi mengisi lebar layar (tanpa batas 1440px), jarak dirapatkan, dan huruf mengikuti hierarki:
+   judul halaman 26 · judul kartu 17 · angka KPI 32 · isi & tabel 15 · keterangan 14 · label kecil 13. */
+
+:root { --atas: 60px; }
+body { font-size: 15px; }
+main.isi { max-width: none; padding: 4px 28px 48px; }
+.atas { height: 60px; padding: 0 28px; }
+.kepala { margin-bottom: 16px; }
+.kepala h1 { font-size: 26px; }
+.kepala p, .keterangan-pemicu, .sub-judul { font-size: 15px; max-width: 100ch; }
+
+.panel-kepala { padding: 16px 20px 8px; }
+.panel-kepala h2, .panel-kepala h3 { font-size: 17px; }
+.panel-isi { padding: 8px 20px 20px; }
+
+.nav a, .nav button { height: 40px; }
+.nav-sub a { height: 40px; }
+.btn { height: 40px; padding: 0 18px; font-size: 15px; }
+.btn--kecil { height: 40px; padding: 0 14px; font-size: 14px; }
+
+.kartu-angka { gap: 12px; margin-bottom: 16px; }
+.kartu-angka > .kpi { padding: 4px; border-radius: 16px; }
+.kpi-kepala { padding: 6px 8px 8px; font-size: 15px; }
+.kpi-isi { padding: 12px 14px; border-radius: 12px; }
+.kartu-angka .kpi-isi b { font-size: 32px; }
+.kpi-bawah { margin-top: 6px; gap: 6px; }
+/* Keterangan selalu satu baris supaya keempat kartu identik; pill dibuat ringkas. */
+.kartu-angka .kpi-bawah span:first-child { white-space: nowrap; }
+.kartu-angka .kpi-bawah .kpi-pill { height: 24px; padding: 0 8px; }
+.kartu-angka .kpi-kepala > span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-isi { padding: 12px 12px 12px 14px; }
+.antrean-atas .kartu-angka .kpi-isi b { font-size: 28px; }
+.antrean-atas .kpi-isi { padding: 10px 14px; }
+.antrean-atas .bar-antrean { padding: 8px 12px; }
+
+table.tabel { font-size: 15px; }
+.tabel th { padding-top: 10px; padding-bottom: 10px; }
+.tabel td { padding-top: 10px; padding-bottom: 10px; }
+.tabel .nama-berkas span, .sel-status .progres-rs { font-size: 13px; }
+.sel-status { gap: 4px; }
+.putusan-baris { font-size: 14px; }
+
+/* Chip indikator mengalir menyamping, baru turun baris bila kolom penuh: baris tabel tidak lagi tinggi. */
+.chip-ind-wadah { max-width: none; gap: 4px 6px; }
+.chip-ind { white-space: nowrap; min-height: 24px; padding: 2px 9px; }
+
 /* Zoom 125% di monitor 1366 (lebar efektif ~1093px): tabel antrean harus muat tanpa gulir,
    dan blok angka tidak menempel supaya tidak memakan sepertiga layar (audit S-08). */
 @media (max-width: 1279px) {
@@ -584,7 +632,10 @@ table.tabel { font-size: 15px; }
   .tabel td:last-child, .tabel th:last-child { padding-right: 16px; }
   .tabel .nama-berkas b { white-space: normal; }
   .tabel th { letter-spacing: .03em; }
-  .chip-ind-wadah { max-width: 130px; }
+  /* Empat kartu di lebar sempit membuat judul kartu turun baris; jadikan 2×2 supaya tetap seragam. */
+  .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chip-ind-wadah { max-width: 150px; }
+  .chip-ind { white-space: normal; }
   .tabel td.aksi .btn { white-space: normal; height: auto; min-height: 44px; padding: 6px 14px; line-height: 1.25; text-align: left; }
 }
 
