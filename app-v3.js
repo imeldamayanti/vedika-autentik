@@ -935,7 +935,8 @@
     }
     const j = p.jawaban, rk = ringkasKartu(p), latar = M.hidup ? p.sumber === "sintetis-riwayat" : !!D.LATAR[id];
     const saran = D.TINDAKAN[saranP(p)];
-    const rs = M.hidup ? p.konteksRs : D.ringkasanRs(panggilanSelesai()).find((r) => r.id_rs === p.rs);
+    const rsMentah = M.hidup ? p.konteksRs : D.ringkasanRs(panggilanSelesai()).find((r) => r.id_rs === p.rs);
+    const rs = Object.assign({}, rsMentah, { status: D.statusRs(rsMentah) });
     const bahaya = j.tanda_bahaya.length;
     const simpanTeks = p.label === "tidak_sesuai" || p.label === "sesuai";
 
@@ -977,7 +978,11 @@
       bukti + tombolTranskrip + transkrip +
       '<div class="catatan-bukti"><span>' + ikon("kunci") + esc(D.RETENSI[p.label]) + "</span><span>" + ikon("kunci") + "Identitas penerima tidak dibagikan ke RS.</span></div></section>";
 
-    const konteks = '<div class="konteks"><span><b>' + esc(namaRs(p.rs)) + "</b>: " + rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai. Status: <b>" + rs.status + "</b>.</span></div>";
+    /* Saran di atas berlaku untuk pasien ini; status RS dihitung dari semua pasien RS itu (audit S-02). */
+    const progres = D.progresRs(rs);
+    const konteks = '<div class="konteks"><span><b>Status ' + esc(namaRs(p.rs)) + ":</b> " + chipStatusRs(rs) + " " +
+      rs.tidak_sesuai + " dari " + rs.terjawab + " jawaban tidak sesuai" + (progres ? " (" + progres + ")" : "") + ".</span>" +
+      "<span>Saran di atas untuk pasien ini. Status rumah sakit dihitung dari semua pasiennya.</span></div>";
     const keputusan = M.hidup ? p.keputusan : S.keputusan[id];
     const tampilPutusan = keputusan && ui.ubah !== id;
     /* Untuk Sesuai/Tidak sesuai, alasannya hanya mengulang angka di ringkasan, jadi cukup akibat tindakannya. */
@@ -1010,6 +1015,12 @@
     };
   }
 
+  /* Normal hijau hanya bila sudah cukup jawaban; Belum cukup jawaban netral (audit S-01). */
+  function chipStatusRs(c) {
+    const kelas = c.status === D.STATUS_RS.normal ? "sesuai" : c.status === D.STATUS_RS.klarifikasi ? "tidak_sesuai" : "belum";
+    return '<span class="label label--' + kelas + '">' + c.status + "</span>";
+  }
+
   function lamanRingkasanRs() {
     const data = dataRingkasan();
     if (!data) return kepala("Memuat ringkasan RS", "Mengambil data dari API…");
@@ -1030,7 +1041,7 @@
         '<td class="angka">' + r.terpicu + ' <span class="redup-kecil">(' + persenRs(r.persen) + ")</span></td>" +
         '<td class="angka sembunyi-hp">' + c.terjawab + "</td>" +
         '<td class="angka">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</td>" +
-        '<td><span class="label label--' + (c.status === "Normal" ? "sesuai" : "tidak_sesuai") + '">' + c.status + "</span></td>" +
+        '<td class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</td>" +
         '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" +
         (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
     }).join("");

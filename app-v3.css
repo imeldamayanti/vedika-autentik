@@ -33,6 +33,10 @@
 .label--tidak_yakin { background: var(--cek-bg); color: var(--cek-fg); }
 .label--tidak_terhubung { background: var(--ulang-bg); color: var(--ulang-fg); }
 .label--menolak { background: var(--muted); color: var(--fg-2); border: 1px solid var(--border-strong); }
+.label--belum { background: var(--muted); color: var(--fg-2); border: 1px dashed var(--border-strong); }
+.sel-status { white-space: nowrap; }
+.sel-status .progres-rs { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }
+.konteks span + span { display: block; margin-top: 4px; color: var(--fg-2); }
 
 /* ---------- status panggilan di antrean ---------- */
 

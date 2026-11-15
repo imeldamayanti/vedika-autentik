@@ -390,15 +390,37 @@
 
   const selisih = (p) => (p.jawaban.jumlah_maks == null ? null : Math.max(0, p.ditagih - p.jawaban.jumlah_maks));
 
-  /* Perlu klarifikasi RS jika tidak sesuai >= 3 DAN >= 10% dari terjawab. Yang terjawab hanya
-     Sesuai + Tidak sesuai; Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung. */
+  /* Status RS dari jumlah jawaban. Yang terjawab hanya Sesuai + Tidak sesuai; Tidak yakin,
+     Tidak terhubung, dan Menolak tidak dihitung.
+     - Belum cukup jawaban: terjawab < 3. RS yang belum diperiksa tidak boleh tampak "Normal" (audit S-01).
+     - Perlu klarifikasi RS: tidak sesuai >= 3 DAN >= 10% dari terjawab (PRD R5.4).
+     - Normal: selain itu.
+     TODO: pindah ke aturan_v3.py di backend, lalu UI cukup membaca status dari API. */
+  const RS_MIN_TERJAWAB = 3, RS_MIN_TIDAK_SESUAI = 3, RS_MIN_RASIO = 0.1;
+  const STATUS_RS = { belum: "Belum cukup jawaban", klarifikasi: "Perlu klarifikasi RS", normal: "Normal" };
+
+  function statusRs(c) {
+    const terjawab = c.terjawab || 0, tidakSesuai = c.tidak_sesuai || 0;
+    if (terjawab < RS_MIN_TERJAWAB) return STATUS_RS.belum;
+    return tidakSesuai >= RS_MIN_TIDAK_SESUAI && tidakSesuai / terjawab >= RS_MIN_RASIO ? STATUS_RS.klarifikasi : STATUS_RS.normal;
+  }
+
+  /* Jarak ke ambang dalam satu kalimat pendek, untuk baris RS dan kartu bukti (audit S-02). */
+  function progresRs(c) {
+    const terjawab = c.terjawab || 0, tidakSesuai = c.tidak_sesuai || 0;
+    const status = statusRs(c);
+    if (status === STATUS_RS.belum) return terjawab + " dari " + RS_MIN_TERJAWAB + " jawaban minimal";
+    if (status === STATUS_RS.normal) return tidakSesuai + " dari " + RS_MIN_TIDAK_SESUAI + " tidak sesuai untuk klarifikasi";
+    return "";
+  }
+
   function ringkasanRs(daftarPanggilan) {
     return RS.map((r) => {
       const c = { id_rs: r.id, sesuai: 0, tidak_sesuai: 0, tidak_yakin: 0, tidak_terhubung: 0, menolak: 0 };
       daftarPanggilan.filter((p) => p.rs === r.id).forEach((p) => { c[p.label] += 1; });
       c.terjawab = c.sesuai + c.tidak_sesuai;
       c.rasio = c.terjawab ? c.tidak_sesuai / c.terjawab : 0;
-      c.status = c.tidak_sesuai >= 3 && c.rasio >= 0.1 ? "Perlu klarifikasi RS" : "Normal";
+      c.status = statusRs(c);
       return c;
     });
   }
@@ -431,6 +453,8 @@
     const sesudah = ringkasanRs(Object.keys(LATAR).map((id) => LATAR[id]).concat([SKENARIO.S1]))[0];
     cek(sebelum.tidak_sesuai === 2 && sebelum.terjawab === 4 && sebelum.status === "Normal", "RS Melati sebelum S1 harus Normal 2 dari 4");
     cek(sesudah.tidak_sesuai === 3 && sesudah.terjawab === 5 && sesudah.status === "Perlu klarifikasi RS", "RS Melati sesudah S1 harus Perlu klarifikasi RS 3 dari 5");
+    const rsKosong = ringkasanRs(Object.keys(LATAR).map((id) => LATAR[id])).filter((c) => c.terjawab === 0);
+    cek(rsKosong.every((c) => c.status === STATUS_RS.belum), "RS tanpa jawaban harus Belum cukup jawaban, bukan Normal");
     cek(!/https?:|www\./i.test(pesanPemberitahuan(SKENARIO.S1) + pesanCadangan(SKENARIO.S5)), "pesan WA tidak boleh berisi tautan");
     if (salah.length) console.warn("Data v3 tidak konsisten dengan PRD:", salah);
     return salah;
@@ -441,6 +465,6 @@
     LABEL, TINDAKAN, PILIHAN_TINDAKAN, SARAN, RETENSI, INDIKATOR, TOLERANSI,
     RS, PASIEN_AKTIF, PASIEN_TERPICU,
     SKENARIO, LATAR, MENGANTRE, SEMUA, URUTAN_ANTREAN, TIDAK_DIPICU,
-    pesanPemberitahuan, pesanCadangan, namaRs, hitungLabel, selisih, ringkasanRs, UJI
+    pesanPemberitahuan, pesanCadangan, namaRs, hitungLabel, selisih, ringkasanRs, statusRs, progresRs, STATUS_RS, RS_MIN_TERJAWAB, UJI
   };
 })(window);

@@ -121,7 +121,9 @@
       jumlah: r.panggilan_selesai,
       rs: r.rs.map((x) => ({
         id: x.id_rs, nama: x.nama, aktif: x.aktif, terpicu: x.terpicu, persen: x.persen,
-        c: { sesuai: x.sesuai, tidak_sesuai: x.tidak_sesuai, tidak_yakin: x.tidak_yakin, tidak_terhubung: x.tidak_terhubung, menolak: x.menolak, terjawab: x.terjawab, rasio: x.rasio, status: x.status },
+        /* Status dihitung ulang di UI dari angka (audit S-01). TODO: hapus setelah aturan_v3.py memakai statusRs yang sama. */
+        c: { sesuai: x.sesuai, tidak_sesuai: x.tidak_sesuai, tidak_yakin: x.tidak_yakin, tidak_terhubung: x.tidak_terhubung, menolak: x.menolak, terjawab: x.terjawab, rasio: x.rasio,
+          status: typeof x.terjawab === "number" && global.DATA3 ? global.DATA3.statusRs(x) : x.status },
         daftar: x.panggilan
       }))
     };
