@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """Stub agen suara: berpura-pura jadi agen Zahra lewat Kontrak B1 (docs/api-contract-v3.md).
 
-Tidak menelepon dan tidak membuka WhatsApp: tautan wa.me hanya dicetak. Skenario dikenali dari id panggilan
+Tidak menelepon. Pesan WA dan chat cadangan dikirim server (app/wa.py), stub hanya melapor. Skenario dikenali dari id panggilan
 (CALL-P-S1-2026-08 dst.). Percakapan diputar dari transkrip_uji + assets/rekaman/waktu.json (hasil SR) supaya
 layar Panggilan bergerak seirama suara; rekaman utuh assets/rekaman/<S>.mp3 dikirim sebagai hasil.
 
-  .venv/bin/python -m scripts.stub_agen                    # terus mengambil antrean (mode otomatis harus AKTIF)
-  .venv/bin/python -m scripts.stub_agen --skenario S1      # sekali jalan: Telepon sekarang S1 lalu selesai
+  .venv/bin/python -m scripts.stub_agen                    # terus mengambil antrean (mode otomatis bawaan AKTIF)
+  .venv/bin/python -m scripts.stub_agen --skenario S1      # sekali jalan: Dahulukan S1 lalu selesai
   .venv/bin/python -m scripts.stub_agen --kecepatan 4      # putar 4x lebih cepat
 
 Perilaku:
-  S1 S2 S3 S4 S6 S8   WA, jeda, menelepon, tersambung, merekam, transkrip baris demi baris (+ tangkapan_sementara),
+  S1 S2 S3 S4 S6 S8   jeda WA, menelepon, tersambung, merekam, transkrip baris demi baris (+ tangkapan_sementara),
                       hasil dengan rekaman .mp3.
-  S5                  menelepon dua kali, tidak diangkat; tautan chat cadangan dicetak lalu dilaporkan terkirim.
+  S5                  menelepon dua kali, tidak diangkat; chat cadangan dikirim server.
+  tiap putaran        POST /agen/detak, supaya situs melihat saluran telepon aktif (perangkat "stub").
   panggilan lain      percakapan singkat tanpa rekaman (pembaca stub menjawab Tidak yakin).
 
 Kunci agen dibaca dari --kunci, environment AGEN_KEY, atau backend/.env. Tidak pernah dicetak.
@@ -126,17 +127,24 @@ class StubAgen:
         sk = self.skenario.get(id_)
         sid = sk["id_skenario"] if sk else None
         self.cetak(f"[{id_}] tugas diambil: percobaan {tugas['percobaan']}, {tugas['skrip']['nama_penerima']} ({tugas['skrip']['hubungan']})")
-        if not tugas["wa"]["lewati"]:
-            self.cetak(f"[{id_}] tautan WA (tidak dibuka, kirim manual bila perlu): {tugas['wa']['tautan']}")
+        wa = tugas["wa"]
+        if wa.get("dikirim_server"):
+            if wa.get("status"):  # percobaan ke-1: server sudah mengirim pemberitahuan, tinggal menunggu jeda
+                self.cetak(f"[{id_}] pesan WA dikirim server: {wa['status']}")
+                self.tidur(tugas["jeda_wa_menit"] * 60)
+        elif not wa["lewati"]:
             self.lapor(id_, "wa_terkirim")
             self.tidur(tugas["jeda_wa_menit"] * 60)
         self.lapor(id_, "menelepon")
         if sid in TIDAK_DIANGKAT:
             self.tidur(self.dering)
             balasan = self.lapor(id_, "tidak_diangkat")
-            if balasan["chat_cadangan"]:
-                self.cetak(f"[{id_}] tidak diangkat 2 kali. Tautan chat cadangan: {balasan['chat_cadangan']['tautan']}")
-                self.lapor(id_, "chat_cadangan_terkirim")
+            chat = balasan["chat_cadangan"]
+            if chat:
+                if chat.get("dikirim_server"):
+                    self.cetak(f"[{id_}] tidak diangkat 2 kali. Chat cadangan dikirim server: {chat['status']}")
+                else:
+                    self.lapor(id_, "chat_cadangan_terkirim")
                 return True
             self.cetak(f"[{id_}] tidak diangkat, kembali antre sampai {balasan['coba_lagi_setelah']}")
             return False
@@ -188,7 +196,7 @@ class StubAgen:
         r = self.klien.post(f"{PREFIX}/panggilan/{id_}/mulai")
         if r.status_code != 200:
             raise GalatAgen(f"{id_} mulai: {r.status_code} {r.text}")
-        self.cetak(f"[{id_}] ditandai Telepon sekarang")
+        self.cetak(f"[{id_}] ditandai Dahulukan")
         return id_
 
     def jalankan(self, skenario: str | None = None, interval=3.0, maks_putaran=None) -> None:
@@ -196,6 +204,7 @@ class StubAgen:
         putaran, diam = 0, 0
         while maks_putaran is None or putaran < maks_putaran:
             putaran += 1
+            self._kirim("/agen/detak", json={"siap": True, "perangkat": "stub"})
             r = self._kirim("/agen/ambil")
             if r.status_code == 401:
                 raise GalatAgen("Kunci agen ditolak API (401 kunci_salah). Periksa AGEN_KEY.")

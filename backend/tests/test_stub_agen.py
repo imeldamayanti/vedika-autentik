@@ -52,15 +52,18 @@ def test_s1_dari_mulai_sampai_kartu_bukti(klien_agen, conn_v3, pembaca, tmp_path
     # rekaman utuh dari SR terkirim
     assert d["rekaman"] and klien_agen.get(d["rekaman"]).content == (config.AKAR / "assets/rekaman/S1.mp3").read_bytes()
     assert [x["status"] for x in d["log"]] == ["wa_terkirim", "menelepon", "tersambung", "merekam", "membaca_jawaban", "selesai"]
-    # tautan WA dicetak, tidak dibuka
-    assert any("https://wa.me/6281234567890?text=Halo%20Andi%20Pratama" in k for k in keluaran)
+    # pesan WA dikirim server (Meta belum diatur: simulasi); stub tidak melapor wa_terkirim
+    assert d["log"][0]["catatan"] == "wa:simulasi" and any("pesan WA dikirim server: simulasi" in k for k in keluaran)
+    laporan = [j["laporan"] for url, j, st in perekam.catatan if url.endswith("/status")]
+    assert "wa_terkirim" not in laporan and laporan[-2:] == ["tersambung", "merekam"]
     # jeda WA 1 menit dihormati lewat jam API
     assert jam.total_tidur >= 60 + 63
     # RS Melati menjadi Perlu klarifikasi RS
     melati = klien_agen.get(f"{BASE}/ringkasan-rs").json()["rs"][0]
     assert (melati["status"], melati["tidak_sesuai"], melati["terjawab"]) == ("Perlu klarifikasi RS", 3, 5)
-    # mode otomatis tetap mati: S1 hanya berjalan karena Telepon sekarang
-    assert klien_agen.get(f"{BASE}/pengaturan").json()["mode_otomatis"] is False
+    # stub mengirim detak tiap putaran: situs melihat saluran aktif
+    stasiun = klien_agen.get(f"{BASE}/antrean").json()["pengaturan"]["stasiun"]
+    assert (stasiun["siap"], stasiun["perangkat"]) == (True, "stub")
 
 
 def test_tangkapan_sementara_bertambah_seiring_giliran_bicara(klien_agen, pembaca, monkeypatch):
@@ -92,17 +95,19 @@ def test_skenario_lain_berakhir_dengan_label_yang_diharapkan(klien_agen, pembaca
 
 
 def test_s5_dua_kali_tidak_diangkat_lalu_chat_cadangan(klien_agen, conn_v3, monkeypatch):
-    agen, jam, keluaran, _ = agen_uji(klien_agen, monkeypatch, dering=3)
+    klien_agen.put(f"{BASE}/pengaturan", json={"mode_otomatis": False})  # hanya S5 (Dahulukan) yang berjalan
+    agen, jam, keluaran, perekam = agen_uji(klien_agen, monkeypatch, dering=3)
     agen.jalankan("S5", maks_putaran=60)
     d = detail(klien_agen, "CALL-P-S5-2026-08")
     assert (d["status"], d["label"], d["percobaan"]) == ("tidak_terhubung", "tidak_terhubung", 2)
     assert d["pesan_wa"]["cadangan"] is not None and d["rekaman"] is None and d["transkrip"] == []
     assert [(x["status"], x["percobaan"], x["catatan"]) for x in d["log"]] == [
-        ("wa_terkirim", 1, None), ("menelepon", 1, None), ("menelepon", 1, "tidak_diangkat"),
-        ("menelepon", 2, None), ("menelepon", 2, "tidak_diangkat"), ("tidak_terhubung", 2, "chat_cadangan_terkirim"),
+        ("wa_terkirim", 1, "wa:simulasi"), ("menelepon", 1, None), ("menelepon", 1, "tidak_diangkat"),
+        ("menelepon", 2, None), ("menelepon", 2, "tidak_diangkat"), ("tidak_terhubung", 2, "chat:simulasi"),
     ]
+    assert not any(j and j.get("laporan") == "chat_cadangan_terkirim" for _, j, _ in perekam.catatan)
     assert conn_v3.execute("select chat_cadangan_terkirim as c from panggilan where id = 'CALL-P-S5-2026-08'").fetchone()["c"] is True
-    assert sum("Tautan chat cadangan: https://wa.me/6281234567890?text=Kami%20belum%20berhasil" in k for k in keluaran) == 1
+    assert sum("Chat cadangan dikirim server: simulasi" in k for k in keluaran) == 1
     assert sum("kembali antre" in k for k in keluaran) == 1
     assert jam.total_tidur >= 120  # jeda percobaan 2 menit dihormati
 
@@ -117,9 +122,8 @@ def test_panggilan_non_skenario_percakapan_singkat_tanpa_rekaman(klien_agen, pem
     assert len(pembaca.permintaan[0]["transkrip"]) == 4
 
 
-def test_mode_otomatis_aktif_stub_mengambil_urutan_antrean(klien_agen, pembaca, monkeypatch):
+def test_mode_otomatis_bawaan_stub_mengambil_urutan_antrean(klien_agen, pembaca, monkeypatch):
     pembaca.balasan = [SKENARIO["S1"]["expected_jawaban"]]
-    klien_agen.put(f"{BASE}/pengaturan", json={"mode_otomatis": True})
     agen, _, keluaran, _ = agen_uji(klien_agen, monkeypatch, kecepatan=10)
     agen.jalankan(maks_putaran=1)
     assert detail(klien_agen, "CALL-P-S1-2026-08")["status"] == "selesai"
@@ -127,9 +131,10 @@ def test_mode_otomatis_aktif_stub_mengambil_urutan_antrean(klien_agen, pembaca, 
 
 
 def test_menunggu_bila_tidak_ada_tugas_dan_mencetak_petunjuk(klien_agen, monkeypatch):
+    klien_agen.put(f"{BASE}/pengaturan", json={"mode_otomatis": False})
     agen, jam, keluaran, perekam = agen_uji(klien_agen, monkeypatch)
     agen.jalankan(maks_putaran=3)
-    assert [st for url, _, st in perekam.catatan] == [204, 204, 204]
+    assert [(url.rsplit("/", 1)[1], st) for url, _, st in perekam.catatan] == [("detak", 204), ("ambil", 204)] * 3
     assert sum("menunggu tugas" in k for k in keluaran) == 1 and jam.total_tidur == 9
 
 

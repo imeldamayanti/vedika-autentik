@@ -49,6 +49,7 @@ def test_mengubah_mode_mematikan_jeda(klien_v3):
 
 
 def test_jeda_ditolak_bila_mode_mati(klien_v3):
+    klien_v3.put("/api/v1/pengaturan", json={"mode_otomatis": False})
     r = klien_v3.put("/api/v1/pengaturan", json={"jeda": True})
     assert r.status_code == 422 and r.json()["galat"]["kode"] == "pengaturan_tidak_valid"
     assert klien_v3.get("/api/v1/pengaturan").json()["jeda"] is False
@@ -69,14 +70,22 @@ def test_pengaturan_tidak_valid_ditolak_dan_tidak_menyimpan(klien_v3, body):
     r = klien_v3.put("/api/v1/pengaturan", json=body)
     assert r.status_code == 422 and r.json()["galat"]["kode"] == "pengaturan_tidak_valid"
     assert klien_v3.get("/api/v1/pengaturan").json() == {
-        "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
+        "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
         "jeda_wa_menit": 1, "jeda_percobaan_menit": 2,
     }
 
 
+def test_pengaturan_tidak_bisa_menimpa_detak_stasiun(klien_v3, conn_v3):
+    detak = {"terakhir_terlihat": "2026-10-06T10:00:00+07:00", "siap": True, "alasan": None, "perangkat": "uji"}
+    conn_v3.execute("insert into pengaturan (kunci, nilai) values ('stasiun', %s)", (json.dumps(detak),))
+    h = klien_v3.put("/api/v1/pengaturan", json={"stasiun": {"siap": False}, "jeda_wa_menit": 2}).json()
+    assert "stasiun" not in h and h["jeda_wa_menit"] == 2
+    assert kunci(conn_v3, "stasiun") == detak
+
+
 # ---- POST /panggilan/{id}/mulai ----
 
-def test_telepon_sekarang_menandai_prioritas(klien_v3, conn_v3):
+def test_dahulukan_menandai_prioritas(klien_v3, conn_v3):
     r = klien_v3.post(f"/api/v1/panggilan/CALL-P-S3-2026-08/mulai")
     assert r.status_code == 200
     assert r.json()["id"] == "CALL-P-S3-2026-08" and r.json()["prioritas"] is True and r.json()["status"] == "antre"
@@ -228,8 +237,7 @@ def test_rekaman_tidak_bisa_keluar_dari_penyimpanan(klien_v3, conn_v3, tmp_path,
 # ---- POST /demo/reset ----
 
 def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
-    klien_v3.put("/api/v1/pengaturan", json={"mode_otomatis": True})
-    klien_v3.put("/api/v1/pengaturan", json={"jeda": True})
+    klien_v3.put("/api/v1/pengaturan", json={"mode_otomatis": False})
     selesaikan(conn_v3)
     rel = simpan_rekaman(tmp_path)
     ubah(conn_v3, S1, rekaman_path=rel, prioritas=True)
@@ -247,7 +255,7 @@ def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
         "pasien_aktif": 300, "terpicu": 30, "sudah_ditelepon": 4, "tidak_sesuai": 2, "rs_perlu_klarifikasi": 0,
         "antre": 26, "menunggu_keputusan": 2,
     }
-    assert h["pengaturan"]["mode_otomatis"] is False and h["pengaturan"]["jeda"] is False
+    assert h["pengaturan"]["mode_otomatis"] is True and h["pengaturan"]["jeda"] is False  # otomatis bawaan menyala
     assert all(not b["prioritas"] and b["percobaan"] == 0 for b in h["baris"] if b["status"] == "antre")
     assert conn_v3.execute("select count(*) as n from panggilan_log").fetchone()["n"] == 0
     assert klien_v3.get("/api/v1/keputusan").json() == []
@@ -262,3 +270,69 @@ def test_reset_demo_tidak_menyentuh_data_master(klien_v3, conn_v3):
     klien_v3.post("/api/v1/demo/reset")
     assert [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")] == sebelum
     assert sebelum[:3] == [5, 408, 4913] and sebelum[4] == 300
+
+
+def test_reset_demo_mematikan_jeda(klien_v3):
+    klien_v3.put("/api/v1/pengaturan", json={"jeda": True})
+    klien_v3.post("/api/v1/demo/reset")
+    p = klien_v3.get("/api/v1/pengaturan").json()
+    assert (p["mode_otomatis"], p["jeda"]) == (True, False)
+
+
+# ---- POST /panggilan/{id}/batal ----
+
+def log_db(conn, id_):
+    return [(r["status"], r["percobaan"], r["catatan"]) for r in conn.execute(
+        "select status, percobaan, catatan from panggilan_log where panggilan_id = %s order by waktu, id", (id_,))]
+
+
+@pytest.mark.parametrize("status,percobaan", [("wa_terkirim", 0), ("menelepon", 1), ("tersambung", 1), ("merekam", 1)])
+def test_batal_percobaan_pertama_kembali_antre(klien_v3, conn_v3, monkeypatch, status, percobaan):
+    jam_palsu(monkeypatch, menit=4)
+    ubah(conn_v3, S1, status=status, percobaan=percobaan, diambil_pada=wib(2026, 10, 6, 10, 0),
+         transkrip=json.dumps([{"detik": 0, "pembicara": "ai", "teks": "Halo."}]), tangkapan_sementara=json.dumps({"hadir": True}))
+    r = klien_v3.post(f"/api/v1/panggilan/{S1}/batal")
+    assert r.status_code == 200
+    b = r.json()
+    assert (b["id"], b["status"], b["percobaan"], b["coba_lagi_setelah"]) == (S1, "antre", 1, "2026-10-06T10:06:00+07:00")
+    db = conn_v3.execute("select diambil_pada, transkrip, tangkapan_sementara, label from panggilan where id = %s", (S1,)).fetchone()
+    assert db == {"diambil_pada": None, "transkrip": None, "tangkapan_sementara": None, "label": None}
+    assert log_db(conn_v3, S1) == [("menelepon", 1, "dibatalkan_verifikator")]
+
+
+def test_batal_percobaan_kedua_menjadi_tidak_terhubung_dan_chat_cadangan(klien_v3, conn_v3, monkeypatch):
+    jam_palsu(monkeypatch, menit=4)
+    ubah(conn_v3, S1, status="menelepon", percobaan=2)
+    b = klien_v3.post(f"/api/v1/panggilan/{S1}/batal").json()
+    assert (b["status"], b["label"], b["percobaan"], b["coba_lagi_setelah"]) == ("tidak_terhubung", "tidak_terhubung", 2, None)
+    assert log_db(conn_v3, S1) == [("menelepon", 2, "dibatalkan_verifikator"), ("tidak_terhubung", 2, "chat:simulasi")]
+    assert conn_v3.execute("select chat_cadangan_terkirim as c from panggilan where id = %s", (S1,)).fetchone()["c"] is True
+
+
+def test_batal_antre_yang_sudah_diambil_hanya_melepas_kunci(klien_v3, conn_v3):
+    ubah(conn_v3, S1, percobaan=1, diambil_pada=wib(2026, 10, 6, 10, 0))
+    b = klien_v3.post(f"/api/v1/panggilan/{S1}/batal").json()
+    assert (b["status"], b["percobaan"]) == ("antre", 1)
+    assert conn_v3.execute("select diambil_pada from panggilan where id = %s", (S1,)).fetchone()["diambil_pada"] is None
+    assert log_db(conn_v3, S1) == []
+
+
+def test_batal_ditolak_bila_tidak_berjalan(klien_v3, conn_v3):
+    for id_, ubahan in ((S1, {}), ("CALL-LATAR-001", {}), ("CALL-P-S3-2026-08", {"status": "membaca_jawaban"})):
+        if ubahan:
+            ubah(conn_v3, id_, **ubahan)
+        r = klien_v3.post(f"/api/v1/panggilan/{id_}/batal")
+        assert r.status_code == 409 and r.json()["galat"]["kode"] == "tidak_bisa_dibatalkan", id_
+    r = klien_v3.post("/api/v1/panggilan/CALL-NGAWUR/batal")
+    assert r.status_code == 404 and r.json()["galat"]["kode"] == "panggilan_tidak_ada"
+
+
+def test_antrean_melepas_panggilan_macet_tanpa_stasiun(klien_v3, conn_v3, monkeypatch):
+    ubah(conn_v3, S1, status="menelepon", percobaan=1, diambil_pada=wib(2026, 10, 6, 10, 0))
+    jam_palsu(monkeypatch, menit=4, detik=59)
+    baris = {b["id"]: b for b in klien_v3.get("/api/v1/antrean").json()["baris"]}
+    assert baris[S1]["status"] == "menelepon"
+    jam_palsu(monkeypatch, menit=5, detik=1)
+    baris = {b["id"]: b for b in klien_v3.get("/api/v1/antrean").json()["baris"]}
+    assert (baris[S1]["status"], baris[S1]["coba_lagi_setelah"]) == ("antre", "2026-10-06T10:07:01+07:00")
+    assert log_db(conn_v3, S1) == [("menelepon", 1, "macet")]

@@ -5,7 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from . import aturan_v3 as at
-from . import config, jam, repo_v3, tampilan_v3
+from . import config, jam, repo_v3, tampilan_v3, wa
 from .galat import Galat
 from .mesin import MesinGalat
 
@@ -13,6 +13,7 @@ log = logging.getLogger("vedika.agen")
 
 LAPORAN = ("wa_terkirim", "menelepon", "tersambung", "merekam", "tidak_diangkat", "chat_cadangan_terkirim")
 BERLANGSUNG = ("tersambung", "merekam")
+BISA_GAGAL = ("wa_terkirim", "menelepon", "tersambung", "merekam")  # boleh dibatalkan verifikator atau dilepas bila macet
 RETENSI_SESUAI = timedelta(days=30)
 EKSTENSI_AUDIO = {".webm", ".mp3", ".wav", ".ogg", ".m4a"}
 TANGKAPAN = ("penerima", "hubungan", "hadir", "jumlah_min", "jumlah_maks", "keyakinan", "membantah_tanggal_libur", "tanda_bahaya")
@@ -35,16 +36,29 @@ def tanggal_libur_skrip(conn, p: dict) -> list[str]:
     return [f"{t.day} {config.BULAN_NAMA[f'{t.month:02d}']}" for t in repo_v3.tanggal_libur(conn, p["id_peserta"], p["id_rs"], p["bulan_layanan"])]
 
 
-def susun_tugas(conn, p: dict, pengaturan: dict) -> dict:
-    nomor = config.nomor_penguji()
-    percobaan = p["percobaan"] + 1
-    sapaan_pasien = at.sapaan(p["jenis_kelamin"])
+def kirim_pemberitahuan(conn, p: dict, pengaturan: dict, sekarang) -> dict:
+    """Percobaan ke-1: server mengirim Lampiran B lewat Meta. Apa pun hasilnya panggilan lanjut ke wa_terkirim,
+    dan jeda WA berlaku seperti biasa. Mengembalikan {"status", "teks"} untuk objek wa di tugas."""
     teks = at.pesan_pemberitahuan(
         nama_penerima=p["nama_penerima"], nama_pasien=p["pasien"], nama_rs=p["nama_rs"], bulan=p["bulan_layanan"],
         jeda_menit=pengaturan["jeda_wa_menit"], nomor_penelepon=config.nomor_penelepon(),
     )
+    hasil = wa.kirim(config.nomor_penguji(), "pemberitahuan", teks, [
+        p["nama_penerima"], str(pengaturan["jeda_wa_menit"]), config.nomor_penelepon(), p["pasien"], p["nama_rs"],
+        at.nama_bulan(p["bulan_layanan"]),
+    ])
+    catatan = f"wa:{hasil['status']}" + (f" ({hasil['pesan']})" if hasil["status"] == "gagal" and hasil.get("pesan") else "")
+    repo_v3.perbarui(conn, p["id"], {"status": "wa_terkirim", "waktu_wa": sekarang})
+    repo_v3.tambah_log(conn, p["id"], "wa_terkirim", sekarang, 1, catatan)
+    return {"status": hasil["status"], "teks": teks}
+
+
+def susun_tugas(conn, p: dict, pengaturan: dict, pesan: dict | None = None) -> dict:
+    """pesan: hasil kirim_pemberitahuan; None di percobaan ke-2 (tanpa pemberitahuan)."""
+    sapaan_pasien = at.sapaan(p["jenis_kelamin"])
+    pesan = pesan or {"status": None, "teks": None}
     return {
-        "id": p["id"], "percobaan": percobaan, "no_tujuan": nomor,
+        "id": p["id"], "percobaan": p["percobaan"] + 1, "no_tujuan": config.nomor_penguji(),
         "skrip": {
             "nama_penerima": p["nama_penerima"],
             "sapaan_penerima": sapaan_pasien if p["penerima"] == "peserta" else "Bapak/Ibu",
@@ -52,14 +66,15 @@ def susun_tugas(conn, p: dict, pengaturan: dict) -> dict:
             "nama_rs": p["nama_rs"], "bulan": at.nama_bulan(p["bulan_layanan"]),
             "tanggal_libur": tanggal_libur_skrip(conn, p),
         },
-        "wa": {"lewati": percobaan >= 2, "teks": teks, "tautan": at.tautan_wa(nomor, teks)},
+        "wa": {"lewati": True, "dikirim_server": True, "status": pesan["status"], "teks": pesan["teks"]},
         "jeda_wa_menit": pengaturan["jeda_wa_menit"], "batas_detik": config.BATAS_PANGGILAN_DETIK,
     }
 
 
 def ambil_tugas(conn) -> dict | None:
     """Tugas berikutnya untuk agen, atau None (HTTP 204). Aturan: satu panggilan aktif, jam kerja, mode otomatis
-    (kecuali prioritas dari 'Telepon sekarang'), dan percobaan ke-2 menunggu coba_lagi_setelah."""
+    (kecuali prioritas dari 'Dahulukan'), dan percobaan ke-2 menunggu coba_lagi_setelah."""
+    lepas_macet(conn)
     sekarang = jam.sekarang()
     pengaturan = repo_v3.ambil_pengaturan(conn)
     batas_kunci = sekarang - timedelta(minutes=config.KUNCI_AMBIL_MENIT)
@@ -70,7 +85,58 @@ def ambil_tugas(conn) -> dict | None:
         return None
     p = repo_v3.satu_baris(conn, id_)
     repo_v3.perbarui(conn, id_, {"no_tujuan": config.nomor_penguji(), "jeda_wa_menit": pengaturan["jeda_wa_menit"]})
-    return susun_tugas(conn, p, pengaturan)
+    pesan = kirim_pemberitahuan(conn, p, pengaturan, sekarang) if p["percobaan"] == 0 else None
+    return susun_tugas(conn, p, pengaturan, pesan)
+
+
+# ---- percobaan gagal: tidak diangkat, dibatalkan verifikator, atau macet ----
+
+def _gagal_satu_percobaan(conn, p: dict, catatan: str) -> dict:
+    """Percobaan ke-1: kembali antre dan dicoba lagi setelah jeda (R3.5). Percobaan ke-2: Tidak terhubung, lalu
+    server mengirim chat cadangan. Mengembalikan balasan Kontrak B1 untuk laporan tidak_diangkat."""
+    id_, sekarang, ke = p["id"], jam.sekarang(), _nomor_percobaan(p)
+    repo_v3.tambah_log(conn, id_, "menelepon", sekarang, ke, catatan)
+    if ke < 2:
+        coba_lagi = sekarang + timedelta(minutes=repo_v3.ambil_pengaturan(conn)["jeda_percobaan_menit"])
+        repo_v3.perbarui(conn, id_, {
+            "status": "antre", "percobaan": ke, "coba_lagi_setelah": coba_lagi, "diambil_pada": None,
+            "transkrip": None, "tangkapan_sementara": None,
+        })
+        return balasan_status(p, "antre", ke, coba_lagi)
+    jawaban = dict(at.JAWABAN_TIDAK_TERHUBUNG)
+    label, alasan = at.label_jawaban(jawaban, p["sesi_ditagih"])
+    teks = at.pesan_cadangan(nama_pasien=p["pasien"], nama_rs=p["nama_rs"], bulan=p["bulan_layanan"])
+    kirim = wa.kirim(config.nomor_penguji(), "cadangan", teks, [p["pasien"], p["nama_rs"], at.nama_bulan(p["bulan_layanan"])])
+    repo_v3.perbarui(conn, id_, {
+        "status": "tidak_terhubung", "percobaan": ke, "label": label, "alasan": alasan, "jawaban": jawaban,
+        "waktu_selesai": sekarang, "diambil_pada": None, "coba_lagi_setelah": None, "transkrip": None,
+        "tangkapan_sementara": None, "chat_cadangan_terkirim": kirim["status"] in ("terkirim", "simulasi"),
+    })
+    repo_v3.tambah_log(conn, id_, "tidak_terhubung", sekarang, ke, f"chat:{kirim['status']}")
+    return balasan_status(p, "tidak_terhubung", ke, chat={"teks": teks, "dikirim_server": True, "status": kirim["status"]})
+
+
+def lepas_macet(conn) -> None:
+    """Panggilan berjalan tanpa laporan selama KUNCI_MACET_MENIT (agen mati di tengah jalan) dihitung satu percobaan gagal."""
+    batas = jam.sekarang() - timedelta(minutes=config.KUNCI_MACET_MENIT)
+    for id_ in repo_v3.panggilan_macet(conn, batas):
+        log.warning("panggilan %s macet, dilepas", id_)
+        _gagal_satu_percobaan(conn, repo_v3.satu_baris(conn, id_), "macet")
+
+
+def batalkan(conn, id_: str) -> dict:
+    """POST /panggilan/{id}/batal: verifikator membatalkan panggilan yang berjalan (satu percobaan gagal) atau
+    melepas kunci ambil percobaan ke-2 yang belum dimulai. Mengembalikan baris antrean terbaru."""
+    p = repo_v3.satu_baris(conn, id_)
+    if p is None:
+        raise _tidak_ada()
+    if p["status"] in BISA_GAGAL:
+        _gagal_satu_percobaan(conn, p, "dibatalkan_verifikator")
+    elif p["status"] == "antre" and p["diambil_pada"] is not None:
+        repo_v3.perbarui(conn, id_, {"diambil_pada": None})
+    else:
+        raise Galat(409, "tidak_bisa_dibatalkan", f"Panggilan berstatus {p['status']} tidak sedang berjalan.")
+    return tampilan_v3.baris_antre(repo_v3.satu_baris(conn, id_))
 
 
 # ---- POST /panggilan/{id}/status ----
@@ -127,21 +193,11 @@ def lapor_status(conn, id_: str, laporan: str, waktu, catatan: str | None) -> di
         return balasan_status(p, "merekam", ke)
 
     if laporan == "tidak_diangkat":
-        repo_v3.tambah_log(conn, id_, "menelepon", waktu, ke, "tidak_diangkat")
-        if ke < 2:  # percobaan ke-1: kembali antre, coba lagi setelah jeda (R3.5)
-            coba_lagi = sekarang + timedelta(minutes=repo_v3.ambil_pengaturan(conn)["jeda_percobaan_menit"])
-            repo_v3.perbarui(conn, id_, {"status": "antre", "coba_lagi_setelah": coba_lagi, "diambil_pada": None})
-            return balasan_status(p, "antre", ke, coba_lagi)
-        jawaban = dict(at.JAWABAN_TIDAK_TERHUBUNG)
-        label, alasan = at.label_jawaban(jawaban, p["sesi_ditagih"])
-        repo_v3.perbarui(conn, id_, {
-            "status": "tidak_terhubung", "label": label, "alasan": alasan, "jawaban": jawaban, "waktu_selesai": sekarang,
-            "diambil_pada": None, "coba_lagi_setelah": None,
-        })
-        chat = at.pesan_cadangan(nama_pasien=p["pasien"], nama_rs=p["nama_rs"], bulan=p["bulan_layanan"])
-        return balasan_status(p, "tidak_terhubung", ke, chat={"teks": chat, "tautan": at.tautan_wa(config.nomor_penguji(), chat)})
+        return _gagal_satu_percobaan(conn, p, "tidak_diangkat")
 
-    # chat_cadangan_terkirim
+    # chat_cadangan_terkirim: laporan agen lama. Server sudah mengirim chat, jadi cukup dibalas sama (idempoten).
+    if p["chat_cadangan_terkirim"]:
+        return balasan_status(p, "tidak_terhubung", ke)
     repo_v3.perbarui(conn, id_, {"chat_cadangan_terkirim": True})
     repo_v3.tambah_log(conn, id_, "tidak_terhubung", waktu, ke, catatan or "chat_cadangan_terkirim")
     return balasan_status(p, "tidak_terhubung", ke)
