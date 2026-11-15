@@ -567,7 +567,9 @@ table.tabel { font-size: 15px; }
 
 :root {
   --latar: oklch(98.5% .003 205);
-  --bayangan-kartu: 0 1px 2px oklch(20% .01 205 / .05);
+  /* Bayangan lembut berlapis seperti referensi: tepi tipis + sebaran lebar berintensitas rendah. */
+  --bayangan-kartu: 0 1px 3px oklch(20% .01 205 / .06), 0 8px 24px oklch(20% .02 205 / .07);
+  --bayangan-kecil: 0 1px 2px oklch(20% .01 205 / .06), 0 2px 8px oklch(20% .02 205 / .05);
 }
 body { background: var(--latar); }
 
@@ -608,7 +610,8 @@ body { background: var(--latar); }
 .panel-kepala { padding: 18px 20px 12px; }
 .panel-kepala .kanan { font-size: 14px; font-weight: 500; color: var(--muted-fg); }
 .tautan-kartu a, .ringkasan-tagihan { box-shadow: var(--bayangan-kartu); }
-.masuk-kartu { border: 1px solid var(--border); }
+.masuk-kartu { border: 1px solid var(--border); box-shadow: var(--bayangan-kartu); }
+.tautan-kartu a:hover { box-shadow: 0 1px 3px oklch(20% .01 205 / .08), 0 10px 28px oklch(20% .02 205 / .10); }
 
 /* ---------- kartu KPI: label kiri atas, ikon kanan atas, angka, pill + keterangan ---------- */
 
@@ -646,10 +649,10 @@ body { background: var(--latar); }
 .antrean-atas .bar-antrean, .bar-antrean { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; gap: 10px; }
 .bar-antrean .pilih {
   height: 40px; min-height: 40px; min-width: 160px; border-radius: 12px; border: 1px solid var(--border-strong);
-  background-color: var(--bg); box-shadow: var(--bayangan-kartu); font-size: 15px; font-weight: 500;
+  background-color: var(--bg); box-shadow: var(--bayangan-kecil); font-size: 15px; font-weight: 500;
 }
 .btn { border-radius: 12px; }
-.bar-antrean .btn { box-shadow: var(--bayangan-kartu); }
+.bar-antrean .btn { box-shadow: var(--bayangan-kecil); }
 .bar-antrean .btn:disabled { box-shadow: none; }
 
 /* ---------- tabel: header abu lembut membulat, baris lega, status pill lembut, titik kategori ---------- */
