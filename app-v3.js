@@ -382,12 +382,12 @@
       }
       return "<tr" + (tujuan ? ' class="bisa-klik" data-aksi="buka-baris" data-tujuan="' + tujuan + '"' : "") + ">" +
         '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
-        '<td class="sembunyi-hp">' + esc(namaRs(p.rs)) + "</td>" +
-        '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
-        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
-        '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
+        '<td class="sembunyi-hp" data-label="Rumah sakit">' + esc(namaRs(p.rs)) + "</td>" +
+        '<td class="angka sembunyi-hp" data-label="Ditagih">' + p.ditagih + " sesi</td>" +
+        '<td class="lebar-penuh" data-label="Indikator aktif"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
+        '<td class="sembunyi-hp" data-label="Penerima"><span class="nilai">' + penerimaTeks(p) + "</span></td>" +
         /* Panggilan selesai: satu pernyataan "hasil + keputusan", bukan tiga baris (audit S-10). */
-        '<td><div class="sel-status">' + (lab
+        '<td data-label="Status"><div class="sel-status">' + (lab
           ? labelChip(lab) + (b.putusan ? '<span class="putusan-baris">' + D.TINDAKAN[b.putusan].status + "</span>" : '<span class="putusan-baris putusan-baris--perlu">Perlu diputuskan</span>')
           : '<span class="status-chip status-chip--' + b.st + '">' + STATUS[b.st] + "</span>") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
@@ -1055,11 +1055,11 @@
         : '<p class="daftar-rinci kosong-rinci">Belum ada panggilan selesai untuk rumah sakit ini.</p>';
       return "<tr>" +
         '<td class="nama-berkas"><b>' + esc(r.nama) + "</b><span>" + r.id + "</span></td>" +
-        '<td class="angka sembunyi-hp">' + r.aktif + "</td>" +
-        '<td class="angka">' + r.terpicu + ' <span class="redup-kecil">(' + persenRs(r.persen) + ")</span></td>" +
-        '<td class="angka sembunyi-hp">' + c.terjawab + "</td>" +
-        '<td class="angka">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</td>" +
-        '<td class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</td>" +
+        '<td class="angka sembunyi-hp" data-label="Pasien aktif">' + r.aktif + "</td>" +
+        '<td class="angka" data-label="Terpicu"><span class="nilai">' + r.terpicu + ' <span class="redup-kecil">(' + persenRs(r.persen) + ")</span></span></td>" +
+        '<td class="angka sembunyi-hp" data-label="Terjawab">' + c.terjawab + "</td>" +
+        '<td class="angka" data-label="Tidak sesuai"><span class="nilai">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</span></td>" +
+        '<td data-label="Status"><div class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</div></td>" +
         '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" +
         (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
     }).join("");
@@ -1091,9 +1091,9 @@
     if (!daftar) return kepala("Memuat riwayat keputusan", "Mengambil data dari API…");
     const isi = daftar.length
       ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Waktu</th><th>Pasien</th><th>Rumah sakit</th><th>Label</th><th>Tindakan</th><th>Saran sistem</th><th>Alasan</th><th>Verifikator</th></tr></thead><tbody>' +
-        daftar.map((x) => '<tr class="bisa-klik" data-aksi="buka-baris" data-tujuan="#/kartu/' + x.id + '"><td class="redup">' + esc(x.waktu) + '</td><td class="nama-berkas"><b>' + esc(x.pasien) + "</b><span>" + x.umur + " th</span></td>" +
-          '<td class="sembunyi-hp">' + esc(x.namaRs) + "</td><td>" + labelChip(x.label) + "</td><td><b>" + D.TINDAKAN[x.tindakan].nama + '</b></td><td class="sembunyi-hp">' +
-          (x.ikutSaran ? "Diikuti" : '<b class="tidak-diikuti">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp">' + esc(x.oleh) + "</td></tr>").join("") +
+        daftar.map((x) => '<tr class="bisa-klik" data-aksi="buka-baris" data-tujuan="#/kartu/' + x.id + '"><td class="redup" data-label="Waktu">' + esc(x.waktu) + '</td><td class="nama-berkas"><b>' + esc(x.pasien) + "</b><span>" + x.umur + " th</span></td>" +
+          '<td class="sembunyi-hp" data-label="Rumah sakit">' + esc(x.namaRs) + '</td><td data-label="Label">' + labelChip(x.label) + '</td><td data-label="Tindakan"><b>' + D.TINDAKAN[x.tindakan].nama + '</b></td><td class="sembunyi-hp" data-label="Saran sistem">' +
+          (x.ikutSaran ? "Diikuti" : '<b class="tidak-diikuti">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh" data-label="Alasan">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp" data-label="Verifikator">' + esc(x.oleh) + "</td></tr>").join("") +
         "</tbody></table></div>"
       : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Keputusan dari kartu bukti akan muncul di sini.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
     return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Jejak audit semua keputusan verifikator.</p></div></div><section class="panel">' +
