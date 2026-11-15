@@ -377,6 +377,16 @@
 }
 
 body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-settings: "cv11", "ss01"; }
+
+/* Skala 90%: sama dengan zoom Chrome 90% yang dinilai paling nyaman oleh tim.
+   Semua ukuran di file ini ditulis pada skala 100% lalu diperkecil serentak, jadi proporsinya tetap.
+   Ukuran tampil efektif: isi ~14,4px, tabel ~13,5px, teks terkecil ~11,7px, tombol ~40px.
+   Tinggi berbasis 100vh dibagi skala supaya tetap penuh satu layar. */
+:root { --skala: .9; }
+body { zoom: var(--skala); }
+.sisi { height: calc(100vh / var(--skala)); }
+.kolom { min-height: calc(100vh / var(--skala) - 24px); }
+.masuk { min-height: calc(100vh / var(--skala)); }
 .angka, .kartu-angka b, .tabel td { font-variant-numeric: tabular-nums; }
 .kapital, .nav-judul { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
 .redup-kecil { font-size: 13px; }
@@ -456,11 +466,13 @@ main.isi { padding: 8px 32px 64px; }
 .kartu-angka .kpi-kepala span { margin-top: 0; font-size: inherit; color: inherit; }
 .kartu-angka .kpi-kepala .kpi-ikon { display: grid; }
 .kpi-isi { flex: 1; }
-/* Kartu sempit: pill turun ke baris bawah, keterangan tidak dipotong. */
-.kpi-bawah { flex-wrap: wrap; row-gap: 6px; }
-.kartu-angka .kpi-bawah span:first-child { white-space: nowrap; }
+/* Tata letak panel selalu sama: angka di atas; keterangan kiri bawah, pill kanan bawah.
+   Keterangan boleh dua baris, pill tidak pernah turun baris. Semua panel sama tinggi. */
+.kpi-isi { display: flex; flex-direction: column; justify-content: space-between; }
+.kpi-bawah { flex-wrap: nowrap; align-items: flex-end; }
+.kartu-angka .kpi-bawah span:first-child { min-width: 0; white-space: normal; line-height: 1.35; }
 /* Di antrean (menempel saat digulir) kartu dibuat lebih pendek. */
-.antrean-atas .kartu-angka > .kpi { display: block; padding: 4px; }
+.antrean-atas .kartu-angka > .kpi { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 4px; }
 .antrean-atas .kpi-kepala { padding: 6px 8px 8px; font-size: 14px; }
 .antrean-atas .kpi-isi { padding: 10px 14px; }
 .antrean-atas .kartu-angka .kpi-isi b { font-size: 30px; }
@@ -596,7 +608,7 @@ table.tabel { font-size: 15px; }
 }
 
 @media (max-width: 960px) {
-  .kolom { margin: 0; border-radius: 0; min-height: 100vh; }
+  .kolom { margin: 0; border-radius: 0; min-height: calc(100vh / var(--skala)); }
   .atas { border-radius: 0; padding: 0 16px; }
   main.isi { padding: 8px 16px 56px; }
   .tombol-menu { width: 44px; height: 44px; border-radius: 999px; }
@@ -635,6 +647,7 @@ table.tabel { font-size: 15px; }
 }
 
 @media (max-width: 640px) {
+  .sisi { height: auto; }
   .kartu-angka { gap: 10px; }
   .kartu-angka > div { padding: 12px 14px; }
   .kartu-angka b { font-size: 24px; }
