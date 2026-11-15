@@ -568,8 +568,8 @@ table.tabel { font-size: 15px; }
 :root {
   --latar: oklch(98.5% .003 205);
   /* Bayangan lembut berlapis seperti referensi: tepi tipis + sebaran lebar berintensitas rendah. */
-  --bayangan-kartu: 0 1px 3px oklch(20% .01 205 / .06), 0 8px 24px oklch(20% .02 205 / .07);
-  --bayangan-kecil: 0 1px 2px oklch(20% .01 205 / .06), 0 2px 8px oklch(20% .02 205 / .05);
+  --bayangan-kartu: 0 1px 3px oklch(20% .01 205 / .09), 0 10px 28px oklch(20% .02 205 / .11);
+  --bayangan-kecil: 0 1px 2px oklch(20% .01 205 / .08), 0 3px 10px oklch(20% .02 205 / .08);
 }
 body { background: var(--latar); }
 
@@ -611,7 +611,7 @@ body { background: var(--latar); }
 .panel-kepala .kanan { font-size: 14px; font-weight: 500; color: var(--muted-fg); }
 .tautan-kartu a, .ringkasan-tagihan { box-shadow: var(--bayangan-kartu); }
 .masuk-kartu { border: 1px solid var(--border); box-shadow: var(--bayangan-kartu); }
-.tautan-kartu a:hover { box-shadow: 0 1px 3px oklch(20% .01 205 / .08), 0 10px 28px oklch(20% .02 205 / .10); }
+.tautan-kartu a:hover { box-shadow: 0 2px 4px oklch(20% .01 205 / .10), 0 14px 32px oklch(20% .02 205 / .14); }
 
 /* ---------- kartu KPI: label kiri atas, ikon kanan atas, angka, pill + keterangan ---------- */
 
