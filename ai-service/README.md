@@ -53,6 +53,7 @@ does not export participant IDs, visit IDs, or row-level claims.
 | `GET /v1/kesehatan` | `{"status": "ok"}` plus versions and whether the reader is configured |
 | `POST /v1/baca` | Kontrak B2: transcript in, structured answer plus `versi_pembaca` out; no label |
 | `POST /v1/suara/token` | Takes the B1 `skrip`; returns a one-use Gemini Live credential and call prompt |
+| `/v1/saluran/*` | Phone helper, station laptop only (`SALURAN_ADB=1` or `palsu`); see "Line station" below |
 
 ## Cloudflare Worker (deployment)
 
@@ -80,8 +81,9 @@ must send a normal `User-Agent`: Cloudflare answers bare `Python-urllib` with
 `403 error code: 1010` (the backend's `httpx` client is fine).
 
 Point the backend at it with `MESIN_URL=https://vedika-ai.<account>.workers.dev`
-and add that origin to `CORS_ORIGINS` so the hosted agent page can reach the API.
-On the agent page, enter the same `AI_SERVICE_KEY` under **Kunci layanan**.
+The Worker serves the reader and the token endpoint. It does not include the Phone
+helper, so the agent page it hosts only shows "Halaman ini hanya berjalan di laptop
+stasiun"; calls are placed from the station laptop's local ai-service.
 
 ## Voice confirmation prototype
 
@@ -106,77 +108,85 @@ To replace the backend stub, run this service on port 8001 and set
 `MESIN_URL=http://localhost:8001` and `KUNCI_MESIN=<AI_SERVICE_KEY>` in
 `backend/.env`.
 
-### Voice agent (Kontrak B1)
+### Line station (Kontrak B1)
 
-The agent page is served at <http://localhost:8001/voice/>. Add
-`http://localhost:8001` to the backend's `CORS_ORIGINS`, then enter the backend
-URL and `AGEN_KEY` on the page and press **Mulai agen**. The page:
-
-1. polls `POST /api/v1/agen/ambil` every 3 seconds;
-2. opens `wa.tautan` and reports `wa_terkirim` after the operator sends it
-   (skipped on the second attempt);
-3. waits `jeda_wa_menit`, asks the operator to dial, and reports `menelepon`,
-   retrying each second on `409 jeda_belum_lewat`;
-4. starts Gemini Live with the task's `skrip` as soon as the operator dials and
-   listens on the line. The recipient's first transcribed words count as the
-   answer: it reports `tersambung` and `merekam` and the AI opens the call. No words
-   within 40 seconds (ringback does not count) reports `tidak_diangkat` and sends
-   `chat_cadangan` when offered;
-5. posts one `…/transkrip` line per speaking turn (`detik` from connection,
-   `pembicara` `ai` or `penerima`);
-6. uploads the two-way `.webm`, final transcript, and `durasi` to `…/hasil`.
-
-The page never sends a label and always ends a call with `hasil` or
-`tidak_diangkat`, because an unfinished call holds the backend queue.
-
-### Automated call without WhatsApp
-
-`scripts/agent_e2e.mjs` runs one scenario through the real agent page in a throwaway
-Chrome profile, real BlackHole routing, and real Gemini Live. A phone robot replaces
-WhatsApp and the recipient: it listens on BlackHole 16ch and speaks the recipient's
-lines from `data-uji-konfirmasi/transkrip_uji/<S>.txt` into BlackHole 2ch.
+Calls are placed automatically by a line station: an Android phone with an Indonesian
+SIM, driven over ADB by this service's Phone helper, with the agent page running Gemini
+Live in a dedicated Chrome window. Officers only use the website. Setup, env vars,
+Meta WhatsApp, and troubleshooting: `../docs/rencana-v3-otomatis/STASIUN.md`.
+Real-phone checklist: `../docs/rencana-v3-otomatis/UJI-HP.md`.
 
 ```bash
-./dev.sh                          # in another terminal, from the repo root
-node scripts/agent_e2e.mjs S1     # stop any other agent page first
+./stasiun.sh        # from the repo root: checks the phone, starts everything, opens the station page
 ```
 
-It exits 0 when the backend label matches the scenario's `expected_label`. The call
-must be `antre`; press "Mulai ulang demo" to reset the shared demo.
+**Phone helper** (`src/vedika_ai/saluran.py`). Mounted only when `SALURAN_ADB` is `1`
+(real adb) or `palsu` (in-memory fake phone for tests and e2e); otherwise the routes
+return 404. No `X-Kunci-Layanan`; every route answers only `127.0.0.1` / `::1`
+(`403 bukan_lokal`), because `/konfigurasi` hands the station browser its keys. Phone
+numbers are never logged.
 
-### Real call setup (WhatsApp Web)
+| Endpoint | Behavior |
+|---|---|
+| `GET /v1/saluran/kesehatan` | `{siap, alasan, perangkat, sim, panggilan}`: one authorised device, SIM `READY`, call state idle |
+| `POST /v1/saluran/panggil {"nomor"}` | `am start -a android.intent.action.CALL`; `422 nomor_tidak_valid`, `502 adb_gagal` |
+| `POST /v1/saluran/tutup` | `input keyevent KEYCODE_ENDCALL`; idempotent |
+| `GET /v1/saluran/status` | `{panggilan: idle \| offhook \| ringing}` from every `mCallState` in `dumpsys telephony.registry` |
+| `GET /v1/saluran/konfigurasi` | Backend URL, agent key, service key, audio mode, device label hints |
+| `POST /v1/saluran/palsu/tutup-penerima` | `palsu` only: the remote party hangs up |
 
-Use WhatsApp **Web** in Chrome as the phone line. WhatsApp Desktop for Mac always
-uses the built-in microphone and speakers for calls and ignores BlackHole, even as
-the system default.
+**Station page** (`/voice/?mulai=1`, `web/voice-console.html` + `web/voice-agent.mjs`).
+No inputs; it reads `/v1/saluran/konfigurasi` and then, every 3 seconds:
 
-```text
-Tab 1: WhatsApp Web (the line)                Tab 2: agent page /voice/ (the AI)
-  mic     = BlackHole 16ch  <---- AI voice ----  output = BlackHole 16ch
-  speaker = BlackHole 2ch   --- recipient ---->  input  = BlackHole 2ch
+1. reads `/v1/saluran/kesehatan` and posts it to the backend as `POST /api/v1/agen/detak`
+   (the heartbeat keeps running during a call);
+2. when ready, claims a task with `POST /api/v1/agen/ambil`. The backend has already
+   sent the WhatsApp notice (`wa.dikirim_server`), so the page sends nothing;
+3. reports `menelepon`, retrying each second on `409 jeda_belum_lewat`, and only then
+   dials through the helper;
+4. starts Gemini Live with the task's `skrip` and listens. The call counts as answered
+   when the recipient's first **completed turn** is not a carrier announcement
+   (`isOperatorAnnouncement`): it then reports `tersambung` and `merekam`. An
+   announcement, no accepted turn within 40 seconds, or the line going idle first
+   reports `tidak_diangkat`;
+5. posts one `…/transkrip` line per speaking turn (`detik` from the answer);
+6. hangs up 3 seconds after the AI's closing line (`isClosingLine`) has finished
+   playing, after 10 silent seconds following an AI turn, when the recipient hangs up
+   (helper status `idle`), or at the 150-second cap, then uploads the recording,
+   transcript, and `durasi` to `…/hasil`;
+7. stops quietly when any report gets `404` or `409 urutan_salah` /
+   `bukan_berlangsung`: the officer cancelled or the backend released the call.
+
+The page never sends a label, always releases the line (`/v1/saluran/tutup`), and
+one task's error never stops the loop.
+
+Audio mode comes from `SALURAN_AUDIO`: `speaker` (default; phone on speakerphone,
+Chrome echo cancellation, noise suppression, and auto-gain on) or `kabel` (USB audio
+interface, processing off). Chrome must be started with
+`--autoplay-policy=no-user-gesture-required` (done by `stasiun.sh`); otherwise the page
+shows "Chrome memblokir audio; jalankan lewat stasiun.sh" and claims nothing.
+
+### Automated call without a phone
+
+`scripts/agent_e2e.mjs` runs one call through the real station page in a throwaway
+Chrome profile, real BlackHole routing, real Gemini Live, and the fake phone. A robot
+replaces the recipient: it listens on BlackHole 16ch and speaks into BlackHole 2ch.
+
+```bash
+SALURAN_ADB=palsu SALURAN_AUDIO=kabel SALURAN_INPUT="BlackHole 2ch" SALURAN_OUTPUT="BlackHole 16ch" \
+  SALURAN_AGEN_KEY="$(grep '^AGEN_KEY=' backend/.env | cut -d= -f2-)" ./dev.sh   # from the repo root
+node scripts/agent_e2e.mjs S1           # answered call; label must match expected_label
+node scripts/agent_e2e.mjs S5           # two unanswered attempts, fallback chat, tidak_terhubung
+node scripts/agent_e2e.mjs pengumuman   # carrier announcement: never tersambung, attempt 2 scheduled
 ```
 
-1. Install `blackhole-2ch` and `blackhole-16ch` (`brew install --cask blackhole-2ch blackhole-16ch`).
-2. Turn off Continuity Camera (or the iPhone's Bluetooth) so macOS does not offer
-   the iPhone as a microphone.
-3. Set the Mac's default devices; WhatsApp Web follows them:
-   `swift scripts/set_audio.swift "BlackHole 2ch" "BlackHole 16ch"`.
-4. Quit WhatsApp Desktop, then open web.whatsapp.com in the same Chrome as the
-   agent page and link the calling phone.
-5. Run `./dev.sh`, then on the agent page enter `AGEN_KEY`, click **Muat perangkat
-   audio**, choose input BlackHole 2ch and output BlackHole 16ch, and click
-   **Mulai agen**. Hard-reload (Cmd+Shift+R) after any agent code change.
-6. Send the notice and place the voice call from WhatsApp Web, then click
-   **Saya menelepon**. The AI starts when the recipient says "Halo"; there is no
-   answer button. **Tidak diangkat** ends the attempt early.
-7. Afterwards restore the Mac:
-   `swift scripts/set_audio.swift "MacBook Pro Speakers" "MacBook Pro Microphone"`.
+Each run needs the call in `antre` with no attempts; press "Mulai ulang demo" first.
+The script turns automatic mode off while it runs so only its own call is dialled.
 
-The agent page captures the line with Chrome's echo cancellation, noise
-suppression, and auto-gain disabled; otherwise Chrome erases the recipient's voice
-as echo of WhatsApp Web's playback. It creates its audio context at the
-**Saya menelepon** click, because Chrome keeps a context created later suspended (silent
-in both directions).
+### Archived: WhatsApp Web calls
+
+The earlier setup (WhatsApp Web as the line, BlackHole between two Chrome tabs, an operator
+clicking through each step) was replaced by the line station; see git history before 2026-11-16.
 
 ### Acceptance commands
 
