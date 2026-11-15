@@ -633,3 +633,28 @@ def test_hasil_durasi_wajib_bilangan_bulat_tak_negatif(klien_agen, monkeypatch):
     for durasi in ("-1", "abc"):
         r = klien_agen.post(f"{BASE}/panggilan/{S1}/hasil", data={"transkrip": "[]", "durasi": durasi})
         assert r.status_code == 422 and r.json()["galat"]["kode"] == "validasi"
+
+
+def test_batal_saat_jeda_wa_menolak_laporan_agen_yang_masih_menunggu(klien_agen, conn_v3, monkeypatch):
+    """Verifikator membatalkan saat agen menunggu jeda WA: laporan menelepon berikutnya ditolak, percobaan ke-2
+    baru jalan setelah jeda percobaan dan lewat agen/ambil."""
+    jam_palsu(monkeypatch, menit=0)
+    klien_agen.post(f"{BASE}/agen/ambil")
+    assert klien_agen.post(f"{BASE}/panggilan/{S1}/batal").json()["status"] == "antre"
+    jam_palsu(monkeypatch, menit=1)
+    r = lapor(klien_agen, S1, "menelepon")
+    assert r.status_code == 409 and r.json()["galat"]["kode"] == "urutan_salah"
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S2")  # antrean lanjut
+    b = baris_db(conn_v3, S1)
+    assert (b["status"], b["percobaan"], b["coba_lagi_setelah"]) == ("antre", 1, wib(2026, 10, 6, 10, 2))
+
+
+def test_batal_saat_merekam_menolak_transkrip_dan_hasil(klien_agen, conn_v3, monkeypatch):
+    sampai_merekam(klien_agen, monkeypatch)
+    klien_agen.post(f"{BASE}/panggilan/{S1}/transkrip", json={"baris": TRANSKRIP})
+    assert klien_agen.post(f"{BASE}/panggilan/{S1}/batal").status_code == 200
+    assert klien_agen.post(f"{BASE}/panggilan/{S1}/transkrip", json={"baris": TRANSKRIP}).json()["galat"]["kode"] == "bukan_berlangsung"
+    assert kirim_hasil(klien_agen).json()["galat"]["kode"] == "bukan_berlangsung"
+    d = detail(klien_agen, S1)
+    assert (d["status"], d["transkrip"], d["coba_lagi_setelah"]) == ("antre", [], "2026-10-06T10:03:05+07:00")
+    assert d["log"][-1]["catatan"] == "dibatalkan_verifikator"

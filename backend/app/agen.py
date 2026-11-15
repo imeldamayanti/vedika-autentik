@@ -144,6 +144,8 @@ def batalkan(conn, id_: str) -> dict:
 # dari status (dan percobaan yang sedang dijalankan) -> laporan yang sah
 def laporan_sah(p: dict) -> tuple[str, ...]:
     if p["status"] == "antre":
+        if p["diambil_pada"] is None:  # belum diambil, atau dibatalkan/dilepas saat agen masih menunggu
+            return ()
         return ("wa_terkirim",) if p["percobaan"] == 0 else ("menelepon",)
     return {
         "wa_terkirim": ("menelepon",), "menelepon": ("tersambung", "tidak_diangkat"), "tersambung": ("merekam",),

@@ -2,180 +2,144 @@
 <html lang="id">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vedika Agen Suara · Simulasi</title>
+<title>Stasiun saluran Vedika · Simulasi</title>
 <style>
-  body { font: 16px/1.45 system-ui, sans-serif; max-width: 820px; margin: 32px auto; padding: 0 20px; color: #17202a; }
-  fieldset { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 1px solid #ccd4dc; border-radius: 10px; margin: 16px 0; padding: 16px; }
-  label { display: grid; gap: 4px; } input, select, button { font: inherit; padding: 8px; }
-  .wide { grid-column: 1 / -1; } button { cursor: pointer; } #transkrip { white-space: pre-wrap; background: #f5f7f9; min-height: 120px; padding: 12px; }
-  #tugas { white-space: pre-wrap; background: #f5f7f9; padding: 12px; overflow-wrap: anywhere; }
-  #aksi { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; min-height: 44px; }
+  body { font: 15px/1.45 system-ui, sans-serif; max-width: 720px; margin: 24px auto; padding: 0 16px; color: #17202a; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 12px; margin: 14px 0; padding: 12px; border: 1px solid #ccd4dc; border-radius: 10px; }
+  dt { color: #5b6773; } dd { margin: 0; overflow-wrap: anywhere; }
+  button { font: inherit; padding: 8px 14px; cursor: pointer; }
+  #transkrip { white-space: pre-wrap; background: #f5f7f9; min-height: 120px; padding: 12px; border-radius: 10px; }
   .simulasi { background: #fff4ce; padding: 8px 12px; border-radius: 8px; }
-  .galat { color: #a4262c; }
+  .galat { color: #a4262c; min-height: 1.4em; }
+  .ok { color: #0b6a3b; } .tidak { color: #a4262c; }
 </style>
-<h1>Vedika Agen Suara</h1>
+<h1>Stasiun saluran Vedika</h1>
 <p class="simulasi"><strong>Simulasi.</strong> Gunakan data fiktif dan nomor tim. Jangan gunakan data peserta nyata.</p>
-
-<fieldset>
-  <legend>Sambungan</legend>
-  <label class="wide">URL API backend <input id="apiUrl" value="http://localhost:8000"></label>
-  <label>Kunci agen (X-Kunci-Agen) <input id="kunciAgen" type="password" autocomplete="off"></label>
-  <label>Kunci layanan ai-service (opsional) <input id="kunciLayanan" type="password" autocomplete="off"></label>
-</fieldset>
-
-<fieldset>
-  <legend>Audio</legend>
-  <label>Input WhatsApp <select id="inputDevice"></select></label>
-  <label>Output AI <select id="outputDevice"></select></label>
-  <button id="muatDevice" class="wide" type="button">Muat perangkat audio</button>
-</fieldset>
-
-<p><button id="mulai" type="button">Mulai agen</button> <button id="henti" type="button" disabled>Hentikan agen</button></p>
-<p>Status: <strong id="status">siap</strong></p>
+<p id="pesan"></p>
+<p><button id="mulai" type="button" hidden>Mulai</button> <button id="henti" type="button" hidden>Hentikan</button></p>
+<dl>
+  <dt>Stasiun</dt><dd id="status">memuat</dd>
+  <dt>HP saluran</dt><dd id="hp">–</dd>
+  <dt>SIM</dt><dd id="sim">–</dd>
+  <dt>Audio</dt><dd id="audio">–</dd>
+  <dt>Tugas</dt><dd id="tugas">Belum ada tugas.</dd>
+  <dt>Tahap panggilan</dt><dd id="fase">–</dd>
+</dl>
 <p id="galat" class="galat" aria-live="polite"></p>
-<pre id="tugas">Belum ada tugas.</pre>
-<p id="aksiTeks"></p>
-<div id="aksi"></div>
 <div id="transkrip" aria-live="polite"></div>
 
 <script type="module">
-  import { VedikaVoiceSession, createAgentApi, runTask, waitForTask } from "./voice-agent.mjs";
+  import {
+    AUDIO_BLOCKED, VedikaVoiceSession, createAgentApi, createLineApi, createStationOperator, pickDevice, runTask, stationTick,
+  } from "./voice-agent.mjs";
 
   const $ = (id) => document.getElementById(id);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-  let running = false;
-  let clickAudio = null;
-
+  const jam = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
   const setStatus = (text) => { $("status").textContent = text; };
-  const showError = (error) => { $("galat").textContent = `Galat: ${error.message}`; };
+  const showError = (error) => { $("galat").textContent = `${jam()} Galat terakhir: ${error.message}`; };
+  const PROCESSING = {
+    speaker: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    kabel: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+  };
+  const line = createLineApi();
+  let running = false;
+  let probe = null;
+  let devices = null;
 
-  async function muatDevice() {
+  async function siapkanAudio(konfigurasi) {
     const permission = await navigator.mediaDevices.getUserMedia({ audio: true });
     permission.getTracks().forEach((track) => track.stop());
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    for (const [element, kind, preferred] of [
-      [$("inputDevice"), "audioinput", "BlackHole 2ch"],
-      [$("outputDevice"), "audiooutput", "BlackHole 16ch"],
-    ]) {
-      element.replaceChildren();
-      devices.filter((device) => device.kind === kind).forEach((device) => {
-        const option = new Option(device.label || `${kind} ${element.length + 1}`, device.deviceId);
-        option.selected = device.label.includes(preferred);
-        element.add(option);
-      });
+    const all = await navigator.mediaDevices.enumerateDevices();
+    const chosen = {};
+    for (const [key, kind, hint] of [["input", "audioinput", konfigurasi.input], ["output", "audiooutput", konfigurasi.output]]) {
+      chosen[key] = pickDevice(all, kind, hint);
+      if (hint && !chosen[key]) throw new Error(`Perangkat audio "${hint}" tidak ditemukan`);
     }
+    $("audio").textContent = `mode ${konfigurasi.audio} · masuk: ${chosen.input?.label || "bawaan"} · keluar: ${chosen.output?.label || "bawaan"}`;
+    return chosen;
   }
 
-  function ask(text, actions, link) {
-    return new Promise((resolve) => {
-      $("aksiTeks").textContent = text;
-      const nodes = [];
-      if (link) {
-        const anchor = Object.assign(document.createElement("a"), {
-          href: link, target: "_blank", rel: "noopener", textContent: "Buka WhatsApp",
+  async function jalankan(konfigurasi) {
+    const api = createAgentApi({ baseUrl: konfigurasi.api_url, agentKey: konfigurasi.kunci_agen || "" });
+    const headers = konfigurasi.kunci_layanan ? { "X-Kunci-Layanan": konfigurasi.kunci_layanan } : {};
+    const operator = createStationOperator({
+      line,
+      onError: showError,
+      onLog: (entry) => { $("transkrip").textContent += `· ${entry}\n`; },
+      onPhase: (phase) => { $("fase").textContent = phase; },
+      startSession: (options) => {
+        const session = new VedikaVoiceSession({
+          ...options,
+          headers,
+          inputDeviceId: devices.input?.deviceId,
+          outputDeviceId: devices.output?.deviceId,
+          lineConstraints: PROCESSING[konfigurasi.audio],
+          onTranscript: (turn, all) => {
+            $("transkrip").textContent += `[${turn.detik}] ${turn.pembicara}: ${turn.teks}\n`;
+            options.onTranscript(turn, all);
+          },
         });
-        nodes.push(anchor);
-      }
-      for (const [label, value] of actions) {
-        const button = Object.assign(document.createElement("button"), { type: "button", textContent: label });
-        button.addEventListener("click", () => {
-          $("aksi").replaceChildren();
-          $("aksiTeks").textContent = "";
-          resolve(value);
-        });
-        nodes.push(button);
-      }
-      $("aksi").replaceChildren(...nodes);
+        session.start().catch(showError);
+        return session;
+      },
     });
-  }
-
-  async function countdown(seconds) {
-    for (let left = seconds; left > 0; left -= 1) {
-      $("aksiTeks").textContent = `Tunggu ${left} detik sebelum menelepon.`;
-      await sleep(1000);
-    }
-  }
-
-  const operator = {
-    kirimWa: (task) => ask(`Kirim pesan pemberitahuan ke ${task.no_tujuan}, lalu tekan kirim di WhatsApp.`, [["Pesan WA terkirim", true]], task.wa.tautan),
-    telepon: async (task) => {
-      if (!task.wa.lewati) await countdown(task.jeda_wa_menit * 60);
-      await ask(`Telepon ${task.no_tujuan} lewat WhatsApp Web, lalu klik tombol ini.`, [["Saya menelepon", true]]);
-      clickAudio = new AudioContext();
-    },
-    kirimChatCadangan: (chat) => ask("Dua kali tidak diangkat. Kirim chat cadangan.", [["Chat cadangan terkirim", true]], chat.tautan),
-  };
-
-  // The AI listens from the moment the operator dials; the recipient's first words count
-  // as the answer. No words within ANSWER_TIMEOUT_MS means not answered.
-  const ANSWER_TIMEOUT_MS = 40000;
-  function converse(task, { onAnswered, onTurn }) {
-    return new Promise((resolve) => {
-      $("transkrip").textContent = "";
-      const kunciLayanan = $("kunciLayanan").value;
-      let answered = false;
-      const session = new VedikaVoiceSession({
-        audioContext: clickAudio,
-        greetFirst: false,
-        context: task.skrip,
-        headers: kunciLayanan ? { "X-Kunci-Layanan": kunciLayanan } : {},
-        inputDeviceId: $("inputDevice").value,
-        outputDeviceId: $("outputDevice").value,
-        onStatus: (value) => setStatus(`${task.id}: ${value}`),
-        onAnswer: () => {
-          answered = true;
-          clearTimeout(noAnswer);
-          onAnswered().catch(showError);
-          ask("Panggilan berlangsung.", [["Akhiri panggilan", true]]).then(() => session.stop("selesai"));
-        },
-        onTranscript: (turn) => {
-          $("transkrip").textContent += `[${turn.detik}] ${turn.pembicara}: ${turn.teks}\n`;
-          onTurn(turn);
-        },
-        onError: showError,
-        onComplete: ({ transkrip, recording, durasi }) => resolve({ answered, transkrip, rekaman: recording, durasi }),
-      });
-      clickAudio = null;
-      const noAnswer = setTimeout(() => session.stop("tidak_diangkat"), ANSWER_TIMEOUT_MS);
-      ask("Menunggu penerima mengangkat dan bicara…", [["Tidak diangkat", true]]).then(() => {
-        if (!answered) session.stop("tidak_diangkat");
-      });
-      session.start().catch(showError);
-    });
-  }
-
-  async function jalankanAgen() {
-    const api = createAgentApi({ baseUrl: $("apiUrl").value, agentKey: $("kunciAgen").value });
+    probe = probe || new AudioContext();
     while (running) {
-      setStatus("menunggu tugas");
-      const task = await waitForTask(api, { isRunning: () => running, onError: showError });
-      if (!task) break;
-      $("galat").textContent = "";
-      $("tugas").textContent = JSON.stringify(task, null, 2);
       try {
-        const reply = await runTask({ api, task, operator, converse, onError: showError });
-        setStatus(`${task.id}: ${reply?.status ?? "selesai"}`);
+        if (probe.state !== "running") await Promise.race([probe.resume(), sleep(500)]);
+        devices = devices || await siapkanAudio(konfigurasi);
+        const { sehat, siap, blocked, task } = await stationTick({ line, api, audioReady: () => probe.state === "running", onError: showError });
+        $("hp").textContent = sehat.perangkat || "–";
+        $("sim").textContent = sehat.sim || "–";
+        $("status").className = siap ? "ok" : "tidak";
+        setStatus(blocked ? AUDIO_BLOCKED : siap ? "siap, menunggu tugas" : `belum siap: ${sehat.alasan}`);
+        if (task) {
+          $("galat").textContent = "";
+          $("transkrip").textContent = "";
+          $("tugas").textContent = `${task.id} · ${task.skrip.nama_pasien} · percobaan ${task.percobaan}`;
+          $("fase").textContent = "menunggu jeda pesan WA";
+          setStatus("sedang menelepon");
+          const reply = await runTask({ api, task, operator, converse: operator.converse, onError: showError, onLog: (entry) => { $("transkrip").textContent += `· ${entry}\n`; } });
+          $("fase").textContent = `selesai: ${reply?.status ?? "terkirim"}`;
+          continue;
+        }
       } catch (error) {
         showError(error);
-        await sleep(3000);
+        await line.tutup().catch(() => {});
       }
-      $("aksi").replaceChildren();
-      $("aksiTeks").textContent = "";
+      await sleep(3000);
     }
     setStatus("berhenti");
-    $("mulai").disabled = false;
+    $("status").className = "";
+    $("mulai").hidden = false;
+    $("henti").hidden = true;
   }
 
-  $("muatDevice").addEventListener("click", () => muatDevice().catch(showError));
-  $("mulai").addEventListener("click", () => {
-    running = true;
-    $("mulai").disabled = true;
-    $("henti").disabled = false;
-    jalankanAgen();
-  });
-  $("henti").addEventListener("click", () => {
-    running = false;
-    $("henti").disabled = true;
-  });
+  async function muat() {
+    let konfigurasi;
+    try {
+      konfigurasi = await line.konfigurasi();
+    } catch (error) {
+      setStatus("tidak aktif");
+      $("pesan").textContent = error.status === 404
+        ? "Halaman ini hanya berjalan di laptop stasiun (SALURAN_ADB belum aktif)."
+        : `Phone helper tidak bisa dihubungi: ${error.message}`;
+      return;
+    }
+    const mulai = () => {
+      if (running) return;
+      running = true;
+      $("mulai").hidden = true;
+      $("henti").hidden = false;
+      jalankan(konfigurasi);
+    };
+    $("mulai").addEventListener("click", mulai);
+    $("henti").addEventListener("click", () => { running = false; setStatus("berhenti setelah tugas ini"); });
+    if (new URLSearchParams(location.search).get("mulai") === "1") mulai();
+    else { $("mulai").hidden = false; setStatus("siap dimulai"); }
+  }
+  muat();
 </script>
 </html>
