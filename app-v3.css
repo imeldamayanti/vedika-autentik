@@ -401,3 +401,7 @@
   .bar-antrean .pilih { flex: 1; min-width: 0; }
   .tabel td.aksi { text-align: left; }
 }
+
+/* ---------- mode presentasi (?presentasi=1): hanya untuk rekaman video demo ---------- */
+.presentasi .lencana-simulasi, .presentasi .catatan-prototipe, .presentasi .catatan-simulasi, .presentasi .masuk-catatan,
+.presentasi .masuk-versi, .presentasi [data-aksi="ulang-demo"] { display: none !important; }

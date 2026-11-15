@@ -56,6 +56,10 @@
   const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
   const koma = (n) => String(n).replace(".", ",");
   const tunggal = (id) => D.SEMUA[id];
+  /* Mode presentasi: pemanggil tampil sebagai BPJS Kesehatan, label Simulasi disembunyikan lewat kelas di <html>. */
+  if (D.PRESENTASI) document.documentElement.classList.add("presentasi");
+  const namaPemanggil = (p) => D.PRESENTASI ? "BPJS Kesehatan" : M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
+  const ketPemanggil = D.PRESENTASI ? "Care Center " + D.NOMOR_PENELEPON : "Nomor uji coba";
 
   /* Jam kerja simulasi: demo selalu terasa berlangsung pagi hari di kantor cabang. */
   const MULAI = Date.now();
@@ -667,7 +671,7 @@
   function htmlPonsel(p, t, kartu, tambahan) {
     const tak = p.label === "tidak_terhubung";
     const k = kartu ? { mode: tak ? "tak" : "akhir", teks: tak ? "Tidak diangkat" : "Panggilan berakhir" } : keadaanPonsel(p, t);
-    const nomor = M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
+    const nomor = namaPemanggil(p);
     const jam = kartu ? waktuPanggilan(p).split(", ").pop() : M.hidup ? A3.jamTeks(M.waktuServer) : formatJam(menitPanggilan(p.id));
     const detik = kartu ? 0 : Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
     const baris = k.mode === "aktif" ? '<span class="durasi-ponsel">' + sisaTeks(p, detik) + "</span>"
@@ -679,7 +683,7 @@
     const akhiri = '<div class="telp-aksi">' + bulat("merah", "Akhiri", ikon("telepon")) + "</div>";
     const bawah = k.mode === "dering" ? '<div class="telp-aksi telp-aksi--dering">' + bulat("merah", "Tolak", ikon("telepon")) + bulat("hijau", "Jawab", ikon("telepon")) + "</div>"
       : opsi + akhiri;
-    const info = '<div class="telp-info"><span class="telp-foto">' + ikon("telepon") + "</span><b>" + esc(nomor) + "</b><span>Nomor uji coba</span>" +
+    const info = '<div class="telp-info"><span class="telp-foto">' + ikon("telepon") + "</span><b>" + esc(nomor) + "</b><span>" + ketPemanggil + "</span>" +
       '<p class="telp-status">' + k.teks + '</p><p class="telp-durasi">' + baris + "</p>" +
       '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>';
     return '<div class="kol-ponsel"><div class="ponsel ponsel--telp ponsel--' + k.mode + '" role="img" aria-label="Simulasi layar telepon penerima: ' + k.teks + '">' +
@@ -800,7 +804,7 @@
     const p = M.hidup ? M.detail[ui.wa.id] : D.SKENARIO[ui.wa.id], cadangan = ui.wa.jenis === "cadangan";
     if (!p) return "";
     const obrolan = obrolanWa(p, cadangan);
-    const nomor = M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
+    const nomor = namaPemanggil(p);
     const jedaWa = M.hidup ? M.antrean.pengaturan.jeda_wa_menit : D.JEDA_PESAN_MENIT;
     const petunjuk = cadangan ? "Penerima belum membalas. Jawaban 1–6 menggantikan panggilan." : "Penerima belum membalas. Pesan ini tanpa tautan.";
     const aturan = cadangan
@@ -808,7 +812,7 @@
       : ["Dikirim sebelum panggilan. Jeda " + jedaWa + " menit di prototipe, 10 menit di produksi.", "Tanpa tautan, karena penipu sering menyamar sebagai BPJS.", "Tidak meminta data pribadi, kode OTP, atau pembayaran.", "Mengarahkan penerima mengecek ke Care Center 165."];
     return '<div class="modal-wa" id="modalWa" data-aksi="tutup-wa"><div class="modal-wa-kartu" data-aksi="diam" role="dialog" aria-modal="true" aria-label="Simulasi layar WhatsApp penerima">' +
       '<button class="modal-wa-tutup" type="button" data-aksi="tutup-wa" aria-label="Tutup">' + ikon("x") + "</button>" +
-      '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(nomor) + "</b><span>Nomor uji coba</span></div></div>" +
+      '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(nomor) + "</b><span>" + ketPemanggil + "</span></div></div>" +
         '<div class="obrolan">' + obrolan + '</div><div class="ponsel-balas"><span class="petunjuk">' + petunjuk + "</span></div></div></div>" +
       '<div class="modal-wa-info"><span class="kapital">' + (cadangan ? "Chat cadangan" : "Pesan pemberitahuan") + "</span><h2>" + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</h2>" +
         "<p>" + (cadangan ? "Sistem tidak berhasil menelepon, lalu mengirim pertanyaan lewat chat." : "Penerima tahu akan ditelepon dan tidak mengira panggilan ini penipuan.") + "</p>" +
@@ -957,7 +961,7 @@
 
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
-    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>Suara buatan (ElevenLabs).</small></div>'; }
+    else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small class="catatan-simulasi">Suara buatan (ElevenLabs).</small></div>'; }
     else bukti = '<p class="tanpa-rekaman">Rekaman dan transkrip tidak disimpan untuk hasil ' + D.LABEL[p.label].nama + ".</p>";
     /* Transkrip menyatu di kartu Kutipan kunci: tombol membuka daftar, baris yang sedang diucapkan disorot saat rekaman
        diputar (lihat sorotTranskrip), klik baris untuk melompat. */

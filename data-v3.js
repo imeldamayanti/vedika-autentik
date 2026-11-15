@@ -17,8 +17,10 @@
   const VERIFIKATOR = { nama: "R. Santoso", peran: "Verifikator", kantor: "KC Jakarta Pusat" };
   const BULAN = "Agustus 2026";
   const BULAN_PENDEK = "Agustus";
-  /* Awalan 0800 tidak bisa ditelepon (README data uji). */
-  const NOMOR_PENELEPON = "0800-0000-0165";
+  /* Awalan 0800 tidak bisa ditelepon (README data uji). Mode presentasi (?presentasi=1, hanya untuk rekaman video
+     demo): label Simulasi disembunyikan dan pemanggil tampil sebagai Care Center 165, seperti produk akhir. */
+  const PRESENTASI = new URLSearchParams(location.search).get("presentasi") === "1";
+  const NOMOR_PENELEPON = PRESENTASI ? "165" : "0800-0000-0165";
   const JEDA_PESAN_MENIT = 1;
 
   /* ---------- label hasil panggilan (PRD F4) ---------- */
@@ -435,7 +437,7 @@
   })();
 
   global.DATA3 = {
-    HARI_INI, VERIFIKATOR, BULAN, BULAN_PENDEK, NOMOR_PENELEPON, JEDA_PESAN_MENIT,
+    HARI_INI, VERIFIKATOR, BULAN, BULAN_PENDEK, PRESENTASI, NOMOR_PENELEPON, JEDA_PESAN_MENIT,
     LABEL, TINDAKAN, PILIHAN_TINDAKAN, SARAN, RETENSI, INDIKATOR, TOLERANSI,
     RS, PASIEN_AKTIF, PASIEN_TERPICU,
     SKENARIO, LATAR, MENGANTRE, SEMUA, URUTAN_ANTREAN, TIDAK_DIPICU,
