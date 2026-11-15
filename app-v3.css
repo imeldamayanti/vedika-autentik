@@ -512,6 +512,14 @@ table.tabel { font-size: 15px; }
 .tabel td:last-child, .tabel th:last-child { padding-right: 24px; }
 .chip-ind-wadah { gap: 6px; max-width: 260px; }
 
+/* Chip indikator berisi arti singkat, boleh dua baris (audit S-11). */
+.chip-ind { height: auto; min-height: 26px; padding: 3px 10px; white-space: normal; line-height: 1.25; border-radius: 13px; }
+.chip-ind-wadah { max-width: 220px; }
+
+/* Status antrean: hasil + keputusan dengan ukuran yang sama (audit S-10). */
+.putusan-baris { font-size: 14px; font-weight: 500; color: var(--fg-2); }
+.putusan-baris--perlu { font-weight: 600; color: var(--cek-fg); }
+
 /* Target klik minimal 40px (audit S-06). */
 .jejak-rute a { display: inline-flex; align-items: center; min-height: 40px; }
 .pilih, select { min-height: 44px; border-radius: 999px; }
@@ -532,6 +540,25 @@ table.tabel { font-size: 15px; }
   .tabel th { letter-spacing: .03em; }
   .chip-ind-wadah { max-width: 130px; }
   .tabel td.aksi .btn { white-space: normal; height: auto; min-height: 44px; padding: 6px 14px; line-height: 1.25; text-align: left; }
+}
+
+/* Zoom 150% di monitor 1366 (~911px) dan tablet: menu tetap terlihat sebagai baris pill di atas,
+   bukan disembunyikan di balik tombol menu (audit S-09). Ponsel (≤640px) tetap pakai menu geser. */
+@media (min-width: 641px) and (max-width: 960px) {
+  .sisi {
+    position: static; transform: none; width: auto; height: auto; z-index: auto; box-shadow: none; transition: none;
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px;
+  }
+  .merek { padding: 0; min-height: 44px; }
+  .merek > span:last-child > span { display: none; }
+  /* Baris 1: merek + Mulai ulang demo. Baris 2: semua menu dalam satu deret pill. */
+  .merek { order: 1; }
+  .sisi-kaki { order: 2; margin: 0 0 0 auto; padding-top: 0; flex-direction: row; }
+  .nav:not(.sisi-kaki) { order: 3; flex-basis: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .nav-judul, .nav .mati, .catatan-prototipe { display: none; }
+  .nav a, .nav button { width: auto; height: 40px; padding: 0 14px; }
+  .nav-sub { display: contents; }
+  .tombol-menu { display: none; }
 }
 
 @media (max-width: 960px) {

@@ -72,10 +72,11 @@
   /* ---------- indikator (PRD F1) ---------- */
 
   const INDIKATOR = {
-    I1: { nama: "Melebihi 8", arti: "Sesi ditagih lebih dari 8 dalam sebulan" },
-    I2: { nama: "3x seminggu", arti: "Ada satu minggu dengan 3 sesi atau lebih" },
-    I3: { nama: "6 bulan", arti: "Ada sesi di 6 bulan berturut-turut" },
-    I4: { nama: "Libur", arti: "Ada sesi di hari Minggu atau libur nasional" }
+    /* nama = arti singkat yang langsung terbaca di chip, tanpa hover (audit S-11). */
+    I1: { nama: "Lebih dari 8 sesi/bulan", arti: "Sesi ditagih lebih dari 8 dalam sebulan" },
+    I2: { nama: "3 sesi dalam seminggu", arti: "Ada satu minggu dengan 3 sesi atau lebih" },
+    I3: { nama: "6 bulan berturut-turut", arti: "Ada sesi di 6 bulan berturut-turut" },
+    I4: { nama: "Sesi di hari libur", arti: "Ada sesi di hari Minggu atau libur nasional" }
   };
 
   /* ---------- rumah sakit (rumah_sakit.csv, expected_ringkasan_rs.json) ---------- */

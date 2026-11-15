@@ -372,7 +372,10 @@
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
         '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
-        '<td><div class="sel-status"><span class="status-chip status-chip--' + b.st + '">' + STATUS[b.st] + "</span>" + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
+        /* Panggilan selesai: satu pernyataan "hasil + keputusan", bukan tiga baris (audit S-10). */
+        '<td><div class="sel-status">' + (lab
+          ? labelChip(lab) + (b.putusan ? '<span class="putusan-baris">' + D.TINDAKAN[b.putusan].status + "</span>" : '<span class="putusan-baris putusan-baris--perlu">Perlu diputuskan</span>')
+          : '<span class="status-chip status-chip--' + b.st + '">' + STATUS[b.st] + "</span>") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
     }).join("");
 
