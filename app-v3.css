@@ -475,7 +475,12 @@ table.tabel { font-size: 15px; }
 .saran-kartu .catatan-saran { font-size: 13px; }
 .pilihan-lain label.catatan-medan > .kapital { font-size: 13px; }
 .pilihan-lain label.catatan-medan > .petunjuk-alasan, .petunjuk-alasan { font-size: 13px; }
-.tabel .redup-kecil { font-size: 13px; }
+/* Persen yang menentukan status tidak boleh jadi teks terkecil dan terabu (audit S-04). */
+.tabel .redup-kecil { font-size: 15px; color: var(--fg-2); }
+/* Menu "Sudah ada" tetap terbaca: tanpa opacity, warna muted-fg lulus 4,5:1 (audit S-07). */
+.nav .mati { opacity: 1; color: var(--muted-fg); }
+.nav .mati svg { color: var(--muted-fg); }
+.nav .mati small { color: var(--muted-fg); }
 .tautan-kecil { font-size: 14px; font-weight: 600; }
 .masuk-bungkus > p, .masuk-kartu > p { font-size: 14px; }
 .masuk-catatan, .masuk-versi { font-size: 13px; }
@@ -512,6 +517,22 @@ table.tabel { font-size: 15px; }
 .pilih, select { min-height: 44px; border-radius: 999px; }
 
 /* ---------- layar sedang dan kecil ---------- */
+
+/* Zoom 125% di monitor 1366 (lebar efektif ~1093px): tabel antrean harus muat tanpa gulir,
+   dan blok angka tidak menempel supaya tidak memakan sepertiga layar (audit S-08). */
+@media (max-width: 1279px) {
+  :root { --sisi: 240px; }
+  .nav .mati { white-space: normal; height: auto; min-height: 44px; padding-top: 6px; padding-bottom: 6px; line-height: 1.25; }
+  main.isi { padding: 8px 20px 56px; }
+  .antrean-atas { position: static; margin: 0 0 16px; padding: 0; }
+  .tabel td, .tabel th { padding-left: 8px; padding-right: 8px; }
+  .tabel td:first-child, .tabel th:first-child { padding-left: 16px; }
+  .tabel td:last-child, .tabel th:last-child { padding-right: 16px; }
+  .tabel .nama-berkas b { white-space: normal; }
+  .tabel th { letter-spacing: .03em; }
+  .chip-ind-wadah { max-width: 130px; }
+  .tabel td.aksi .btn { white-space: normal; height: auto; min-height: 44px; padding: 6px 14px; line-height: 1.25; text-align: left; }
+}
 
 @media (max-width: 960px) {
   .kolom { margin: 0; border-radius: 0; min-height: 100vh; }
