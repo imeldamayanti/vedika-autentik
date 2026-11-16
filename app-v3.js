@@ -58,6 +58,17 @@
 
   const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
   const koma = (n) => String(n).replace(".", ",");
+
+  /* Skor pola: sinyal prioritas panggilan dari pola nasional, bukan putusan. Dua desimal, koma desimal. */
+  const CATATAN_POLA = "Skor pola: prioritas panggilan, bukan putusan.";
+  const skorTeks = (s) => koma(s.toFixed(2));
+  const persenSatu = (x) => koma(x.toFixed(1)) + "%";
+  function chipPola(p) {
+    if (p.skor_pola == null) return "";
+    return '<span class="chip-pola' + (p.pola_tinggi ? " chip-pola--tinggi" : "") + '" title="' + CATATAN_POLA + '" aria-label="Skor pola ' + skorTeks(p.skor_pola) +
+      (p.pola_tinggi ? ", pola tidak biasa. " : ". ") + CATATAN_POLA + '">Pola ' + skorTeks(p.skor_pola) +
+      '<i aria-hidden="true"><b style="width:' + Math.round(p.skor_pola * 100) + '%"></b></i></span>';
+  }
   const tunggal = (id) => D.SEMUA[id];
 
   /* Jam kerja simulasi: demo selalu terasa berlangsung pagi hari di kantor cabang. */
@@ -450,7 +461,7 @@
         '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
         '<td class="sembunyi-hp">' + esc(namaRs(p.rs)) + "</td>" +
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
-        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
+        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + chipPola(p) + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
         '<td><div class="sel-status"><span class="status-chip status-chip--' + b.st + '">' + (M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : STATUS[b.st]) + "</span>" + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
@@ -459,7 +470,7 @@
     const oto = otomatisAktif(), jd = jedaAktif();
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih. Antrean ditelepon otomatis satu per satu pukul 09.00–17.00; Dahulukan memindahkan pasien ke urutan berikutnya.</p></div></div>" +
+        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih, diurutkan menurut skor pola tertinggi. Antrean ditelepon otomatis satu per satu pukul 09.00–17.00; Dahulukan memindahkan pasien ke urutan berikutnya.</p></div></div>" +
       stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
@@ -472,7 +483,7 @@
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
-        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur.</p>' +
+        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. ' + CATATAN_POLA + "</p>" +
       "</section>";
   }
   /* ============================================================== panggilan */
@@ -1053,6 +1064,13 @@
       angka("Ditagih RS", p.ditagih, "netral", "") + angka("Versi peserta", rk.versi, rk.versiGaya, rk.versiKet) + angka("Selisih", rk.selisih, rk.gaya, rk.selisihKet) + "</div>" +
       '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + "</div></section>";
 
+    /* Mengapa panggilan ini diprioritaskan: dua alasan teratas skor pola dan kelangkaan kombinasi indikatornya. */
+    const pola = p.pola ? '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Mengapa diprioritaskan</h2><div class="kanan">' +
+        (p.pola.tinggi ? '<span class="lencana-pola">Pola tidak biasa</span>' : "") + chipPola({ skor_pola: p.pola.skor, pola_tinggi: p.pola.tinggi }) + "</div></div>" +
+      '<ul class="pola-alasan">' + p.pola.alasan.map((a) => "<li>" + esc(a.teks) + "</li>").join("") + "</ul>" +
+      '<p class="pola-kombinasi">' + esc(p.pola.kombinasi.teks) + "</p>" +
+      '<p class="pola-catatan">Skor pola dihitung dari pola nasional data sampel BPJS 2024 (agregat). Bukan putusan; label tetap dari jawaban pasien.</p></section>' : "";
+
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
     else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small>' + (M.hidup ? "Rekaman panggilan uji." : "Suara buatan (ElevenLabs).") + "</small></div>"; }
@@ -1082,7 +1100,7 @@
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan">' + ringkasan + kutipan + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+      '<div class="kartu-kanan">' + ringkasan + kutipan + pola + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
   /* ============================================================ ringkasan RS */
 
@@ -1093,15 +1111,48 @@
     if (M.hidup) return M.ringkasan;
     const selesai = panggilanSelesai();
     const ring = D.ringkasanRs(selesai);
+    const terjawab = selesai.filter((p) => p.label === "sesuai" || p.label === "tidak_sesuai");
+    const tidakSesuai = terjawab.filter((p) => p.label === "tidak_sesuai");
+    const rata = (d) => (d.length ? d.reduce((a, p) => a + p.skor_pola, 0) / d.length : null);
     return {
       jumlah: selesai.length,
+      kinerjaPola: {
+        n: terjawab.length, skor_rata_tidak_sesuai: rata(tidakSesuai), skor_rata_sesuai: rata(terjawab.filter((p) => p.label === "sesuai")),
+        tinggi: terjawab.filter((p) => p.pola_tinggi).length, tinggi_dan_tidak_sesuai: tidakSesuai.filter((p) => p.pola_tinggi).length
+      },
       rs: D.RS.map((r, i) => ({
         id: r.id, nama: r.nama, aktif: r.aktif, terpicu: r.terpicu, persen: r.persen, c: ring[i],
+        pembanding: r.pembanding, polaTinggiTidakTerpicu: r.pola_tinggi_tidak_terpicu,
         daftar: selesai.filter((p) => p.rs === r.id).map((p) => ({
           id: p.id, pasien: p.pasien, label: p.label, ditagih: p.ditagih, jumlah_min: p.jawaban.jumlah_min, jumlah_maks: p.jawaban.jumlah_maks, selisih: D.selisih(p)
         }))
       }))
     };
+  }
+
+  /* Satu baris pembanding per RS: persen terpicu RS ini, RS sejenis nasional, dan batas 95% kelompok RS sejenis. */
+  function barisPembanding(r) {
+    const b = r.pembanding;
+    if (!b) return "";
+    const bagian = ["Terpicu " + persenSatu(r.persen), "RS sejenis nasional " + persenSatu(b.persen_terpicu_nasional)];
+    if (b.terpicu_p95_kelompok != null) bagian.push("95% kelompok RS sejenis ≤ " + persenSatu(b.terpicu_p95_kelompok));
+    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Pembanding: ' + esc(b.tipe) + ', data sampel BPJS 2024 (agregat)">' +
+      "<span>" + bagian.join(" · ") + "</span>" +
+      (b.posisi === "di_atas_p95" ? '<span class="lencana-pola">Di atas 95% RS sejenis</span>' : "") +
+      (r.polaTinggiTidakTerpicu > 0 ? '<span class="redup">' + r.polaTinggiTidakTerpicu + " bulan-pasien berpola tidak biasa di bawah ambang aturan (tidak ditelepon)</span>" : "") +
+      "</div></td></tr>";
+  }
+
+  /* Kartu kecil: apakah skor pola sejalan dengan hasil panggilan (hanya Sesuai dan Tidak sesuai). */
+  function kartuKinerjaPola(k) {
+    if (!k) return "";
+    const skor = (s) => (s == null ? "–" : skorTeks(s));
+    const isi = k.n
+      ? "<span>Rata-rata skor <b>" + skor(k.skor_rata_tidak_sesuai) + "</b> pada Tidak sesuai · <b>" + skor(k.skor_rata_sesuai) + "</b> pada Sesuai</span>" +
+        "<span><b>" + k.tinggi_dan_tidak_sesuai + " dari " + k.tinggi + "</b> panggilan berpola tidak biasa berakhir Tidak sesuai</span>" +
+        '<span class="redup">' + k.n + " panggilan terjawab</span>"
+      : '<span class="redup">Belum ada panggilan terjawab.</span>';
+    return '<div class="kinerja-pola" title="' + CATATAN_POLA + '"><b>Skor pola vs hasil panggilan</b>' + isi + "</div>";
   }
 
   function lamanRingkasanRs() {
@@ -1125,7 +1176,7 @@
         '<td class="angka sembunyi-hp">' + c.terjawab + "</td>" +
         '<td class="angka">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</td>" +
         '<td><span class="label label--' + (c.status === "Normal" ? "sesuai" : "tidak_sesuai") + '">' + c.status + "</span></td>" +
-        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" +
+        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisPembanding(r) +
         (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
     }).join("");
 
@@ -1136,9 +1187,10 @@
     return '<div class="kepala"><div><h1>Ringkasan rumah sakit</h1>' +
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Normal (2 dari 4).</div>' : "") +
+      kartuKinerjaPola(data.kinerjaPola) +
       '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
       '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
-        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
+        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit. Pembanding RS sejenis berasal dari agregat data sampel BPJS 2024 dan hanya informasi; status RS tetap dari jawaban pasien.</p></section>';
   }
   /* ============================================================== riwayat */
 
