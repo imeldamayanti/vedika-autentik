@@ -56,14 +56,14 @@ Model diterapkan ke semua 22.457 bulan-pasien nyata 2024 di laptop (data mentah 
 
 ## Tier B (data demo vs `kunci_kebenaran_2026-08.csv`)
 
-300 bulan-pasien Agustus 2026, 25 di antaranya digelembungkan (selisih ditagih dan sebenarnya lebih dari 2). Kunci kebenaran hanya dibaca di evaluasi offline ini.
+302 bulan-pasien Agustus 2026, 26 di antaranya digelembungkan (selisih ditagih dan sebenarnya lebih dari 2). Kunci kebenaran hanya dibaca di evaluasi offline ini.
 
-- AUC skor pola: **0,997**.
-- AUC `jumlah_indikator` (pembanding): **0,996**.
-- Pemicu aturan (≥ 2 indikator, 30 bulan-pasien): presisi **0,833**, recall **1,000**.
+- AUC skor pola: **0,990**.
+- AUC `jumlah_indikator` (pembanding): **0,974**.
+- Pemicu aturan (≥ 2 indikator, 30 bulan-pasien): presisi **0,833**, recall **0,962**.
 - Presisi@30 skor pola: **0,833**.
-- Skor ≥ ambang: 22 bulan-pasien, 21 di antaranya digelembungkan.
-- Digelembungkan tetapi tidak terpicu aturan: 0; di antaranya **0** berskor ≥ ambang (tampil sebagai informasi, tidak ditelepon).
+- Skor ≥ ambang: 23 bulan-pasien, 21 di antaranya digelembungkan.
+- Digelembungkan tetapi tidak terpicu aturan: 1; di antaranya **0** berskor ≥ ambang (tampil sebagai informasi, tidak ditelepon).
 
 ## Koefisien
 

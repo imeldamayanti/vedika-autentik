@@ -1,129 +1,119 @@
 {
-  "bulan_pasien": 40650,
-  "tahun": [
+  "patient_months": 40650,
+  "years": [
     "2023",
     "2024"
   ],
-  "target_pangsa": 0.015,
-  "hasil": {
-    "Isolation Forest": {
-      "persen_ditandai": 1.54,
-      "persen_hanya_model": 0.7,
-      "persen_aturan_atau_model": 2.75,
-      "antartahun": {
-        "persen_model_tahun_lalu": 1.03,
-        "persen_model_tahun_ini": 1.54,
-        "jaccard": 0.7
+  "results": {
+    "anomali-v1 (Isolation Forest)": {
+      "percent_flagged": 1.53,
+      "percent_model_only": 0.68,
+      "percent_rules_or_model": 2.72
+    },
+    "Kelangkaan nasional": {
+      "percent_flagged": 1.53,
+      "percent_model_only": 1.05,
+      "percent_rules_or_model": 3.09,
+      "over_time": {
+        "train_years": [
+          "2023"
+        ],
+        "test_years": [
+          "2024"
+        ],
+        "percent_flagged_by_past_model": 1.34,
+        "percent_flagged_by_own_model": 1.51,
+        "jaccard": 0.692,
+        "percent_model_only_by_past_model": 0.76,
+        "percent_patterns_unknown_to_past_model": 1.34
       }
     },
-    "Local Outlier Factor": {
-      "persen_ditandai": 1.52,
-      "persen_hanya_model": 0.93,
-      "persen_aturan_atau_model": 2.97,
-      "antartahun": {
-        "persen_model_tahun_lalu": 1.36,
-        "persen_model_tahun_ini": 1.5,
-        "jaccard": 0.86
+    "anomali-v2 (umur)": {
+      "percent_flagged": 1.53,
+      "percent_model_only": 1.05,
+      "percent_rules_or_model": 3.1,
+      "over_time": {
+        "train_years": [
+          "2023"
+        ],
+        "test_years": [
+          "2024"
+        ],
+        "percent_flagged_by_past_model": 1.34,
+        "percent_flagged_by_own_model": 1.51,
+        "jaccard": 0.669,
+        "percent_model_only_by_past_model": 0.76,
+        "percent_patterns_unknown_to_past_model": 1.34
       }
-    },
-    "One-Class SVM": {
-      "persen_ditandai": 1.62,
-      "persen_hanya_model": 1.22,
-      "persen_aturan_atau_model": 3.26,
-      "antartahun": {
-        "persen_model_tahun_lalu": 33.74,
-        "persen_model_tahun_ini": 33.6,
-        "jaccard": 0.93
-      }
-    },
-    "Kelangkaan gabungan": {
-      "persen_ditandai": 1.54,
-      "persen_hanya_model": 1.02,
-      "persen_aturan_atau_model": 3.06,
-      "antartahun": {
-        "persen_model_tahun_lalu": 1.6,
-        "persen_model_tahun_ini": 1.51,
-        "jaccard": 0.59
-      }
-    },
-    "Suara ≥ 2 dari 3": {
-      "persen_ditandai": 1.49,
-      "persen_hanya_model": 0.85,
-      "persen_aturan_atau_model": 2.9
-    },
-    "Salah satu dari 3 (ATAU)": {
-      "persen_ditandai": 2.57,
-      "persen_hanya_model": 1.65,
-      "persen_aturan_atau_model": 3.7
     }
   },
-  "jaccard_antarmetode": {
-    "Isolation Forest": {
-      "Isolation Forest": 1.0,
-      "Local Outlier Factor": 0.27,
-      "One-Class SVM": 0.14,
-      "Kelangkaan gabungan": 0.26
+  "jaccard": {
+    "anomali-v1 (Isolation Forest)": {
+      "anomali-v1 (Isolation Forest)": 1.0,
+      "Kelangkaan nasional": 0.378,
+      "anomali-v2 (umur)": 0.413
     },
-    "Local Outlier Factor": {
-      "Isolation Forest": 0.27,
-      "Local Outlier Factor": 1.0,
-      "One-Class SVM": 0.25,
-      "Kelangkaan gabungan": 0.7
+    "Kelangkaan nasional": {
+      "anomali-v1 (Isolation Forest)": 0.378,
+      "Kelangkaan nasional": 1.0,
+      "anomali-v2 (umur)": 0.793
     },
-    "One-Class SVM": {
-      "Isolation Forest": 0.14,
-      "Local Outlier Factor": 0.25,
-      "One-Class SVM": 1.0,
-      "Kelangkaan gabungan": 0.24
-    },
-    "Kelangkaan gabungan": {
-      "Isolation Forest": 0.26,
-      "Local Outlier Factor": 0.7,
-      "One-Class SVM": 0.24,
-      "Kelangkaan gabungan": 1.0
+    "anomali-v2 (umur)": {
+      "anomali-v1 (Isolation Forest)": 0.413,
+      "Kelangkaan nasional": 0.793,
+      "anomali-v2 (umur)": 1.0
     }
   },
-  "persen_ditandai_keempatnya": 0.27,
-  "sisipan": {
-    "jumlah": 2000,
-    "hasil": {
+  "injection": {
+    "count": 2000,
+    "results": {
       "pemadatan seminggu": {
-        "Aturan": 26.0,
-        "Isolation Forest": 27.1,
-        "Local Outlier Factor": 32.2,
-        "One-Class SVM": 41.1,
-        "Kelangkaan gabungan": 66.4,
-        "Suara ≥ 2 dari 3": 45.0,
-        "Salah satu dari 3 (ATAU)": 70.3
-      },
-      "rujukan janggal": {
-        "Aturan": 2.0,
-        "Isolation Forest": 100.0,
-        "Local Outlier Factor": 2.0,
-        "One-Class SVM": 2.0,
-        "Kelangkaan gabungan": 2.0,
-        "Suara ≥ 2 dari 3": 2.0,
-        "Salah satu dari 3 (ATAU)": 100.0
+        "Aturan": 27.0,
+        "anomali-v1 (Isolation Forest)": 40.5,
+        "Kelangkaan nasional": 66.3,
+        "anomali-v2 (umur)": 57.0
       },
       "sesi hari Minggu": {
-        "Aturan": 22.7,
-        "Isolation Forest": 8.8,
-        "Local Outlier Factor": 74.5,
-        "One-Class SVM": 54.4,
-        "Kelangkaan gabungan": 73.2,
-        "Suara ≥ 2 dari 3": 73.2,
-        "Salah satu dari 3 (ATAU)": 74.6
+        "Aturan": 24.0,
+        "anomali-v1 (Isolation Forest)": 26.4,
+        "Kelangkaan nasional": 75.0,
+        "anomali-v2 (umur)": 63.3
       },
       "tagihan digelembungkan": {
-        "Aturan": 9.8,
-        "Isolation Forest": 3.1,
-        "Local Outlier Factor": 10.9,
-        "One-Class SVM": 9.8,
-        "Kelangkaan gabungan": 11.3,
-        "Suara ≥ 2 dari 3": 10.9,
-        "Salah satu dari 3 (ATAU)": 11.9
+        "Aturan": 11.7,
+        "anomali-v1 (Isolation Forest)": 8.2,
+        "Kelangkaan nasional": 11.1,
+        "anomali-v2 (umur)": 10.7
+      },
+      "sebagian tanpa rujukan": {
+        "Aturan": 0.0,
+        "anomali-v1 (Isolation Forest)": 17.5,
+        "Kelangkaan nasional": 34.4,
+        "anomali-v2 (umur)": 49.5
+      },
+      "rujukan janggal": {
+        "Aturan": 2.1,
+        "anomali-v1 (Isolation Forest)": 100.0,
+        "Kelangkaan nasional": 2.1,
+        "anomali-v2 (umur)": 36.7
       }
     }
   },
-  "dibuat": "2026-11-17"
+  "outside": [
+    {
+      "sample": "KM20152023_fkrtl",
+      "patient_months": 27062,
+      "anomali-v1 (Isolation Forest)": 3.59,
+      "Kelangkaan nasional": 3.07,
+      "anomali-v2 (umur)": 3.7
+    },
+    {
+      "sample": "COV20152024_fkrtl",
+      "patient_months": 8910,
+      "anomali-v1 (Isolation Forest)": 5.37,
+      "Kelangkaan nasional": 4.59,
+      "anomali-v2 (umur)": 5.73
+    }
+  ],
+  "created_on": "2026-11-17"
 }

@@ -1,278 +1,386 @@
 #!/usr/bin/env python3
-"""Train the unsupervised anomaly model (Isolation Forest) on the real FKRTL samples and export aggregates.
+"""Train anomali-v2 on the regular FKRTL samples and write the model, behaviour aggregates, and report.
 
-Needs the raw samples, so it runs only on the laptop that holds them. Writes:
-- data-uji-konfirmasi/referensi-pola/model-anomali-v1.json: one score per feature-bin combination seen in
-  at least 10 participant-months, the threshold and national bin shares (the scorer is tools/anomali.py);
-- ai-service/data/reference/pola-2024/anomali-nyata.json: behaviour on real data (counts >= 10 only);
-- data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md: the same numbers for people.
+Needs the raw samples, so it runs only on the laptop that holds them:
 
-Only July-December of each file is used, because `episode` looks back 6 months and each file starts in
-January. --source takes the regular samples (one per year, trained on); --uji-luar takes disease-specific
-samples that are only scored, never trained on.
-Run with `uv run --group data python scripts/train_anomaly_model.py --source <2023.dta> --source <2024.dta>`.
+    uv run --group data python scripts/train_anomaly_model.py \\
+        --sample <2023 fkrtl.dta> <2023 kepesertaan.dta> <2023 diagnosissekunder.dta> \\
+        --sample <2024 fkrtl.dta> <2024 kepesertaan.dta> <2024 diagnosissekunder.dta> \\
+        --outside <disease-specific fkrtl.dta> <its kepesertaan.dta>
+
+Writes data-uji-konfirmasi/referensi-pola/model-anomali-v2.json (the scorer is tools/anomali.py),
+ai-service/data/reference/pola-2024/anomali-nyata.json, and data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import math
 from datetime import date
 from pathlib import Path
 
-from vedika_ai.anomali_reference import (
-    behaviour,
-    build_model,
-    hospital_level,
-    in_window,
-    outside_check,
-    validate_over_time,
-)
-from vedika_ai.claim_reference import assert_privacy_safe_aggregate
-from vedika_ai.pola_reference import patient_months, read_visits
+from vedika_ai.ml import anomaly_evaluation as evaluation
+from vedika_ai.ml import anomaly_model, tools
+from vedika_ai.ml.cohort import load_sample
+from vedika_ai.ml.privacy import assert_privacy_safe, write_json
+from vedika_ai.ml.report import number, table, thousands
 
-ROOT = Path(__file__).resolve().parents[2]
-MODEL = ROOT / "data-uji-konfirmasi" / "referensi-pola" / "model-anomali-v1.json"
-REAL = ROOT / "ai-service" / "data" / "reference" / "pola-2024" / "anomali-nyata.json"
-REPORT = ROOT / "data-uji-konfirmasi" / "referensi-pola" / "EVALUASI-ANOMALI.md"
+MODEL = tools.MODEL_DIR / "model-anomali-v2.json"
+REAL = tools.REFERENCE_DIR / "pola-2024" / "anomali-nyata.json"
+REPORT = tools.MODEL_DIR / "EVALUASI-ANOMALI.md"
 
-NAMA_KELOMPOK = {
-    "ditandai_model": "Ditandai model",
-    "dipicu_aturan": "Dipicu aturan (≥ 2 indikator)",
-    "keduanya": "Keduanya",
-    "hanya_model": "Hanya model (tidak terlihat aturan)",
-    "hanya_aturan": "Hanya aturan",
-    "dipanggil_aturan_atau_model": "Ditelepon: aturan ATAU model",
+GROUP_NAMES = {
+    "flagged_by_model": "Ditandai model",
+    "triggered_by_rules": "Dipicu aturan (≥ 2 indikator)",
+    "both": "Keduanya",
+    "model_only": "Hanya model (tidak terlihat aturan)",
+    "rules_only": "Hanya aturan",
+    "called": "Ditelepon: aturan ATAU model",
 }
-NAMA_FITUR = {
+FEATURE_NAMES = {
     "sesi": "Sesi sebulan",
     "maks_minggu": "Sesi terbanyak seminggu",
     "ahad_libur": "Sesi hari Minggu",
     "episode": "Bulan berturut-turut",
     "tanpa_rujukan": "Kunjungan tanpa rujukan FKTP",
     "lintas_wilayah": "Dirujuk dari kab/kota lain",
-    "gabungan": "Hanya gabungannya yang jarang",
-    "dipicu": "Pangsa terpicu aturan",
-    "ahad": "Pangsa dengan sesi hari Minggu",
-    "dx_langka": "Diagnosis jarang",
-    "cbg_langka": "Kode INA-CBG jarang",
+    "pattern": "Hanya gabungannya yang jarang",
+}
+AGE_ORDER = ["<18", "18-39", "40-59", "60+", "tidak diketahui"]
+CONTEXT_NAMES = {
+    None: "Nasional (tanpa kelompok)",
+    "age_group": "Kelompok umur",
+    "condition": "Diagnosis sekunder",
 }
 
 
-def angka(x: float) -> str:
-    return f"{x:.2f}".rstrip("0").rstrip(".").replace(".", ",")
+def verdict(forward: list[dict], backward: list[dict]) -> str:
+    """Held-out gain of each context over national, at its best smoothing, in both directions."""
+
+    def best(comparison: list[dict], context: str | None) -> dict:
+        return max(
+            (r for r in comparison if r["context"] == context), key=lambda r: r["log_likelihood"]
+        )
+
+    sentences = []
+    for context in ("age_group", "condition"):
+        gains = [
+            best(c, context)["log_likelihood"] - best(c, None)["log_likelihood"]
+            for c in (forward, backward)
+        ]
+        alphas = {best(c, context)["alpha"] for c in (forward, backward)}
+        sentence = (
+            f"{CONTEXT_NAMES[context]}: selisih terhadap nasional {number(gains[0], 4)} (2023 ke 2024) dan "
+            f"{number(gains[1], 4)} (2024 ke 2023)."
+        )
+        if alphas == {max(anomaly_model.ALPHAS)} and max(gains) < 0.005:
+            sentence += " Selisih ini hanya muncul pada penghalusan terkuat, saat model hampir sama dengan nasional."
+        sentences.append(sentence)
+    return "\n".join(f"- {s}" for s in sentences)
 
 
-def ribuan(n: int) -> str:
-    return f"{n:,}".replace(",", ".")
+def context_section(forward: list[dict], backward: list[dict], model: dict) -> str:
+    rows = [
+        [
+            CONTEXT_NAMES[f["context"]],
+            f["groups"] or "–",
+            number(f["alpha"], 0),
+            number(f["log_likelihood"], 4),
+            number(b["log_likelihood"], 4),
+        ]
+        for f, b in zip(forward, backward, strict=True)
+    ]
+    return f"""## Memilih kelompok pembanding
 
+Pola dinilai jarang dibanding pasien sekelompok. Kelompok dipilih dengan data tahun lain yang tidak dipakai
+melatih: rata-rata log-peluang berbobot (makin tinggi makin baik) dari model yang dilatih satu tahun dan dinilai
+pada tahun lainnya. Alfa = kekuatan penghalusan ke pangsa nasional.
 
-def records_of(source: Path, chunk_size: int) -> list[dict]:
-    """Participant-months of one sample file, July-December only. Files are never joined."""
+{table(["Kelompok", "Jumlah kelompok", "Alfa", "Latih 2023, uji 2024", "Latih 2024, uji 2023"], rows)}
 
-    return in_window(patient_months(read_visits(source.resolve(), chunk_size)))
+{verdict(forward, backward)}
 
-
-def report(model: dict, facts: dict, real: dict) -> str:
-    rows = "\n".join(
-        f"| {NAMA_KELOMPOK[g['kelompok']]} | {ribuan(g['bulan_pasien'])} | {ribuan(g['kunjungan'])} | {angka(g['persen'])}% | ≈{ribuan(g['per_bulan_nasional'])} |"
-        for g in real["kelompok"]
-    )
-    reasons = "\n".join(
-        f"| {NAMA_FITUR[r['fitur']]} | {ribuan(r['bulan_pasien'])} |"
-        for r in real["alasan_pertama_hanya_model"]
-    )
-    patterns = "\n".join(
-        f"| {', '.join(p['pola'])} | {ribuan(p['bulan_pasien'])} |"
-        for p in real["pola_teratas_hanya_model"]
-    )
-    rs = real["rs"]
-    drivers = "\n".join(
-        f"| {NAMA_FITUR[d['fitur']]} | {d['kelompok_rs']} |" for d in rs["pemicu_utama"]
-    )
-    peers = real["kelompok_rs"]
-    data = "\n".join(
-        f"| `{d['berkas']}` | {', '.join(d['tahun'])} | {ribuan(d['bulan_pasien'])} |"
-        for d in real["data"]
-    )
-    v = real.get("validasi_waktu")
-    validation = (
-        f"""Model dilatih ulang hanya dari {", ".join(v["latih"])}, lalu dipakai pada {", ".join(v["uji"])} yang belum pernah dilihatnya.
-Pembanding: model yang dilatih dari {", ".join(v["uji"])} sendiri.
-
-| Ukuran | Hasil |
-|---|---|
-| Ditandai di {", ".join(v["uji"])} oleh model {", ".join(v["latih"])} | {angka(v["persen_ditandai_model_tahun_lalu"])}% |
-| Ditandai di {", ".join(v["uji"])} oleh model {", ".join(v["uji"])} | {angka(v["persen_ditandai_model_tahun_ini"])}% |
-| Irisan (Jaccard) kedua himpunan yang ditandai | {angka(v["jaccard"])} |
-| Hanya model (tidak terpicu aturan), model {", ".join(v["latih"])} | {angka(v["persen_hanya_model_tahun_lalu"])}% |
-| Bobot {", ".join(v["uji"])} di gabungan yang tidak ada di tabel {", ".join(v["latih"])} | {angka(v["persen_gabungan_tak_dikenal_tahun_lalu"])}% |
+Model memakai {CONTEXT_NAMES[model["context"]].lower()} dengan alfa {number(model["alpha"], 0)}, alfa dengan
+log-peluang tertinggi di kedua arah.
 """
-        if v
-        else "Hanya satu tahun data, jadi validasi antartahun tidak dijalankan.\n"
-    )
-    outside = "\n".join(
-        f"| {o['sampel']} | {', '.join(o['tahun'])} | {ribuan(o['bulan_pasien'])} | {angka(o['persen_ditandai_model'])}% | {angka(o['persen_dipicu_aturan'])}% | {angka(o['persen_hanya_model'])}% |"
-        for o in real["uji_luar"]
-    )
-    outside_section = (
-        f"""## Uji luar (tidak dipakai melatih)
 
-Tabel akhir dipakai pada data sampel kontekstual: peserta yang dipilih karena penyakit tertentu, jadi bukan
-gambaran semua pasien fisioterapi. Bobotnya mewakili kelompok penyakit itu, bukan nasional. Tujuannya hanya
-melihat apakah model berperilaku wajar pada populasi lain.
 
-| Sampel | Tahun | Bulan-pasien | Ditandai model | Dipicu aturan | Hanya model |
-|---|---|---|---|---|---|
-{outside}
-"""
-        if real["uji_luar"]
+def report(model: dict, real: dict) -> str:
+    behaviour = real["behaviour"]
+    groups = table(
+        ["Kelompok", "Bulan-pasien", "Kunjungan", "Bobot nasional", "Per bulan"],
+        [
+            [
+                GROUP_NAMES[g["group"]],
+                thousands(g["patient_months"]),
+                thousands(g["visits"]),
+                f"{number(g['percent'])}%",
+                f"≈{thousands(g['per_month_national'])}",
+            ]
+            for g in behaviour["groups"]
+        ],
+    )
+    ages = table(
+        ["Kelompok umur", "Bulan-pasien", "Ditandai model"],
+        [
+            [a["age_group"], thousands(a["patient_months"]), f"{number(a['percent_flagged'])}%"]
+            for a in sorted(
+                behaviour["by_age_group"], key=lambda a: AGE_ORDER.index(a["age_group"])
+            )
+        ],
+    )
+    reasons = table(
+        ["Alasan pertama", "Bulan-pasien"],
+        [
+            [FEATURE_NAMES[r["feature"]], thousands(r["patient_months"])]
+            for r in behaviour["first_reason_model_only"]
+        ],
+    )
+    patterns = table(
+        ["Pola", "Bulan-pasien"],
+        [
+            [", ".join(p["pattern"]), thousands(p["patient_months"])]
+            for p in behaviour["top_patterns_model_only"]
+        ],
+    )
+    data = table(
+        ["Berkas", "Tahun", "Bulan-pasien (Juli–Desember)"],
+        [
+            [f"`{d['file']}`", ", ".join(d["years"]), thousands(d["patient_months"])]
+            for d in real["data"]
+        ],
+    )
+    over = real["over_time"]
+    train, test = ", ".join(over["train_years"]), ", ".join(over["test_years"])
+    over_time = table(
+        ["Ukuran", "Hasil"],
+        [
+            [
+                f"Ditandai di {test} oleh model {train}",
+                f"{number(over['percent_flagged_by_past_model'])}%",
+            ],
+            [
+                f"Ditandai di {test} oleh model {test}",
+                f"{number(over['percent_flagged_by_own_model'])}%",
+            ],
+            ["Irisan (Jaccard) kedua himpunan yang ditandai", number(over["jaccard"], 3)],
+            [
+                f"Hanya model (tidak terpicu aturan), model {train}",
+                f"{number(over['percent_model_only_by_past_model'])}%",
+            ],
+            [
+                f"Bobot {test} pada pola yang tidak ada di tabel {train}",
+                f"{number(over['percent_patterns_unknown_to_past_model'])}%",
+            ],
+        ],
+    )
+    outside = (
+        "## Uji luar (tidak dipakai melatih)\n\n"
+        "Model akhir dipakai pada data sampel kontekstual: peserta yang dipilih karena penyakit tertentu, jadi bukan\n"
+        "gambaran semua pasien fisioterapi. Bobotnya mewakili kelompok penyakit itu.\n\n"
+        + table(
+            ["Sampel", "Tahun", "Bulan-pasien", "Ditandai model", "Dipicu aturan", "Hanya model"],
+            [
+                [
+                    o["sample"],
+                    f"{o['years'][0]}–{o['years'][-1]}",
+                    thousands(o["patient_months"]),
+                    f"{number(o['percent_flagged'])}%",
+                    f"{number(o['percent_triggered'])}%",
+                    f"{number(o['percent_model_only'])}%",
+                ]
+                for o in real["outside"]
+            ],
+        )
+        + "\n"
+        if real["outside"]
         else ""
     )
-    return f"""# Evaluasi model anomali ({model["versi"]})
+    hospitals = real["hospitals"]
+    return f"""# Evaluasi model anomali ({model["version"]})
 
-Dibuat oleh `ai-service/scripts/train_anomaly_model.py` pada {real["dibuat"]}. Jangan disunting manual.
+Dibuat oleh `ai-service/scripts/train_anomaly_model.py` pada {
+        model["trained_on"]
+    }. Jangan disunting manual.
 
 ## Apa yang dilakukan model
 
-Isolation Forest **tanpa label** (unsupervised) dilatih pada {ribuan(model["pelatihan"]["bulan_pasien"])} bulan-pasien fisioterapi
-rawat jalan dari data sampel reguler BPJS. Model mencari tagihan bulanan yang polanya jarang dibanding seluruh tagihan
-nasional, tanpa diberi tahu mana yang curang. Data sampel memang tidak punya label itu.
+Model **tanpa label** mengukur seberapa jarang pola satu tagihan bulanan fisioterapi di antara pasien
+seusia, dari {
+        thousands(model["training"]["patient_months"])
+    } bulan-pasien data sampel reguler BPJS {model["years"]}.
+Pola = enam fitur yang bisa dikonfirmasi peserta lewat telepon: sesi sebulan, sesi terbanyak seminggu, sesi hari
+Minggu, bulan berturut-turut, pangsa kunjungan tanpa rujukan FKTP, dan pangsa yang dirujuk dari kab/kota lain.
 
-Pasien ditelepon bila **aturan (≥ 2 indikator) ATAU model** menandainya. Hasilnya tetap ditentukan jawaban peserta.
+Peluang pola p dihitung dari pangsa berbobot pola itu di kelompok umur pasien, dihaluskan ke pangsa nasional
+(alfa {number(model["alpha"], 0)}); skor = −ln p. Ditandai bila skor ≥ {
+        number(model["threshold"], 4)
+    }, yaitu
+peluang di bawah {number(100 * math.exp(-model["threshold"]), 3)}%. Ambang dipilih supaya sekitar
+{
+        number(100 * model["target_share"], 1)
+    }% bobot nasional ditandai, setara aturan. Pasien ditelepon bila
+**aturan (≥ 2 indikator) ATAU model** menandainya; hasilnya tetap ditentukan jawaban peserta.
 
-Fitur hanya hal yang bisa dikonfirmasi peserta lewat telepon: jumlah sesi sebulan, sesi terbanyak dalam satu minggu,
-sesi hari Minggu, bulan berturut-turut, pangsa kunjungan tanpa nomor rujukan FKTP, dan pangsa yang dirujuk dari
-kab/kota lain. Kode diagnosis dan INA-CBG tidak dipakai di tingkat pasien karena peserta tidak bisa
-mengonfirmasinya; keduanya dipakai di tingkat RS (bagian terakhir).
-
+{context_section(real["contexts"]["forward"], real["contexts"]["backward"], model)}
 ## Data
 
-| Berkas | Tahun | Bulan-pasien (Juli–Desember) |
-|---|---|---|
 {data}
 
-Hanya Juli–Desember tiap berkas yang dipakai. Fitur bulan berturut-turut melihat 6 bulan ke belakang, dan tiap berkas
-mulai Januari, jadi Januari–Mei tidak punya riwayat lengkap (Januari–Juni tetap dipakai sebagai riwayat). Berkas
-tidak digabung per peserta: data sampel tiap tahun diambil terpisah.
+Hanya Juli–Desember tiap berkas yang dinilai: bulan berturut-turut melihat 6 bulan ke belakang dan tiap berkas
+mulai Januari. Berkas tidak digabung per peserta.
 
 ## Privasi
 
-- Model disimpan sebagai tabel: satu skor per gabungan bin yang muncul pada minimal {model["minimum_sel"]} bulan-pasien
-  ({facts["gabungan_dalam_tabel"]} gabungan). Pohon Isolation Forest, baris, nomor peserta, dan nilai minimum/maksimum tidak disimpan.
-- Gabungan yang lebih jarang ({angka(100 * facts["pangsa_gabungan_langka"])}% bobot nasional) tidak disimpan dan dianggap
-  tidak biasa oleh penilai. Isolation Forest sebelum ditabelkan juga menandai {angka(100 * facts["gabungan_langka_juga_ditandai_hutan"])}% bobot gabungan itu.
+- Model menyimpan pangsa pola dan pangsa bin hanya untuk sel dengan minimal {
+        model["minimum_cell"]
+    } bulan-pasien
+  ({
+        len(model["patterns"])
+    } pola nasional). Tidak ada baris, nomor peserta, atau nilai minimum/maksimum.
+- Pola yang lebih jarang dari itu tidak disimpan dan selalu ditandai.
 - Batas bin ditetapkan tangan (ambang aturan dan angka bulat), bukan dari data.
 
-## Perilaku di data nyata (Tingkat A)
+## Perilaku di data nyata
 
-Ambang dipilih supaya model menandai sekitar {angka(100 * model["target_pangsa"])}% bulan-pasien nasional, setara aturan.
-"Per bulan" = perkiraan nasional dengan bobot sampel, rata-rata atas {real["bulan"]} bulan.
+"Per bulan" = perkiraan nasional dengan bobot sampel, rata-rata atas {behaviour["months"]} bulan.
 
-| Kelompok | Bulan-pasien | Kunjungan | Bobot nasional | Per bulan |
-|---|---|---|---|---|
-{rows}
+{groups}
 
-- Persen ditandai per bulan: {angka(real["persen_bulanan"]["min"])}% sampai {angka(real["persen_bulanan"]["maks"])}%.
-- {peers["dengan_minimal_bulan_pasien"]} kelompok RS sejenis punya minimal {peers["minimal_bulan_pasien"]} bulan-pasien;
-  {peers["tanpa_ditandai"]} di antaranya tanpa satu pun yang ditandai. 10% kelompok teratas memuat
-  {angka(peers["pangsa_di_10_persen_teratas"])}% bobot yang ditandai.
-- Kestabilan: irisan (Jaccard) himpunan yang ditandai antara seed pertama dan empat seed lain:
-  {", ".join(angka(x) for x in facts["jaccard_antar_seed"])}.
+- Persen ditandai per bulan (tanpa bobot): {number(behaviour["monthly_percent"]["low"])}% sampai {
+        number(behaviour["monthly_percent"]["high"])
+    }%.
+
+Per kelompok umur:
+
+{ages}
 
 Alasan pertama pada kasus "hanya model":
 
-| Alasan | Bulan-pasien |
-|---|---|
 {reasons}
 
 Pola "hanya model" yang paling sering:
 
-| Pola | Bulan-pasien |
-|---|---|
 {patterns}
 
 ## Validasi antartahun
 
-{validation}
-{outside_section}
-## Tingkat RS
+{over_time}
 
-Isolation Forest kedua atas {rs["kelompok_rs"]} kelompok RS sejenis (minimal {peers["minimal_bulan_pasien"]} bulan-pasien),
-dengan fitur pangsa terpicu, rata-rata sesi, pangsa dengan sesi Minggu, pangsa tanpa rujukan FKTP, pangsa dari kab/kota lain,
-pangsa diagnosis jarang, dan pangsa kode INA-CBG jarang (kode di bawah 1% kunjungan nasional). Ditandai
-{rs["ditandai"]} kelompok (5% teratas). Identitas kelompok tidak disimpan.
+{outside}
+## Tingkat RS (corong)
 
-| Fitur paling menyimpang | Kelompok RS |
-|---|---|
-{drivers}
+Untuk tiap kelompok RS sejenis (kab/kota + kepemilikan + jenis + tipe) dengan minimal
+{
+        hospitals["minimum_patient_months"]
+    } bulan-pasien: jumlah bulan-pasien yang dipilih (aturan ATAU model) dibanding
+harapan menurut umur pasiennya. Simpangan dilebarkan dengan faktor sebaran antar-RS
+{
+        number(hospitals["overdispersion"], 2)
+    } (penyesuaian overdispersi Spiegelhalter), karena RS memang lebih beragam
+dari yang dijelaskan umur saja.
+
+{
+        table(
+            ["Ukuran", "Hasil"],
+            [
+                ["Kelompok RS sejenis yang dinilai", hospitals["peer_groups"]],
+                ["Di atas batas 95%", hospitals["above_95"]],
+                ["Di atas batas 99,8%", hospitals["above_99_8"]],
+                [
+                    "Pangsa pasien dipilih yang berada di kelompok di atas 99,8%",
+                    f"{number(hospitals['percent_selected_in_above_99_8'], 1)}%",
+                ],
+            ],
+        )
+    }
+
+Identitas kelompok tidak disimpan.
 
 ## Batasan
 
-- Tidak ada label kecurangan di data sampel, jadi angka di atas adalah perilaku, bukan ketepatan.
-  Ketepatan baru bisa diukur dari hasil panggilan (berapa yang ditandai model berakhir Tidak sesuai).
-- Nomor rujukan FKTP kosong bisa berarti kunjungan kontrol dengan surat kontrol RS, bukan pelanggaran.
-  Arti sinyal ini perlu dipastikan bersama verifikator BPJS.
-- Data sampel tidak memuat identitas RS. "Kelompok RS sejenis" = kab/kota + kepemilikan + jenis + tipe.
+- Tidak ada label kecurangan, jadi angka di atas adalah perilaku, bukan ketepatan. Ketepatan diukur dari hasil
+  panggilan: berapa yang ditandai model berakhir Tidak sesuai.
+- Jarang tidak sama dengan curang: pola yang jarang bisa sah.
+- Nomor rujukan FKTP kosong bisa berarti kunjungan kontrol dengan surat kontrol RS. Arti sinyal ini perlu
+  dipastikan bersama verifikator BPJS.
+- Data sampel tidak memuat identitas RS, jadi kelompok RS sejenis hanya mendekati satu RS.
 """
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
-        "--source",
-        type=Path,
+        "--sample",
+        nargs=3,
         action="append",
         required=True,
-        help="Regular FKRTL .dta, one per year",
+        type=Path,
+        metavar=("FKRTL", "KEPESERTAAN", "DIAGNOSIS_SEKUNDER"),
+        help="One regular sample year",
     )
     parser.add_argument(
-        "--uji-luar",
-        type=Path,
+        "--outside",
+        nargs=2,
         action="append",
         default=[],
-        help="Disease-specific FKRTL .dta, scored only",
+        type=Path,
+        metavar=("FKRTL", "KEPESERTAAN"),
+        help="A disease-specific sample, scored only",
     )
-    parser.add_argument("--chunk-size", type=int, default=200_000)
     args = parser.parse_args()
 
-    per_file = [(source, records_of(source, args.chunk_size)) for source in args.source]
-    records = [r for _, rows in per_file for r in rows]
-    model, facts = build_model(records)
-    model["dilatih"] = date.today().isoformat()
-
-    years = sorted({r["bulan"][:4] for r in records})
-    validation = None
-    if len(years) >= 2:
-        validation = validate_over_time(
-            [r for r in records if r["bulan"][:4] == years[0]],
-            [r for r in records if r["bulan"][:4] == years[-1]],
-        )
-    outside = [
-        outside_check(source.stem, records_of(source, args.chunk_size), model)
-        for source in args.uji_luar
+    samples = [
+        (fkrtl, load_sample(fkrtl, membership=membership, secondary=secondary))
+        for fkrtl, membership, secondary in args.sample
     ]
-    real = behaviour(records, model) | {
+    records = [r for _, rows in samples for r in rows]
+    years = sorted({r["month"][:4] for r in records})
+    if len(years) < 2:
+        parser.error(
+            "Two sample years are needed to choose the context and check stability over time."
+        )
+    by_year = {year: [r for r in records if r["month"][:4] == year] for year in years}
+    first, last = by_year[years[0]], by_year[years[-1]]
+
+    forward = anomaly_model.compare_contexts(first, last)
+    backward = anomaly_model.compare_contexts(last, first)
+    alpha = anomaly_model.best_alpha(forward, backward)
+    model = anomaly_model.fit(records, alpha=alpha)
+    model["training"] = {
+        "patient_months": len(records),
+        "months": sorted({r["month"] for r in records}),
+    }
+    model["trained_on"] = date.today().isoformat()
+
+    outside = [
+        evaluation.outside(fkrtl.stem, load_sample(fkrtl, membership=membership), model)
+        for fkrtl, membership in args.outside
+    ]
+    real = {
         "data": [
             {
-                "berkas": source.name,
-                "tahun": sorted({r["bulan"][:4] for r in rows}),
-                "bulan_pasien": len(rows),
+                "file": fkrtl.name,
+                "years": sorted({r["month"][:4] for r in rows}),
+                "patient_months": len(rows),
             }
-            for source, rows in per_file
+            for fkrtl, rows in samples
         ],
-        "validasi_waktu": validation,
-        "uji_luar": [o for o in outside if o],
-        "rs": hospital_level(records),
-        "pelatihan": facts,
-        "dibuat": model["dilatih"],
+        "contexts": {"forward": forward, "backward": backward},
+        "behaviour": evaluation.behaviour(model, records),
+        "over_time": evaluation.over_time(first, last, alpha=alpha),
+        "outside": [o for o in outside if o],
+        "hospitals": evaluation.hospitals(model, records),
+        "created_on": model["trained_on"],
     }
-    assert_privacy_safe_aggregate(model)
-    assert_privacy_safe_aggregate(real)
-    MODEL.write_text(json.dumps(model, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    REAL.write_text(json.dumps(real, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    REPORT.write_text(report(model, facts, real), encoding="utf-8")
-    print(json.dumps({"model": str(MODEL), "ambang": model["ambang"], "sel": len(model["sel"])}))
+    assert_privacy_safe(real)
+    write_json(MODEL, model, sort_keys=False)
+    write_json(REAL, real, sort_keys=False)
+    REPORT.write_text(report(model, real), encoding="utf-8")
+    print(json.dumps({"model": str(MODEL), "alpha": alpha, "threshold": model["threshold"]}))
     return 0
 
 

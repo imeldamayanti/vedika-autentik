@@ -1,5 +1,65 @@
 [
   {
+    "id_peserta": "P-M1",
+    "id_rs": "RS03",
+    "bulan": "2026-08",
+    "fitur": {
+      "sesi": 6,
+      "maks_minggu": 2,
+      "ahad_libur": 0,
+      "episode": 4
+    },
+    "skor": 0.164,
+    "logit": -1.6259,
+    "tinggi": false,
+    "alasan": [
+      {
+        "fitur": "sesi",
+        "nilai": 6,
+        "kontribusi": 1.892,
+        "persentil_nasional": 88.7,
+        "teks": "6 sesi dalam sebulan, lebih banyak dari 80,5% tagihan bulanan fisioterapi nasional."
+      },
+      {
+        "fitur": "episode",
+        "nilai": 4,
+        "kontribusi": 0.179,
+        "persentil_nasional": 77.1,
+        "teks": "Ada sesi 4 bulan berturut-turut, lebih lama dari 70% tagihan bulanan fisioterapi nasional."
+      }
+    ]
+  },
+  {
+    "id_peserta": "P-M2",
+    "id_rs": "RS05",
+    "bulan": "2026-08",
+    "fitur": {
+      "sesi": 6,
+      "maks_minggu": 2,
+      "ahad_libur": 2,
+      "episode": 1
+    },
+    "skor": 0.998,
+    "logit": 6.0107,
+    "tinggi": true,
+    "alasan": [
+      {
+        "fitur": "ahad_libur",
+        "nilai": 2,
+        "kontribusi": 7.794,
+        "persentil_nasional": 100.0,
+        "teks": "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."
+      },
+      {
+        "fitur": "sesi",
+        "nilai": 6,
+        "kontribusi": 1.892,
+        "persentil_nasional": 88.7,
+        "teks": "6 sesi dalam sebulan, lebih banyak dari 80,5% tagihan bulanan fisioterapi nasional."
+      }
+    ]
+  },
+  {
     "id_peserta": "P-S1",
     "id_rs": "RS01",
     "bulan": "2026-08",

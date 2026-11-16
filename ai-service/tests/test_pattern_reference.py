@@ -5,21 +5,21 @@ from pathlib import Path
 
 import pytest
 
-from vedika_ai.claim_reference import (
-    _FORBIDDEN_AGGREGATE_KEYS,
-    MINIMUM_SAFE_CELL_COUNT,
-    ClaimReferenceError,
-    assert_privacy_safe_aggregate,
-    sha256_file,
-)
-from vedika_ai.pola_reference import (
+from vedika_ai.ml import tools
+from vedika_ai.ml.cohort import patient_months
+from vedika_ai.ml.pattern_reference import (
     NATIONAL,
     aggregate,
     histogram_levels,
-    load_pola,
-    patient_months,
     percentile,
     weighted_percentile,
+)
+from vedika_ai.ml.privacy import (
+    FORBIDDEN_KEYS,
+    MINIMUM_SAFE_CELL_COUNT,
+    ReferenceDataError,
+    assert_privacy_safe,
+    sha256_file,
 )
 
 REFERENCE_DIR = Path(__file__).parents[1] / "data" / "reference" / "pola-2024"
@@ -38,11 +38,11 @@ BENCHMARK_KEYS = {
 
 def visit(participant, day, *, group=(1, 9, 1, 7), kind="RS Swasta Setara Type C", weight=2.0):
     return {
-        "peserta": participant,
-        "tanggal": date.fromisoformat(day),
-        "bobot": weight,
-        "kelompok": group,
-        "tipe": kind,
+        "participant": participant,
+        "date": date.fromisoformat(day),
+        "weight": weight,
+        "peer_group": group,
+        "hospital_type": kind,
     }
 
 
@@ -56,15 +56,17 @@ def test_patient_months_use_shared_features_and_sunday_only():
     visits.append(visit(1, "2024-08-06", group=(2, 3, 1, 2), kind="RS Kelas B"))
     visits.append(visit(1, "2024-08-07", group=(2, 3, 1, 2), kind="RS Kelas B"))
 
-    july, august = sorted(patient_months(visits), key=lambda record: record["bulan"])
+    july, august = sorted(patient_months(visits), key=lambda record: record["month"])
 
-    assert july["fitur"] == {"sesi": 4, "maks_minggu": 4, "ahad_libur": 1, "episode": 1}
-    assert (july["kombinasi"], july["dipicu"]) == ("I2+I4", True)
-    assert august["fitur"] == {"sesi": 3, "maks_minggu": 3, "ahad_libur": 0, "episode": 2}
-    assert (august["kombinasi"], august["dipicu"]) == ("I2", False)
-    assert (august["kelompok"], august["tipe"]) == ((2, 3, 1, 2), "RS Kelas B")
-    assert july["bobot"] == 2.0
-    assert "peserta" not in july
+    assert july["features"] == {"sesi": 4, "maks_minggu": 4, "ahad_libur": 1, "episode": 1}
+    assert (july["combination"], july["triggered"]) == ("I2+I4", True)
+    assert august["features"] == {"sesi": 3, "maks_minggu": 3, "ahad_libur": 0, "episode": 2}
+    assert (august["combination"], august["triggered"]) == ("I2", False)
+    assert (august["peer_group"], august["hospital_type"]) == ((2, 3, 1, 2), "RS Kelas B")
+    assert july["weight"] == 2.0
+    assert july["anomaly_features"]["tanpa_rujukan"] == 0.0
+    assert (july["condition"], july["age_group"]) == (None, None)
+    assert "participant" not in july
 
 
 def test_aggregate_suppresses_small_cells_everywhere():
@@ -126,7 +128,7 @@ def test_coarse_bands_never_straddle_a_rule_threshold():
     for level in histogram_levels():
         for name, bands in level.items():
             covered = [label for members in bands.values() for label in members]
-            assert covered == load_pola().BIN[name], (name, covered)
+            assert covered == tools.pola().BIN[name], (name, covered)
             for members in bands.values():
                 values = [int(label.rstrip("+")) for label in members]
                 assert all(v <= thresholds[name] for v in values) or all(
@@ -158,7 +160,7 @@ def test_benchmark_percentiles_need_enough_groups():
     assert type_c.keys() == BENCHMARK_KEYS
     assert result["counts"]["peer_groups_with_30_patient_months"] == 20
 
-    fewer = aggregate([v for v in visits if v["kelompok"][0] < 19])
+    fewer = aggregate([v for v in visits if v["peer_group"][0] < 19])
     assert "terpicu_p95" not in fewer["pembanding_tipe"]["RS Swasta Setara Type C"]
 
 
@@ -179,7 +181,7 @@ def test_types_dominated_by_one_peer_group_are_omitted():
 
 
 def test_aggregate_rejects_a_minimum_below_the_safe_cell_count():
-    with pytest.raises(ClaimReferenceError, match="minimum_count"):
+    with pytest.raises(ReferenceDataError, match="minimum_count"):
         aggregate([visit(1, "2024-08-05")], minimum_count=5)
 
 
@@ -205,14 +207,14 @@ def all_keys(value):
 
 
 def test_committed_histogram_has_only_binned_safe_cells():
-    pola = load_pola()
+    pola = tools.pola()
     with (REFERENCE_DIR / "histogram.csv").open(encoding="utf-8", newline="") as source:
         rows = list(csv.DictReader(source))
 
     assert rows
     levels = histogram_levels()
     assert list(rows[0]) == ["tingkat", *pola.FITUR, "n", "bobot"]
-    assert not {name.casefold() for name in rows[0]} & _FORBIDDEN_AGGREGATE_KEYS
+    assert not {name.casefold() for name in rows[0]} & FORBIDDEN_KEYS
     assert all(int(row["n"]) >= MINIMUM_SAFE_CELL_COUNT for row in rows)
     for row in rows:
         assert all(row[name] in levels[int(row["tingkat"])][name] for name in pola.FITUR), row
@@ -232,7 +234,7 @@ def test_committed_histogram_has_only_binned_safe_cells():
 def test_committed_json_has_no_identifiers_small_counts_or_extremes(name):
     payload = read_json(name)
 
-    assert_privacy_safe_aggregate(payload)
+    assert_privacy_safe(payload)
     for key in all_keys(payload):
         assert not any(part in key.casefold() for part in ("max", "min_", "tertinggi")), key
 
@@ -290,10 +292,10 @@ MODEL_DIR = Path(__file__).parents[2] / "data-uji-konfirmasi" / "referensi-pola"
 
 
 def test_committed_model_is_a_plain_coefficient_table():
-    pola = load_pola()
+    pola = tools.pola()
     model = json.loads((MODEL_DIR / "model-pola-v1.json").read_text(encoding="utf-8"))
 
-    assert_privacy_safe_aggregate(model)
+    assert_privacy_safe(model)
     assert model["versi"] == "pola-v1"
     assert set(model["fitur"]) <= set(pola.FITUR)
     assert all(list(model["koefisien"][name]) == pola.BIN[name] for name in model["fitur"])
@@ -305,7 +307,7 @@ def test_committed_runtime_reference_is_aggregate_only():
     reference = json.loads((MODEL_DIR / "referensi.json").read_text(encoding="utf-8"))
     source = read_json("pembanding_tipe.json")
 
-    assert_privacy_safe_aggregate(reference)
+    assert_privacy_safe(reference)
     assert reference["marginal"] == read_json("marginal.json")["marginal"]
     assert reference["kombinasi"] == read_json("kombinasi.json")["kombinasi"]
     assert set(reference["pembanding_tipe"]) == {NATIONAL, *reference["peta_tipe"].values()}
@@ -315,11 +317,11 @@ def test_committed_runtime_reference_is_aggregate_only():
 
 
 def test_committed_demo_scores_cover_every_august_patient_month():
-    pola = load_pola()
+    pola = tools.pola()
     model = json.loads((MODEL_DIR / "model-pola-v1.json").read_text(encoding="utf-8"))
     scores = json.loads((MODEL_DIR / "skor_demo.json").read_text(encoding="utf-8"))
 
-    assert len(scores) == 300
+    assert len(scores) == 302
     for row in scores:
         assert row["skor"] == pola.skor(model, row["fitur"])
         assert row["tinggi"] == (row["skor"] >= model["ambang_tinggi"])
