@@ -217,7 +217,7 @@ def test_behaviour_and_hospital_summaries_report_only_safe_counts():
 
 
 MODEL = tools.MODEL_DIR / "model-anomali-v2.json"
-REAL = tools.REFERENCE_DIR / "pola-2024" / "anomali-nyata.json"
+REAL = tools.REFERENCE_DIR / "anomali" / "anomali-nyata.json"
 DEMO = tools.MODEL_DIR / "anomali_demo.json"
 
 

@@ -123,10 +123,10 @@ def test_panggilan_non_skenario_percakapan_singkat_tanpa_rekaman(klien_agen, pem
 
 
 def test_mode_otomatis_bawaan_stub_mengambil_urutan_antrean(klien_agen, pembaca, monkeypatch):
-    pembaca.balasan = [SKENARIO["S6"]["expected_jawaban"]]
+    pembaca.balasan = [SKENARIO["S1"]["expected_jawaban"]]
     agen, _, keluaran, _ = agen_uji(klien_agen, monkeypatch, kecepatan=10)
     agen.jalankan(maks_putaran=1)
-    assert detail(klien_agen, "CALL-P-S6-2026-08")["status"] == "selesai"  # pertama menurut logit skor pola
+    assert detail(klien_agen, "CALL-P-S1-2026-08")["status"] == "selesai"  # pertama menurut model anomali (pola langka)
     assert any("tugas diambil" in k for k in keluaran)
 
 

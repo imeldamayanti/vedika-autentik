@@ -1,131 +1,60 @@
-"""Skor pola Vedika Autentik: satu definisi fitur, bin, skor, dan alasan.
+"""Visit-pattern features of one patient-month, shared by the anomaly model, the backend seed, and the tests.
 
-Dipakai oleh pembangun referensi (ai-service), pelatih model, backend, dan uji. Hanya pustaka standar.
-Skor pola hanya mengurutkan antrean dan menjelaskan alasannya. Skor tidak memicu panggilan,
-tidak memberi label, dan tidak mengubah status RS: itu tetap tugas tools/aturan.py.
+Standard library only. Feature keys (sesi, maks_minggu, ahad_libur, episode) are data keys and match
+tools/aturan.py; the rule indicators computed here equal aturan.hitung_indikator (checked in uji_pola.py).
 """
-import math
 from collections import Counter, defaultdict
 from datetime import timedelta
 
-FITUR = ("sesi", "maks_minggu", "ahad_libur", "episode")
-BIN = {
-    "sesi": [str(n) for n in range(1, 13)] + ["13+"],
-    "maks_minggu": [str(n) for n in range(1, 6)] + ["6+"],
-    "ahad_libur": ["0", "1", "2+"],
-    "episode": [str(n) for n in range(1, 7)] + ["7+"],
-}
-EPISODE_MAKS = 7
+FEATURES = ("sesi", "maks_minggu", "ahad_libur", "episode")
+EPISODE_MAX = 7
 
 
-def bulan_sebelumnya(ym, n):
-    y, m = map(int, ym.split("-"))
-    m -= n
-    while m <= 0:
-        m += 12
-        y -= 1
-    return f"{y:04d}-{m:02d}"
+def previous_month(month, n):
+    year, mon = map(int, month.split("-"))
+    mon -= n
+    while mon <= 0:
+        mon += 12
+        year -= 1
+    return f"{year:04d}-{mon:02d}"
 
 
-def fitur_bulan(tanggal_bulan_ini, bulan_aktif, bulan, libur):
-    """Fitur mentah satu pasien (di satu RS bila diketahui) pada satu bulan.
-    tanggal_bulan_ini: list[date] sesi di bulan itu; bulan_aktif: set 'YYYY-MM' yang punya sesi; libur: set[date]."""
-    minggu = Counter(t - timedelta(days=t.weekday()) for t in tanggal_bulan_ini)
+def month_features(dates, active_months, month, holidays):
+    """Raw features of one patient (at one hospital, when known) in one month.
+
+    dates: session dates in that month; active_months: set of 'YYYY-MM' with sessions; holidays: set of dates.
+    """
+    per_week = Counter(d - timedelta(days=d.weekday()) for d in dates)
     episode = 1
-    while episode < EPISODE_MAKS and bulan_sebelumnya(bulan, episode) in bulan_aktif:
+    while episode < EPISODE_MAX and previous_month(month, episode) in active_months:
         episode += 1
     return {
-        "sesi": len(tanggal_bulan_ini),
-        "maks_minggu": max(minggu.values()),
-        "ahad_libur": sum(t.weekday() == 6 or t in libur for t in tanggal_bulan_ini),
+        "sesi": len(dates),
+        "maks_minggu": max(per_week.values()),
+        "ahad_libur": sum(d.weekday() == 6 or d in holidays for d in dates),
         "episode": episode,
     }
 
 
-def fitur_per_pasien(sesi, bulan, libur):
-    """sesi: iterable (kunci, tanggal), kunci mis. (id_peserta, id_rs). Mengembalikan kunci -> fitur mentah bulan itu,
-    untuk setiap kunci yang punya sesi di bulan itu. Bulan lain hanya dipakai untuk menghitung episode."""
-    tanggal = defaultdict(list)
-    for kunci, t in sesi:
-        tanggal[kunci].append(t)
-    hasil = {}
-    for kunci, tgl in sorted(tanggal.items()):
-        bulan_ini = [t for t in tgl if t.strftime("%Y-%m") == bulan]
-        if bulan_ini:
-            hasil[kunci] = fitur_bulan(bulan_ini, {t.strftime("%Y-%m") for t in tgl}, bulan, libur)
-    return hasil
+def features_per_patient(sessions, month, holidays):
+    """sessions: iterable of (key, date), e.g. key = (participant, hospital). Returns key -> features of that
+    month for every key with sessions in it; other months only count towards `episode`."""
+    dates = defaultdict(list)
+    for key, day in sessions:
+        dates[key].append(day)
+    result = {}
+    for key, days in sorted(dates.items()):
+        this_month = [d for d in days if d.strftime("%Y-%m") == month]
+        if this_month:
+            result[key] = month_features(this_month, {d.strftime("%Y-%m") for d in days}, month, holidays)
+    return result
 
 
-def bin_nilai(fitur, nilai):
-    daftar = BIN[fitur]
-    return str(nilai) if str(nilai) in daftar else daftar[-1 if nilai > 0 else 0]
-
-
-def bin_fitur(fitur):
-    return {f: bin_nilai(f, fitur[f]) for f in FITUR}
-
-
-def indikator(fitur):
-    """(I1, I2, I3, I4) dari fitur mentah; sama dengan aturan.hitung_indikator (diuji di uji_pola.py)."""
-    return (fitur["sesi"] > 8, fitur["maks_minggu"] >= 3, fitur["episode"] >= 6, fitur["ahad_libur"] > 0)
-
-
-def kombinasi(i1, i2, i3, i4):
-    aktif = [f"I{n}" for n, v in enumerate((i1, i2, i3, i4), 1) if v]
-    return "+".join(aktif) or "-"
-
-
-def _z(model, fitur):
-    b = bin_fitur(fitur)
-    return model["intersep"] + sum(model["koefisien"][f].get(b[f], 0.0) for f in model["fitur"])
-
-
-def logit(model, fitur):
-    """Nilai sebelum fungsi logistik. Dipakai mengurutkan antrean: skor di atas 0,999 tampil sama (1,00),
-    logitnya masih berbeda. Urutan logit selalu sama dengan urutan skor yang belum dibulatkan."""
-    return round(_z(model, fitur), 4)
-
-
-def skor(model, fitur):
-    return round(1 / (1 + math.exp(-_z(model, fitur))), 3)
-
-
-def persen(x):
-    """Persen gaya Indonesia: satu desimal dengan koma, tanpa ',0'; tidak pernah dibulatkan menjadi 100 atau 0."""
-    x = min(x, 99.9) if x < 100 else x
-    if 0 < x < 0.1:
-        return "kurang dari 0,1"
-    return f"{x:.1f}".replace(".", ",").removesuffix(",0")
-
-
-def _teks(f, nilai, di_bawah, punya_libur):
-    """Satu kalimat untuk verifikator. 'Tagihan bulanan' = tagihan satu pasien dalam satu bulan (bulan-pasien)."""
-    if f == "sesi":
-        return f"{nilai} sesi dalam sebulan, lebih banyak dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
-    if f == "maks_minggu":
-        return f"{nilai} sesi dalam satu minggu, lebih padat dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
-    if f == "ahad_libur":
-        return f"{nilai} sesi pada hari Minggu atau libur. Hanya {persen(punya_libur)}% tagihan bulanan nasional memuat sesi seperti ini."
-    lama = f"{nilai} bulan atau lebih" if nilai >= EPISODE_MAKS else f"{nilai} bulan"
-    return f"Ada sesi {lama} berturut-turut, lebih lama dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
-
-
-def alasan(model, referensi, fitur, n=2):
-    """n fitur dengan sumbangan positif terbesar terhadap skor, dibanding rata-rata nasional."""
-    b = bin_fitur(fitur)
-    hasil = []
-    for f in model["fitur"]:
-        koef = model["koefisien"][f]
-        p = referensi["marginal"][f]
-        kontribusi = koef.get(b[f], 0.0) - sum(p.get(x, 0.0) * koef.get(x, 0.0) for x in BIN[f])
-        if kontribusi <= 0:
-            continue
-        posisi = BIN[f].index(b[f])
-        sampai = sum(p.get(x, 0.0) for x in BIN[f][:posisi + 1])
-        di_bawah = sum(p.get(x, 0.0) for x in BIN[f][:posisi])
-        hasil.append({
-            "fitur": f, "nilai": fitur[f], "kontribusi": round(kontribusi, 3),
-            "persentil_nasional": round(100 * sampai, 1),
-            "teks": _teks(f, fitur[f], 100 * di_bawah, 100 * (1 - p.get("0", 0.0))),
-        })
-    return sorted(hasil, key=lambda a: (-a["kontribusi"], FITUR.index(a["fitur"])))[:n]
+def indicators(features):
+    """(I1, I2, I3, I4) from raw features; equal to aturan.hitung_indikator."""
+    return (
+        features["sesi"] > 8,
+        features["maks_minggu"] >= 3,
+        features["episode"] >= 6,
+        features["ahad_libur"] > 0,
+    )

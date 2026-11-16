@@ -8,7 +8,7 @@ KOLOM_BARIS = (
     " p.status, p.percobaan, p.prioritas, p.label, p.coba_lagi_setelah, p.diambil_pada, p.waktu_mulai,"
     " p.waktu_selesai, p.jawaban, s.nama as pasien, s.umur, s.jenis_kelamin, r.nama_rs,"
     " i.i1_lebih_8_sebulan as i1, i.i2_3x_seminggu as i2, i.i3_episode_6_bulan as i3, i.i4_hari_libur as i4,"
-    " i.skor_pola, i.pola_tinggi, i.logit_pola, i.dipicu, i.anomali_ditandai,"
+    " i.dipicu, i.anomali_ditandai, i.anomali_langka, i.skor_anomali,"
     " (select k.tindakan from keputusan_panggilan k where k.panggilan_id = p.id order by k.waktu desc, k.id desc limit 1)"
     " as keputusan_tindakan"
 )
@@ -50,7 +50,7 @@ def satu_baris(conn, id_: str) -> dict | None:
     return conn.execute(
         f"select {KOLOM_BARIS}, p.transkrip, p.tangkapan_sementara, p.alasan, p.rekaman_path, p.hapus_pada,"
         f" p.sumber, p.durasi_detik, p.waktu_wa, p.galat_pembaca, p.chat_cadangan_terkirim, p.no_tujuan,"
-        f" p.jeda_wa_menit, i.alasan_pola, i.skor_anomali, i.anomali_langka, i.alasan_anomali{DARI_BARIS}"
+        f" p.jeda_wa_menit, i.alasan_anomali{DARI_BARIS}"
         " where p.id = %s",
         (id_,),
     ).fetchone()
@@ -83,17 +83,16 @@ def tanggal_libur(conn, id_peserta: str, id_rs: str, bulan: str) -> list:
 # ---- ringkasan RS ----
 
 def semua_rs(conn) -> list[dict]:
-    return conn.execute("select id_rs, nama_rs, tipe from rumah_sakit order by id_rs").fetchall()
+    return conn.execute("select id_rs, nama_rs from rumah_sakit order by id_rs").fetchall()
 
 
 def hitungan_indikator(conn, bulan: str) -> list[dict]:
     """Per RS pada satu bulan layanan: pasien aktif, terpicu aturan, dipilih (aturan ATAU model anomali),
-    hanya dipilih model, dan berpola tinggi tanpa terpicu."""
+    dan hanya dipilih model."""
     return conn.execute(
         "select id_rs, count(*) as aktif, count(*) filter (where dipicu) as terpicu,"
         " count(*) filter (where dipicu or anomali_ditandai) as dipilih,"
-        " count(*) filter (where anomali_ditandai and not dipicu) as hanya_model,"
-        " count(*) filter (where pola_tinggi and not dipicu) as pola_tinggi_tidak_terpicu"
+        " count(*) filter (where anomali_ditandai and not dipicu) as hanya_model"
         " from indikator_bulanan where bulan = %s group by id_rs",
         (bulan,),
     ).fetchall()
@@ -117,7 +116,7 @@ def panggilan_selesai(conn, bulan: str, id_rs: str | None = None) -> list[dict]:
         param.append(id_rs)
     return conn.execute(
         "select p.id, p.id_rs, p.label, p.sesi_ditagih, p.jawaban, s.nama as pasien, p.waktu_selesai, p.waktu_mulai,"
-        " i.skor_pola, i.pola_tinggi, i.dipicu, i.anomali_ditandai"
+        " i.dipicu, i.anomali_ditandai"
         " from panggilan p join peserta s on s.id_peserta = p.id_peserta"
         " left join indikator_bulanan i on i.id_peserta = p.id_peserta and i.id_rs = p.id_rs and i.bulan = p.bulan_layanan"
         f" where p.status = any(%s) and p.label is not null and p.bulan_layanan = %s{saring}"
@@ -213,8 +212,8 @@ def panggilan_macet(conn, batas) -> list[str]:
 
 
 def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None:
-    """Ambil dan kunci satu panggilan antre: prioritas (Dahulukan) dulu, lalu logit skor pola tertinggi, lalu id biner.
-    Kunci yang lewat batas boleh diambil lagi."""
+    """Ambil dan kunci satu panggilan antre: prioritas (Dahulukan) dulu, lalu pola paling jarang menurut model anomali
+    (langka, lalu skor tertinggi), lalu id biner. Kunci yang lewat batas boleh diambil lagi."""
     r = conn.execute(
         "update panggilan set diambil_pada = %s where id = ("
         " select p.id from panggilan p left join indikator_bulanan i"
@@ -223,7 +222,8 @@ def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None
         " and (p.diambil_pada is null or p.diambil_pada <= %s)"
         " and (p.coba_lagi_setelah is null or p.coba_lagi_setelah <= %s)"
         " and (p.prioritas or %s)"
-        ' order by p.prioritas desc, i.logit_pola desc nulls last, p.id collate "C" limit 1'
+        " order by p.prioritas desc, i.anomali_langka desc nulls last, i.skor_anomali desc nulls last,"
+        ' p.id collate "C" limit 1'
         " for update of p skip locked) returning id",
         (sekarang, batas_kunci, sekarang, boleh_otomatis),
     ).fetchone()

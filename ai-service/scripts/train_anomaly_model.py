@@ -9,7 +9,7 @@ Needs the raw samples, so it runs only on the laptop that holds them:
         --outside <disease-specific fkrtl.dta> <its kepesertaan.dta>
 
 Writes data-uji-konfirmasi/referensi-pola/model-anomali-v2.json (the scorer is tools/anomali.py),
-ai-service/data/reference/pola-2024/anomali-nyata.json, and data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md.
+ai-service/data/reference/anomali/anomali-nyata.json, and data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from vedika_ai.ml.privacy import assert_privacy_safe, write_json
 from vedika_ai.ml.report import number, table, thousands
 
 MODEL = tools.MODEL_DIR / "model-anomali-v2.json"
-REAL = tools.REFERENCE_DIR / "pola-2024" / "anomali-nyata.json"
+REAL = tools.REFERENCE_DIR / "anomali" / "anomali-nyata.json"
 REPORT = tools.MODEL_DIR / "EVALUASI-ANOMALI.md"
 
 GROUP_NAMES = {

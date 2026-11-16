@@ -1,14 +1,14 @@
-"""anomali-v2 results for the demo data, copied into data-v3.js (like skor_demo.json for the pola score).
+"""anomali-v2 results for the demo data, copied into data-v3.js.
 
-Referral per visit comes from klaim_sesi.csv (`rujukan_fktp`, `perujuk_luar_wilayah`), age from peserta.csv,
-and the August features from skor_demo.json. Field names in the output are the ones data-v3.js and
-app-v3.js already read.
+Visit features and referral per visit come from klaim_sesi.csv (`rujukan_fktp`, `perujuk_luar_wilayah`), age from
+peserta.csv. Field names in the output are the ones data-v3.js and app-v3.js already read.
 
     python3 data-uji-konfirmasi/tools/anomali_demo.py  ->  referensi-pola/anomali_demo.json
 """
 import csv
 import json
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 
 import anomali
@@ -28,15 +28,20 @@ def read_csv(name):
         return list(csv.DictReader(f))
 
 
-def august_visits():
-    """(participant, hospital) -> August visits as {referred, other_district}."""
+def august_claims():
+    """(participant, hospital) -> August pattern features, and -> August visits as {referred, other_district}."""
+    claims = read_csv("klaim_sesi.csv")
+    holidays = {date.fromisoformat(r["tanggal"]) for r in read_csv("libur_nasional_2026.csv")}
+    features = pola.features_per_patient(
+        [((r["id_peserta"], r["id_rs"]), date.fromisoformat(r["tanggal"])) for r in claims], MONTH, holidays
+    )
     visits = defaultdict(list)
-    for row in read_csv("klaim_sesi.csv"):
+    for row in claims:
         if row["tanggal"].startswith(MONTH):
             visits[(row["id_peserta"], row["id_rs"])].append(
                 {"referred": row["rujukan_fktp"] == "ya", "other_district": row["perujuk_luar_wilayah"] == "ya"}
             )
-    return visits
+    return features, visits
 
 
 def selection(model, pattern_features, visits, age):
@@ -44,7 +49,7 @@ def selection(model, pattern_features, visits, age):
     group = anomali.age_group(age)
     result = anomali.score(model, features, group)
     why = anomali.reasons(model, features, group)
-    triggered = sum(pola.indikator(pattern_features)) >= 2
+    triggered = sum(pola.indicators(pattern_features)) >= 2
     chosen_by = (
         "keduanya" if triggered and result["flagged"]
         else "aturan" if triggered
@@ -65,13 +70,12 @@ def selection(model, pattern_features, visits, age):
 def main():
     model = read_json("model-anomali-v2.json")
     ages = {row["id_peserta"]: int(row["umur"]) for row in read_csv("peserta.csv")}
-    visits = august_visits()
+    features, visits = august_claims()
     patients, hospital_rows = {}, defaultdict(list)
-    for row in read_json("skor_demo.json"):
-        key = (row["id_peserta"], row["id_rs"])
-        age = ages[row["id_peserta"]]
-        patients[row["id_peserta"]] = selection(model, row["fitur"], visits[key], age)
-        hospital_rows[row["id_rs"]].append((anomali.age_group(age), patients[row["id_peserta"]]["dipilih"] is not None))
+    for (participant, hospital), pattern in features.items():
+        age = ages[participant]
+        patients[participant] = selection(model, pattern, visits[(participant, hospital)], age)
+        hospital_rows[hospital].append((anomali.age_group(age), patients[participant]["dipilih"] is not None))
 
     output = {
         "versi": model["version"],
