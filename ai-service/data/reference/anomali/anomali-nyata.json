@@ -1,0 +1,350 @@
+{
+  "data": [
+    {
+      "file": "202303_fkrtl.dta",
+      "years": [
+        "2023"
+      ],
+      "patient_months": 18193
+    },
+    {
+      "file": "202403_fkrtl.dta",
+      "years": [
+        "2024"
+      ],
+      "patient_months": 22457
+    }
+  ],
+  "contexts": {
+    "forward": [
+      {
+        "context": null,
+        "alpha": 10,
+        "groups": 0,
+        "log_likelihood": -2.5997
+      },
+      {
+        "context": "age_group",
+        "alpha": 10,
+        "groups": 4,
+        "log_likelihood": -2.5856
+      },
+      {
+        "context": "age_group",
+        "alpha": 50,
+        "groups": 4,
+        "log_likelihood": -2.5855
+      },
+      {
+        "context": "age_group",
+        "alpha": 200,
+        "groups": 4,
+        "log_likelihood": -2.5852
+      },
+      {
+        "context": "age_group",
+        "alpha": 1000,
+        "groups": 4,
+        "log_likelihood": -2.5851
+      },
+      {
+        "context": "condition",
+        "alpha": 10,
+        "groups": 12,
+        "log_likelihood": -2.6113
+      },
+      {
+        "context": "condition",
+        "alpha": 50,
+        "groups": 12,
+        "log_likelihood": -2.6091
+      },
+      {
+        "context": "condition",
+        "alpha": 200,
+        "groups": 12,
+        "log_likelihood": -2.6042
+      },
+      {
+        "context": "condition",
+        "alpha": 1000,
+        "groups": 12,
+        "log_likelihood": -2.5976
+      }
+    ],
+    "backward": [
+      {
+        "context": null,
+        "alpha": 10,
+        "groups": 0,
+        "log_likelihood": -2.8026
+      },
+      {
+        "context": "age_group",
+        "alpha": 10,
+        "groups": 4,
+        "log_likelihood": -2.7902
+      },
+      {
+        "context": "age_group",
+        "alpha": 50,
+        "groups": 4,
+        "log_likelihood": -2.79
+      },
+      {
+        "context": "age_group",
+        "alpha": 200,
+        "groups": 4,
+        "log_likelihood": -2.7896
+      },
+      {
+        "context": "age_group",
+        "alpha": 1000,
+        "groups": 4,
+        "log_likelihood": -2.789
+      },
+      {
+        "context": "condition",
+        "alpha": 10,
+        "groups": 13,
+        "log_likelihood": -2.8136
+      },
+      {
+        "context": "condition",
+        "alpha": 50,
+        "groups": 13,
+        "log_likelihood": -2.812
+      },
+      {
+        "context": "condition",
+        "alpha": 200,
+        "groups": 13,
+        "log_likelihood": -2.8082
+      },
+      {
+        "context": "condition",
+        "alpha": 1000,
+        "groups": 13,
+        "log_likelihood": -2.8014
+      }
+    ]
+  },
+  "behaviour": {
+    "patient_months": 40650,
+    "months": 12,
+    "groups": [
+      {
+        "group": "flagged_by_model",
+        "patient_months": 772,
+        "visits": 5152,
+        "percent": 1.53,
+        "per_month_national": 4331
+      },
+      {
+        "group": "triggered_by_rules",
+        "patient_months": 890,
+        "visits": 8178,
+        "percent": 2.05,
+        "per_month_national": 5809
+      },
+      {
+        "group": "both",
+        "patient_months": 272,
+        "visits": 2388,
+        "percent": 0.47,
+        "per_month_national": 1345
+      },
+      {
+        "group": "model_only",
+        "patient_months": 500,
+        "visits": 2764,
+        "percent": 1.05,
+        "per_month_national": 2985
+      },
+      {
+        "group": "rules_only",
+        "patient_months": 618,
+        "visits": 5790,
+        "percent": 1.57,
+        "per_month_national": 4463
+      },
+      {
+        "group": "called",
+        "patient_months": 1390,
+        "visits": 10942,
+        "percent": 3.1,
+        "per_month_national": 8794
+      }
+    ],
+    "first_reason_model_only": [
+      {
+        "feature": "maks_minggu",
+        "patient_months": 118
+      },
+      {
+        "feature": "tanpa_rujukan",
+        "patient_months": 112
+      },
+      {
+        "feature": "lintas_wilayah",
+        "patient_months": 104
+      },
+      {
+        "feature": "ahad_libur",
+        "patient_months": 102
+      },
+      {
+        "feature": "sesi",
+        "patient_months": 64
+      }
+    ],
+    "top_patterns_model_only": [
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 24
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "4 sesi atau lebih dalam satu minggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "semua kunjungan dengan rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 20
+      },
+      {
+        "pattern": [
+          "1–4 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "sebagian dirujuk dari kab/kota lain"
+        ],
+        "patient_months": 19
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "2 sesi atau lebih hari Minggu",
+          "1–2 bulan berturut-turut",
+          "semua kunjungan dengan rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 18
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "3–5 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "sebagian dirujuk dari kab/kota lain"
+        ],
+        "patient_months": 16
+      }
+    ],
+    "monthly_percent": {
+      "low": 1.35,
+      "high": 2.72
+    },
+    "by_age_group": [
+      {
+        "age_group": "18-39",
+        "patient_months": 4398,
+        "percent_flagged": 1.88
+      },
+      {
+        "age_group": "40-59",
+        "patient_months": 17192,
+        "percent_flagged": 1.59
+      },
+      {
+        "age_group": "60+",
+        "patient_months": 14262,
+        "percent_flagged": 1.26
+      },
+      {
+        "age_group": "<18",
+        "patient_months": 4798,
+        "percent_flagged": 1.88
+      }
+    ]
+  },
+  "over_time": {
+    "train_years": [
+      "2023"
+    ],
+    "test_years": [
+      "2024"
+    ],
+    "percent_flagged_by_past_model": 1.34,
+    "percent_flagged_by_own_model": 1.51,
+    "jaccard": 0.669,
+    "percent_model_only_by_past_model": 0.76,
+    "percent_patterns_unknown_to_past_model": 1.34
+  },
+  "outside": [
+    {
+      "sample": "KM20152023_fkrtl",
+      "patient_months": 27062,
+      "years": [
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023"
+      ],
+      "percent_flagged": 3.7,
+      "percent_triggered": 3.34,
+      "percent_model_only": 2.2
+    },
+    {
+      "sample": "COV20152024_fkrtl",
+      "patient_months": 8910,
+      "years": [
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "percent_flagged": 5.73,
+      "percent_triggered": 2.52,
+      "percent_model_only": 3.89
+    }
+  ],
+  "hospitals": {
+    "peer_groups": 423,
+    "minimum_patient_months": 30,
+    "overdispersion": 2.5421,
+    "above_95": 44,
+    "above_99_8": 27,
+    "expected_by_chance": {
+      "above_95": 10.6,
+      "above_99_8": 0.4
+    },
+    "percent_selected_in_above_99_8": 43.3
+  },
+  "created_on": "2026-11-17"
+}

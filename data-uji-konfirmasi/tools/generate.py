@@ -74,11 +74,14 @@ peserta, sesi, kebenaran = [], [], []
 no_klaim = [0]
 
 
-def tambah_sesi(pid, rs, tgl_list, dx):
+def tambah_sesi(pid, rs, tgl_list, dx, rujukan=None):
+    """rujukan: tanggal -> (ada rujukan FKTP, perujuk dari kab/kota lain). Bawaan: dirujuk FKTP kab/kota yang sama."""
     for t in tgl_list:
         no_klaim[0] += 1
+        ada, luar = (rujukan or {}).get(t, (True, False))
         sesi.append({"id_klaim": f"SEP-UJI-{no_klaim[0]:06d}", "id_peserta": pid, "id_rs": rs, "tanggal": t,
-                     "kode_cbg": dx[2], "kode_icd10": dx[0], "diagnosis": dx[1], "tarif": dx[3]})
+                     "kode_cbg": dx[2], "kode_icd10": dx[0], "diagnosis": dx[1], "tarif": dx[3],
+                     "rujukan_fktp": "ya" if ada else "tidak", "perujuk_luar_wilayah": "ya" if luar else "tidak"})
 
 
 def tambah_peserta(pid, nama, umur, jk, keluarga=None, hubungan=None, catatan=""):
@@ -159,6 +162,31 @@ for sid, nama, umur, jk, rs, kel, hub, dx, tagih, benar, sebelum in SK:
     tambah_sesi(pid, rs, tagih, dx)
     kebenaran.append({"id_peserta": pid, "id_rs": rs, "bulan": BULAN_UJI, "sesi_ditagih": len(tagih),
                       "sesi_sebenarnya": len(benar) if benar else len(tagih), "sumber": f"skenario {sid}"})
+
+# ---------- pasien yang hanya dipilih model anomali (M1, M2) ----------
+# Pola keduanya termasuk pola "hanya model" yang paling sering di data sampel BPJS 2023-2024
+# (referensi-pola/EVALUASI-ANOMALI.md). Tanggal ditulis tetap, tanpa rng, supaya data lain tidak berubah.
+# M1: 6 sesi, 4 bulan berturut-turut, 3 kunjungan tanpa rujukan FKTP dan 3 dirujuk dari kab/kota lain. Tidak ada indikator.
+# M2: 6 sesi, 2 di hari Minggu, dirujuk FKTP setempat. Hanya I4.
+HM = [  # id, nama, umur, jk, rs, dx, {bulan: tanggal}, rujukan Agustus {tanggal: (ada rujukan, luar wilayah)}, sesi sebenarnya Agustus
+    ("M1", "Sari Wulandari", 49, "P", "RS03", DX[0],
+     {"2026-05": ["2026-05-05", "2026-05-12", "2026-05-19", "2026-05-26"],
+      "2026-06": ["2026-06-02", "2026-06-09", "2026-06-16", "2026-06-23"],
+      "2026-07": ["2026-07-01", "2026-07-08", "2026-07-15", "2026-07-22", "2026-07-29"],
+      "2026-08": ["2026-08-03", "2026-08-06", "2026-08-11", "2026-08-14", "2026-08-19", "2026-08-25"]},
+     {"2026-08-03": (False, False), "2026-08-11": (False, False), "2026-08-19": (False, False),
+      "2026-08-06": (True, True), "2026-08-14": (True, True), "2026-08-25": (True, True)}, 3),
+    ("M2", "Agus Setiadi", 41, "L", "RS05", DX[3],
+     {"2026-08": ["2026-08-04", "2026-08-09", "2026-08-13", "2026-08-20", "2026-08-23", "2026-08-27"]},
+     {}, 6),
+]
+for mid, nama, umur, jk, rs, dx, per_bulan, rujukan, benar in HM:
+    pid = f"P-{mid}"
+    tambah_peserta(pid, nama, umur, jk, catatan=f"pasien hanya model {mid}")
+    for ym, tgl in per_bulan.items():
+        tambah_sesi(pid, rs, [d(x) for x in tgl], dx, {d(k): v for k, v in rujukan.items()})
+    kebenaran.append({"id_peserta": pid, "id_rs": rs, "bulan": BULAN_UJI, "sesi_ditagih": len(per_bulan[BULAN_UJI]),
+                      "sesi_sebenarnya": benar, "sumber": f"hanya model {mid}"})
 
 # ---------- indikator referensi ----------
 ind = hitung_indikator(sesi, LIBUR_SET, BULAN_UJI)

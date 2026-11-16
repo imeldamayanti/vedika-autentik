@@ -1,10 +1,8 @@
 """Uji D-03: endpoint tulis untuk FE (pengaturan, mulai, keputusan, rekaman, reset demo)."""
 import json
-from datetime import timedelta
 
 import pytest
 
-from app import config
 from tests.util_v3 import jam_palsu, ubah, wib
 
 S1 = "CALL-P-S1-2026-08"
@@ -86,7 +84,7 @@ def test_pengaturan_tidak_bisa_menimpa_detak_stasiun(klien_v3, conn_v3):
 # ---- POST /panggilan/{id}/mulai ----
 
 def test_dahulukan_menandai_prioritas(klien_v3, conn_v3):
-    r = klien_v3.post(f"/api/v1/panggilan/CALL-P-S3-2026-08/mulai")
+    r = klien_v3.post("/api/v1/panggilan/CALL-P-S3-2026-08/mulai")
     assert r.status_code == 200
     assert r.json()["id"] == "CALL-P-S3-2026-08" and r.json()["prioritas"] is True and r.json()["status"] == "antre"
     assert conn_v3.execute("select prioritas from panggilan where id = 'CALL-P-S3-2026-08'").fetchone()["prioritas"] is True
@@ -252,8 +250,8 @@ def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
 
     h = klien_v3.get("/api/v1/antrean").json()
     assert h["angka"] == {
-        "pasien_aktif": 300, "terpicu": 30, "sudah_ditelepon": 4, "tidak_sesuai": 2, "rs_perlu_klarifikasi": 0,
-        "antre": 26, "menunggu_keputusan": 2,
+        "pasien_aktif": 302, "terpicu": 30, "dipilih": 32, "hanya_model": 2, "sudah_ditelepon": 4, "tidak_sesuai": 2,
+        "rs_perlu_klarifikasi": 0, "antre": 28, "menunggu_keputusan": 2,
     }
     assert h["pengaturan"]["mode_otomatis"] is True and h["pengaturan"]["jeda"] is False  # otomatis bawaan menyala
     assert all(not b["prioritas"] and b["percobaan"] == 0 for b in h["baris"] if b["status"] == "antre")
@@ -269,7 +267,7 @@ def test_reset_demo_tidak_menyentuh_data_master(klien_v3, conn_v3):
     sebelum = [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")]
     klien_v3.post("/api/v1/demo/reset")
     assert [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")] == sebelum
-    assert sebelum[:3] == [5, 408, 4913] and sebelum[4] == 300
+    assert sebelum[:3] == [5, 410, 4938] and sebelum[4] == 302
 
 
 def test_reset_demo_mematikan_jeda(klien_v3):

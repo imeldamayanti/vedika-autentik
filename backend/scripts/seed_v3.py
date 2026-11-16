@@ -1,6 +1,7 @@
-"""Mengisi database v3 dari data-uji-konfirmasi: 5 RS, 408 peserta, 4.913 klaim sesi, libur,
-indikator Agustus 2026 (dihitung dengan tools/aturan.py), 4 panggilan riwayat (Selesai), dan
-panggilan berstatus Antre untuk setiap pasien terpicu yang belum punya riwayat.
+"""Mengisi database v3 dari data-uji-konfirmasi: 5 RS, 410 peserta, 4.938 klaim sesi, libur,
+indikator Agustus 2026 (aturan: tools/aturan.py, model anomali: tools/anomali.py),
+4 panggilan riwayat (Selesai), dan panggilan berstatus Antre untuk setiap pasien yang dipilih aturan ATAU
+model anomali dan belum punya riwayat.
 
 kunci_kebenaran_2026-08.csv sengaja tidak dibaca: itu milik penguji, bukan sistem.
 
@@ -16,15 +17,15 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import psycopg
-from psycopg.rows import tuple_row
 from psycopg.types.json import Jsonb
 
-from app import pola_v3
+from app import anomali_v3
 from app.config import DATA_UJI as DATA  # noqa: E402
 
 AKAR = Path(__file__).resolve().parents[2]
 BULAN = "2026-08"
 RETENSI_SESUAI = timedelta(days=30)
+PESERTA, PASIEN_AKTIF = 410, 302
 WIB = timezone(timedelta(hours=7))
 # Empat riwayat latar demo: (waktu_mulai, durasi detik). Sama dengan data demo FE (data-v3.js).
 JADWAL_RIWAYAT = {
@@ -70,36 +71,58 @@ def baris_peserta(r):
     )
 
 
+SQL_KLAIM = (
+    "insert into klaim_sesi (id_klaim, id_peserta, id_rs, tanggal, kode_cbg, kode_icd10, diagnosis, tarif,"
+    " rujukan_fktp, perujuk_luar_wilayah) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing"
+)
+SQL_INDIKATOR = (
+    "insert into indikator_bulanan (id_peserta, id_rs, bulan, sesi_ditagih, maks_sesi_seminggu, i1_lebih_8_sebulan,"
+    " i2_3x_seminggu, i3_episode_6_bulan, i4_hari_libur, tanggal_libur, jumlah_indikator, dipicu,"
+    " skor_anomali, anomali_ditandai, anomali_langka, alasan_anomali)"
+    " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    # baris lama (database yang di-seed sebelum model ada) hanya menerima hasil model; kolom aturan tidak disentuh
+    " on conflict (id_peserta, id_rs, bulan) do update set"
+    " skor_anomali = excluded.skor_anomali, anomali_ditandai = excluded.anomali_ditandai,"
+    " anomali_langka = excluded.anomali_langka, alasan_anomali = excluded.alasan_anomali"
+)
+
+
 def baris_klaim(r):
     return (
         r["id_klaim"], r["id_peserta"], r["id_rs"], r["tanggal"], r["kode_cbg"], r["kode_icd10"], r["diagnosis"],
-        int(r["tarif"]),
+        int(r["tarif"]), r["rujukan_fktp"] == "ya", r["perujuk_luar_wilayah"] == "ya",
     )
 
 
-def baris_indikator(h, pola):
-    """pola: keluaran pola_v3.nilai untuk bulan-pasien ini (skor, logit, tinggi, alasan)."""
+def baris_indikator(h, anomali):
+    """anomali: keluaran anomali_v3.score untuk bulan-pasien ini."""
     return (
         h["id_peserta"], h["id_rs"], h["bulan"], h["sesi_ditagih"], h["maks_sesi_seminggu"],
         h["I1_lebih_8_sebulan"], h["I2_3x_seminggu"], h["I3_episode_6_bulan"], h["I4_hari_libur"],
         [date.fromisoformat(t) for t in h["tanggal_libur"]], h["jumlah_indikator"], h["dipicu"],
-        pola["skor"], Jsonb(pola["alasan"]), pola["tinggi"], pola["logit"],
+        anomali["skor"], anomali["ditandai"], anomali["langka"], Jsonb(anomali["alasan"]),
     )
 
 
 def fitur_pola(sesi, libur, bulan):
-    """(id_peserta, id_rs) -> fitur mentah tools/pola.py untuk setiap pasien aktif di bulan itu (semua, bukan hanya terpicu)."""
-    return pola_v3.pola().fitur_per_pasien([((s["id_peserta"], s["id_rs"]), s["tanggal"]) for s in sesi], bulan, libur)
-
-
-def versi_pola(conn):
-    """Versi model di pengaturan; ditulis dengan nilai bawaan bila belum ada."""
-    conn.execute(
-        "insert into pengaturan (kunci, nilai) values ('versi_pola', %s) on conflict do nothing",
-        (Jsonb(pola_v3.VERSI_BAWAAN),),
+    """(id_peserta, id_rs) -> fitur kunjungan tools/pola.py untuk setiap pasien aktif di bulan itu (semua, bukan hanya terpicu)."""
+    return anomali_v3.pola().features_per_patient(
+        [((s["id_peserta"], s["id_rs"]), s["tanggal"]) for s in sesi], bulan, libur
     )
-    cur = conn.cursor(row_factory=tuple_row)  # koneksi pemanggil bisa memakai baris dict atau tuple
-    return cur.execute("select nilai from pengaturan where kunci = 'versi_pola'").fetchone()[0]
+
+
+def nilai_anomali(klaim, peserta, fitur, bulan):
+    """(id_peserta, id_rs) -> keluaran anomali_v3.score untuk setiap pasien aktif di bulan itu."""
+    kunjungan = {}
+    for k in klaim:
+        if k["tanggal"].startswith(bulan):
+            kunjungan.setdefault((k["id_peserta"], k["id_rs"]), []).append(
+                {"referred": k["rujukan_fktp"] == "ya", "other_district": k["perujuk_luar_wilayah"] == "ya"}
+            )
+    return {
+        kunci: anomali_v3.score(f, kunjungan[kunci], int(peserta[kunci[0]]["umur"]))
+        for kunci, f in fitur.items()
+    }
 
 
 def hapus_pada(label, waktu):
@@ -142,13 +165,13 @@ def baris_antre(h, pes):
     )
 
 
-def susun_antre(indikator, peserta, riwayat):
-    """Satu baris Antre per pasien terpicu yang belum punya panggilan riwayat (pasien, RS, bulan)."""
+def susun_antre(indikator, peserta, riwayat, anomali):
+    """Satu baris Antre per pasien yang dipilih aturan ATAU model anomali dan belum punya panggilan riwayat."""
     sudah = {(p["id_peserta"], p["id_rs"], p["bulan_layanan"]) for p in riwayat}
     return [
         baris_antre(h, peserta[h["id_peserta"]])
-        for _, h in sorted(indikator.items())
-        if h["dipicu"] and (h["id_peserta"], h["id_rs"], h["bulan"]) not in sudah
+        for kunci, h in sorted(indikator.items())
+        if (h["dipicu"] or anomali[kunci]["ditandai"]) and (h["id_peserta"], h["id_rs"], h["bulan"]) not in sudah
     ]
 
 
@@ -166,11 +189,13 @@ def muat_data():
     tanggal_libur = {date.fromisoformat(r["tanggal"]) for r in libur}
     indikator = aturan.hitung_indikator(sesi, tanggal_libur, BULAN)
     peta_peserta = {r["id_peserta"]: r for r in peserta}
+    fitur = fitur_pola(sesi, tanggal_libur, BULAN)
+    anomali = nilai_anomali(klaim, peta_peserta, fitur, BULAN)
     return {
         "rs": baca_csv("rumah_sakit.csv"), "peserta": peserta, "klaim": klaim, "libur": libur,
         "riwayat": riwayat, "indikator": indikator, "peta_peserta": peta_peserta,
-        "fitur_pola": fitur_pola(sesi, tanggal_libur, BULAN),
-        "antre": susun_antre(indikator, peta_peserta, riwayat),
+        "fitur_pola": fitur, "anomali": anomali,
+        "antre": susun_antre(indikator, peta_peserta, riwayat, anomali),
     }
 
 
@@ -187,24 +212,12 @@ def isi_ke(conn, d, reset=False):
         "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
         [baris_peserta(r) for r in d["peserta"]],
     )
-    cur.executemany(
-        "insert into klaim_sesi values (%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
-        [baris_klaim(r) for r in d["klaim"]],
-    )
+    cur.executemany(SQL_KLAIM, [baris_klaim(r) for r in d["klaim"]])
     cur.executemany(
         "insert into libur_nasional (tanggal, nama) values (%s,%s) on conflict do nothing",
         [(r["tanggal"], r["nama"]) for r in d["libur"]],
     )
-    versi = versi_pola(conn)
-    cur.executemany(
-        "insert into indikator_bulanan (id_peserta, id_rs, bulan, sesi_ditagih, maks_sesi_seminggu, i1_lebih_8_sebulan,"
-        " i2_3x_seminggu, i3_episode_6_bulan, i4_hari_libur, tanggal_libur, jumlah_indikator, dipicu, skor_pola,"
-        " alasan_pola, pola_tinggi, logit_pola) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        # baris lama (database yang di-seed sebelum skor pola ada) hanya menerima skor; indikator tidak disentuh
-        " on conflict (id_peserta, id_rs, bulan) do update set skor_pola = excluded.skor_pola,"
-        " alasan_pola = excluded.alasan_pola, pola_tinggi = excluded.pola_tinggi, logit_pola = excluded.logit_pola",
-        [baris_indikator(h, pola_v3.nilai(d["fitur_pola"][kunci], versi)) for kunci, h in d["indikator"].items()],
-    )
+    cur.executemany(SQL_INDIKATOR, [baris_indikator(h, d["anomali"][kunci]) for kunci, h in d["indikator"].items()])
     cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
     cur.executemany(SQL_PANGGILAN, d["antre"])
 
@@ -212,7 +225,7 @@ def isi_ke(conn, d, reset=False):
 def reset_panggilan(conn, d):
     """Keadaan awal demo tanpa menyentuh data master: hapus panggilan, log, dan keputusan, isi ulang 4 riwayat
     Selesai + panggilan Antre, nyalakan mode otomatis dan matikan Jeda. Tanpa commit.
-    indikator_bulanan tidak disentuh, jadi skor pola tetap."""
+    indikator_bulanan tidak disentuh, jadi hasil model anomali tetap."""
     conn.execute("delete from panggilan_log")
     conn.execute("delete from keputusan_panggilan")
     conn.execute("delete from panggilan")
@@ -242,11 +255,12 @@ def main() -> int:
 
     d = muat_data()
     dipicu = sum(h["dipicu"] for h in d["indikator"].values())
+    hanya_model = sum(a["ditandai"] and not d["indikator"][k]["dipicu"] for k, a in d["anomali"].items())
     print(f"RS {len(d['rs'])} | peserta {len(d['peserta'])} | klaim {len(d['klaim'])} | libur {len(d['libur'])} | "
-          f"indikator {len(d['indikator'])} (dipicu {dipicu}) | riwayat {len(d['riwayat'])} | "
+          f"indikator {len(d['indikator'])} (dipicu {dipicu}, hanya model {hanya_model}) | riwayat {len(d['riwayat'])} | "
           f"antre baru {len(d['antre'])}")
-    if len(d["peserta"]) != 408 or len(d["indikator"]) != 300:
-        print("Jumlah tidak sesuai PRD (408 peserta, 300 pasien aktif Agustus)")
+    if len(d["peserta"]) != PESERTA or len(d["indikator"]) != PASIEN_AKTIF:
+        print(f"Jumlah tidak sesuai data uji ({PESERTA} peserta, {PASIEN_AKTIF} pasien aktif Agustus)")
         return 1
     if arg.dry_run:
         return 0

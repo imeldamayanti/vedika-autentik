@@ -15,7 +15,7 @@
     },
     "RS03": {
       "id_rs": "RS03",
-      "pasien_aktif": 59,
+      "pasien_aktif": 60,
       "pasien_dipicu": 1,
       "persen_dipicu": 1.7
     },
@@ -27,7 +27,7 @@
     },
     "RS05": {
       "id_rs": "RS05",
-      "pasien_aktif": 55,
+      "pasien_aktif": 56,
       "pasien_dipicu": 1,
       "persen_dipicu": 1.8
     }

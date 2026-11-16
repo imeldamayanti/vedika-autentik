@@ -10,29 +10,31 @@ Data ini dipakai untuk menguji tiga bagian sistem: indikator (F1), panggilan AI 
 | Nama peserta, RS, nomor HP, tanggal sesi | Sintetis. Nomor HP memakai awalan 0800 yang tidak bisa ditelepon. |
 | Pola curang di RS Melati Sehat (RS01) | Sintetis, disisipkan sengaja: 35% bulan-pasien ditambah sesinya menjadi 9–12, sebagian di hari Minggu atau libur. |
 | 8 pasien skenario (S1–S8) | Sintetis, ditulis manual untuk pengujian. |
+| 2 pasien hanya model (M1, M2) | Sintetis, ditulis manual. Polanya dua pola "hanya model" yang paling sering di data sampel BPJS 2023–2024: tidak terpicu aturan, tetapi ditandai model anomali. |
+| Rujukan per kunjungan | Sintetis. Semua kunjungan dirujuk FKTP kab/kota yang sama, kecuali 6 kunjungan M1 Agustus (3 tanpa rujukan, 3 dari kab/kota lain). |
+| Model anomali (`referensi-pola/model-anomali-v2.json`) | Nyata, agregat dari Data Sampel Reguler 2023 dan 2024 (40.650 bulan-pasien), tiap sel ≥ 10 baris. |
 | Riwayat panggilan sebelum demo | Sintetis, ditandai `sintetis-riwayat`. |
-| Referensi nasional skor pola (`referensi-pola/referensi.json`) | Nyata, agregat dari Data Sampel Reguler Edisi 2025 (kunjungan 2024, 41.905 bulan-pasien fisioterapi). Tiap sel ≥ 10 baris, tanpa baris peserta riil. |
-| Model skor pola (`referensi-pola/model-pola-v1.json`) | Campuran: kelas normal dari histogram nasional nyata, kelas pelanggaran dari manipulasi buatan. |
-| Skor demo (`referensi-pola/skor_demo.json`) | Sintetis: model di atas diterapkan ke data uji ini. |
 
 ## Berkas
 
 | Berkas | Isi | Dipakai oleh |
 |---|---|---|
 | `rumah_sakit.csv` | 5 RS fiktif | Imelda |
-| `peserta.csv` | 408 peserta, termasuk kontak keluarga untuk usia ≥60 atau <13 | Imelda, Zahra |
-| `klaim_sesi.csv` | 4.913 klaim sesi rehab, Maret–Agustus 2026 | Zahra (indikator), Imelda (tampilan) |
+| `peserta.csv` | 410 peserta, termasuk kontak keluarga untuk usia ≥60 atau <13 | Imelda, Zahra |
+| `klaim_sesi.csv` | 4.938 klaim sesi rehab, Maret–Agustus 2026. `rujukan_fktp` (ya/tidak) dan `perujuk_luar_wilayah` (ya/tidak) per kunjungan, fitur model anomali | Zahra (indikator), Imelda (tampilan) |
 | `libur_nasional_2026.csv` | Daftar libur yang dipakai indikator I4 (parsial, cukup untuk data uji) | Zahra |
-| `expected_indikator_2026-08.csv` | Hasil indikator yang benar untuk 300 pasien aktif Agustus | Uji F1 |
+| `expected_indikator_2026-08.csv` | Hasil indikator yang benar untuk 302 pasien aktif Agustus | Uji F1 |
 | `riwayat_panggilan_2026-08.json` | 4 panggilan yang dianggap sudah terjadi sebelum demo | Imelda (isi awal database) |
 | `skenario_uji.json` | 8 skenario: naskah penguji, perilaku AI wajib, jawaban dan label yang diharapkan | Uji F3–F5 |
 | `transkrip_uji/S*.txt` | Contoh transkrip per skenario, untuk menguji pembaca jawaban tanpa menelepon | Zahra |
 | `expected_ringkasan_rs.json` | Status tiap RS sebelum skenario dan setelah tiap skenario | Uji F5 |
 | `kunci_kebenaran_2026-08.csv` | Jumlah sesi yang sebenarnya terjadi. **Hanya untuk penguji, tidak boleh dibaca sistem.** | Penguji |
 | `tools/aturan.py` | Aturan referensi: indikator, label, status RS | Zahra, Imelda |
-| `tools/pola.py` | Skor pola: fitur, bin, skor, alasan. Hanya mengurutkan antrean; tidak mengubah indikator, label, atau status RS | Zahra, Imelda |
-| `tools/uji_pola.py` | Uji `pola.py`, termasuk kesamaan fitur dengan `aturan.py` di 300 bulan-pasien | Semua |
-| `referensi-pola/` | Model (`model-pola-v1.json`), referensi nasional, skor demo, dan `EVALUASI.md`. Dibuat `ai-service/scripts/train_pattern_model.py`; lihat `docs/rencana-v3-skor-pola/SKOR-POLA.md` | Imelda (backend), Zahra |
+| `tools/pola.py` | Fitur kunjungan per bulan-pasien (sesi, minggu terpadat, hari Minggu/libur, bulan berturut-turut) dan indikator I1–I4, dipakai model anomali dan seed | Zahra, Imelda |
+| `tools/uji_pola.py` | Uji `pola.py`, termasuk kesamaan fitur dengan `aturan.py` di 302 bulan-pasien | Semua |
+| `tools/anomali.py` | Model anomali `anomali-v2`: fitur, bin, skor, alasan, corong RS. Ikut memilih siapa ditelepon (aturan ATAU model) | Imelda (backend), Zahra |
+| `tools/anomali_demo.py` | Hasil model anomali untuk data uji (`referensi-pola/anomali_demo.json`, disalin ke `data-v3.js`) | Imelda |
+| `referensi-pola/` | Model anomali (`model-anomali-v2.json`, `EVALUASI-ANOMALI.md`, `BANDING-METODE.md`; `ai-service/scripts/train_anomaly_model.py`), tabel `model-anomali-v1.json` sebagai pembanding, dan hasil demo (`anomali_demo.json`). Lihat `docs/rencana-v3-skor-pola/MODEL-ANOMALI.md` | Imelda (backend), Zahra |
 | `tools/generate.py` | Pembangkit data (deterministik) | — |
 | `tools/uji.py` | Pemeriksa keluaran aplikasi | Semua |
 
@@ -49,13 +51,22 @@ Data ini dipakai untuk menguji tiga bagian sistem: indikator (F1), panggilan AI 
 | S7 | Rina Marlina, 41 | RSU Nusa Sejahtera | 4 | 4 | I3 saja | Tidak ditelepon |
 | S8 | Hendra Wijaya, 50 (curiga penipuan) | RS Kenanga Medika | 10 | 10 | I1, I3 | Menolak, tidak dihitung |
 
+Pasien yang hanya dipilih model anomali (tidak punya skenario panggilan):
+
+| ID | Pasien | RS | Ditagih | Sebenarnya | Indikator | Mengapa model memilih |
+|---|---|---|---|---|---|---|
+| M1 | Sari Wulandari, 49 | RS Cempaka Asri | 6 | 3 | tidak ada | Sebagian kunjungan tanpa rujukan FKTP dan sebagian dari kab/kota lain |
+| M2 | Agus Setiadi, 41 | RS Kenanga Medika | 6 | 6 | I4 | 2 sesi hari Minggu dengan 5–8 sesi sebulan |
+
+M1 digelembungkan dan tidak terlihat aturan; M2 jarang tetapi jujur (jarang tidak sama dengan curang).
+
 Ringkasan RS: RS Melati Sehat berstatus Normal sebelum skenario (2 tidak sesuai dari 4 terjawab). Setelah S1 menjadi **Perlu klarifikasi RS** (3 dari 5). RS lain tetap Normal. Persentase pasien terpicu di Agustus: RS Melati 39,7%, RS lain 0–1,8%.
 
 ## Cara menguji
 
 ```bash
 python3 tools/uji.py indikator                       # aturan referensi = expected
-python3 tools/uji_pola.py                            # skor pola: fitur, bin, skor, alasan
+python3 tools/uji_pola.py                            # fitur kunjungan sama dengan aturan.py
 python3 tools/uji.py indikator keluaran_app.csv      # keluaran indikator aplikasi
 python3 tools/uji.py jawaban keluaran_pembaca.json   # keluaran pembaca jawaban
 ```

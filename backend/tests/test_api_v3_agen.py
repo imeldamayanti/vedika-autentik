@@ -13,10 +13,11 @@ DATA = config.AKAR / "data-uji-konfirmasi"
 SKENARIO = {s["id_skenario"]: s for s in json.loads((DATA / "skenario_uji.json").read_text())}
 S1 = "CALL-P-S1-2026-08"
 BASE = "/api/v1"
-# Antrean awal menurut logit skor pola: S6 (14,7), P0037 (14,3), lalu S1 (13,7); ketiganya tampil 1,00.
+# Antrean awal menurut model anomali: pola langka (di luar tabel model) dulu, menurut id biner: S1, lalu S2.
 # Uji mekanik agen memakai "yang pertama" dan "berikutnya" di antrean, bukan pasien tertentu.
-PERTAMA = "CALL-P-S6-2026-08"
-KEDUA = "CALL-P0037-2026-08"
+PERTAMA = "CALL-P-S1-2026-08"
+KEDUA = "CALL-P-S2-2026-08"
+ANOMALI_DEMO = json.loads((DATA / "referensi-pola" / "anomali_demo.json").read_text(encoding="utf-8"))["pasien"]
 
 
 def id_skenario(sid):
@@ -161,24 +162,27 @@ def test_ambil_mengikuti_urutan_antrean_dan_satu_panggilan_aktif(klien_agen, con
     assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == KEDUA
 
 
-def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkeypatch):
-    """Dahulukan menang atas skor; sesudahnya logit skor pola tertinggi (skor 1,00 pun tetap berbeda urutannya),
-    logit sama menurut id biner, tanpa logit paling akhir."""
+def kunci_anomali(id_):
+    """Urutan antre menurut model anomali: langka dulu, lalu skor tertinggi, tanpa skor di akhir, lalu id biner."""
+    a = ANOMALI_DEMO[id_.removeprefix("CALL-").removesuffix("-2026-08")]
+    return (0 if a["langka"] else 1, 1 if a["skor"] is None else 0, -(a["skor"] or 0), id_)
+
+
+def test_ambil_urut_dahulukan_lalu_pola_paling_jarang_lalu_id(klien_agen, conn_v3, monkeypatch):
+    """Dahulukan menang; sesudahnya pola langka, lalu skor anomali tertinggi, lalu id biner; tanpa skor paling akhir."""
     jam_palsu(monkeypatch)
     nyalakan(klien_agen)
-    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,124, terendah di antrean
-    conn_v3.execute("update indikator_bulanan set skor_pola = null, logit_pola = null where id_peserta = 'P-S2'")
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # S3 hampir terakhir menurut model
+    conn_v3.execute("update indikator_bulanan set skor_anomali = null, anomali_langka = false where id_peserta = 'P-M2'")
     urutan = []
-    for _ in range(26):
+    for _ in range(28):
         id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
         urutan.append(id_)
         ubah(conn_v3, id_, status="selesai", label="Tidak yakin", diambil_pada=None)
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
-    skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
-    sisa = sorted((i for i in urutan[1:-1]), key=lambda i: (-skor[i[5:-8]]["logit"], i))
-    assert urutan[0] == id_skenario("S3") and urutan[1:-1] == sisa
-    assert urutan[1:4] == [PERTAMA, KEDUA, S1] and urutan[-2:] == [id_skenario("S8"), id_skenario("S2")]
-    assert skor["P-S6"]["skor"] == skor["P-S1"]["skor"] == 1.0  # skor tampil sama, logit memisahkan
+    assert urutan[0] == id_skenario("S3") and urutan[-1] == "CALL-P-M2-2026-08"  # Dahulukan, lalu tanpa skor di akhir
+    assert urutan[1:-1] == sorted(urutan[1:-1], key=kunci_anomali)
+    assert urutan[1:3] == [PERTAMA, KEDUA]
 
 
 def test_ambil_urutan_sama_dengan_daftar_antrean_situs(klien_agen, conn_v3, monkeypatch):
@@ -260,8 +264,8 @@ def test_ambil_jeda_menahan_otomatis_tetapi_prioritas_tetap_jalan(klien_agen, mo
     nyalakan(klien_agen)
     klien_agen.put(f"{BASE}/pengaturan", json={"jeda": True})
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
-    klien_agen.post(f"{BASE}/panggilan/CALL-P-S6-2026-08/mulai")
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == "CALL-P-S6-2026-08"
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S8')}/mulai")
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S8")
 
 
 def test_ambil_prioritas_walau_mode_mati_dan_mendahului_urutan(klien_agen, monkeypatch):

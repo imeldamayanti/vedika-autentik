@@ -5,13 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from vedika_ai.claim_reference import (
+from vedika_ai.ml.claim_reference import visit_frequency_buckets
+from vedika_ai.ml.cohort import is_physiotherapy_text
+from vedika_ai.ml.privacy import (
     MINIMUM_SAFE_CELL_COUNT,
-    ClaimReferenceError,
-    assert_privacy_safe_aggregate,
-    is_physiotherapy_text,
+    ReferenceDataError,
+    assert_privacy_safe,
     sha256_file,
-    visit_frequency_buckets,
 )
 
 REFERENCE_DIR = Path(__file__).parents[1] / "data" / "reference" / "rehab-2024"
@@ -55,12 +55,12 @@ def test_visit_frequency_is_exported_only_as_buckets():
 
 
 def test_privacy_guard_rejects_identifier_collections():
-    with pytest.raises(ClaimReferenceError, match="participant_ids"):
-        assert_privacy_safe_aggregate({"participant_ids": [10000001]})
+    with pytest.raises(ReferenceDataError, match="participant_ids"):
+        assert_privacy_safe({"participant_ids": [10000001]})
 
 
 def test_privacy_guard_accepts_aggregate_counts():
-    assert_privacy_safe_aggregate(
+    assert_privacy_safe(
         {
             "counts": {"unique_participants": 42, "participant_months": 73},
             "privacy": {"participant_identifiers_exported": False},
@@ -71,16 +71,17 @@ def test_privacy_guard_accepts_aggregate_counts():
 def test_committed_reference_contains_only_safe_aggregates():
     summary = json.loads((REFERENCE_DIR / "summary.json").read_text(encoding="utf-8"))
 
-    assert_privacy_safe_aggregate(summary)
+    assert_privacy_safe(summary)
     assert summary["privacy"] == {
         "minimum_category_count": MINIMUM_SAFE_CELL_COUNT,
         "participant_identifiers_exported": False,
         "row_level_records_exported": False,
         "visit_identifiers_exported": False,
     }
-    assert summary["counts"]["outpatient_physiotherapy_rows"] <= summary["counts"][
-        "outpatient_rehabilitation_rows"
-    ]
+    assert (
+        summary["counts"]["outpatient_physiotherapy_rows"]
+        <= summary["counts"]["outpatient_rehabilitation_rows"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -102,7 +103,7 @@ def test_reference_category_tables_are_suppressed(filename, expected_fields):
 def test_reference_manifest_matches_committed_outputs():
     manifest = json.loads((REFERENCE_DIR / "manifest.json").read_text(encoding="utf-8"))
 
-    assert_privacy_safe_aggregate(manifest)
+    assert_privacy_safe(manifest)
     for output in manifest["outputs"]:
         path = REFERENCE_DIR / output["filename"]
         assert path.stat().st_size == output["size_bytes"]

@@ -89,7 +89,7 @@
       id: b.id, pasien: b.pasien, umur: b.umur, rs: b.rs, namaRs: b.nama_rs, ditagih: b.ditagih, indikator: b.indikator,
       penerima: b.penerima, status: b.status, st: KELOMPOK[b.status], label: b.label, keputusanTindakan: b.keputusan_tindakan,
       prioritas: b.prioritas, percobaan: b.percobaan, cobaLagi: b.coba_lagi_setelah,
-      skor_pola: b.skor_pola, pola_tinggi: b.pola_tinggi
+      dipilih: b.dipilih
     };
   }
 
@@ -121,18 +121,20 @@
       rekaman: d.rekaman ? url(d.rekaman) : null, hapusPada: d.hapus_pada,
       suara_langsung: null, /* tanpa klip buatan di mode API: hanya rekaman panggilan asli di kartu bukti */
       konteksRs: d.konteks_rs, pesanWa: d.pesan_wa, keputusan: keKeputusan(d.keputusan), galatPembaca: d.galat_pembaca,
-      pola: d.pola
+      dipilih: d.dipilih, anomali: d.anomali
     };
   }
 
   /* Satu bentuk untuk layar Ringkasan RS, sama dengan hasil ringkasanRs() di data-v3.js ditambah daftar rinci. */
   function keRingkasan(r) {
     return {
-      jumlah: r.panggilan_selesai, kinerjaPola: r.kinerja_pola,
+      jumlah: r.panggilan_selesai, kinerjaModel: r.kinerja_model,
       rs: r.rs.map((x) => ({
         id: x.id_rs, nama: x.nama, aktif: x.aktif, terpicu: x.terpicu, persen: x.persen,
-        pembanding: x.pembanding, polaTinggiTidakTerpicu: x.pola_tinggi_tidak_terpicu,
-        c: { sesuai: x.sesuai, tidak_sesuai: x.tidak_sesuai, tidak_yakin: x.tidak_yakin, tidak_terhubung: x.tidak_terhubung, menolak: x.menolak, terjawab: x.terjawab, rasio: x.rasio, status: x.status },
+        funnel: x.funnel,
+        /* Status dihitung ulang di UI dari angka (audit S-01). TODO: hapus setelah aturan_v3.py memakai statusRs yang sama. */
+        c: { sesuai: x.sesuai, tidak_sesuai: x.tidak_sesuai, tidak_yakin: x.tidak_yakin, tidak_terhubung: x.tidak_terhubung, menolak: x.menolak, terjawab: x.terjawab, rasio: x.rasio,
+          status: typeof x.terjawab === "number" && global.DATA3 ? global.DATA3.statusRs(x) : x.status },
         daftar: x.panggilan
       }))
     };

@@ -80,24 +80,27 @@ def test_kolom_d01_ditambahkan_ke_tabel_yang_sudah_ada(conn):
     assert {"diambil_pada", "tangkapan_sementara", "durasi_detik"} <= kolom(conn, "panggilan")
 
 
-def test_kolom_skor_pola_ditambahkan_ke_tabel_yang_sudah_ada(conn):
-    """Database yang di-seed sebelum skor pola ada harus mendapat empat kolomnya, dengan bawaan yang aman."""
+def test_kolom_model_anomali_ditambahkan_ke_tabel_yang_sudah_ada(conn):
+    """Database yang di-seed sebelum model anomali ada harus mendapat kolomnya, dengan bawaan yang aman."""
     conn.execute(SKEMA_V3)
-    conn.execute("alter table uji.indikator_bulanan drop column skor_pola, drop column alasan_pola, drop column pola_tinggi,"
-                 " drop column logit_pola")
+    conn.execute("alter table uji.indikator_bulanan drop column skor_anomali, drop column anomali_ditandai,"
+                 " drop column anomali_langka, drop column alasan_anomali")
+    conn.execute("alter table uji.klaim_sesi drop column rujukan_fktp, drop column perujuk_luar_wilayah")
     conn.execute("insert into uji.rumah_sakit (id_rs, nama_rs) values ('RS01', 'RS Uji')")
     conn.execute("insert into uji.peserta (id_peserta, nama) values ('P01', 'Peserta Uji')")
     conn.execute(
         "insert into uji.indikator_bulanan values ('P01', 'RS01', '2026-08', 9, 3, true, true, false, false, '{}', 2, true)"
     )
-    assert not {"skor_pola", "alasan_pola", "pola_tinggi", "logit_pola"} & kolom(conn, "indikator_bulanan")
+    conn.execute("insert into uji.klaim_sesi (id_klaim, id_peserta, id_rs, tanggal) values ('K1', 'P01', 'RS01', '2026-08-03')")
     conn.execute(SKEMA_V3)
     conn.execute(SKEMA_V3)
-    assert {"skor_pola", "alasan_pola", "pola_tinggi", "logit_pola"} <= kolom(conn, "indikator_bulanan")
-    baris = conn.execute("select skor_pola, alasan_pola, pola_tinggi, dipicu from uji.indikator_bulanan").fetchone()
-    assert baris == {"skor_pola": None, "alasan_pola": [], "pola_tinggi": False, "dipicu": True}
+    assert {"skor_anomali", "anomali_ditandai", "anomali_langka", "alasan_anomali"} <= kolom(conn, "indikator_bulanan")
+    baris = conn.execute("select skor_anomali, anomali_ditandai, anomali_langka, alasan_anomali, dipicu from uji.indikator_bulanan").fetchone()
+    assert baris == {"skor_anomali": None, "anomali_ditandai": False, "anomali_langka": False, "alasan_anomali": None, "dipicu": True}
+    klaim = conn.execute("select rujukan_fktp, perujuk_luar_wilayah from uji.klaim_sesi").fetchone()
+    assert klaim == {"rujukan_fktp": True, "perujuk_luar_wilayah": False}  # baris lama: dirujuk FKTP setempat
     with pytest.raises(psycopg.errors.NotNullViolation):
-        conn.execute("update uji.indikator_bulanan set pola_tinggi = null")
+        conn.execute("update uji.indikator_bulanan set anomali_ditandai = null")
 
 
 def tambah_panggilan(conn, id_="C1"):
