@@ -17,9 +17,10 @@ dengan HP palsu. Data tetap sintetis; semua panggilan hanya ke satu nomor penguj
 Alur penuh sudah berjalan di HP nyata tanpa disentuh: antrean → WA (simulasi) → jeda 1 menit → HP menekan nomor →
 speakerphone menyala → penerima mengangkat → AI membuka dan bertanya → telepon ditutup → jawaban dibaca → label.
 
-Yang belum lulus: **mutu suara penerima di mode speaker**. Ucapan penguji sampai ke Gemini dalam potongan yang
-ditranskrip sebagai kata asing ("hier", "madre", "die haben"), sehingga label S1 berakhir Tidak yakin, bukan Tidak sesuai.
-Gerbang R3.6 (transkrip ≥ 90%) belum terpenuhi. Lihat bagian "Yang masih terbuka".
+**S1 lulus di percobaan ke-9**: label Tidak sesuai, ditagih 11 vs versi peserta 3 (selisih 8), rekaman tersimpan, RS
+Melati Sehat menjadi Perlu klarifikasi RS (3 dari 5). Keenam field kunci S1 benar. Delapan percobaan sebelumnya
+membuka sepuluh perbaikan di bawah; yang terbesar menyangkut mutu suara mode speaker. Satu panggilan lulus belum cukup
+untuk gerbang R3.6 (tiga panggilan berturut-turut, transkrip ≥ 90%).
 
 ## Bagian A: pemeriksaan ADB
 
@@ -53,8 +54,15 @@ Gerbang R3.6 (transkrip ≥ 90%) belum terpenuhi. Lihat bagian "Yang masih terbu
 | 1 (19:06 WIB) | Penguji mengangkat lalu diam menunggu. Agen menunggu penerima bicara lebih dulu, tidak ada yang terdengar, telepon ditutup oleh batas 40 detik | Tidak diangkat (salah). Memicu temuan 5 |
 | 2 (19:14) | Setelah temuan 5: AI membuka 3 detik setelah diangkat. Ucapan penguji tertangkap sebagai "Hello? Hello?", "hier", "llevar", "madre", lalu "Kayaknya enggak ingat" | Tidak yakin. Alur lengkap, suara buram |
 | 3 (19:34) | Bahasa dikunci id-ID. Ucapan penguji tertangkap "die haben", lalu hening 10 detik | Tidak yakin |
-| 4 (19:37) | Peredam bising Chrome dimatikan. Penguji tidak mengangkat; stasiun menutup setelah 40 detik dan menjadwalkan percobaan 2 | Tidak diangkat (benar) |
-| 5 (19:41) | Sama dengan percobaan 4; penguji tidak mengangkat | Tidak diangkat (benar). Uji suara dengan peredam bising mati belum terjadi |
+| 4 (19:37) | Peredam bising Chrome dimatikan. HP penguji tidak berdering sama sekali; 40 detik tanpa tersambung, stasiun menutup dan menjadwalkan percobaan 2 | Tidak diangkat (benar untuk stasiun; sebabnya jaringan) |
+| 5 (19:41) | Telepon tidak pernah sampai ke HP penguji: jaringan memutus dengan "Recovery on timer expiry" | Tidak diangkat (benar). Gangguan jaringan Tri, bukan kode |
+| 6 (19:44) | Berdering 8 detik setelah ditekan, diangkat. AI bertanya identitas; ucapan penguji tidak tertranskrip, lalu AI berlanjut "Baik, Bapak Andi…" seolah dibenarkan, giliran itu tanpa pertanyaan, dan aturan hening 10 detik menutup telepon sebelum penguji menjawab | Tidak yakin. Memicu temuan 8 |
+| 7 (19:48) | Naskah wajib bertanya dan tidak boleh menganggap sudah dijawab; hening pertama memicu pertanyaan ulang. Lengkap sampai pamit, tetapi pembuka diulang dan transkrip awal masih buram ("¿Aló?", "या बनार") | **Tidak sesuai, 11 vs 3.** Memicu temuan 9 |
+| 8 (19:52) | Pendeteksi suara Gemini dibuat peka. Saat HP penguji masih berdering, gumaman di ruangan dianggap jawaban, AI mulai bicara, panggilan putus 5 detik kemudian | Tidak terhubung (salah). Memicu temuan 10 |
+| 9 (19:55) | Mikrofon ditahan sampai jaringan menyatakan diangkat. Semua jawaban tertranskrip benar: "Iya, benar", "tiga kali", "Enggak pernah, hari Minggu kan tutup". Pertanyaan identitas diulang sekali (sesuai aturan), pembuka sekali | **Tidak sesuai, 11 vs 3, selisih 8.** 59 detik, rekaman tersimpan. Lulus |
+
+Akurasi field kunci percobaan 9 (UJI-HP bagian E): penerima, hadir, jumlah sesi, keyakinan, tanggal libur, tanda
+bahaya, **6 dari 6 benar**.
 
 Di setiap panggilan yang diangkat, AI mematuhi naskah: mengaku asisten otomatis, menyebut panggilan direkam, bukan
 tagihan, tidak meminta NIK/OTP/rekening/uang, dan tidak memakai kata "curang" atau "fraud". Label Tidak yakin juga
@@ -70,20 +78,26 @@ benar menurut `aturan.py`, karena jumlah sesi tidak tertangkap; rekaman dan tran
 | 4 | Panggilan selalu mulai di earpiece; speakerphone tidak diingat, dan Android tidak punya perintah adb untuknya | Phone helper mengetuk tombol "Speaker" layar panggilan lewat `uiautomator`, lalu memastikan rute telecom pindah ke speaker (paling banyak 2 ketukan). Hanya di mode speaker |
 | 5 | Penerima nomor tak dikenal sering mengangkat lalu diam. Agen menunggu ucapan pertama penerima, jadi panggilan dianggap tidak diangkat | `/v1/saluran/status` menambah `tersambung` dari `mForegroundCallState=1` (jaringan menyatakan diangkat). Bila tersambung dan penerima diam 3 detik, AI membuka lebih dulu. Pengumuman operator terjadi sebelum diangkat, jadi filternya tidak terpengaruh |
 | 6 | Gemini menebak bahasa ucapan penerima yang buram | `languageCode: "id-ID"` di token sesi (`voice.py`), di halaman agen, dan di Cloudflare Worker |
-| 7 | Peredam bising Chrome diduga memotong suara telepon dari speaker HP | Mode speaker: `noiseSuppression` dimatikan, peredam gema tetap menyala. **Belum terbukti**; panggilan sesudahnya tidak diangkat |
+| 7 | Peredam bising Chrome diduga memotong suara telepon dari speaker HP | Mode speaker: `noiseSuppression` dimatikan, peredam gema tetap menyala |
+| 8 | AI menganggap penerima sudah membenarkan padahal jawabannya tidak terdengar, lalu telepon ditutup sebelum penerima menjawab | Naskah: setiap giliran diakhiri satu pertanyaan, dilarang menganggap sudah dijawab. Hening pertama setelah giliran AI memicu pertanyaan ulang (`SILENCE_NUDGE`); telepon ditutup hanya bila hening lagi |
+| 9 | Pembuka diulang; jawaban pendek penerima terlewat atau ditranskrip dalam huruf lain | Naskah: pembuka sekali, ulang hanya pertanyaannya, paling banyak sekali per pertanyaan; "iya/benar/saya sendiri" cukup untuk identitas. Gemini: `startOfSpeechSensitivity` HIGH, `endOfSpeechSensitivity` LOW, `inputAudioTranscription.languageCodes` id-ID |
+| 10 | Dengan pendeteksi peka, bunyi saat masih berdering dianggap jawaban | Halaman agen menahan audio mikrofon (`holdInput`) sampai Phone helper melaporkan `tersambung: true`. HP palsu melaporkan `tersambung: null` dan langsung didengar seperti sebelumnya |
 
 Uji otomatis setelah perbaikan: ai-service pytest lulus semua (1 dilewati seperti sebelumnya), `node --test
-ai-service/web/voice-agent.test.mjs` 61 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih.
+ai-service/web/voice-agent.test.mjs` 66 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih, backend 296
+lulus, `node tests/alur-v3.test.js` 19 lulus.
 
 ## Yang masih terbuka
 
-1. **Mutu suara mode speaker.** Ulangi S1 dengan peredam bising mati. Bila transkrip masih buram, pindah ke mode kabel
-   (`SALURAN_AUDIO=kabel`, splitter TRRS + antarmuka audio USB, lihat [STASIUN.md](STASIUN.md) bagian 1). Mode kabel
-   memang disiapkan untuk keadaan ini.
-2. **Meta WhatsApp** (dikerjakan Zahra, lihat di bawah).
-3. **B4–B6, A11–A12, S2–S8, bagian D** belum dijalankan.
-4. **Cloudflare Worker** belum di-deploy ulang dengan `languageCode`.
-5. Rekaman halaman agen tidak menyimpan transkrip untuk label Tidak yakin, jadi diagnosis mutu suara bergantung pada
+1. **Gerbang R3.6.** Ulangi S1 dua kali lagi berturut-turut, lalu S2–S8. Bila transkrip turun di bawah 90%, pindah ke
+   mode kabel (`SALURAN_AUDIO=kabel`, lihat [STASIUN.md](STASIUN.md) bagian 1).
+2. **Jaringan lambat.** Pada percobaan 3, HP penerima baru berdering sekitar 30 detik setelah nomor ditekan, padahal batas
+   "tidak diangkat" 40 detik dihitung sejak menekan. Status `mForegroundCallState=4` (berdering di penerima) sudah terbaca,
+   jadi batas itu bisa dihitung sejak berdering. Belum diubah.
+3. **Meta WhatsApp** (dikerjakan Zahra, lihat di bawah).
+4. **B4–B6, A11–A12, bagian D** belum dijalankan.
+5. **Cloudflare Worker** belum di-deploy ulang dengan pengaturan suara baru.
+6. Rekaman halaman agen tidak menyimpan transkrip untuk label Tidak yakin, jadi diagnosis mutu suara bergantung pada
    transkrip di jendela agen. Untuk uji suara, salin transkrip itu sebelum panggilan berikutnya.
 
 ## Meta WhatsApp: langkah untuk Zahra
