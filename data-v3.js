@@ -79,14 +79,20 @@
     I4: { nama: "Sesi di hari libur", arti: "Ada sesi di hari Minggu atau libur nasional" }
   };
 
-  /* ---------- rumah sakit (rumah_sakit.csv, expected_ringkasan_rs.json) ---------- */
+  /* ---------- rumah sakit (rumah_sakit.csv, expected_ringkasan_rs.json) ----------
+     pembanding: posisi terhadap RS sejenis nasional (data sampel BPJS 2024, agregat), sama dengan GET /ringkasan-rs. */
 
   const RS = [
-    { id: "RS01", nama: "RS Melati Sehat", aktif: 68, terpicu: 27, persen: 39.7 },
-    { id: "RS02", nama: "RSU Bakti Mulia", aktif: 65, terpicu: 1, persen: 1.5 },
-    { id: "RS03", nama: "RS Cempaka Asri", aktif: 59, terpicu: 1, persen: 1.7 },
-    { id: "RS04", nama: "RSU Nusa Sejahtera", aktif: 53, terpicu: 0, persen: 0.0 },
-    { id: "RS05", nama: "RS Kenanga Medika", aktif: 55, terpicu: 1, persen: 1.8 }
+    { id: "RS01", nama: "RS Melati Sehat", aktif: 68, terpicu: 27, persen: 39.7, pola_tinggi_tidak_terpicu: 0,
+      pembanding: {"tipe": "RS Swasta Setara Type C", "persen_terpicu_nasional": 1.48, "sesi_rata_nasional": 3.74, "terpicu_p95_kelompok": 8.2, "posisi": "di_atas_p95"} },
+    { id: "RS02", nama: "RSU Bakti Mulia", aktif: 65, terpicu: 1, persen: 1.5, pola_tinggi_tidak_terpicu: 0,
+      pembanding: {"tipe": "RS Kelas B", "persen_terpicu_nasional": 1.12, "sesi_rata_nasional": 3.27, "terpicu_p95_kelompok": 14.8, "posisi": "wajar"} },
+    { id: "RS03", nama: "RS Cempaka Asri", aktif: 59, terpicu: 1, persen: 1.7, pola_tinggi_tidak_terpicu: 0,
+      pembanding: {"tipe": "RS Swasta Setara Type C", "persen_terpicu_nasional": 1.48, "sesi_rata_nasional": 3.74, "terpicu_p95_kelompok": 8.2, "posisi": "wajar"} },
+    { id: "RS04", nama: "RSU Nusa Sejahtera", aktif: 53, terpicu: 0, persen: 0.0, pola_tinggi_tidak_terpicu: 0,
+      pembanding: {"tipe": "RS Kelas C", "persen_terpicu_nasional": 1.06, "sesi_rata_nasional": 3.36, "terpicu_p95_kelompok": 6.7, "posisi": "wajar"} },
+    { id: "RS05", nama: "RS Kenanga Medika", aktif: 55, terpicu: 1, persen: 1.8, pola_tinggi_tidak_terpicu: 0,
+      pembanding: {"tipe": "RS Swasta Setara Type B", "persen_terpicu_nasional": 0.94, "sesi_rata_nasional": 3.55, "terpicu_p95_kelompok": 3.3, "posisi": "wajar"} }
   ];
   const PASIEN_AKTIF = 300;
   const PASIEN_TERPICU = 30;
@@ -371,8 +377,34 @@
     A3: { id: "A3", pasien: "Sri Gunawan", umur: 69, rs: "RS01", ditagih: 9, indikator: ["I1", "I2", "I4"], penerima: { nama: "Bayu Handayani", hubungan: "anak" } }
   };
 
-  /* Urutan baris antrean: skenario dulu (S1 paling atas), lalu yang belum ditelepon, lalu riwayat. */
-  const URUTAN_ANTREAN = ["S1", "S2", "S3", "S4", "S5", "S6", "S8", "A1", "A2", "A3", "R1", "R2", "R3", "R4"];
+  /* ---------- skor pola (disalin dari data-uji-konfirmasi/referensi-pola/skor_demo.json) ----------
+
+     Skor pola hanya mengurutkan antrean dan menjelaskan alasannya; bukan putusan. Urutan memakai logit (skor di
+     atas 0,999 tampil sama, logitnya masih berbeda); urut = id panggilan di API, penentu bila logit sama. Bentuk pola sama dengan field pola di GET /panggilan/{id}. */
+
+  const AMBANG_POLA = 0.898;
+  const VERSI_POLA = "pola-v1";
+  const POLA = {
+    S1: {"urut": "CALL-P-S1-2026-08", "skor": 1.0, "logit": 13.7498, "tinggi": true, "alasan": [{"fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    S2: {"urut": "CALL-P-S2-2026-08", "skor": 1.0, "logit": 9.6594, "tinggi": true, "alasan": [{"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}, {"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2+I3+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    S3: {"urut": "CALL-P-S3-2026-08", "skor": 0.124, "logit": -1.9535, "tinggi": false, "alasan": [{"fitur": "episode", "nilai": 6, "kontribusi": 0.967, "persentil_nasional": 85.7, "teks": "Ada sesi 6 bulan berturut-turut, lebih lama dari 82,1% tagihan bulanan fisioterapi nasional."}, {"fitur": "sesi", "nilai": 9, "kontribusi": 0.777, "persentil_nasional": 99.2, "teks": "9 sesi dalam sebulan, lebih banyak dari 97,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I3", "teks": "Gabungan indikator ini muncul pada 0,22% tagihan bulanan fisioterapi nasional 2024."}},
+    S4: {"urut": "CALL-P-S4-2026-08", "skor": 1.0, "logit": 7.7811, "tinggi": true, "alasan": [{"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}, {"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    S5: {"urut": "CALL-P-S5-2026-08", "skor": 1.0, "logit": 8.2287, "tinggi": true, "alasan": [{"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}, {"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    S6: {"urut": "CALL-P-S6-2026-08", "skor": 1.0, "logit": 14.6598, "tinggi": true, "alasan": [{"fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}], "kombinasi": {"kunci": "I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    S8: {"urut": "CALL-P-S8-2026-08", "skor": 0.182, "logit": -1.5059, "tinggi": false, "alasan": [{"fitur": "sesi", "nilai": 10, "kontribusi": 1.225, "persentil_nasional": 99.5, "teks": "10 sesi dalam sebulan, lebih banyak dari 99,2% tagihan bulanan fisioterapi nasional."}, {"fitur": "episode", "nilai": 6, "kontribusi": 0.967, "persentil_nasional": 85.7, "teks": "Ada sesi 6 bulan berturut-turut, lebih lama dari 82,1% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I3", "teks": "Gabungan indikator ini muncul pada 0,22% tagihan bulanan fisioterapi nasional 2024."}},
+    A1: {"urut": "CALL-P0007-2026-08", "skor": 0.819, "logit": 1.5092, "tinggi": false, "alasan": [{"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "sesi", "nilai": 10, "kontribusi": 1.225, "persentil_nasional": 99.5, "teks": "10 sesi dalam sebulan, lebih banyak dari 99,2% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2", "teks": "Gabungan indikator ini muncul pada 0,80% tagihan bulanan fisioterapi nasional 2024."}},
+    A2: {"urut": "CALL-P0010-2026-08", "skor": 1.0, "logit": 8.2342, "tinggi": true, "alasan": [{"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}, {"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    A3: {"urut": "CALL-P0011-2026-08", "skor": 1.0, "logit": 7.905, "tinggi": true, "alasan": [{"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}, {"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    R1: {"urut": "CALL-P0002-2026-08", "skor": 1.0, "logit": 13.4251, "tinggi": true, "alasan": [{"fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "ahad_libur", "nilai": 1, "kontribusi": 7.14, "persentil_nasional": 99.9, "teks": "1 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."}], "kombinasi": {"kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."}},
+    R2: {"urut": "CALL-P0003-2026-08", "skor": 0.675, "logit": 0.7324, "tinggi": false, "alasan": [{"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "sesi", "nilai": 9, "kontribusi": 0.777, "persentil_nasional": 99.2, "teks": "9 sesi dalam sebulan, lebih banyak dari 97,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2", "teks": "Gabungan indikator ini muncul pada 0,80% tagihan bulanan fisioterapi nasional 2024."}},
+    R3: {"urut": "CALL-P0012-2026-08", "skor": 0.124, "logit": -1.9535, "tinggi": false, "alasan": [{"fitur": "episode", "nilai": 6, "kontribusi": 0.967, "persentil_nasional": 85.7, "teks": "Ada sesi 6 bulan berturut-turut, lebih lama dari 82,1% tagihan bulanan fisioterapi nasional."}, {"fitur": "sesi", "nilai": 9, "kontribusi": 0.777, "persentil_nasional": 99.2, "teks": "9 sesi dalam sebulan, lebih banyak dari 97,9% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I3", "teks": "Gabungan indikator ini muncul pada 0,22% tagihan bulanan fisioterapi nasional 2024."}},
+    R4: {"urut": "CALL-P0065-2026-08", "skor": 0.813, "logit": 1.4677, "tinggi": false, "alasan": [{"fitur": "maks_minggu", "nilai": 3, "kontribusi": 4.055, "persentil_nasional": 99.9, "teks": "3 sesi dalam satu minggu, lebih padat dari 96,9% tagihan bulanan fisioterapi nasional."}, {"fitur": "sesi", "nilai": 11, "kontribusi": 1.512, "persentil_nasional": 99.8, "teks": "11 sesi dalam sebulan, lebih banyak dari 99,5% tagihan bulanan fisioterapi nasional."}], "kombinasi": {"kunci": "I1+I2", "teks": "Gabungan indikator ini muncul pada 0,80% tagihan bulanan fisioterapi nasional 2024."}}
+  };
+
+  /* Urutan baris antrean, sama dengan API: yang belum ditelepon menurut logit skor pola lalu id, kemudian riwayat. */
+  const URUTAN_ANTREAN = ["S1", "S2", "S3", "S4", "S5", "S6", "S8", "A1", "A2", "A3"]
+    .sort((a, b) => POLA[b].logit - POLA[a].logit || (POLA[a].urut < POLA[b].urut ? -1 : 1))
+    .concat(["R1", "R2", "R3", "R4"]);
 
   /* ---------- aturan label (PRD F4) dan ringkasan RS (R5.4) ---------- */
 
@@ -429,7 +461,13 @@
   /* ---------- turunan dan uji mandiri ---------- */
 
   const SEMUA = Object.assign({}, SKENARIO, LATAR, MENGANTRE);
-  Object.keys(SEMUA).forEach((id) => { SEMUA[id].kunciPeserta = id; });
+  Object.keys(SEMUA).forEach((id) => {
+    const x = POLA[id];
+    Object.assign(SEMUA[id], {
+      kunciPeserta: id, skor_pola: x.skor, pola_tinggi: x.tinggi,
+      pola: { skor: x.skor, tinggi: x.tinggi, ambang: AMBANG_POLA, alasan: x.alasan, kombinasi: x.kombinasi, versi: VERSI_POLA }
+    });
+  });
 
   const UJI = (function () {
     const salah = [];
@@ -461,11 +499,34 @@
     return salah;
   })();
 
+  /* Uji mandiri skor pola: nilai wajar, penanda tinggi sesuai ambang, urutan antrean mengikuti skor, tanpa kata terlarang. */
+  const UJI_POLA = (function () {
+    const salah = [];
+    const cek = (kondisi, pesan) => { if (!kondisi) salah.push(pesan); };
+    Object.keys(SEMUA).forEach((id) => {
+      const p = SEMUA[id];
+      cek(p.skor_pola >= 0 && p.skor_pola <= 1, id + ": skor pola di luar 0-1");
+      cek(p.pola_tinggi === (p.skor_pola >= AMBANG_POLA), id + ": penanda pola tinggi tidak sesuai ambang");
+      cek(p.pola.alasan.length <= 2 && p.pola.alasan.every((a) => a.kontribusi > 0), id + ": alasan harus paling banyak dua dan bersumbangan positif");
+      cek(p.pola.kombinasi.kunci === p.indikator.join("+"), id + ": kombinasi tidak sama dengan indikator aktif");
+      cek(!/fraud|curang/i.test(JSON.stringify(p.pola)), id + ": teks pola memuat kata terlarang");
+    });
+    const antre = URUTAN_ANTREAN.filter((id) => !LATAR[id]).map((id) => SEMUA[id].skor_pola);
+    cek(antre.every((s, i) => i === 0 || antre[i - 1] >= s), "antrean harus terurut skor pola menurun");
+    const logit = URUTAN_ANTREAN.filter((id) => !LATAR[id]).map((id) => POLA[id].logit);
+    cek(logit.every((x, i) => i === 0 || logit[i - 1] >= x), "antrean harus terurut logit skor pola menurun");
+    const s1 = SKENARIO.S1.pola.alasan.map((a) => a.teks).join(" ");
+    cek(SKENARIO.S1.pola.alasan.length === 2 && /sesi/.test(s1) && /hari Minggu atau libur/.test(s1), "S1 harus punya dua alasan tentang sesi dan hari Minggu atau libur");
+    cek(RS[0].pembanding.posisi === "di_atas_p95" && RS.slice(1).every((r) => r.pembanding.posisi !== "di_atas_p95"), "hanya RS Melati yang di atas 95% RS sejenis");
+    if (salah.length) console.warn("Skor pola data v3 tidak konsisten:", salah);
+    return salah;
+  })();
+
   global.DATA3 = {
     HARI_INI, VERIFIKATOR, BULAN, BULAN_PENDEK, PRESENTASI, NOMOR_PENELEPON, JEDA_PESAN_MENIT,
     LABEL, TINDAKAN, PILIHAN_TINDAKAN, SARAN, RETENSI, INDIKATOR, TOLERANSI,
     RS, PASIEN_AKTIF, PASIEN_TERPICU,
     SKENARIO, LATAR, MENGANTRE, SEMUA, URUTAN_ANTREAN, TIDAK_DIPICU,
-    pesanPemberitahuan, pesanCadangan, namaRs, hitungLabel, selisih, ringkasanRs, statusRs, progresRs, STATUS_RS, RS_MIN_TERJAWAB, UJI
+    pesanPemberitahuan, pesanCadangan, namaRs, hitungLabel, selisih, ringkasanRs, statusRs, progresRs, STATUS_RS, RS_MIN_TERJAWAB, UJI, UJI_POLA
   };
 })(window);

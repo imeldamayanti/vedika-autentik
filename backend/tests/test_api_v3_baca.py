@@ -28,10 +28,39 @@ def test_antrean_s7_tidak_pernah_muncul(klien_v3):
     assert all(len(r["indikator"]) >= 2 for r in klien_v3.get("/api/v1/antrean").json()["baris"])
 
 
-def test_antrean_urutan_skenario_dulu_riwayat_terbaru_di_akhir(klien_v3):
-    ids = [r["id"] for r in klien_v3.get("/api/v1/antrean").json()["baris"]]
-    assert ids[:7] == [f"CALL-P-S{n}-2026-08" for n in (1, 2, 3, 4, 5, 6, 8)]
+def test_antrean_urutan_logit_skor_pola_riwayat_terbaru_di_akhir(klien_v3):
+    baris = klien_v3.get("/api/v1/antrean").json()["baris"]
+    ids = [r["id"] for r in baris]
+    antre = [r for r in baris if r["status"] == "antre"]
+    assert antre == baris[:26]
+    skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
+    logit = [skor[r["id"][5:-8]]["logit"] for r in antre]
+    assert all(a > b or (a == b and x["id"] < y["id"]) for a, b, x, y in zip(logit, logit[1:], antre, antre[1:]))
+    assert [r["skor_pola"] for r in antre] == sorted((r["skor_pola"] for r in antre), reverse=True)
+    # skor 1,00 tidak lagi diurutkan menurut id: S6 (logit 14,7) mendahului S1 (13,7)
+    assert ids[:3] == ["CALL-P-S6-2026-08", "CALL-P0037-2026-08", S1]
+    assert ids[24:26] == ["CALL-P-S8-2026-08", "CALL-P-S3-2026-08"]
     assert ids[-4:] == ["CALL-LATAR-004", "CALL-LATAR-003", "CALL-LATAR-002", "CALL-LATAR-001"]
+
+
+def test_antrean_skor_pola_sama_dengan_skor_demo(klien_v3):
+    skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
+    baris = klien_v3.get("/api/v1/antrean").json()["baris"]
+    for r in baris:
+        if r["status"] == "antre":
+            pid = r["id"].removeprefix("CALL-").removesuffix("-2026-08")
+            assert (r["skor_pola"], r["pola_tinggi"]) == (skor[pid]["skor"], skor[pid]["tinggi"]), r["id"]
+    assert sum(r["pola_tinggi"] for r in baris) == 22
+
+
+def test_antrean_tanpa_skor_di_akhir_antre_dan_skor_tidak_mengubah_pemicu(klien_v3, conn_v3):
+    conn_v3.execute("update indikator_bulanan set skor_pola = null, logit_pola = null, pola_tinggi = false where id_peserta = 'P-S1'")
+    conn_v3.execute("update indikator_bulanan set skor_pola = 1.0, logit_pola = 99, pola_tinggi = true where id_peserta = 'P-S7'")
+    h = klien_v3.get("/api/v1/antrean").json()
+    antre = [r for r in h["baris"] if r["status"] == "antre"]
+    assert antre[-1]["id"] == S1 and antre[-1]["skor_pola"] is None and antre[-1]["pola_tinggi"] is False
+    assert "CALL-P-S7-2026-08" not in {r["id"] for r in h["baris"]}  # skor tinggi tidak pernah memicu panggilan
+    assert h["angka"]["terpicu"] == 30 and h["angka"]["antre"] == 26
 
 
 def test_antrean_bentuk_baris_s1_dan_riwayat(klien_v3):
@@ -40,6 +69,7 @@ def test_antrean_bentuk_baris_s1_dan_riwayat(klien_v3):
         "id": S1, "pasien": "Andi Pratama", "umur": 54, "rs": "RS01", "nama_rs": "RS Melati Sehat", "ditagih": 11,
         "indikator": ["I1", "I2", "I4"], "penerima": {"nama": "Andi Pratama", "hubungan": "peserta"},
         "status": "antre", "label": None, "keputusan_tindakan": None, "prioritas": False, "percobaan": 0,
+        "coba_lagi_setelah": None, "skor_pola": 1.0, "pola_tinggi": True,
     }
     assert baris["CALL-P-S2-2026-08"]["penerima"] == {"nama": "Dewi Rahmawati", "hubungan": "anak"}
     r1 = baris["CALL-LATAR-001"]
@@ -57,8 +87,8 @@ def test_antrean_urutan_berjalan_prioritas_antre_selesai(klien_v3, conn_v3):
     ubah(conn_v3, "CALL-P-S8-2026-08", prioritas=True)
     ubah(conn_v3, S1, status="tidak_terhubung", label="Tidak terhubung", waktu_selesai=datetime(2026, 10, 6, 12, tzinfo=config.ZONA))
     ids = [r["id"] for r in klien_v3.get("/api/v1/antrean").json()["baris"]]
-    assert ids[:2] == ["CALL-P-S3-2026-08", "CALL-P-S8-2026-08"]
-    assert ids[2] == "CALL-P-S2-2026-08"
+    assert ids[:2] == ["CALL-P-S3-2026-08", "CALL-P-S8-2026-08"]  # berjalan, lalu Dahulukan walau skornya rendah
+    assert ids[2] == "CALL-P-S6-2026-08"  # antre pertama menurut logit skor pola
     assert ids[-5] == S1  # selesai terbaru dulu, di atas empat riwayat
 
 
@@ -66,8 +96,8 @@ def test_antrean_pengaturan_dan_jam(klien_v3, monkeypatch):
     jam_palsu(monkeypatch, jam_=10)
     p = klien_v3.get("/api/v1/antrean").json()["pengaturan"]
     assert p == {
-        "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00", "jeda_wa_menit": 1,
-        "jeda_percobaan_menit": 2, "dalam_jam": True, "waktu_server": "2026-10-06T10:00:00+07:00",
+        "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00", "jeda_wa_menit": 1,
+        "jeda_percobaan_menit": 2, "dalam_jam": True, "waktu_server": "2026-10-06T10:00:00+07:00", "stasiun": None,
     }
     jam_palsu(monkeypatch, jam_=17, menit=0)
     assert klien_v3.get("/api/v1/antrean").json()["pengaturan"]["dalam_jam"] is False
@@ -96,6 +126,41 @@ def test_detail_s1_sebelum_ditelepon(klien_v3):
     assert d["log"] == [] and d["transkrip"] == [] and d["tangkapan_sementara"] is None
     assert d["toleransi"] == 2 and d["galat_pembaca"] is None
     assert d["konteks_rs"] == {"rs": "RS01", "tidak_sesuai": 2, "terjawab": 4, "status": "Normal"}
+
+
+def test_detail_pola_s1_dua_alasan_dan_kombinasi(klien_v3):
+    pola = klien_v3.get(f"/api/v1/panggilan/{S1}").json()["pola"]
+    assert (pola["skor"], pola["tinggi"], pola["ambang"], pola["versi"]) == (1.0, True, 0.898, "pola-v1")
+    assert [a["fitur"] for a in pola["alasan"]] == ["maks_minggu", "ahad_libur"]
+    assert pola["alasan"][0]["teks"] == "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional."
+    assert pola["alasan"][1]["teks"] == "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."
+    assert all(a.keys() == {"fitur", "nilai", "kontribusi", "persentil_nasional", "teks"} for a in pola["alasan"])
+    assert pola["kombinasi"] == {
+        "kunci": "I1+I2+I4",
+        "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024.",
+    }
+
+
+def test_detail_pola_s3_wajar_dengan_prevalensi_pasti(klien_v3):
+    pola = klien_v3.get("/api/v1/panggilan/CALL-P-S3-2026-08").json()["pola"]
+    assert (pola["skor"], pola["tinggi"]) == (0.124, False)
+    assert pola["kombinasi"] == {
+        "kunci": "I1+I3", "teks": "Gabungan indikator ini muncul pada 0,22% tagihan bulanan fisioterapi nasional 2024.",
+    }
+
+
+def test_detail_pola_null_bila_belum_ada_skor_dan_tidak_memuat_kata_terlarang(klien_v3, conn_v3):
+    teks = klien_v3.get(f"/api/v1/panggilan/{S1}").text.lower() + klien_v3.get("/api/v1/ringkasan-rs").text.lower()
+    assert "fraud" not in teks and "curang" not in teks
+    conn_v3.execute("update indikator_bulanan set skor_pola = null where id_peserta = 'P-S1'")
+    assert klien_v3.get(f"/api/v1/panggilan/{S1}").json()["pola"] is None
+
+
+def test_detail_pola_tidak_mengubah_label_dan_saran(klien_v3, conn_v3):
+    """Skor setinggi apa pun: label dan saran tetap dari jawaban penerima."""
+    ubah(conn_v3, S1, status="selesai", label="Sesuai")
+    d = klien_v3.get(f"/api/v1/panggilan/{S1}").json()
+    assert (d["pola"]["skor"], d["label"], d["saran"]) == (1.0, "sesuai", "tutup")
 
 
 def test_detail_pesan_wa_persis_lampiran_b(klien_v3):
@@ -233,6 +298,48 @@ def test_ringkasan_rs_menjadi_perlu_klarifikasi_setelah_s1(klien_v3, conn_v3):
     assert klien_v3.get("/api/v1/antrean").json()["angka"]["rs_perlu_klarifikasi"] == 1
 
 
+def test_ringkasan_rs_pembanding_nasional_per_tipe(klien_v3):
+    h = klien_v3.get("/api/v1/ringkasan-rs").json()
+    pembanding = {r["id_rs"]: r["pembanding"] for r in h["rs"]}
+    assert pembanding["RS01"] == {
+        "tipe": "RS Swasta Setara Type C", "persen_terpicu_nasional": 1.48, "sesi_rata_nasional": 3.74,
+        "terpicu_p95_kelompok": 8.2, "posisi": "di_atas_p95",
+    }
+    assert {k: (v["tipe"], v["posisi"]) for k, v in pembanding.items() if k != "RS01"} == {
+        "RS02": ("RS Kelas B", "wajar"), "RS03": ("RS Swasta Setara Type C", "wajar"),
+        "RS04": ("RS Kelas C", "wajar"), "RS05": ("RS Swasta Setara Type B", "wajar"),
+    }
+    assert [r["pola_tinggi_tidak_terpicu"] for r in h["rs"]] == [0, 0, 0, 0, 0]
+    assert [r["status"] for r in h["rs"]] == ["Normal"] * 5  # pembanding tidak mengubah status RS
+
+
+def test_ringkasan_rs_pola_tinggi_tidak_terpicu_hanya_informasi(klien_v3, conn_v3):
+    conn_v3.execute("update indikator_bulanan set pola_tinggi = true where id_peserta = 'P-S7'")
+    h = klien_v3.get("/api/v1/ringkasan-rs").json()
+    rs04 = next(r for r in h["rs"] if r["id_rs"] == "RS04")
+    assert (rs04["pola_tinggi_tidak_terpicu"], rs04["terpicu"], rs04["status"]) == (1, 0, "Normal")
+    assert klien_v3.get("/api/v1/antrean").json()["angka"]["antre"] == 26
+
+
+def test_ringkasan_rs_bulan_tanpa_data_tidak_punya_pembanding(klien_v3):
+    h = klien_v3.get("/api/v1/ringkasan-rs", params={"bulan": "2026-09"}).json()
+    assert {r["pembanding"]["posisi"] for r in h["rs"]} == {"tidak_ada_pembanding"}
+    assert h["kinerja_pola"] == {
+        "n": 0, "skor_rata_tidak_sesuai": None, "skor_rata_sesuai": None, "tinggi_dan_tidak_sesuai": 0, "tinggi": 0,
+    }
+
+
+def test_ringkasan_rs_kinerja_pola_hanya_sesuai_dan_tidak_sesuai(klien_v3, conn_v3):
+    awal = klien_v3.get("/api/v1/ringkasan-rs").json()["kinerja_pola"]
+    assert awal == {"n": 4, "skor_rata_tidak_sesuai": 0.838, "skor_rata_sesuai": 0.468, "tinggi_dan_tidak_sesuai": 1, "tinggi": 1}
+    ubah(conn_v3, S1, status="selesai", label="Tidak sesuai")
+    ubah(conn_v3, "CALL-P-S3-2026-08", status="selesai", label="Sesuai")
+    ubah(conn_v3, "CALL-P-S4-2026-08", status="selesai", label="Tidak yakin")  # tidak dihitung
+    ubah(conn_v3, "CALL-P-S5-2026-08", status="tidak_terhubung", label="Tidak terhubung")  # tidak dihitung
+    k = klien_v3.get("/api/v1/ringkasan-rs").json()["kinerja_pola"]
+    assert k == {"n": 6, "skor_rata_tidak_sesuai": 0.892, "skor_rata_sesuai": 0.354, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2}
+
+
 # ---- GET /keputusan, /pengaturan, /kesehatan ----
 
 def test_keputusan_kosong_lalu_terkini_per_panggilan(klien_v3, conn_v3):
@@ -256,7 +363,7 @@ def test_keputusan_kosong_lalu_terkini_per_panggilan(klien_v3, conn_v3):
 
 def test_pengaturan_baca(klien_v3):
     assert klien_v3.get("/api/v1/pengaturan").json() == {
-        "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
+        "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
         "jeda_wa_menit": 1, "jeda_percobaan_menit": 2,
     }
 

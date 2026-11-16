@@ -30,7 +30,7 @@ FASKES = {
 
 def cors_origins() -> list[str]:
     """Origin FE yang boleh memanggil API langsung (dev). Produksi memakai rewrite Vercel, tanpa CORS."""
-    mentah = os.environ.get("CORS_ORIGINS", "http://localhost:8899,http://127.0.0.1:8899")
+    mentah = os.environ.get("CORS_ORIGINS", "http://localhost:8899,http://127.0.0.1:8899,http://localhost:8001")
     return [o.strip() for o in mentah.split(",") if o.strip()]
 
 
@@ -57,6 +57,8 @@ VERSI_ATURAN_V3 = "2026.10"
 BULAN_BAWAAN = "2026-08"
 MAKS_REKAMAN = 10 * 1024 * 1024
 KUNCI_AMBIL_MENIT = 5  # kunci ambil agen lepas bila tidak ada laporan selama ini
+KUNCI_MACET_MENIT = 5  # panggilan berjalan tanpa laporan selama ini dilepas sebagai satu percobaan gagal
+STASIUN_AKTIF_DETIK = 30  # stasiun dianggap aktif bila detaknya lebih baru dari ini
 BATAS_PANGGILAN_DETIK = 150  # R3.3: panggilan paling lama 2,5 menit
 WAKTU_PEMBACA_DETIK = 30
 BULAN_NAMA = {
@@ -80,3 +82,33 @@ def nomor_penelepon() -> str:
 
 def rekaman_dir() -> Path:
     return upload_dir() / "rekaman"
+
+
+# ---- WhatsApp lewat Meta Cloud API (app/wa.py) ----
+
+def meta_wa_mode() -> str:
+    """log (tanpa jaringan), teks, atau template. Tanpa token atau phone id selalu log."""
+    mode = os.environ.get("META_WA_MODE", "log").strip().lower()
+    if not meta_wa_token() or not meta_wa_phone_id() or mode not in ("teks", "template"):
+        return "log"
+    return mode
+
+
+def meta_wa_token() -> str | None:
+    return os.environ.get("META_WA_TOKEN") or None
+
+
+def meta_wa_phone_id() -> str | None:
+    return os.environ.get("META_WA_PHONE_ID") or None
+
+
+def meta_wa_api_version() -> str | None:
+    return os.environ.get("META_WA_API_VERSION") or None
+
+
+def meta_wa_template(jenis: str) -> str | None:
+    return os.environ.get(f"META_WA_TEMPLATE_{jenis.upper()}") or None
+
+
+def meta_wa_template_bahasa() -> str:
+    return os.environ.get("META_WA_TEMPLATE_BAHASA") or "id"

@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vedika Automatic Calling</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: single reading column (max 1180px) of plan sections; the architecture diagram and the call simulator sit side by side on wide screens and share highlight state. */
+:root {
+  --bg: oklch(98.6% .004 205);
+  --panel: oklch(100% 0 0);
+  --sunk: oklch(96.6% .007 205);
+  --fg: oklch(18% .01 220);
+  --fg-2: oklch(38% .012 220);
+  --muted: oklch(54% .012 220);
+  --line: oklch(90.5% .008 210);
+  --line-2: oklch(84% .01 210);
+  --accent: oklch(48% .085 205);
+  --accent-2: oklch(64% .11 184);
+  --accent-bg: oklch(95.5% .025 200);
+  --hl: oklch(70% .15 65);
+  --hl-bg: oklch(96% .05 80);
+  --new: oklch(52% .15 155); --new-bg: oklch(95.5% .04 155);
+  --chg: oklch(52% .14 255); --chg-bg: oklch(95.5% .03 255);
+  --keep: oklch(50% .01 220); --keep-bg: oklch(95% .005 220);
+  --del: oklch(54% .18 27); --del-bg: oklch(96% .03 27);
+  --warn: oklch(55% .12 70); --warn-bg: oklch(96.5% .045 85);
+  --shadow: 0 1px 2px oklch(25% .02 220 / .07), 0 4px 14px oklch(25% .02 220 / .05);
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: oklch(17% .012 225); --panel: oklch(21% .013 225); --sunk: oklch(19% .012 225);
+  --fg: oklch(94% .006 210); --fg-2: oklch(80% .01 210); --muted: oklch(66% .012 215);
+  --line: oklch(30% .014 225); --line-2: oklch(38% .016 225);
+  --accent: oklch(74% .1 195); --accent-2: oklch(76% .12 184); --accent-bg: oklch(28% .04 200);
+  --hl: oklch(78% .14 70); --hl-bg: oklch(32% .05 75);
+  --new: oklch(76% .14 155); --new-bg: oklch(29% .05 155);
+  --chg: oklch(76% .11 255); --chg-bg: oklch(29% .05 255);
+  --keep: oklch(72% .01 220); --keep-bg: oklch(28% .01 220);
+  --del: oklch(74% .14 27); --del-bg: oklch(30% .06 27);
+  --warn: oklch(80% .12 80); --warn-bg: oklch(30% .05 80);
+  --shadow: 0 1px 2px oklch(0% 0 0 / .3); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: oklch(17% .012 225); --panel: oklch(21% .013 225); --sunk: oklch(19% .012 225);
+  --fg: oklch(94% .006 210); --fg-2: oklch(80% .01 210); --muted: oklch(66% .012 215);
+  --line: oklch(30% .014 225); --line-2: oklch(38% .016 225);
+  --accent: oklch(74% .1 195); --accent-2: oklch(76% .12 184); --accent-bg: oklch(28% .04 200);
+  --hl: oklch(78% .14 70); --hl-bg: oklch(32% .05 75);
+  --new: oklch(76% .14 155); --new-bg: oklch(29% .05 155);
+  --chg: oklch(76% .11 255); --chg-bg: oklch(29% .05 255);
+  --keep: oklch(72% .01 220); --keep-bg: oklch(28% .01 220);
+  --del: oklch(74% .14 27); --del-bg: oklch(30% .06 27);
+  --warn: oklch(80% .12 80); --warn-bg: oklch(30% .05 80);
+  --shadow: 0 1px 2px oklch(0% 0 0 / .3); color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 0 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -.015em; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; border-radius: 4px; }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+.num { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* hero */
+.hero { padding-block: 40px 28px; display: grid; gap: 18px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font-size: clamp(28px, 4.2vw, 44px); font-weight: 800; line-height: 1.1; max-width: 22ch; }
+.hero .lede { font-size: 17px; color: var(--fg-2); max-width: 70ch; }
+.keputusan { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.keputusan div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); }
+.keputusan span { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.keputusan b { display: block; font-size: 15px; margin-top: 2px; }
+.keputusan small { color: var(--fg-2); font-size: 13px; }
+
+nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav.toc ul { list-style: none; margin: 0; padding: 10px 0; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+nav.toc a { display: block; white-space: nowrap; text-decoration: none; color: var(--fg-2); font-size: 13.5px; font-weight: 600; padding: 6px 10px; border-radius: 6px; }
+nav.toc a:hover { background: var(--sunk); color: var(--fg); }
+
+section.bagian { padding-top: 40px; display: grid; gap: 16px; scroll-margin-top: 56px; }
+.bagian-k { display: grid; gap: 6px; }
+.bagian-k h2 { font-size: 24px; font-weight: 800; }
+.bagian-k p { color: var(--fg-2); max-width: 72ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+
+/* decision log */
+.alasan { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.alasan .panel { padding: 16px; display: grid; gap: 8px; align-content: start; }
+.alasan h3 { font-size: 15px; }
+.alasan p { font-size: 14px; color: var(--fg-2); }
+.vonis { display: inline-flex; font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 99px; width: fit-content; }
+.vonis.tidak { background: var(--del-bg); color: var(--del); }
+.vonis.ya { background: var(--new-bg); color: var(--new); }
+.vonis.nanti { background: var(--chg-bg); color: var(--chg); }
+
+/* architecture + simulator */
+.arsi { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.diagram-wadah { padding: 12px; }
+.diagram-gulir { overflow-x: auto; }
+svg.diagram { display: block; width: 100%; min-width: 680px; height: auto; font-family: var(--font); }
+.zona { fill: none; stroke: var(--line-2); stroke-dasharray: 5 5; }
+.zona-l { font-size: 11px; font-weight: 700; letter-spacing: .1em; fill: var(--muted); }
+.tepi { fill: none; stroke: var(--line-2); stroke-width: 2; transition: stroke .25s; }
+.tepi.on { stroke: var(--hl); stroke-width: 3.5; }
+.tepi-l { font-size: 11px; fill: var(--muted); }
+.simpul { cursor: pointer; }
+.simpul rect.kotak { fill: var(--panel); stroke: var(--line-2); stroke-width: 1.5; transition: fill .25s, stroke .25s; }
+.simpul:hover rect.kotak { stroke: var(--accent); }
+.simpul.pilih rect.kotak { stroke: var(--accent); stroke-width: 2.5; }
+.simpul.on rect.kotak { fill: var(--hl-bg); stroke: var(--hl); stroke-width: 2.5; }
+.simpul:focus-visible { outline: none; }
+.simpul:focus-visible rect.kotak { stroke: var(--accent-2); stroke-width: 3; }
+.simpul .t { font-size: 14px; font-weight: 700; fill: var(--fg); }
+.simpul .s { font-size: 11.5px; fill: var(--muted); }
+.simpul .tag { font-size: 9.5px; font-weight: 800; letter-spacing: .08em; }
+.tag-new { fill: var(--new); } .tag-changed { fill: var(--chg); } .tag-kept { fill: var(--keep); }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--muted); padding: 10px 4px 2px; }
+.legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.legenda i { width: 10px; height: 10px; border-radius: 3px; }
+.rinci { padding: 16px; display: grid; gap: 10px; border-top: 1px solid var(--line); }
+.rinci h3 { font-size: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rinci p { font-size: 14px; color: var(--fg-2); }
+.rinci ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+.rinci .berkas { display: flex; flex-wrap: wrap; gap: 6px; }
+.rinci .berkas code { background: var(--sunk); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+.pil { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; }
+.pil-new { background: var(--new-bg); color: var(--new); } .pil-changed { background: var(--chg-bg); color: var(--chg); } .pil-kept { background: var(--keep-bg); color: var(--keep); } .pil-removed { background: var(--del-bg); color: var(--del); }
+
+.sim { display: grid; }
+.sim-k { padding: 14px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.sim-k h3 { font-size: 16px; }
+.skenario { display: flex; flex-wrap: wrap; gap: 6px; }
+.skenario button { border: 1px solid var(--line-2); background: var(--panel); border-radius: 99px; padding: 4px 11px; font-size: 13px; font-weight: 600; color: var(--fg-2); }
+.skenario button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.kendali { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel); font-size: 13px; font-weight: 600; }
+.btn:hover { background: var(--sunk); }
+.btn--utama { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.btn--utama:hover { background: var(--accent); filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn svg { width: 15px; height: 15px; }
+.langkah-hit { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+.layar { padding: 14px 16px; display: grid; gap: 12px; border-bottom: 1px solid var(--line); background: var(--sunk); }
+.layar-baris { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.status-pil { font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 5px; background: var(--chg-bg); color: var(--chg); }
+.petugas { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+.petugas span { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+ol.jejak { list-style: none; margin: 0; padding: 8px 0; max-height: 470px; overflow-y: auto; }
+ol.jejak li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 8px 16px; opacity: .45; transition: opacity .2s, background .2s; cursor: pointer; }
+ol.jejak li.lewat { opacity: .85; }
+ol.jejak li.kini { opacity: 1; background: var(--hl-bg); }
+ol.jejak .no { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line-2); display: grid; place-items: center; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--panel); }
+ol.jejak li.kini .no { border-color: var(--hl); background: var(--hl); color: var(--panel); }
+ol.jejak li.lewat .no { border-color: var(--accent); color: var(--accent); }
+ol.jejak b { display: block; font-size: 13.5px; }
+ol.jejak p { font-size: 13px; color: var(--fg-2); }
+ol.jejak .rute { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+
+/* phases */
+.kemajuan { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13.5px; color: var(--fg-2); }
+.batang { flex: 1; min-width: 160px; height: 8px; background: var(--sunk); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.batang i { display: block; height: 100%; background: var(--accent-2); width: 0; transition: width .3s; }
+.lini { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.lini div { border-radius: 8px; padding: 8px 10px; font-size: 12.5px; border: 1px solid var(--line); background: var(--panel); }
+.lini b { display: block; font-size: 13px; }
+.lini span { color: var(--muted); }
+.lini .gerbang { border-color: var(--hl); background: var(--hl-bg); }
+.fase { overflow: hidden; }
+.fase > button { width: 100%; border: 0; background: transparent; text-align: left; padding: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.fase-no { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.fase-k b { display: block; font-size: 16px; }
+.fase-k span { font-size: 13px; color: var(--muted); }
+.fase-hit { font-size: 12.5px; font-weight: 700; color: var(--fg-2); white-space: nowrap; }
+.fase-isi { border-top: 1px solid var(--line); padding: 6px 16px 14px; display: grid; gap: 4px; }
+.fase-tujuan { font-size: 14px; color: var(--fg-2); padding: 8px 0 6px; }
+.tiket { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px dashed var(--line); }
+.tiket:first-of-type { border-top: 0; }
+.tiket input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+.tiket-k { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.tiket-k code { font-weight: 600; color: var(--accent); font-size: 12.5px; }
+.tiket-k b { font-size: 14.5px; }
+.tiket-k .est { font-size: 12px; color: var(--muted); margin-left: auto; }
+.tiket.selesai .tiket-k b { text-decoration: line-through; color: var(--muted); }
+.tiket p { font-size: 13.5px; color: var(--fg-2); margin-top: 4px; }
+.tiket .ac { margin-top: 6px; font-size: 13px; padding: 7px 10px; border-radius: 6px; background: var(--new-bg); color: var(--fg); }
+.tiket .ac b { color: var(--new); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; margin-right: 6px; }
+.tiket .berkas { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.tiket .berkas code { font-size: 11.5px; background: var(--sunk); border: 1px solid var(--line); padding: 0 5px; border-radius: 4px; }
+.tanya { font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 1px 6px; border-radius: 4px; }
+
+/* feasibility */
+.uji { display: grid; gap: 10px; }
+.uji-b { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding: 14px 16px; }
+.uji-b .no { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-bg); color: var(--accent); font-weight: 800; display: grid; place-items: center; font-size: 13px; }
+.uji-b b { font-size: 15px; display: block; }
+.uji-b p { font-size: 13.5px; color: var(--fg-2); margin-top: 2px; }
+.kode { margin-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px; background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; padding: 8px 8px 8px 12px; }
+.kode pre { margin: 0; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; white-space: pre; }
+.kode button { height: 28px; padding: 0 10px; font-size: 12px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--panel); font-weight: 600; }
+.lulus { margin-top: 8px; font-size: 13px; color: var(--new); font-weight: 600; }
+.gagal-jalur { padding: 14px 16px; border-radius: 12px; border: 1px solid var(--hl); background: var(--hl-bg); font-size: 14px; }
+
+/* hardware */
+.alat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; align-items: start; }
+.alat table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.alat th { text-align: left; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.alat td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.alat tr:last-child td { border-bottom: 0; }
+.alat td small { display: block; color: var(--muted); font-size: 12.5px; }
+svg.kabel { display: block; width: 100%; min-width: 520px; height: auto; font-family: var(--font); }
+.kabel .k { fill: var(--panel); stroke: var(--line-2); stroke-width: 1.5; }
+.kabel .t { font-size: 13px; font-weight: 700; fill: var(--fg); }
+.kabel .s { font-size: 11px; fill: var(--muted); }
+.kabel .jalur-a { stroke: var(--accent-2); stroke-width: 2.5; fill: none; }
+.kabel .jalur-b { stroke: var(--chg); stroke-width: 2.5; fill: none; }
+.kabel .jalur-c { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 4 4; }
+.kabel .l { font-size: 11px; font-weight: 600; }
+.kabel .la { fill: var(--accent-2); } .kabel .lb { fill: var(--chg); } .kabel .lc { fill: var(--muted); }
+.catatan { font-size: 13px; color: var(--fg-2); padding: 12px 14px; border-top: 1px solid var(--line); }
+
+/* risks */
+.risiko { overflow-x: auto; }
+.risiko table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13.5px; }
+.risiko th { text-align: left; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--sunk); }
+.risiko td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.risiko tr:last-child td { border-bottom: 0; }
+.tingkat { font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.t-tinggi { background: var(--del-bg); color: var(--del); } .t-sedang { background: var(--warn-bg); color: var(--warn); } .t-rendah { background: var(--keep-bg); color: var(--keep); }
+
+/* repo changes */
+.ubah { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ubah .panel { padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.ubah h3 { font-size: 15px; display: flex; gap: 8px; align-items: center; }
+.ubah ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.ubah li { font-size: 13.5px; color: var(--fg-2); }
+.ubah li code { display: block; color: var(--fg); font-size: 12px; word-break: break-all; }
+.tetap { display: grid; gap: 8px; padding: 16px; }
+.tetap li { font-size: 14px; color: var(--fg-2); }
+.tetap ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.toast { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 20; }
+
+@media (max-width: 1020px) {
+  .arsi { grid-template-columns: minmax(0, 1fr); }
+  .alasan, .ubah { grid-template-columns: minmax(0, 1fr); }
+  .alat { grid-template-columns: minmax(0, 1fr); }
+  .lini { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .keputusan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fase > button { grid-template-columns: auto minmax(0, 1fr); }
+  .fase-hit { grid-column: 2; }
+}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">Vedika Autentik v3 · implementation plan · 15 Nov 2026</span>
+    <h1>Automatic patient calls from an Android phone, no Twilio</h1>
+    <p class="lede">The verifier website stays the only screen an officer uses. A team-owned “line station” (laptop + Android phone with an Indonesian SIM) works the queue by itself: the backend sends the WhatsApp notice through Meta, the station dials over ADB, Gemini Live talks through an audio cable, and the evidence card appears in the dashboard. One call at a time first; more phones later.</p>
+    <div class="keputusan">
+      <div><span>Phone line</span><b>Android + local SIM</b><small>dialed over ADB, audio by cable</small></div>
+      <div><span>Messages</span><b>Meta WhatsApp Cloud API</b><small>notice + fallback chat, sent by backend</small></div>
+      <div><span>Mode</span><b>Automatic, sequential</b><small>on by default, 09.00–17.00</small></div>
+      <div><span>Officer</span><b>One page, zero setup</b><small>no keys, no second console</small></div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sections"><ul>
+    <li><a href="#keputusan">Decisions</a></li>
+    <li><a href="#arsitektur">Architecture &amp; simulator</a></li>
+    <li><a href="#rencana">Phased plan</a></li>
+    <li><a href="#uji-awal">Day-one check</a></li>
+    <li><a href="#alat">Station hardware</a></li>
+    <li><a href="#risiko">Risks</a></li>
+    <li><a href="#repo">Repo changes</a></li>
+    <li><a href="#tetap">Unchanged rules</a></li>
+  </ul></nav>
+
+  <section class="bagian" id="keputusan">
+    <div class="bagian-k"><h2>Why this route</h2><p>Three options were weighed after the team agreed calls must be automatic and WhatsApp is only for messages.</p></div>
+    <div class="alasan">
+      <div class="panel"><span class="vonis tidak">Dropped</span><h3>Calling through WhatsApp Web</h3><p>A web page cannot drive web.whatsapp.com and personal WhatsApp has no calling API. Every call needed a person to send, dial and confirm, and it can never run in parallel.</p></div>
+      <div class="panel"><span class="vonis ya">Chosen for the prototype</span><h3>Android phone as the line</h3><p>Reuses the existing agent page (answer detection, transcript, recording, Kontrak B1). Real Indonesian number, cost is phone credit. ADB dials with no tap. One phone = one line.</p></div>
+      <div class="panel"><span class="vonis nanti">Production, later</span><h3>BPJS SIP line + Asterisk</h3><p>For production, BPJS's own SIP trunk (e.g. Care Center 165) behind Asterisk keeps an official number and data in Indonesia. The phone line sits behind one small helper, so that swap touches one component.</p></div>
+    </div>
+  </section>
+
+  <section class="bagian" id="arsitektur">
+    <div class="bagian-k"><h2>Architecture and a call, step by step</h2><p>Click any box for what it does and which files change. Pick a scenario and press Play: the boxes and links involved in each step light up, and the panel shows the backend status and what the officer sees at that moment.</p></div>
+    <div class="arsi">
+      <div class="panel">
+        <div class="diagram-wadah"><div class="diagram-gulir"><svg class="diagram" id="diagram" viewBox="0 0 1000 500" role="group" aria-label="System architecture"></svg></div>
+          <div class="legenda"><span><i style="background:var(--new)"></i>New</span><span><i style="background:var(--chg)"></i>Changed</span><span><i style="background:var(--keep)"></i>Kept as is</span><span><i style="background:var(--hl)"></i>Active in current step</span></div></div>
+        <div class="rinci" id="rinci" aria-live="polite"></div>
+      </div>
+      <div class="panel sim">
+        <div class="sim-k"><h3>Call simulator</h3>
+          <div class="skenario" id="skenario" role="group" aria-label="Scenario"></div>
+          <div class="kendali"><button class="btn btn--utama" type="button" id="main"></button><button class="btn" type="button" id="mundur" aria-label="Previous step">‹ Back</button><button class="btn" type="button" id="maju" aria-label="Next step">Next ›</button><button class="btn" type="button" id="ulang">Reset</button><span class="langkah-hit num" id="hit"></span></div>
+        </div>
+        <div class="layar"><div class="layar-baris"><span class="eyebrow">Backend status</span><span class="status-pil" id="status">antre</span></div><div class="petugas" id="petugas"></div></div>
+        <ol class="jejak" id="jejak"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="bagian" id="rencana">
+    <div class="bagian-k"><h2>Phased plan</h2><p>Each phase leaves the system working. Phase 0 is a gate on the real phone; Phases 1–4 can be built and tested without it using the fake phone helper. The first acceptance run is local (dev.sh on the station laptop). Ticks are saved in this browser only.</p></div>
+    <div class="lini" id="lini"></div>
+    <div class="kemajuan"><span id="kemajuanTeks"></span><div class="batang" aria-hidden="true"><i id="kemajuanBatang"></i></div><button class="btn" type="button" id="bukaSemua">Expand all</button></div>
+    <div id="fase" style="display:grid;gap:10px"></div>
+  </section>
+
+  <section class="bagian" id="uji-awal">
+    <div class="bagian-k"><h2>Day-one feasibility check</h2><p>About 30–60 minutes with the actual phone, cable and a tester's phone. Every row must pass before Phase 1 starts.</p></div>
+    <div class="uji" id="uji"></div>
+    <div class="gagal-jalur"><b>If any of steps 1–5 fails:</b> for audio, switch between speakerphone and the cable kit; for dialing, set a default SIM and try a second phone model (stock Android with a 3.5 mm jack). Only the Phone helper and the station hardware depend on the phone.</div>
+  </section>
+
+  <section class="bagian" id="alat">
+    <div class="bagian-k"><h2>Line station hardware</h2><p>Set up once by the team, then left running. The officer never touches it. Start with speakerphone (phone on speaker beside the laptop, no cables, Chrome echo cancellation on). Add the cable kit below only if transcripts are poor.</p></div>
+    <div class="alat">
+      <div class="panel"><table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody>
+        <tr><td><b>Android phone</b></td><td>Android 10+, ideally stock Android and a 3.5 mm headset jack<small>Avoid models that force a SIM chooser or block ADB-started calls; verify in the day-one check.</small></td></tr>
+        <tr><td><b>Prepaid SIM</b></td><td>Telkomsel, Indosat or XL with voice credit<small>Its number goes into the WhatsApp notice as the caller number.</small></td></tr>
+        <tr><td><b>TRRS splitter</b></td><td>CTIA standard, splits headset jack into mic-in and headphone-out</td></tr>
+        <tr><td><b>USB audio interface</b></td><td>Has a mic/line input and a headphone output<small>Shows up in Chrome as an input and an output device.</small></td></tr>
+        <tr><td><b>Two 3.5 mm cables</b></td><td>Phone audio → interface input; interface output → phone mic</td></tr>
+        <tr><td><b>Attenuator (optional)</b></td><td>Inline −20 to −30 dB on the line into the phone mic if the AI voice distorts</td></tr>
+        <tr><td><b>Data USB cable</b></td><td>Phone ↔ laptop for ADB and charging</td></tr>
+        <tr><td><b>Laptop</b></td><td>Always on, sleep disabled, Chrome, <code>adb</code>, <code>uv</code></td></tr>
+      </tbody></table></div>
+      <div class="panel"><div style="overflow-x:auto;padding:12px"><svg class="kabel" viewBox="0 0 640 330" role="img" aria-label="Wiring: phone headset jack through a splitter to a USB audio interface on the laptop, plus a USB data cable for ADB.">
+        <rect class="k" x="20" y="110" width="150" height="110" rx="14"/><text class="t" x="95" y="150" text-anchor="middle">Android phone</text><text class="s" x="95" y="168" text-anchor="middle">SIM · cellular call</text><text class="s" x="95" y="186" text-anchor="middle">headset jack (TRRS)</text>
+        <rect class="k" x="240" y="130" width="120" height="70" rx="10"/><text class="t" x="300" y="160" text-anchor="middle">Splitter</text><text class="s" x="300" y="178" text-anchor="middle">CTIA</text>
+        <rect class="k" x="440" y="40" width="180" height="90" rx="10"/><text class="t" x="530" y="74" text-anchor="middle">USB audio interface</text><text class="s" x="530" y="92" text-anchor="middle">IN: patient voice</text><text class="s" x="530" y="108" text-anchor="middle">OUT: AI voice</text>
+        <rect class="k" x="440" y="210" width="180" height="90" rx="10"/><text class="t" x="530" y="244" text-anchor="middle">Laptop</text><text class="s" x="530" y="262" text-anchor="middle">agent page · Phone helper</text><text class="s" x="530" y="278" text-anchor="middle">adb</text>
+        <path class="jalur-a" d="M170 165 H240"/>
+        <path class="jalur-a" d="M360 150 H400 V70 H440"/><text class="l la" x="372" y="62">headphone → IN</text>
+        <path class="jalur-b" d="M440 112 H410 V180 H360"/><text class="l lb" x="300" y="226">OUT → mic (attenuate)</text>
+        <path class="jalur-c" d="M530 130 V210"/><text class="l lc" x="540" y="174">USB audio</text>
+        <path class="jalur-c" d="M95 220 V310 H530 V300"/><text class="l lc" x="200" y="304">USB data: ADB dial, hang up, call state</text>
+      </svg></div><p class="catatan">Turn off phone speaker, notifications and incoming calls (Do Not Disturb with exceptions off). Keep the screen awake while plugged in: <code>adb shell svc power stayon usb</code>. Chrome on the agent page keeps echo cancellation off, as today, so set levels by ear on the first test call.</p></div>
+    </div>
+  </section>
+
+  <section class="bagian" id="risiko">
+    <div class="bagian-k"><h2>Risks and mitigations</h2><p>Sorted by impact on the demo.</p></div>
+    <div class="panel risiko"><table><thead><tr><th>Risk</th><th>Impact</th><th>Likelihood</th><th>Mitigation</th><th>Caught by</th></tr></thead><tbody id="risikoIsi"></tbody></table></div>
+  </section>
+
+  <section class="bagian" id="repo">
+    <div class="bagian-k"><h2>What changes in the repo</h2><p>Contract changes (B1) and schema changes are flagged in the tickets and need team sign-off before merging.</p></div>
+    <div class="ubah" id="ubah"></div>
+  </section>
+
+  <section class="bagian" id="tetap">
+    <div class="bagian-k"><h2>Rules that do not change</h2></div>
+    <div class="panel tetap"><ul>
+      <li>Labels and the RS summary are computed only by the backend with <code>data-uji-konfirmasi/tools/aturan.py</code>. The station and the reader never send a label.</li>
+      <li>Two attempts maximum, retry delay and WA delay decided by the server clock; fallback chat after the second miss.</li>
+      <li>Call script R3.3: admits it's an automated assistant; never asks for NIK, OTP, bank details or money; never says “curang” or “fraud”. WA text = Lampiran B, no links.</li>
+      <li>A person decides. “Pilih tindakan lain” always needs a written reason.</li>
+      <li>Recipient identity never reaches hospitals. Screens stay labelled “Simulasi”. No BPJS logo. Synthetic data only; prototype calls go to tester numbers (<code>NOMOR_PENGUJI</code>).</li>
+      <li>Secrets (<code>GEMINI_API_KEY</code>, <code>AGEN_KEY</code>, Meta token) stay server-side or in the station's local env, never in the officer's browser or in git.</li>
+      <li>The simulation fallback (<code>data-v3.js</code>) and the stubs keep working when the API or station is down.</li>
+    </ul></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
+  };
+  const toast = (t) => { const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el); setTimeout(() => el.remove(), 1600); };
+
+  /* ------------------------------------------------ architecture */
+  const W = 175, H = 64;
+  const N = {
+    web: { x: 20, y: 40, t: "Officer website", s: "index.html · app-v3.js", tag: "changed",
+      role: "The only screen an officer uses. Shows the queue, the live call, the evidence card and the RS summary by polling the API every second.",
+      changes: ["Panggilan otomatis is ON by default; “Telepon sekarang” becomes “Dahulukan” (move to front).", "Status strip explains what is happening or why nothing is: outside hours, station offline, retry countdown, call running.", "Per-call recovery: “Batalkan panggilan” counts as one failed attempt instead of “Mulai ulang demo”.", "Copy cleanup: drop “agen suara … masih stub”; clear “Mode simulasi” banner when the API is down."],
+      files: ["app-v3.js", "api-v3.js", "app-v3.css"] },
+    api: { x: 215, y: 40, t: "Backend API", s: "FastAPI · Supabase", tag: "changed",
+      role: "Owns the queue, hours, delays, retries, labels and retention. Sends WhatsApp messages itself now.",
+      changes: ["Sends the WA notice through Meta when a task is claimed, and the fallback chat after the second miss (agent no longer does either).", "New POST /agen/detak stores the station heartbeat (phone ready, or why not) so the website can say “Saluran telepon aktif / terputus”.", "New POST /panggilan/{id}/batal for officer recovery.", "Optional: Meta webhook stores the fallback-chat reply in jawaban_chat."],
+      files: ["backend/app/agen.py", "backend/app/router_agen.py", "backend/app/router_v3.py", "backend/app/wa.py (new)", "backend/app/tampilan_v3.py", "docs/api-contract-v3.md"] },
+    reader: { x: 410, y: 40, t: "Answer reader", s: "/v1/baca · Gemini text", tag: "kept",
+      role: "Turns the transcript into the structured answer (hadir, jumlah, keyakinan, tanda bahaya). Never returns a label.",
+      changes: ["No change. Already passes 7/7 official scenarios and 95.8% on the 20-case set."], files: ["ai-service/src/vedika_ai/answer_reader.py", "ai-service/worker/src/reader.js"] },
+    gemini: { x: 605, y: 40, t: "Gemini Live", s: "real-time voice", tag: "kept",
+      role: "Speaks Indonesian with the patient using the script built from the task's skrip. Token comes from /v1/suara/token.",
+      changes: ["No change to the prompt or session code. Audio devices become the USB interface instead of BlackHole."], files: ["ai-service/src/vedika_ai/voice.py", "ai-service/web/voice-agent.mjs"] },
+    meta: { x: 800, y: 40, t: "WhatsApp Cloud API", s: "Meta, direct", tag: "new",
+      role: "Delivers the pre-call notice (Lampiran B) and the fallback chat as approved templates. No Twilio in between.",
+      changes: ["Prototype: Meta test number, up to 5 registered tester recipients.", "Two templates: vedika_pemberitahuan and vedika_cadangan, text identical to Lampiran B, no links.", "Token and phone-number ID live only in backend env."], files: ["backend/app/wa.py (new)", "backend/.env.example"] },
+    agent: { x: 215, y: 210, t: "Agent page", s: "Chrome kiosk · /voice/", tag: "changed",
+      role: "Runs on the station laptop, not the officer's machine. Pulls tasks (Kontrak B1), runs Gemini Live, uploads transcript and recording.",
+      changes: ["Operator buttons removed: telepon() calls the Phone helper; the call ends on hang-up detected by the helper or after the closing line.", "Announcement filter: operator messages (“nomor yang Anda tuju…”) are not counted as an answer.", "Auto-starts from a launcher with config from local env: no URL, key or device to type.", "Claims a task only when the helper reports phone connected and SIM ready."],
+      files: ["ai-service/web/voice-agent.mjs", "ai-service/web/voice-console.html", "ai-service/web/voice-agent.test.mjs"] },
+    helper: { x: 410, y: 210, t: "Phone helper", s: "ADB · /v1/saluran", tag: "new",
+      role: "Small local API inside ai-service, enabled only on the station (SALURAN_ADB=1, localhost). Wraps adb so the agent page can dial, hang up and read call state.",
+      changes: ["GET /v1/saluran/kesehatan → device, SIM, battery.", "POST /v1/saluran/panggil {nomor} → am start CALL intent.", "POST /v1/saluran/tutup → KEYCODE_ENDCALL.", "GET /v1/saluran/status → idle / offhook from telephony.registry."], files: ["ai-service/src/vedika_ai/saluran.py (new)", "ai-service/src/vedika_ai/main.py", "ai-service/tests/test_saluran.py (new)"] },
+    audio: { x: 215, y: 410, t: "USB audio interface", s: "cable to phone jack", tag: "new",
+      role: "Carries the patient's voice into Chrome and the AI's voice back into the phone mic. Replaces BlackHole + WhatsApp Web routing.",
+      changes: ["Selected automatically by name from station env (SALURAN_INPUT / SALURAN_OUTPUT)."], files: ["dev.sh / station launcher"] },
+    android: { x: 410, y: 410, t: "Android phone", s: "Indonesian SIM", tag: "new",
+      role: "The phone line. Places a normal cellular call; its SIM number is the caller number named in the WA notice.",
+      changes: ["USB debugging on, laptop authorised once, default SIM set, Do Not Disturb, screen kept awake."], files: [] },
+    patient: { x: 800, y: 410, t: "Patient's phone", s: "normal cellular call", tag: "kept",
+      role: "Receives the WhatsApp notice, then a regular phone call about a minute later. Needs no app or login.",
+      changes: ["Prototype: always a tester's phone (NOMOR_PENGUJI), never a real participant."], files: [] }
+  };
+  const E = {
+    web_api: "M195,72 H215",
+    api_reader: "M390,72 H410",
+    api_meta: "M302,40 V20 H887 V40",
+    meta_patient: "M887,104 V410",
+    agent_api: "M260,210 V104",
+    agent_gemini: "M360,210 V150 H692 V104",
+    agent_helper: "M390,242 H410",
+    helper_android: "M497,274 V410",
+    agent_audio: "M302,274 V410",
+    audio_android: "M390,442 H410",
+    android_patient: "M585,442 H800"
+  };
+  const EL = [["api_meta", 600, 15, "WA notice · fallback chat"], ["meta_patient", 895, 262, "WhatsApp"], ["agent_api", 268, 140, "B1"], ["agent_gemini", 520, 144, "live audio"], ["helper_android", 505, 345, "ADB / USB"], ["agent_audio", 310, 345, "audio"], ["android_patient", 692, 432, "cellular call"]];
+
+  const svg = $("#diagram");
+  let html = `<rect class="zona" x="6" y="4" width="988" height="120" rx="12"/><text class="zona-l" x="20" y="117">CLOUD</text>
+    <rect class="zona" x="200" y="172" width="400" height="320" rx="12"/><text class="zona-l" x="212" y="486">LINE STATION · team laptop + phone, always on</text>`;
+  html += Object.entries(E).map(([id, d]) => `<path class="tepi" id="e-${id}" d="${d}"/>`).join("");
+  html += EL.map(([id, x, y, t]) => `<text class="tepi-l" x="${x}" y="${y}">${t}</text>`).join("");
+  html += Object.entries(N).map(([id, n]) => `<g class="simpul" id="n-${id}" data-id="${id}" tabindex="0" role="button" aria-label="${esc(n.t)}: details">
+      <rect class="kotak" x="${n.x}" y="${n.y}" width="${W}" height="${H}" rx="10"/>
+      <text class="tag tag-${n.tag}" x="${n.x + 12}" y="${n.y + 17}">${n.tag.toUpperCase()}</text>
+      <text class="t" x="${n.x + 12}" y="${n.y + 37}">${esc(n.t)}</text>
+      <text class="s" x="${n.x + 12}" y="${n.y + 54}">${esc(n.s)}</text></g>`).join("");
+  svg.innerHTML = html;
+
+  let pilih = "agent";
+  function rinci() {
+    const n = N[pilih];
+    document.querySelectorAll(".simpul").forEach((g) => g.classList.toggle("pilih", g.dataset.id === pilih));
+    $("#rinci").innerHTML = `<h3>${esc(n.t)} <span class="pil pil-${n.tag}">${n.tag}</span></h3><p>${esc(n.role)}</p>
+      <ul>${n.changes.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>${n.files.length ? `<div class="berkas">${n.files.map((f) => `<code>${esc(f)}</code>`).join("")}</div>` : ""}`;
+  }
+  svg.addEventListener("click", (e) => { const g = e.target.closest(".simpul"); if (g) { pilih = g.dataset.id; rinci(); } });
+  svg.addEventListener("keydown", (e) => { const g = e.target.closest(".simpul"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pilih = g.dataset.id; rinci(); } });
+  rinci();
+
+  /* ------------------------------------------------ simulator */
+  const awalPanggil = [
+    { t: "Station claims the next task", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "antre → diambil", o: "Status strip: “Sedang menelepon Andi Pratama · menyiapkan”. Automatic mode is on, it's 09.31, no other call running.", p: "Every 3 s the agent asks the Phone helper if the phone is ready, posts that to /agen/detak, then calls POST /agen/ambil only when ready." },
+    { t: "Backend sends the WhatsApp notice", r: "Backend → Meta → Patient", n: ["api", "meta", "patient"], e: ["api_meta", "meta_patient"], st: "wa_terkirim", o: "Progress: “Pesan WA terkirim 09.31”.", p: "Template vedika_pemberitahuan with Lampiran B text: who will call, from which number (the station SIM), no data or payment requested, verify via 165." },
+    { t: "Wait the notice delay", r: "Backend", n: ["api"], e: [], st: "wa_terkirim", o: "Progress: “Memanggil dalam 0:42”.", p: "1 minute in the prototype, 10 in production. The agent retries “menelepon” and gets 409 jeda_belum_lewat until the server clock allows it." },
+    { t: "Station dials the patient", r: "Agent page → Phone helper → Android → Patient", n: ["agent", "helper", "android", "patient"], e: ["agent_helper", "helper_android", "android_patient"], st: "menelepon", o: "Progress: “Berdering ke 0812-…”.", p: "POST /v1/saluran/panggil runs adb shell am start -a android.intent.action.CALL -d tel:… — no tap on the phone. Gemini Live starts listening through the USB interface; ringback is ignored." }
+  ];
+  const S = {
+    jawab: { nama: "Answered (S1)", langkah: awalPanggil.concat([
+      { t: "Patient says “Halo?”", r: "Patient → Android → USB audio → Agent page", n: ["patient", "android", "audio", "agent"], e: ["android_patient", "audio_android", "agent_audio"], st: "tersambung → merekam", o: "Progress: “Tersambung 09.33”. Transcript panel opens.", p: "First recipient words that are not an operator announcement count as the answer. The agent reports tersambung, then merekam." },
+      { t: "AI runs the script", r: "Gemini Live ↔ Agent page ↔ phone", n: ["gemini", "agent", "audio", "android", "patient"], e: ["agent_gemini", "agent_audio", "audio_android", "android_patient"], st: "merekam", o: "Transcript streams line by line; “Yang ditangkap AI” fills in: hadir Ya, 3 sesi, membantah 16–17 Agustus.", p: "Script A–F with skrip variables (RS Melati Sehat, Agustus, 16 dan 17 Agustus). Each turn is POSTed to …/transkrip." },
+      { t: "Call ends", r: "Agent page → Phone helper → Android", n: ["agent", "helper", "android"], e: ["agent_helper", "helper_android"], st: "merekam", o: "Progress: “Membaca jawaban…” next.", p: "Either the patient hangs up (helper sees call state go idle) or, 3 s after the AI's closing line, the helper sends KEYCODE_ENDCALL. Hard stop at batas_detik (150 s)." },
+      { t: "Upload result", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "membaca_jawaban", o: "Row status: “Membaca jawaban”.", p: "POST …/hasil with the two-way .webm recording, final transcript and durasi." },
+      { t: "Read answer, compute label", r: "Backend → Answer reader", n: ["api", "reader"], e: ["api_reader"], st: "selesai · Tidak sesuai", o: "Evidence card opens: 11 billed vs 3, difference 8, Tidak sesuai, suggested “Minta klarifikasi RS”. RS Melati becomes Perlu klarifikasi RS (3 of 5).", p: "Reader returns JSON only; aturan.py computes the label and hapus_pada. Retry once on reader failure, else Tidak yakin." },
+      { t: "Next patient", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "next task", o: "Officer decides on the card while the station already calls the next patient.", p: "The next agen/ambil returns the following queued patient. No officer click needed." }
+    ]) },
+    tidak: { nama: "No answer twice (S5)", langkah: awalPanggil.concat([
+      { t: "No words for 40 s", r: "Agent page → Phone helper → Android", n: ["agent", "helper", "android"], e: ["agent_helper", "helper_android"], st: "menelepon", o: "Progress: “Tidak diangkat”.", p: "Helper hangs up with KEYCODE_ENDCALL; the agent reports tidak_diangkat." },
+      { t: "Retry scheduled, queue moves on", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "antre (percobaan 2 · coba_lagi_setelah)", o: "Row: “Coba lagi 1:58”. Meanwhile the station calls the next patient.", p: "Backend sets coba_lagi_setelah = now + jeda_percobaan_menit (2 min prototype, 2 h production) and releases the line." },
+      { t: "Second attempt, no notice", r: "Agent page → Phone helper → Android → Patient", n: ["agent", "helper", "android", "patient"], e: ["agent_helper", "helper_android", "android_patient"], st: "menelepon (percobaan 2)", o: "Progress: “Memanggil · percobaan 2”.", p: "agen/ambil returns S5 again with wa.lewati = true, so it dials straight away." },
+      { t: "No answer again", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "tidak_terhubung", o: "Row: “Tidak terhubung”.", p: "Second tidak_diangkat → status tidak_terhubung, label Tidak terhubung." },
+      { t: "Backend sends the fallback chat", r: "Backend → Meta → Patient", n: ["api", "meta", "patient"], e: ["api_meta", "meta_patient"], st: "tidak_terhubung · chat terkirim", o: "Card shows the attempts log and the chat that was sent.", p: "Template vedika_cadangan with options 1–6. Sent by the backend; no operator step. Optional: the reply comes back by webhook into jawaban_chat." }
+    ]) },
+    pengumuman: { nama: "Operator announcement", langkah: awalPanggil.concat([
+      { t: "Operator voice plays", r: "Patient's network → Android → USB audio → Agent page", n: ["android", "audio", "agent"], e: ["audio_android", "agent_audio"], st: "menelepon", o: "Still “Memanggil”. Nothing is shown as answered.", p: "“Nomor yang Anda tuju tidak dapat dihubungi…” is transcribed, matched against the announcement phrase list, and NOT counted as an answer. Without this filter it would wrongly report tersambung." },
+      { t: "Treated as no answer", r: "Agent page → Phone helper / Backend", n: ["agent", "helper", "android", "api"], e: ["agent_helper", "helper_android", "agent_api"], st: "antre (percobaan 2)", o: "Row: “Coba lagi 1:59”.", p: "Helper hangs up, agent reports tidak_diangkat; same retry and fallback rules as S5." }
+    ]) },
+    tutup: { nama: "Patient hangs up mid-call", langkah: awalPanggil.concat([
+      { t: "Patient answers", r: "Patient → Agent page", n: ["patient", "android", "audio", "agent"], e: ["android_patient", "audio_android", "agent_audio"], st: "merekam", o: "Transcript starts.", p: "Normal answer detection." },
+      { t: "Line drops after one question", r: "Android → Phone helper → Agent page", n: ["android", "helper", "agent"], e: ["helper_android", "agent_helper"], st: "merekam", o: "Transcript stops; progress moves to “Membaca jawaban”.", p: "Helper status turns idle; the agent stops Gemini Live within a second instead of waiting for a button." },
+      { t: "Partial result is read", r: "Agent page → Backend → Answer reader", n: ["agent", "api", "reader"], e: ["agent_api", "api_reader"], st: "selesai · Tidak yakin", o: "Card: Tidak yakin, “Pantau. Tidak dihitung.”", p: "Rules decide: no count heard → Tidak yakin. Nothing is guessed." }
+    ]) },
+    offline: { nama: "Station goes offline", langkah: [
+      { t: "Laptop sleeps or phone unplugged", r: "Line station", n: ["agent", "helper", "android"], e: [], st: "—", o: "Nothing yet.", p: "The helper reports no device, so the agent stops claiming tasks. No call is started on a dead line." },
+      { t: "Heartbeat goes stale", r: "Backend → Officer website", n: ["api", "web"], e: ["web_api"], st: "stasiun.terakhir_terlihat > 30 s", o: "Status strip: “Saluran telepon terputus sejak 10.14. Antrean menunggu; tidak ada yang hilang.”", p: "Website reads the heartbeat from GET /antrean (pengaturan)." },
+      { t: "A call was mid-flight", r: "Officer website → Backend", n: ["web", "api"], e: ["web_api"], st: "menelepon → antre (percobaan 2)", o: "Row shows “Terputus” with “Batalkan panggilan”. One click counts it as a failed attempt.", p: "POST /panggilan/{id}/batal. If nobody clicks, the 5-minute claim lock releases it anyway. “Mulai ulang demo” is never needed." },
+      { t: "Station back", r: "Agent page → Backend", n: ["agent", "api"], e: ["agent_api"], st: "next task", o: "Strip returns to “Panggilan otomatis aktif”.", p: "Launcher restarts the kiosk page on boot; polling resumes on its own." }
+    ] }
+  };
+  let sk = "jawab", i = -1, timer = null;
+  const skBtns = Object.entries(S).map(([k, v]) => `<button type="button" data-k="${k}" aria-pressed="${k === sk}">${esc(v.nama)}</button>`).join("");
+  $("#skenario").innerHTML = skBtns;
+
+  function terang() {
+    const L = S[sk].langkah, cur = L[i];
+    document.querySelectorAll(".simpul").forEach((g) => g.classList.toggle("on", !!cur && cur.n.includes(g.dataset.id)));
+    document.querySelectorAll(".tepi").forEach((p) => p.classList.toggle("on", !!cur && cur.e.includes(p.id.slice(2))));
+    $("#status").textContent = cur ? cur.st : "antre";
+    $("#petugas").innerHTML = `<span>Officer sees</span>${esc(cur ? cur.o : "Queue with Andi Pratama, Joko Prasetyo and others waiting. Automatic mode is on.")}`;
+    $("#hit").textContent = `${Math.max(i + 1, 0)} / ${L.length}`;
+    $("#jejak").innerHTML = L.map((l, j) => `<li class="${j === i ? "kini" : j < i ? "lewat" : ""}" data-j="${j}"><span class="no">${j + 1}</span><div><span class="rute">${esc(l.r)}</span><b>${esc(l.t)}</b><p>${esc(l.p)}</p></div></li>`).join("");
+    const kini = $("#jejak li.kini");
+    if (kini) { const ol = $("#jejak"); ol.scrollTop = kini.offsetTop - ol.offsetTop - 40; }
+    $("#mundur").disabled = i <= 0;
+    $("#maju").disabled = i >= L.length - 1;
+    $("#main").innerHTML = timer ? "❚❚ Pause" : i >= L.length - 1 ? "▶ Replay" : "▶ Play";
+  }
+  function henti() { clearInterval(timer); timer = null; }
+  function main() {
+    if (timer) { henti(); terang(); return; }
+    const L = S[sk].langkah;
+    if (i >= L.length - 1) i = -1;
+    i += 1;
+    timer = setInterval(() => { if (i >= S[sk].langkah.length - 1) { henti(); terang(); return; } i += 1; terang(); }, 2600);
+    terang();
+  }
+  $("#main").addEventListener("click", main);
+  $("#maju").addEventListener("click", () => { henti(); i = Math.min(i + 1, S[sk].langkah.length - 1); terang(); });
+  $("#mundur").addEventListener("click", () => { henti(); i = Math.max(i - 1, 0); terang(); });
+  $("#ulang").addEventListener("click", () => { henti(); i = -1; terang(); });
+  $("#skenario").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; henti(); sk = b.dataset.k; i = -1; document.querySelectorAll("#skenario button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); terang(); });
+  $("#jejak").addEventListener("click", (e) => { const li = e.target.closest("li"); if (!li) return; henti(); i = Number(li.dataset.j); terang(); });
+  terang();
+
+  /* ------------------------------------------------ phases */
+  const FASE = [
+    { id: "P0", nama: "Feasibility gate", hari: "Day 1", tujuan: "Prove the phone can dial with no tap, report call state, and carry audio both ways, and that Meta can deliver a message to a tester. No product code yet.", tiket: [
+      { id: "P0-1", t: "ADB dial, hang up and call state on the real phone", est: "1 h", d: "Run the day-one commands against a tester number.", ac: "Tester phone rings with nobody touching the Android phone; mCallState reads 2 during the call and 0 after; KEYCODE_ENDCALL ends it.", f: [] },
+      { id: "P0-2", t: "Audio both ways through the cable", est: "1 h", d: "Wire splitter + USB interface. Speak on the tester phone, play a tone from the laptop.", ac: "Patient voice moves the input meter in Chrome; laptop tone is heard clearly on the tester phone; no loud echo or hum.", f: [] },
+      { id: "P0-3", t: "Manual Gemini Live call over the cable", est: "1 h", d: "Use today's /voice/ page, choose the USB interface as input/output, dial by hand with ADB, run S1.", ac: "3 calls in a row understandable; transcript ≥90% correct (PRD R3.6 gate).", f: ["ai-service/web/voice-console.html"] },
+      { id: "P0-4", t: "Meta WhatsApp test message", est: "1 h", d: "Create the Meta app + test number, register tester numbers, send hello_world. Submit the two templates the same day.", ac: "Message arrives on a tester phone; templates submitted for review.", f: [], tanya: "Who owns the Meta business account?" }
+    ] },
+    { id: "P1", nama: "Line station", hari: "Days 2–4", tujuan: "The station works the queue with zero clicks. WhatsApp can still be the old manual link during this phase.", tiket: [
+      { id: "P1-1", t: "Phone helper in ai-service", est: "0.5 d", d: "saluran.py wraps adb via subprocess (ADB serial from env). Endpoints /v1/saluran/kesehatan, /panggil, /tutup, /status. Mounted only when SALURAN_ADB=1 and bound to localhost.", ac: "Unit tests with a fake adb pass; endpoints absent when SALURAN_ADB is unset; logs never contain phone numbers.", f: ["ai-service/src/vedika_ai/saluran.py", "ai-service/src/vedika_ai/main.py", "ai-service/tests/test_saluran.py"] },
+      { id: "P1-2", t: "Automatic operator in the agent page", est: "1 d", d: "Replace ask() buttons: telepon() → helper /panggil after jeda; poll helper /status during the call and stop the session when idle; hang up 3 s after the closing line or at batas_detik.", ac: "voice-agent.test.mjs covers answered, no answer, remote hang-up and timeout; S1 runs end to end with the robot recipient with no click.", f: ["ai-service/web/voice-agent.mjs", "ai-service/web/voice-console.html", "ai-service/web/voice-agent.test.mjs"] },
+      { id: "P1-3", t: "Operator-announcement filter", est: "0.5 d", d: "Phrase list (tidak dapat dihubungi, sedang sibuk, di luar jangkauan, tidak aktif, kotak suara, mailbox, silakan tinggalkan pesan …). A match on the first recipient words is not an answer.", ac: "Unit tests: each phrase → not answered; “Halo?” and “Iya, saya sendiri” → answered.", f: ["ai-service/web/voice-agent.mjs"] },
+      { id: "P1-4", t: "Health gate and heartbeat", est: "0.5 d", d: "Every 3 s the agent posts /agen/detak {siap, alasan} from the helper health check, and calls agen/ambil only when siap.", ac: "Unplug phone → no task claimed, website shows the station offline within 30 s.", f: ["ai-service/web/voice-console.html", "backend/app/router_agen.py"] },
+      { id: "P1-5", t: "Station launcher", est: "0.5 d", d: "One command starts ai-service with SALURAN_ADB=1 and opens a dedicated Chrome profile with --use-fake-ui-for-media-stream and --autoplay-policy=no-user-gesture-required on /voice/?mulai=1. Backend URL, agent key and device names come from local env via a localhost-only config endpoint.", ac: "Cold start to polling in under 30 s with zero typing or clicks.", f: ["dev.sh", "ai-service/web/voice-console.html"] }
+    ] },
+    { id: "P2", nama: "WhatsApp from the backend", hari: "Days 2–3 (parallel)", tujuan: "Messages become fully automatic and leave the station's hands.", tiket: [
+      { id: "P2-1", t: "Meta sender module", est: "0.5 d", d: "wa.py sends through the Graph API with httpx in one of three modes: approved template, free-form text (works within 24 h after the tester messages the test number), or log-only when Meta isn't configured. Env: META_WA_MODE, META_WA_TOKEN, META_WA_PHONE_ID, template names.", ac: "Unit tests with mocked HTTP; rendered text equals Lampiran B and contains no link.", f: ["backend/app/wa.py", "backend/.env.example", "backend/tests/test_wa.py"] },
+      { id: "P2-2", t: "Backend sends notice and fallback chat itself", est: "0.75 d", d: "Notice sent when a first-attempt task is claimed (logs wa_terkirim); fallback chat sent on the second tidak_diangkat (sets chat_cadangan_terkirim). Agent no longer reports either; stub_agen updated.", ac: "test_api_v3_agen covers both; a Meta failure is logged and the call still proceeds (notice) / label still Tidak terhubung (chat).", f: ["backend/app/agen.py", "backend/app/router_agen.py", "backend/scripts/stub_agen.py", "docs/api-contract-v3.md"] },
+      { id: "P2-3", t: "Caller number = station SIM", est: "0.1 d", d: "NOMOR_PENELEPON set to the station SIM so the notice names the number that actually rings.", ac: "Notice on tester phone shows the same number as the incoming call.", f: ["backend/.env"] },
+      { id: "P2-4", t: "Optional: record fallback-chat replies", est: "0.5 d", d: "Webhook endpoint verifies Meta's signature and stores the reply in jawaban_chat.", ac: "Replying “2” on the tester phone shows on the S5 card.", f: ["backend/app/router_agen.py"] }
+    ] },
+    { id: "P3", nama: "Officer experience", hari: "Days 4–5", tujuan: "The officer opens one page and the queue is already being worked; the page always says what is happening.", tiket: [
+      { id: "P3-1", t: "Automatic by default, “Dahulukan” instead of “Telepon sekarang”", est: "0.25 d", d: "mode_otomatis defaults to true after seed/reset; the row button moves a patient to the front.", ac: "Fresh reset during 09–17: S1 is called without any officer click.", f: ["backend/scripts/seed_v3.py", "app-v3.js"] },
+      { id: "P3-2", t: "Status strip with station heartbeat", est: "0.75 d", d: "Backend keeps the latest /agen/detak in the pengaturan key-value table (no schema change) and returns pengaturan.stasiun in GET /antrean; the strip shows: running call, retry countdown, outside hours, station offline, paused.", ac: "Unplug the phone → strip says “Saluran telepon terputus” within 30 s.", f: ["backend/app/tampilan_v3.py", "backend/app/repo_v3.py", "app-v3.js", "app-v3.css"] },
+      { id: "P3-3", t: "Per-call recovery", est: "0.5 d", d: "POST /panggilan/{id}/batal counts as one failed attempt and frees the line; button on stuck rows.", ac: "Kill the agent mid-call → officer clicks Batalkan → queue continues; no reset needed.", f: ["backend/app/router_v3.py", "backend/app/agen.py", "app-v3.js"] },
+      { id: "P3-4", t: "Copy cleanup and simulation banner", est: "0.25 d", d: "Remove “agen suara dan pembaca jawaban masih stub”; show a persistent “Mode simulasi” banner when falling back to data-v3.js.", ac: "tests/alur.test.js updated and green.", f: ["app-v3.js", "tests/alur.test.js"] },
+      { id: "P3-5", t: "No pre-recorded clips in API mode", est: "0.25 d", d: "The call screen must never play the ElevenLabs clips (suara_langsung) when data comes from the API; only the real recording plays on the evidence card.", ac: "Live S1 call shows the live transcript with no stray audio from the website.", f: ["api-v3.js", "app-v3.js"] }
+    ] },
+    { id: "P4", nama: "Verification and demo", hari: "Day 6", tujuan: "Prove it on real phones and make the demo repeatable.", tiket: [
+      { id: "P4-1", t: "Automated run without a phone", est: "0.5 d", d: "agent_e2e.mjs uses a fake Phone helper and the robot recipient for S1, S5 and the announcement case.", ac: "Exit 0 for all three; runs on any dev laptop.", f: ["ai-service/scripts/agent_e2e.mjs"] },
+      { id: "P4-2", t: "Real-phone run S1–S8", est: "0.5 d", d: "Testers play the recipients from skenario_uji.json.", ac: "Labels match expected_label; RS summary matches expected_ringkasan_rs.json after S1 and after all scenarios.", f: ["data-uji-konfirmasi/skenario_uji.json"] },
+      { id: "P4-3", t: "Demo runbook", est: "0.25 d", d: "Station checklist (charge, DND, levels), reset, what to do if the station drops (simulation fallback).", ac: "A teammate who didn't build it runs the demo from the runbook alone.", f: ["docs/"] },
+      { id: "P4-4", t: "Optional: deployed backend", est: "0.5 d", d: "Recordings to a private Supabase Storage bucket and check that background reading finishes on Vercel; otherwise read synchronously inside /hasil.", ac: "A call against the Vercel backend reaches the evidence card with a playable recording.", f: ["backend/app/penyimpanan.py", "backend/app/router_agen.py"] }
+    ] },
+    { id: "P5", nama: "Later", hari: "After the demo", tujuan: "Scale and production. Not part of this sprint.", tiket: [
+      { id: "P5-1", t: "Parallel lines", est: "—", d: "N phones on one station (helper keyed by ADB serial); backend setting maks_jalur replaces the single-active-call rule.", ac: "Two calls run at once without crossing audio.", f: [] },
+      { id: "P5-2", t: "Production line", est: "—", d: "BPJS SIP trunk + Asterisk/FreeSWITCH streaming to the same bridge; WhatsApp from BPJS's verified account; Gemini Live on Vertex AI for quota.", ac: "Official number shown to patients; data stays in Indonesia.", f: [] }
+    ] }
+  ];
+  let selesai = store.get("vedika-rencana-v1", {});
+  let buka = { P0: true, P1: true };
+  const semua = FASE.flatMap((f) => f.tiket).filter((t) => !t.id.startsWith("P5"));
+
+  $("#lini").innerHTML = FASE.map((f) => `<div class="${f.id === "P0" ? "gerbang" : ""}"><b>${f.id} · ${esc(f.nama)}</b><span>${esc(f.hari)}</span></div>`).join("");
+  function gambarFase() {
+    const n = semua.filter((t) => selesai[t.id]).length;
+    $("#kemajuanTeks").textContent = `${n} of ${semua.length} tickets done (P0–P4)`;
+    $("#kemajuanBatang").style.width = `${Math.round((n / semua.length) * 100)}%`;
+    $("#fase").innerHTML = FASE.map((f) => {
+      const k = f.tiket.filter((t) => selesai[t.id]).length;
+      return `<div class="panel fase"><button type="button" data-fase="${f.id}" aria-expanded="${!!buka[f.id]}"><span class="fase-no">${f.id}</span><span class="fase-k"><b>${esc(f.nama)}</b><span>${esc(f.hari)}</span></span><span class="fase-hit num">${k}/${f.tiket.length} done</span></button>
+        ${buka[f.id] ? `<div class="fase-isi"><p class="fase-tujuan">${esc(f.tujuan)}</p>${f.tiket.map((t) => `<div class="tiket ${selesai[t.id] ? "selesai" : ""}"><input type="checkbox" id="c-${t.id}" data-t="${t.id}" ${selesai[t.id] ? "checked" : ""} aria-label="Mark ${t.id} done"><div>
+          <label class="tiket-k" for="c-${t.id}"><code>${t.id}</code><b>${esc(t.t)}</b>${t.tanya ? `<span class="tanya">Needs sign-off: ${esc(t.tanya)}</span>` : ""}<span class="est">${esc(t.est)}</span></label>
+          <p>${esc(t.d)}</p><div class="ac"><b>Done when</b>${esc(t.ac)}</div>${t.f.length ? `<div class="berkas">${t.f.map((x) => `<code>${esc(x)}</code>`).join("")}</div>` : ""}</div></div>`).join("")}</div>` : ""}</div>`;
+    }).join("");
+    $("#bukaSemua").textContent = FASE.every((f) => buka[f.id]) ? "Collapse all" : "Expand all";
+  }
+  $("#fase").addEventListener("click", (e) => { const b = e.target.closest("button[data-fase]"); if (b) { buka[b.dataset.fase] = !buka[b.dataset.fase]; gambarFase(); } });
+  $("#fase").addEventListener("change", (e) => { const c = e.target.closest("input[data-t]"); if (c) { selesai[c.dataset.t] = c.checked; store.set("vedika-rencana-v1", selesai); gambarFase(); } });
+  $("#bukaSemua").addEventListener("click", () => { const all = FASE.every((f) => buka[f.id]); FASE.forEach((f) => { buka[f.id] = !all; }); gambarFase(); });
+  gambarFase();
+
+  /* ------------------------------------------------ day-one check */
+  const UJI = [
+    ["Phone is visible to the laptop", "USB debugging on, laptop authorised on the phone's prompt.", "adb devices", "One device listed as “device”, not “unauthorized”."],
+    ["Dial without touching the phone", "Use a tester's number. Set a default SIM first on dual-SIM phones.", "adb shell am start -a android.intent.action.CALL -d tel:08XXXXXXXXXX", "Tester phone rings; the Android screen shows an outgoing call with no prompt."],
+    ["Read call state", "Run while the call is up, then after hanging up.", "adb shell dumpsys telephony.registry | grep mCallState", "2 during the call, 0 after."],
+    ["Hang up from the laptop", "", "adb shell input keyevent KEYCODE_ENDCALL", "Call ends on both phones."],
+    ["Audio both ways", "Plug the splitter and USB interface. Open any recorder or the /voice/ page meter with the interface as input. Speak on the tester phone, then play a tone from the laptop to the interface output.", "adb shell svc power stayon usb", "Input meter moves when the tester speaks; the tester hears the tone clearly; no echo loop."],
+    ["Meta test message", "Meta app with WhatsApp product, test number, tester number registered as a recipient.", "curl -X POST \"https://graph.facebook.com/<version>/<PHONE_NUMBER_ID>/messages\" \\\n  -H \"Authorization: Bearer $META_WA_TOKEN\" -H \"Content-Type: application/json\" \\\n  -d '{\"messaging_product\":\"whatsapp\",\"to\":\"62XXXXXXXXXX\",\"type\":\"template\",\"template\":{\"name\":\"hello_world\",\"language\":{\"code\":\"en_US\"}}}'", "Message arrives on the tester phone. Use the API version shown in your Meta app dashboard."]
+  ];
+  $("#uji").innerHTML = UJI.map((u, j) => `<div class="panel uji-b"><span class="no">${j + 1}</span><div><b>${esc(u[0])}</b>${u[1] ? `<p>${esc(u[1])}</p>` : ""}
+    <div class="kode"><pre id="k${j}">${esc(u[2])}</pre><button type="button" data-salin="k${j}">Copy</button></div><p class="lulus">Pass: ${esc(u[3])}</p></div></div>`).join("");
+  $("#uji").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-salin]"); if (!b) return;
+    const el = document.getElementById(b.dataset.salin);
+    navigator.clipboard.writeText(el.textContent).then(() => toast("Copied")).catch(() => { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected, press Ctrl/Cmd+C"); });
+  });
+
+  /* ------------------------------------------------ risks */
+  const RISIKO = [
+    ["Phone model blocks ADB-started calls or shows a SIM chooser", "tinggi", "sedang", "Set default SIM; prefer stock Android; keep a second model on hand.", "P0-2 step 2"],
+    ["Call audio does not reach the headset jack / USB-C adapter", "tinggi", "sedang", "Start with speakerphone; for cables choose a phone with a 3.5 mm jack; verify before buying hardware.", "P0-2"],
+    ["Operator announcements or voicemail counted as an answer", "tinggi", "tinggi", "Announcement phrase filter on the first recipient words; reader still decides the label.", "P1-3, P4-1"],
+    ["Echo or distortion through the cable", "sedang", "tinggi", "Attenuator on the mic line, set levels once, phone speaker off; Gemini handles the rest.", "P0-2, P0-3"],
+    ["Meta template review delay", "sedang", "sedang", "Free-form text works within 24 h after the tester messages the test number; log-only mode keeps calls running if Meta isn't set up; submit templates on day 1.", "P0-4"],
+    ["Station is a single point of failure", "sedang", "sedang", "Health gate, heartbeat in the status strip, 5-minute claim lock, per-call Batalkan, simulation fallback.", "P1-4, P3-2, P3-3"],
+    ["Caller is a personal prepaid number, patients suspect a scam", "sedang", "sedang", "Notice names the exact number and Care Center 165; production moves to an official BPJS line.", "P2-3"],
+    ["Operator flags the SIM for automated calling", "sedang", "rendah", "Prototype volume is tiny and paced (one line, one call at a time, testers only).", "P4-2"],
+    ["Gemini Live quota on the Developer API", "rendah", "rendah", "Sequential calling uses one session at a time; move to Vertex AI before parallel lines.", "P5-1"]
+  ];
+  const lbl = { tinggi: "High", sedang: "Medium", rendah: "Low" };
+  $("#risikoIsi").innerHTML = RISIKO.map((r) => `<tr><td><b>${esc(r[0])}</b></td><td><span class="tingkat t-${r[1]}">${lbl[r[1]]}</span></td><td><span class="tingkat t-${r[2]}">${lbl[r[2]]}</span></td><td>${esc(r[3])}</td><td class="mono" style="font-size:12px">${esc(r[4])}</td></tr>`).join("");
+
+  /* ------------------------------------------------ repo changes */
+  const UBAH = [
+    ["new", "Add", [["ai-service/src/vedika_ai/saluran.py", "Phone helper (ADB wrapper + /v1/saluran/*)"], ["backend/app/wa.py", "Meta WhatsApp sender"], ["Station launcher in dev.sh", "Chrome kiosk profile + auto-start"], ["Tests", "test_saluran.py, test_wa.py, announcement + hang-up cases in voice-agent.test.mjs"]]],
+    ["changed", "Change", [["ai-service/web/voice-agent.mjs · voice-console.html", "Automatic operator, announcement filter, health gate"], ["backend/app/agen.py · router_agen.py", "Backend sends WA; heartbeat; batal"], ["backend/app/tampilan_v3.py · repo_v3.py", "pengaturan.stasiun heartbeat, no schema change"], ["app-v3.js · api-v3.js", "Auto default, Dahulukan, status strip, recovery"], ["docs/api-contract-v3.md · READMEs", "Kontrak B1 and station setup"]]],
+    ["removed", "Remove", [["Operator ask() buttons", "Saya menelepon, Tidak diangkat, Pesan WA terkirim, Chat cadangan terkirim"], ["WhatsApp Web + BlackHole call setup", "Docs move to an archive note; set_audio.swift no longer needed for calls"], ["Typed config on the agent page", "Backend URL, Kunci agen, device pickers"], ["Kept on purpose", "stub_agen.py, stub_mesin, data-v3.js simulation, the Cloudflare Worker reader"]]]
+  ];
+  $("#ubah").innerHTML = UBAH.map(([k, t, xs]) => `<div class="panel"><h3><span class="pil pil-${k}">${t}</span></h3><ul>${xs.map((x) => `<li><code>${esc(x[0])}</code>${esc(x[1])}</li>`).join("")}</ul></div>`).join("");
+})();
+</script>
+
+</html>

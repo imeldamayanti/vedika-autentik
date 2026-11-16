@@ -6,9 +6,9 @@ from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, UploadFile
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from . import agen, config
+from . import agen, config, jam, repo_v3
 from .deps import get_buka_conn, get_conn, get_mesin, get_penyimpanan
 from .galat import Galat
 
@@ -27,6 +27,19 @@ def ambil(conn=Depends(get_conn)):
     tugas = agen.ambil_tugas(conn)
     conn.commit()
     return JSONResponse(tugas) if tugas else Response(status_code=204)
+
+
+class Detak(BaseModel):
+    siap: bool
+    alasan: str | None = Field(None, max_length=200)
+    perangkat: str | None = Field(None, max_length=200)
+
+
+@router.post("/agen/detak", status_code=204)
+def detak(body: Detak, conn=Depends(get_conn)):
+    repo_v3.simpan_pengaturan(conn, {"stasiun": {"terakhir_terlihat": jam.iso(jam.sekarang()), **body.model_dump()}})
+    conn.commit()
+    return Response(status_code=204)
 
 
 class Laporan(BaseModel):

@@ -7,6 +7,62 @@ const OPENING_CUE = "Panggilan sudah tersambung dan penerima sudah mengangkat. M
 const AUDIO_EXTENSIONS = { "audio/mpeg": "mp3", "audio/mp4": "m4a", "audio/ogg": "ogg", "audio/wav": "wav" };
 const audioExtension = (blob) => AUDIO_EXTENSIONS[blob.type.split(";")[0]] || "webm";
 
+export const AUDIO_BLOCKED = "Chrome memblokir audio; jalankan lewat stasiun.sh";
+export const ANSWER_TIMEOUT_MS = 40000;
+export const DIAL_GRACE_MS = 5000;
+export const LINE_POLL_MS = 1000;
+export const CLOSING_HANGUP_MS = 3000;
+// Pause kept after the last audio of the goodbye before the line is cut.
+export const GOODBYE_TAIL_MS = 1000;
+export const SILENCE_HANGUP_MS = 10000;
+// Sent to the model after the first silence following its question: on a phone line the answer is
+// often missed, so the AI asks once more before the call is ended.
+export const REPLY_NUDGE = "Penerima sudah selesai menjawab. Tanggapi jawabannya dengan singkat, lalu lanjutkan "
+  + "ke langkah berikutnya. Jangan mengulang pertanyaan yang sudah dijawab.";
+export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Ulangi pertanyaan terakhir dengan singkat, "
+  + "tanpa sapaan dan tanpa kata halo. Jangan menganggap penerima sudah menjawab atau membenarkan.";
+// After the network reports the call as answered, how long the recipient may stay silent before
+// the AI opens the conversation itself.
+export const PICKUP_SILENCE_MS = 3000;
+// Microphone level (RMS, 0..1 after Chrome's gain control) above which the line counts as speech.
+export const VOICE_ACTIVITY_RMS = 0.035;
+
+const normalize = (teks) => String(teks || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+const ANNOUNCEMENTS = [
+  "nomor yang anda tuju", "tidak dapat dihubungi", "tidak aktif", "sedang sibuk", "di luar jangkauan", "berada di luar",
+  "kotak suara", "mailbox", "silakan tinggalkan pesan", "silakan coba", "the number you", "is not active", "is busy",
+  "cannot be reached",
+];
+
+// A carrier recording ("Nomor yang Anda tuju…") is speech on the line but not an answer.
+export const isOperatorAnnouncement = (teks) => {
+  const text = normalize(teks);
+  return ANNOUNCEMENTS.some((phrase) => text.includes(phrase));
+};
+
+// The AI's goodbye: a time-of-day farewell at the end of the turn, "sudah kami catat", or the script's
+// closing promise that the answer does not affect service or dues (step F). A question is never one.
+export const isClosingLine = (teks) => {
+  if (String(teks || "").trim().endsWith("?")) return false;
+  const text = normalize(teks);
+  return /sudah (kami|saya) catat/.test(text)
+    || /tidak (akan )?(memengaruhi|mempengaruhi) layanan/.test(text)
+    || /terima kasih atas waktu(nya)?/.test(text)
+    || /selamat (pagi|siang|sore|malam)/.test(text.slice(-60));
+};
+
+// The script's mandatory last sentence (step F). Matched while the AI is still speaking, because
+// Gemini does not always close the turn after its goodbye.
+export const isGoodbyePhrase = (teks) => /terima kasih atas waktu(nya)?/.test(normalize(teks));
+
+// The officer cancelled or the backend released the call: nothing more may be reported for it.
+export const isCallGone = (error) => error?.status === 404
+  || (error?.status === 409 && ["urutan_salah", "bukan_berlangsung"].includes(error.kode));
+
+export const pickDevice = (devices, kind, hint) => (hint
+  ? devices.find((device) => device.kind === kind && device.label.includes(hint)) || null
+  : null);
+
 export function createAgentApi({ baseUrl, agentKey, fetchImpl = fetch }) {
   const send = async (path, body) => {
     const isForm = body instanceof FormData;
@@ -30,6 +86,7 @@ export function createAgentApi({ baseUrl, agentKey, fetchImpl = fetch }) {
   const call = (id) => `/panggilan/${encodeURIComponent(id)}`;
   return {
     ambil: () => send("/agen/ambil"),
+    detak: (keadaan) => send("/agen/detak", keadaan),
     lapor: (id, laporan) => send(`${call(id)}/status`, { laporan, waktu: new Date().toISOString() }),
     kirimTranskrip: (id, baris) => send(`${call(id)}/transkrip`, { baris }),
     kirimHasil: (id, { transkrip, rekaman, durasi }) => {
@@ -67,42 +124,277 @@ export async function reportWhenAllowed(api, id, laporan, { sleep = delay } = {}
 }
 
 // Runs one Kontrak B1 task. The backend decides delays, retries, and labels; the agent only reports.
-export async function runTask({ api, task, operator, converse, sleep = delay, onError }) {
-  if (!task.wa.lewati) {
-    await operator.kirimWa(task);
-    await api.lapor(task.id, "wa_terkirim");
-  }
-  await operator.telepon(task);
-  await reportWhenAllowed(api, task.id, "menelepon", { sleep });
-  // The call counts as answered when the recipient's first words are heard. Lines spoken
-  // before that wait, because the backend only accepts transcript once "tersambung".
-  let answered = null;
-  let sent = Promise.resolve();
-  const early = [];
-  const send = (baris) => {
-    sent = sent
-      .then(() => api.kirimTranskrip(task.id, [baris]))
-      .catch((error) => onError?.(error));
-  };
-  const hasil = await converse(task, {
-    onAnswered: () => {
-      answered = api.lapor(task.id, "tersambung").then(() => api.lapor(task.id, "merekam"));
-      sent = answered;
-      early.splice(0).forEach(send);
-      return answered;
-    },
-    onTurn: (baris) => (answered ? send(baris) : early.push(baris)),
-  });
-  if (!hasil.answered) {
-    const status = await api.lapor(task.id, "tidak_diangkat");
-    if (status.chat_cadangan) {
-      await operator.kirimChatCadangan(status.chat_cadangan);
-      await api.lapor(task.id, "chat_cadangan_terkirim");
+export async function runTask({ api, task, operator, converse, sleep = delay, onError, onLog }) {
+  const cancelled = { status: "dibatalkan" };
+  let halting = null;
+  const lost = (error) => {
+    if (!isCallGone(error)) return false;
+    if (!halting) {
+      onLog?.(`${task.id}: dibatalkan petugas atau dilepas backend; panggilan dihentikan`);
+      halting = Promise.resolve().then(() => operator.batal?.()).catch(() => {});
     }
-    return status;
+    return true;
+  };
+  try {
+    if (!task.wa.dikirim_server && !task.wa.lewati) {
+      await operator.kirimWa(task);
+      await api.lapor(task.id, "wa_terkirim");
+    }
+    // The backend holds "menelepon" until the WA delay has passed, so report first and dial after.
+    await reportWhenAllowed(api, task.id, "menelepon", { sleep });
+    let dialed = true;
+    try {
+      await operator.telepon(task);
+    } catch (error) {
+      dialed = false;
+      onError?.(error);
+    }
+    // Lines spoken before the answer wait, because the backend only accepts transcript once
+    // "tersambung"; for a no-answer they are never sent.
+    let answered = null;
+    let sent = Promise.resolve();
+    const early = [];
+    const send = (baris) => {
+      sent = sent
+        .then(() => api.kirimTranskrip(task.id, [baris]))
+        .catch((error) => { if (!lost(error)) onError?.(error); });
+    };
+    const hasil = dialed ? await converse(task, {
+      onAnswered: () => {
+        answered = api.lapor(task.id, "tersambung")
+          .then(() => api.lapor(task.id, "merekam"))
+          .catch((error) => { if (!lost(error)) throw error; });
+        sent = answered;
+        early.splice(0).forEach(send);
+        return answered;
+      },
+      onTurn: (baris) => (answered ? send(baris) : early.push(baris)),
+    }) : { answered: false };
+    if (!hasil.answered && !halting) {
+      const status = await api.lapor(task.id, "tidak_diangkat");
+      if (status.chat_cadangan && !status.chat_cadangan.dikirim_server) {
+        await operator.kirimChatCadangan(status.chat_cadangan);
+        await api.lapor(task.id, "chat_cadangan_terkirim");
+      }
+      return status;
+    }
+    await sent;
+    if (halting) {
+      await halting;
+      return cancelled;
+    }
+    return await api.kirimHasil(task.id, hasil);
+  } catch (error) {
+    if (!lost(error)) throw error;
+    await halting;
+    return cancelled;
   }
-  await sent;
-  return api.kirimHasil(task.id, hasil);
+}
+
+export function createLineApi({ fetchImpl = (...args) => fetch(...args), baseUrl = "" } = {}) {
+  const send = async (method, path, body) => {
+    const response = await fetchImpl(`${baseUrl}/v1/saluran${path}`, {
+      method,
+      headers: body === undefined ? {} : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw Object.assign(new Error(payload?.galat?.pesan || `saluran ${response.status}`), {
+        status: response.status,
+        kode: payload?.galat?.kode,
+      });
+    }
+    return payload;
+  };
+  return {
+    konfigurasi: () => send("GET", "/konfigurasi"),
+    kesehatan: () => send("GET", "/kesehatan"),
+    status: () => send("GET", "/status"),
+    panggil: (nomor) => send("POST", "/panggil", { nomor }),
+    tutup: () => send("POST", "/tutup"),
+  };
+}
+
+// One loop turn of the station: phone health, heartbeat to the backend, then claim a task if ready.
+export async function stationTick({ line, api, audioReady = () => true, onError }) {
+  const sehat = await line.kesehatan().catch((error) => {
+    onError?.(error);
+    return { siap: false, alasan: "Phone helper tidak menjawab", perangkat: null, sim: null };
+  });
+  const blocked = !audioReady();
+  const siap = Boolean(sehat.siap) && !blocked;
+  await api.detak({ siap, alasan: blocked ? AUDIO_BLOCKED : sehat.alasan ?? null, perangkat: sehat.perangkat ?? null })
+    .catch((error) => onError?.(error));
+  let task = null;
+  if (siap) task = await api.ambil().catch((error) => { onError?.(error); return null; });
+  return { sehat, siap, blocked, task };
+}
+
+// The automatic operator: dials through the Phone helper, decides answered / not answered / when
+// to hang up, and always releases the line. `startSession(options)` returns a started-or-starting
+// VedikaVoiceSession-like object with stop(reason) and playbackRemainingMs().
+export function createStationOperator({ line, startSession, onPhase, onLog, onError }) {
+  let current = null;
+  const hangUp = () => line.tutup().catch((error) => onError?.(error));
+  const unsupported = async () => { throw new Error("tidak didukung"); };
+
+  const converse = (task, { onAnswered, onTurn }) => new Promise((resolve) => {
+    const dialedAt = Date.now();
+    let answered = false;
+    let ended = false;
+    let seenOffhook = false;
+    let aiTurns = 0;
+    let closing = null;
+    let silence = null;
+    let pickup = null;
+    let heardRecipient = false;
+    let nudged = false;
+    let lastSpeaker = null;
+    let session = null;
+    const clearTimers = () => {
+      clearTimeout(noAnswer);
+      clearTimeout(closing);
+      clearTimeout(silence);
+      clearTimeout(pickup);
+      clearInterval(poll);
+    };
+    const end = (reason, note) => {
+      if (ended) return;
+      ended = true;
+      clearTimers();
+      if (note) onLog?.(`${task.id}: ${note}`);
+      hangUp();
+      Promise.resolve(session?.stop(reason)).catch((error) => onError?.(error));
+    };
+    const noAnswerAfter = () => setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
+    let noAnswer = noAnswerAfter();
+    let ringingSeen = false;
+    const poll = setInterval(async () => {
+      const reply = await line.status().catch(() => null);
+      const state = reply?.panggilan;
+      if (ended || !state) return;
+      if (state !== "idle") {
+        seenOffhook = true;
+        // Some networks take 30 s before the recipient's phone rings; the 40 s answer window counts
+        // from the first ring, not from dialing.
+        if (reply.berdering && !ringingSeen && !answered) {
+          ringingSeen = true;
+          clearTimeout(noAnswer);
+          noAnswer = noAnswerAfter();
+        }
+        // tersambung true: answered. null/absent: this line cannot tell (fake phone), so listen now.
+        if (reply.tersambung !== false) session?.releaseInput?.();
+        // Carrier announcements play before the call is answered, so a network "answered" here is
+        // a person (or voicemail), never the operator.
+        if (reply.tersambung && !answered && !heardRecipient && !pickup) {
+          pickup = setTimeout(() => {
+            if (!answered && !ended && !heardRecipient && session?.openFirst?.()) {
+              onLog?.(`${task.id}: diangkat tanpa suara; AI membuka lebih dulu`);
+            }
+          }, PICKUP_SILENCE_MS);
+        }
+        return;
+      }
+      if (answered) end("selesai", "penerima menutup telepon");
+      else if (seenOffhook || Date.now() - dialedAt > DIAL_GRACE_MS) end("tidak_diangkat", "panggilan berakhir sebelum dijawab");
+    }, LINE_POLL_MS);
+    const afterPlayback = (ms) => ms + (session?.playbackRemainingMs?.() || 0);
+    // The goodbye's transcript can arrive while its audio is still streaming in (the recipient spoke
+    // over it), so check again just before hanging up and wait out whatever is still playing.
+    const hangUpAfterGoodbye = () => {
+      if (ended) return;
+      const left = session?.playbackRemainingMs?.() || 0;
+      if (left > 0) {
+        closing = setTimeout(hangUpAfterGoodbye, left + GOODBYE_TAIL_MS);
+        return;
+      }
+      end("selesai", "AI menutup panggilan");
+    };
+    // First silence after an AI turn: the AI asks again. Second silence in a row: end the call.
+    const onSilence = () => {
+      // After the goodbye only hangUpAfterGoodbye ends the call, once its audio has played.
+      if (ended || closing) return;
+      // Never ask again once the AI has said goodbye.
+      // Recipient spoke last but the AI never answered (Gemini did not hear the end of the turn):
+      // ask it to respond. AI spoke last: ask it to repeat the question.
+      const recipientLast = lastSpeaker === "penerima";
+      if (!nudged && session?.nudge?.(recipientLast ? REPLY_NUDGE : SILENCE_NUDGE)) {
+        nudged = true;
+        onLog?.(`${task.id}: hening 10 detik; ${recipientLast ? "AI diminta menanggapi jawaban" : "AI mengulang pertanyaan"}`);
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
+        return;
+      }
+      end("selesai", recipientLast ? "AI tidak menanggapi jawaban" : "hening 10 detik setelah giliran AI");
+    };
+
+    current = { stop: (reason) => end(reason) };
+    onPhase?.("menelepon");
+    session = startSession({
+      greetFirst: false,
+      holdInput: true,
+      context: task.skrip,
+      acceptAnswer: (teks) => !isOperatorAnnouncement(teks),
+      onRejectedAnswer: () => end("tidak_diangkat", "pengumuman operator, bukan jawaban"),
+      onAnswer: () => {
+        answered = true;
+        clearTimeout(noAnswer);
+        onPhase?.("tersambung");
+        Promise.resolve(onAnswered()).catch((error) => onError?.(error));
+      },
+      onSpeech: (pembicara) => {
+        clearTimeout(silence);
+        silence = null;
+        lastSpeaker = pembicara;
+        if (pembicara === "penerima") {
+          heardRecipient = true;
+          nudged = false;
+          clearTimeout(pickup);
+          // The AI normally answers within seconds; this clock only runs out if it never does.
+          if (answered && !closing && !ended) silence = setTimeout(onSilence, SILENCE_HANGUP_MS);
+        }
+      },
+      onPartial: (turn) => {
+        if (turn.pembicara !== "ai" || !answered || ended || closing || aiTurns < 1) return;
+        if (isGoodbyePhrase(turn.teks)) closing = setTimeout(hangUpAfterGoodbye, afterPlayback(CLOSING_HANGUP_MS));
+      },
+      onVoiceActivity: () => {
+        if (!silence || ended || closing) return;
+        clearTimeout(silence);
+        silence = setTimeout(onSilence, SILENCE_HANGUP_MS);
+      },
+      onTranscript: (turn) => {
+        onTurn(turn);
+        if (!answered || ended || turn.pembicara !== "ai") return;
+        aiTurns += 1;
+        clearTimeout(silence);
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
+        // The opener can start with "Selamat siang"; only a later turn can close the call.
+        if (aiTurns > 1 && isClosingLine(turn.teks) && !closing) {
+          closing = setTimeout(hangUpAfterGoodbye, afterPlayback(CLOSING_HANGUP_MS));
+        }
+      },
+      onError,
+      onComplete: ({ transkrip, recording, durasi }) => {
+        ended = true;
+        clearTimers();
+        current = null;
+        onPhase?.("selesai");
+        hangUp().finally(() => resolve({ answered, transkrip, rekaman: recording, durasi }));
+      },
+    });
+  });
+
+  return {
+    kirimWa: unsupported,
+    kirimChatCadangan: unsupported,
+    telepon: (task) => line.panggil(task.no_tujuan),
+    batal: async () => {
+      current?.stop("dibatalkan");
+      await hangUp();
+    },
+    converse,
+  };
 }
 
 export function float32ToPcm16(samples) {
@@ -154,9 +446,18 @@ export function buildSetupMessage(model, instruction) {
       model: `models/${model.replace(/^models\//, "")}`,
       generationConfig: {
         responseModalities: ["AUDIO"],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
+        temperature: 0.4,
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }, languageCode: "id-ID" },
       },
-      inputAudioTranscription: {},
+      inputAudioTranscription: { languageCodes: ["id-ID"] },
+      realtimeInputConfig: {
+        automaticActivityDetection: {
+          startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
+          endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
+          prefixPaddingMs: 200,
+          silenceDurationMs: 1500,
+        },
+      },
       outputAudioTranscription: {},
       systemInstruction: { parts: [{ text: instruction }] },
     },
@@ -246,6 +547,25 @@ export class VedikaVoiceSession {
     this.cleanupPromise = null;
     this.messageQueue = Promise.resolve();
     this.stoppedTracks = new Set();
+    // Station calls hold the microphone until the phone network reports the call as answered, so
+    // ringback, room noise or a carrier recording never reach Gemini as the recipient's words.
+    this.inputHeld = Boolean(options.holdInput);
+  }
+
+  releaseInput() {
+    this.inputHeld = false;
+  }
+
+  // Transcripts arrive only after the recipient finishes a sentence, so silence is judged from the
+  // microphone level itself: someone still talking on the line keeps the call from being nudged.
+  reportVoiceActivity(samples) {
+    let energy = 0;
+    for (let i = 0; i < samples.length; i += 1) energy += samples[i] * samples[i];
+    if (Math.sqrt(energy / Math.max(1, samples.length)) < VOICE_ACTIVITY_RMS) return;
+    const now = performance.now();
+    if (now - (this.lastVoiceAt ?? -Infinity) < 250) return;
+    this.lastVoiceAt = now;
+    this.options.onVoiceActivity?.();
   }
 
   emitStatus(status) {
@@ -271,18 +591,22 @@ export class VedikaVoiceSession {
       const credentials = await tokenResponse.json();
       this.ensureActive();
 
-      // Chrome keeps an AudioContext suspended (silent both ways) unless it is created during a
-      // user gesture, so the page creates it at the operator's "Diangkat" click and passes it in.
+      // Chrome keeps an AudioContext suspended (silent both ways) unless a user gesture or the
+      // launcher's --autoplay-policy=no-user-gesture-required allows it. Each call gets a fresh one.
       this.audioContext = this.options.audioContext || new this.AudioContextImpl();
       if (this.audioContext.state === "suspended") {
         await Promise.race([this.audioContext.resume?.(), delay(1000)]);
-        if (this.audioContext.state !== "running") {
-          throw new Error("audio Chrome terkunci (AudioContext suspended); klik Diangkat langsung saat telepon diangkat");
-        }
+        if (this.audioContext.state !== "running") throw new Error(AUDIO_BLOCKED);
       }
-      // The input is the call line, not a room mic. Chrome's echo canceller would erase the
-      // recipient's voice whenever the call itself plays in the same Chrome (WhatsApp Web).
-      const line = { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+      // Default (cable): the input is the call line, so Chrome's processing stays off. Speaker
+      // mode passes lineConstraints with echo cancellation on, or the AI would hear itself.
+      const line = {
+        channelCount: 1,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        ...(this.options.lineConstraints || {}),
+      };
       const inputStream = await this.mediaDevices.getUserMedia({
         audio: this.options.inputDeviceId
           ? { deviceId: { exact: this.options.inputDeviceId }, ...line }
@@ -342,13 +666,12 @@ export class VedikaVoiceSession {
         if (
           this.stopping
           || !this.ready
+          || this.inputHeld
           || this.socket?.readyState !== this.WebSocketImpl.OPEN
         ) return;
-        const downsampled = resample(
-          event.inputBuffer.getChannelData(0),
-          this.audioContext.sampleRate,
-          INPUT_RATE,
-        );
+        const samples = event.inputBuffer.getChannelData(0);
+        this.reportVoiceActivity(samples);
+        const downsampled = resample(samples, this.audioContext.sampleRate, INPUT_RATE);
         const pcm = float32ToPcm16(downsampled);
         this.socket.send(JSON.stringify({
           realtimeInput: {
@@ -392,10 +715,8 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
-    if (event.setupComplete && !this.ready && this.options.greetFirst !== false) {
-      this.socket?.send(JSON.stringify({
-        clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
-      }));
+    if (event.setupComplete && !this.ready && (this.options.greetFirst !== false || this.openWhenReady)) {
+      this.sendOpeningCue();
     }
     this.ready ||= event.setupComplete;
     if (action.clearPlayback) this.clearPlayback();
@@ -405,20 +726,45 @@ export class VedikaVoiceSession {
     for (const chunk of event.audioChunks) this.playPcm(chunk);
   }
 
+  // Ask the model to speak again (for example after the recipient stayed silent).
+  nudge(text) {
+    if (this.stopping || !this.ready || !this.socket) return false;
+    this.socket.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text }] }], turnComplete: true },
+    }));
+    return true;
+  }
+
+  sendOpeningCue() {
+    this.openWhenReady = false;
+    this.socket?.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
+    }));
+  }
+
+  // The phone network says the call is up but the recipient has not said anything: many people
+  // answer an unknown number and wait. Count the call as answered and let the AI open first.
+  openFirst() {
+    if (this.answered || this.stopping) return false;
+    this.answered = true;
+    this.startedAt = performance.now();
+    this.options.onAnswer?.();
+    if (this.ready) this.sendOpeningCue();
+    else this.openWhenReady = true;
+    return true;
+  }
+
   // Gemini streams transcription in fragments; the backend wants one line per speaking turn.
   appendFragment({ pembicara, teks }) {
     if (this.pendingTurn?.pembicara !== pembicara) this.flushTurn();
-    if (pembicara === "penerima" && !this.answered) {
-      this.answered = true;
-      this.startedAt = performance.now();
-      this.options.onAnswer?.();
-    }
+    this.options.onSpeech?.(pembicara);
     if (this.pendingTurn) {
       this.pendingTurn.teks += teks;
-      return;
+    } else {
+      const detik = Math.max(0, Math.floor((performance.now() - this.startedAt) / 1000));
+      this.pendingTurn = { detik, pembicara, teks };
     }
-    const detik = Math.max(0, Math.floor((performance.now() - this.startedAt) / 1000));
-    this.pendingTurn = { detik, pembicara, teks };
+    this.options.onPartial?.({ ...this.pendingTurn });
   }
 
   flushTurn() {
@@ -426,6 +772,18 @@ export class VedikaVoiceSession {
     this.pendingTurn = null;
     if (!turn) return;
     turn.teks = turn.teks.trim().replace(/\s+/g, " ");
+    // The call counts as answered when a completed recipient turn is accepted (a carrier
+    // announcement is not); the clock restarts there so "detik" counts from the connection.
+    if (turn.pembicara === "penerima" && !this.answered) {
+      if ((this.options.acceptAnswer || (() => true))(turn.teks)) {
+        this.answered = true;
+        this.startedAt = performance.now();
+        turn.detik = 0;
+        this.options.onAnswer?.();
+      } else {
+        this.options.onRejectedAnswer?.(turn);
+      }
+    }
     this.transkrip.push(turn);
     this.options.onTranscript?.(turn, [...this.transkrip]);
   }
@@ -447,6 +805,11 @@ export class VedikaVoiceSession {
     source.start(startAt);
     this.nextPlayTime = startAt + buffer.duration;
     this.scheduledSources.add(source);
+  }
+
+  playbackRemainingMs() {
+    if (!this.audioContext) return 0;
+    return Math.max(0, (this.nextPlayTime - this.audioContext.currentTime) * 1000) || 0;
   }
 
   clearPlayback() {

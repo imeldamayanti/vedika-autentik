@@ -1,0 +1,129 @@
+{
+  "counts": {
+    "histogram_participant_months": 22457,
+    "outpatient_physiotherapy_rows": 149997,
+    "participant_months": 41905,
+    "participant_months_weighted": 3521010,
+    "peer_groups": 951,
+    "peer_groups_with_30_patient_months": 426,
+    "unique_participants": 13172
+  },
+  "generated_on": "2026-11-16",
+  "generator_version": "0.1.0",
+  "outputs": [
+    {
+      "filename": "histogram.csv",
+      "sha256": "e702349e3bd59337a4ca3d47e24f6089c0d5349f8b3555b3222e1738dc802706",
+      "size_bytes": 3009
+    },
+    {
+      "filename": "marginal.json",
+      "sha256": "6dbf38aa551735b594434ff31d126a75c0c7570fc17280251433259364292475",
+      "size_bytes": 967
+    },
+    {
+      "filename": "kombinasi.json",
+      "sha256": "4adf593a2114e80e7b7ced0fb8c3c8f742b812e7dbffe8dd12d98e95b9397cec",
+      "size_bytes": 1251
+    },
+    {
+      "filename": "pembanding_tipe.json",
+      "sha256": "a0cd10ad5af6e417f15f96ee6a94c63edb92e5f9fafa3e0f6cc107bba2723154",
+      "size_bytes": 3429
+    }
+  ],
+  "parameters": {
+    "chunk_size": 200000,
+    "dominant_group_share_limit": 0.5,
+    "episode_note": "Months before 2024-01 are not in the source, so I3 is undercounted in the all-month prevalence; the histogram uses 2024-07 to 2024-12 only.",
+    "histogram_levels": [
+      {
+        "ahad_libur": [
+          "0",
+          "1",
+          "2+"
+        ],
+        "episode": [
+          "1",
+          "2-3",
+          "4-5",
+          "6",
+          "7+"
+        ],
+        "maks_minggu": [
+          "1",
+          "2",
+          "3",
+          "4+"
+        ],
+        "sesi": [
+          "1-2",
+          "3-4",
+          "5-6",
+          "7-8",
+          "9-12",
+          "13+"
+        ]
+      },
+      {
+        "ahad_libur": [
+          "0",
+          "1+"
+        ],
+        "episode": [
+          "1-5",
+          "6+"
+        ],
+        "maks_minggu": [
+          "1-2",
+          "3+"
+        ],
+        "sesi": [
+          "1-4",
+          "5-8",
+          "9+"
+        ]
+      }
+    ],
+    "histogram_months": [
+      "2024-07",
+      "2024-08",
+      "2024-09",
+      "2024-10",
+      "2024-11",
+      "2024-12"
+    ],
+    "holiday_list": "none (ahad_libur and I4 count Sundays only in the 2024 data)",
+    "minimum_category_count": 10,
+    "minimum_group_patient_months": 30,
+    "minimum_groups_for_percentiles": 20,
+    "minimum_type_patient_months": 100,
+    "peer_group": "FKL06 + FKL07 + FKL08 + FKL09 of most visits in the patient-month"
+  },
+  "privacy": {
+    "minimum_category_count": 10,
+    "participant_identifiers_exported": false,
+    "row_level_records_exported": false,
+    "visit_identifiers_exported": false
+  },
+  "schema_version": "1.0",
+  "source": {
+    "filename": "202403_fkrtl.dta",
+    "sha256": "a806f7057957269b39bc82a962f7f0b2cfde300b5fa0768d09e2325a0e625f74",
+    "size_bytes": 629010868
+  },
+  "suppression": {
+    "histogram": {
+      "cells_per_level": [
+        119,
+        4,
+        9
+      ],
+      "row_share_suppressed": 0.0013,
+      "rows_suppressed": 30,
+      "weight_share_suppressed": 0.001
+    },
+    "types_omitted_one_group_over_half": 2,
+    "types_omitted_under_100_patient_months": 1
+  }
+}

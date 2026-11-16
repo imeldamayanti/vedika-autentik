@@ -42,6 +42,14 @@ def conn():
     c.close()
 
 
+@pytest.fixture(autouse=True)
+def _lingkungan_tetap(monkeypatch):
+    """Uji tidak bergantung pada isi backend/.env: Meta tidak diatur (wa.kirim = simulasi) dan nomor penelepon bawaan."""
+    for kunci in ("META_WA_MODE", "META_WA_TOKEN", "META_WA_PHONE_ID", "META_WA_API_VERSION"):
+        monkeypatch.delenv(kunci, raising=False)
+    monkeypatch.setenv("NOMOR_PENELEPON", "0800-0000-0165")
+
+
 @pytest.fixture
 def mesin():
     return KlienMesin(TestClient(app_stub))

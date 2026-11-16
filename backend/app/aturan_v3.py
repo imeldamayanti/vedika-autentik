@@ -13,7 +13,7 @@ STATUS_BERJALAN = ("wa_terkirim", "menelepon", "tersambung", "merekam", "membaca
 STATUS_SELESAI = ("selesai", "tidak_terhubung")
 STATUS_PANGGILAN = ("antre",) + STATUS_BERJALAN + STATUS_SELESAI
 BAWAAN_PENGATURAN = {
-    "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
+    "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
     "jeda_wa_menit": 1, "jeda_percobaan_menit": 2,
 }
 
@@ -104,9 +104,11 @@ def pesan_cadangan(*, nama_pasien, nama_rs, bulan) -> str:
     )
 
 
-def tautan_wa(nomor: str, teks: str) -> str:
-    """wa.me butuh nomor internasional tanpa tanda: 08xx → 628xx."""
+def nomor_internasional(nomor: str) -> str:
+    """Nomor internasional tanpa tanda: 0812-xxx → 62812xxx, +62812xxx → 62812xxx."""
     digit = "".join(c for c in nomor if c.isdigit())
-    if digit.startswith("0"):
-        digit = "62" + digit[1:]
-    return f"https://wa.me/{digit}?text={quote(teks, safe='')}"
+    return "62" + digit[1:] if digit.startswith("0") else digit
+
+
+def tautan_wa(nomor: str, teks: str) -> str:
+    return f"https://wa.me/{nomor_internasional(nomor)}?text={quote(teks, safe='')}"

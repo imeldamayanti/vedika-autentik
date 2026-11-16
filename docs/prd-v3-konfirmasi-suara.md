@@ -133,7 +133,11 @@ Tujuan: memilih sedikit pasien yang paling perlu ditanya, dengan aturan yang bis
 | R1.2 | Pasien masuk antrean jika ≥2 indikator aktif. Di bawah itu tidak ditelepon. | Z | S7 (Rina, hanya I3) tidak muncul di antrean |
 | R1.3 | Penerima telepon \= keluarga jika hubungi\_keluarga \= ya (usia ≥60 atau \<13 dan ada kontak keluarga). Selain itu peserta. | I | S2 dan S4 menelepon anak; S1 menelepon peserta |
 | R1.4 | Layar Antrean: pasien, RS, sesi ditagih, chip indikator, penerima, status (Antre, WA terkirim, Menelepon, Selesai, Tidak terhubung). | I | Sesuai Gambar 4, data dari GET /antrean |
-| R1.5 | Mode otomatis: saat AKTIF, sistem memproses antrean satu per satu (prototipe: 1 panggilan aktif), hanya pukul 09.00–17.00. Ada tombol Jeda. | I | Setelah mode diaktifkan, S1 diproses tanpa klik tambahan |
+| R1.5 | Mode otomatis: saat AKTIF, sistem memproses antrean satu per satu (prototipe: 1 panggilan aktif), hanya pukul 09.00–17.00. Ada tombol Jeda. | I | Setelah mode diaktifkan, pasien teratas antrean (di data demo S6, urutan skor pola) diproses tanpa klik tambahan; S1 didahulukan lewat Dahulukan |
+
+### **Skor pola (prioritas, bukan pemicu)**
+
+Aturan I1–I4 tetap satu-satunya pemicu panggilan. Di atasnya ada skor pola (0–1) yang dipelajari dari agregat Data Sampel BPJS 2024: seberapa mirip pola tagihan satu bulan-pasien dengan pola manipulasi yang dikenal, dibanding pola nasional. Skor hanya dipakai untuk tiga hal: mengurutkan antrean (Dahulukan, lalu skor tertinggi menurut logitnya, lalu id), menjelaskan alasannya di kartu bukti ("Alasan prioritas"), dan memberi pembanding nasional per tipe RS di Ringkasan RS. Skor tidak membuat panggilan, tidak memberi label, dan tidak mengubah saran atau status RS. Hasil panggilan (Sesuai dan Tidak sesuai) diekspor sebagai label untuk melatih ulang model. Rincian, tingkat bukti, dan batasannya: `docs/rencana-v3-skor-pola/SKOR-POLA.md`.
 
 ## **F2. Pesan WA pemberitahuan**
 
