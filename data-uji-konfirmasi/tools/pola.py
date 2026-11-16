@@ -5,7 +5,7 @@ Skor pola hanya mengurutkan antrean dan menjelaskan alasannya. Skor tidak memicu
 tidak memberi label, dan tidak mengubah status RS: itu tetap tugas tools/aturan.py.
 """
 import math
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import timedelta
 
 FITUR = ("sesi", "maks_minggu", "ahad_libur", "episode")
@@ -40,6 +40,20 @@ def fitur_bulan(tanggal_bulan_ini, bulan_aktif, bulan, libur):
         "ahad_libur": sum(t.weekday() == 6 or t in libur for t in tanggal_bulan_ini),
         "episode": episode,
     }
+
+
+def fitur_per_pasien(sesi, bulan, libur):
+    """sesi: iterable (kunci, tanggal), kunci mis. (id_peserta, id_rs). Mengembalikan kunci -> fitur mentah bulan itu,
+    untuk setiap kunci yang punya sesi di bulan itu. Bulan lain hanya dipakai untuk menghitung episode."""
+    tanggal = defaultdict(list)
+    for kunci, t in sesi:
+        tanggal[kunci].append(t)
+    hasil = {}
+    for kunci, tgl in sorted(tanggal.items()):
+        bulan_ini = [t for t in tgl if t.strftime("%Y-%m") == bulan]
+        if bulan_ini:
+            hasil[kunci] = fitur_bulan(bulan_ini, {t.strftime("%Y-%m") for t in tgl}, bulan, libur)
+    return hasil
 
 
 def bin_nilai(fitur, nilai):

@@ -81,7 +81,7 @@ def test_kolom_d01_ditambahkan_ke_tabel_yang_sudah_ada(conn):
 
 
 def test_kolom_skor_pola_ditambahkan_ke_tabel_yang_sudah_ada(conn):
-    """Database yang di-seed sebelum skor pola ada harus mendapat tiga kolomnya, dengan bawaan yang aman."""
+    """Database yang di-seed sebelum skor pola ada harus mendapat empat kolomnya, dengan bawaan yang aman."""
     conn.execute(SKEMA_V3)
     conn.execute("alter table uji.indikator_bulanan drop column skor_pola, drop column alasan_pola, drop column pola_tinggi,"
                  " drop column logit_pola")

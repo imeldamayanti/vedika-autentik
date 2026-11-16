@@ -32,11 +32,10 @@ def susun_label(conn) -> list[dict]:
     ).fetchall()
     baris = []
     for p in panggilan:
-        tanggal = [r["tanggal"] for r in conn.execute(
+        sesi = [(None, r["tanggal"]) for r in conn.execute(
             "select tanggal from klaim_sesi where id_peserta = %s and id_rs = %s", (p["id_peserta"], p["id_rs"])
         )]
-        bulan_ini = [t for t in tanggal if t.strftime("%Y-%m") == p["bulan_layanan"]]
-        fitur = pola.fitur_bulan(bulan_ini, {t.strftime("%Y-%m") for t in tanggal}, p["bulan_layanan"], libur)
+        fitur = pola.fitur_per_pasien(sesi, p["bulan_layanan"], libur)[None]
         baris.append({**pola.bin_fitur(fitur), "label": LABEL[p["label"]]})
     return sorted(baris, key=lambda b: [pola.BIN[f].index(b[f]) for f in pola.FITUR] + [b["label"]])
 

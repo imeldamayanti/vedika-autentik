@@ -14,7 +14,7 @@ import json
 import math
 import random
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import date
 from pathlib import Path
 
@@ -76,7 +76,7 @@ def pecah_sel(r: dict, tingkat: list[dict], marginal: dict) -> list[dict]:
     hasil = [({}, float(r["bobot"]))]
     for f, opsi in zip(pola.FITUR, pilihan, strict=True):
         hasil = [({**fitur, f: int(b.rstrip("+"))}, w * bagian) for fitur, w in hasil for b, bagian in opsi]
-    return [{**fitur, "tingkat": int(r["tingkat"]), "bobot": w} for fitur, w in hasil]
+    return [{**fitur, "bobot": w} for fitur, w in hasil]
 
 
 def baca_histogram(marginal: dict) -> list[dict]:
@@ -177,16 +177,8 @@ def model_json(model, fitur_model: list[str], versi: str) -> dict:
 def fitur_demo() -> dict[tuple[str, str], dict]:
     """(id_peserta, id_rs) -> fitur mentah Agustus 2026 dari klaim_sesi.csv."""
     libur = {date.fromisoformat(r["tanggal"]) for r in baca_csv(DATA_UJI / "libur_nasional_2026.csv")}
-    tanggal = defaultdict(list)
-    for r in baca_csv(DATA_UJI / "klaim_sesi.csv"):
-        tanggal[(r["id_peserta"], r["id_rs"])].append(date.fromisoformat(r["tanggal"]))
-    hasil = {}
-    for kunci, tgl in sorted(tanggal.items()):
-        bulan_ini = [t for t in tgl if t.strftime("%Y-%m") == BULAN_DEMO]
-        if bulan_ini:
-            aktif = {t.strftime("%Y-%m") for t in tgl}
-            hasil[kunci] = pola.fitur_bulan(bulan_ini, aktif, BULAN_DEMO, libur)
-    return hasil
+    sesi = [((r["id_peserta"], r["id_rs"]), date.fromisoformat(r["tanggal"])) for r in baca_csv(DATA_UJI / "klaim_sesi.csv")]
+    return pola.fitur_per_pasien(sesi, BULAN_DEMO, libur)
 
 
 def cek_kecocokan_fitur(demo: dict, marginal: dict) -> list[dict]:
