@@ -168,7 +168,7 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
 - Hanya pasien dengan ≥2 indikator (R1.2). S7 tidak pernah muncul.
 - `penerima` mengikuti R1.3: keluarga bila `hubungi_keluarga`, selain itu peserta.
 - `angka` dihitung dari seluruh antrean bulan itu, tidak terpengaruh query. `sudah_ditelepon` = jumlah panggilan berstatus `selesai` atau `tidak_terhubung`. `tidak_sesuai` = jumlah berlabel `tidak_sesuai`. `antre` = jumlah berstatus `antre`. `menunggu_keputusan` = berlabel `tidak_sesuai` dan belum punya keputusan (lencana di menu).
-- `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server; FE memakainya untuk tanggal di Beranda).
+- `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server).
 - `daftar_rs` = semua RS (termasuk yang tidak punya pasien terpicu), untuk pilihan filter.
 - `label` terisi bila status `selesai` atau `tidak_terhubung`. `keputusan_tindakan` = `tindakan` keputusan terkini (enum `tindakan`) atau `null` bila belum diputuskan.
 - `pengaturan.stasiun` = detak terakhir stasiun saluran (`POST /agen/detak`), atau `null` bila belum pernah terlihat. `aktif` = `terakhir_terlihat` paling lama 30 detik sebelum `waktu_server`. `siap: false` disertai `alasan` (mis. `"SIM tidak siap"`). FE menampilkan "Saluran telepon terputus sejak HH.MM" bila `null` atau tidak aktif.
@@ -199,10 +199,10 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
     "tinggi": true,
     "ambang": 0.898,
     "alasan": [
-      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional" },
-      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini" }
+      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional." },
+      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini." }
     ],
-    "kombinasi": { "kunci": "I1+I2+I4", "teks": "Kombinasi I1+I2+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024." },
+    "kombinasi": { "kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024." },
     "versi": "pola-v1"
   },
   "tanggal_libur": ["2026-08-16", "2026-08-17"],
@@ -258,7 +258,7 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
 - `jawaban` selalu terisi saat status `selesai` atau `tidak_terhubung`. Untuk `tidak_terhubung` pembaca tidak dipanggil: API menyusun `{"status_panggilan": "tidak_terhubung", "penerima": null, "hubungan": null, "hadir": null, "jumlah_min": null, "jumlah_maks": null, "keyakinan": null, "tanda_bahaya": [], "membantah_tanggal_libur": null, "kutipan_kunci": "", "ringkasan": "Panggilan tidak diangkat 2 kali."}`. Key yang tidak ada pada baris lama (riwayat tanpa `membantah_tanggal_libur`) dilengkapi `null`. `versi_pembaca` ikut tersimpan di dalam `jawaban`; FE mengabaikannya.
 - `alasan` dari `aturan.py` apa adanya, untuk S2: `Ada pernyataan berisiko: tanda_tangan_tanpa_layanan.` FE menampilkan nama tanda bahaya dengan mengganti kode di teks itu; isi di API tidak diubah (uji E membandingkan dengan `expected_alasan`).
 - `konteks_rs` = ringkasan RS terkini untuk RS panggilan ini (dipakai teks saran di kartu bukti).
-- `pola` = alasan prioritas (bagian "Mengapa diprioritaskan" di kartu bukti), atau `null` bila bulan-pasien belum punya skor. `skor` dan `tinggi` sama dengan baris antrean; `ambang` = `ambang_tinggi` model; `versi` = `pengaturan.versi_pola` (bawaan `pola-v1`). `alasan` = paling banyak dua fitur dengan sumbangan positif terbesar (`fitur`: `sesi`, `maks_minggu`, `ahad_libur`, `episode`); `persentil_nasional` = persen bulan-pasien nasional dengan nilai ≤ nilai ini; `teks` siap tampil. `kombinasi.teks` memakai prevalensi nasional kombinasi indikator; kombinasi di bawah 10 baris pada data sampel hanya punya batas atas ("kurang dari 0,03%"). `pola` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
+- `pola` = alasan prioritas (bagian "Alasan prioritas" di kartu bukti), atau `null` bila bulan-pasien belum punya skor. `skor` dan `tinggi` sama dengan baris antrean; `ambang` = `ambang_tinggi` model; `versi` = `pengaturan.versi_pola` (bawaan `pola-v1`). `alasan` = paling banyak dua fitur dengan sumbangan positif terbesar (`fitur`: `sesi`, `maks_minggu`, `ahad_libur`, `episode`); `persentil_nasional` = persen bulan-pasien nasional dengan nilai ≤ nilai ini; `teks` siap tampil. `kombinasi.teks` memakai prevalensi nasional kombinasi indikator; kombinasi di bawah 10 baris pada data sampel hanya punya batas atas ("kurang dari 0,03%"). `pola` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
 - `pesan_wa.pemberitahuan` = Lampiran B persis (sumber yang sama dengan `wa.teks` di `agen/ambil`), `pesan_wa.cadangan` = teks chat cadangan, hanya terisi untuk label `tidak_terhubung`; `dari` = nomor penelepon di konfigurasi API (`NOMOR_PENELEPON`). FE memakainya untuk mockup WA.
 - `keputusan` berisi objek seperti di `GET /keputusan` (tanpa field gabungan) bila sudah diputuskan.
 - Identitas penerima tidak ikut dalam data apa pun yang dibagikan ke RS (R5.6); endpoint ini hanya untuk verifikator.
@@ -408,7 +408,7 @@ Hasil review KT-06 terhadap `app-v3.js` dan isi `DATA3` di `data-v3.js`. Aturan:
 | `RS` (`id`, `nama`) | `antrean.daftar_rs` |
 | `RS` (`aktif`, `terpicu`, `persen`) | `ringkasan-rs.rs[]` |
 | `PASIEN_AKTIF`, `PASIEN_TERPICU` | `antrean.angka.pasien_aktif`, `antrean.angka.terpicu` |
-| kartu angka, lencana menu, jumlah menunggu di Beranda | `antrean.angka` (`sudah_ditelepon`, `tidak_sesuai`, `rs_perlu_klarifikasi`, `menunggu_keputusan`, `antre`) |
+| kartu angka di Antrean, lencana menu | `antrean.angka` (`sudah_ditelepon`, `tidak_sesuai`, `rs_perlu_klarifikasi`, `menunggu_keputusan`, `antre`) |
 | `SKENARIO`/`LATAR`/`MENGANTRE`/`SEMUA` (per pasien) | `antrean.baris[]` dan `panggilan/{id}`: `tanggal` ISO (FE mengambil tanggalnya), `tanda_tanggal` berkunci ISO, `penerima`, `durasi`, `rekaman`, `jawaban`, `label`, `alasan` |
 | `URUTAN_ANTREAN` | urutan `baris[]` |
 | `waktu` (`LATAR`), waktu kartu dan cap waktu progres | `panggilan.waktu` dan `log[].waktu` |

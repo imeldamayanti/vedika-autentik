@@ -53,7 +53,8 @@ def kombinasi(i1: bool, i2: bool, i3: bool, i4: bool) -> dict:
         besar = f"{_persen(100 * sel['prevalensi'])}%"
     else:  # sel di bawah 10 baris: hanya batas atas yang disimpan
         besar = f"kurang dari {_persen(math.ceil(10000 * sel['prevalensi_maks']) / 100)}%"
-    return {"kunci": kunci, "teks": f"Kombinasi {kunci} terjadi pada {besar} bulan-pasien fisioterapi nasional {referensi()['tahun']}."}
+    teks = f"Gabungan indikator ini muncul pada {besar} tagihan bulanan fisioterapi nasional {referensi()['tahun']}."
+    return {"kunci": kunci, "teks": teks}
 
 
 def pembanding(tipe_rs: str | None, aktif: int, persen_terpicu: float) -> dict:

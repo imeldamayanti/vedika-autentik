@@ -24,10 +24,10 @@ def test_nilai_pasien_wajar_rendah():
 
 def test_kombinasi_pasti_dan_tersembunyi():
     assert pola_v3.kombinasi(True, True, False, False) == {
-        "kunci": "I1+I2", "teks": "Kombinasi I1+I2 terjadi pada 0,80% bulan-pasien fisioterapi nasional 2024.",
+        "kunci": "I1+I2", "teks": "Gabungan indikator ini muncul pada 0,80% tagihan bulanan fisioterapi nasional 2024.",
     }
     assert pola_v3.kombinasi(True, True, True, True)["teks"] == (
-        "Kombinasi I1+I2+I3+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024."
+        "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024."
     )
 
 

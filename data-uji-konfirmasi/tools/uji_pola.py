@@ -103,8 +103,8 @@ def uji_alasan_urut_dan_positif():
     a = pola.alasan(MODEL, REFERENSI, S1)
     # sumbangan: ahad 2.0-(0.99*-0.1+0.01*2.0)=2.079; sesi 1.5-(0.9*-0.5+0.1*1.5)=1.8; minggu 0.8-(-0.16+0.16)=0.8
     assert [(x["fitur"], x["kontribusi"]) for x in a] == [("ahad_libur", 2.079), ("sesi", 1.8)], a
-    assert a[0]["teks"] == "2 sesi di hari Minggu/libur; hanya 1% bulan-pasien nasional punya sesi seperti ini"
-    assert a[1]["teks"] == "11 sesi dalam sebulan; lebih tinggi dari 90% bulan-pasien fisioterapi nasional"
+    assert a[0]["teks"] == "2 sesi pada hari Minggu atau libur. Hanya 1% tagihan bulanan nasional memuat sesi seperti ini."
+    assert a[1]["teks"] == "11 sesi dalam sebulan, lebih banyak dari 90% tagihan bulanan fisioterapi nasional."
     assert (a[0]["nilai"], a[0]["persentil_nasional"], a[1]["persentil_nasional"]) == (2, 100.0, 100.0)
     assert len(pola.alasan(MODEL, REFERENSI, S1, n=3)) == 3
     wajar = pola.alasan(MODEL, REFERENSI, {"sesi": 3, "maks_minggu": 1, "ahad_libur": 0, "episode": 1})

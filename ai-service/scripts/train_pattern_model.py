@@ -261,6 +261,43 @@ def skor_demo(model: dict, referensi: dict, demo: dict) -> list[dict]:
     return hasil
 
 
+def bagian_nyata(model: dict) -> list[str]:
+    """Tier A: perilaku model pada semua bulan-pasien nyata 2024 (perilaku-nyata.json, dibuat
+    check_pattern_real_data.py dari data mentah). Bukan akurasi: data sampel tidak punya label kecurangan."""
+    path = REFERENSI / "perilaku-nyata.json"
+    if not path.exists():
+        return []
+    d = baca_json(path)
+    if (d["versi_model"], d["ambang_tinggi"]) != (model["versi"], model["ambang_tinggi"]):
+        return ["### Perilaku pada data nyata", "",
+                "`perilaku-nyata.json` dihitung untuk model lain. Jalankan ulang `scripts/check_pattern_real_data.py`.", ""]
+    x = d["silang"]
+
+    def sel(k):
+        return f"{ribuan(x[k]['n'])} ({angka(x[k]['persen'], 2)}%)" if k in x else "kurang dari 10"
+
+    hanya = ", ".join(f"{k} saja {ribuan(v['n'])}" for k, v in d["tinggi_tidak_terpicu_per_kombinasi"].items())
+    bulan = [v["persen_tinggi"] for v in d["per_bulan"].values()]
+    satu = d["terpicu_tampil_satu"].get("n", "kurang dari 10")
+    k = d["kelompok"]
+    return [
+        "### Perilaku pada data nyata",
+        "",
+        f"Model diterapkan ke semua {ribuan(d['n'])} bulan-pasien nyata 2024 di laptop (data mentah tidak di-commit; "
+        "hanya agregat di `ai-service/data/reference/pola-2024/perilaku-nyata.json`). Ini perilaku, bukan akurasi: "
+        "data sampel tidak punya label kecurangan, dan kelas normal model berasal dari data yang sama.",
+        "",
+        f"- Pola tidak biasa: **{angka(d['persen_tinggi'], 2)}%** bulan-pasien (berbobot); pemicu aturan {angka(d['persen_terpicu'], 2)}%.",
+        f"- Per bulan (tak berbobot): {angka(min(bulan), 1)}% sampai {angka(max(bulan), 1)}%.",
+        f"- Terpicu aturan dan pola tidak biasa: {sel('tinggi_terpicu')}. Terpicu tetapi skor di bawah ambang: {sel('biasa_terpicu')}.",
+        f"- Pola tidak biasa tanpa pemicu aturan: {sel('tinggi_tidak_terpicu')}, yaitu {hanya}.",
+        f"- Dari {ribuan(d['terpicu']['n'])} bulan-pasien terpicu, {satu} tampil dengan skor 1,00.",
+        f"- {ribuan(k['n'])} kelompok RS sejenis (≥ 30 bulan-pasien): {ribuan(k['tanpa_tinggi'])} tanpa satu pun pola tidak biasa; "
+        f"10% kelompok teratas memuat {k['persen_tinggi_di_10_persen_teratas']}% bulan-pasien berpola tidak biasa.",
+        "",
+    ]
+
+
 def tulis_evaluasi(model, kecocokan, auc_sintetis, tingkat, per_kombinasi, demo_ev, manifest, punya_minggu) -> str:
     buang = [k["fitur"] for k in kecocokan if k["dibuang"]]
     tersembunyi = manifest["suppression"]["histogram"]["weight_share_suppressed"]
@@ -313,6 +350,7 @@ def tulis_evaluasi(model, kecocokan, auc_sintetis, tingkat, per_kombinasi, demo_
         "|---|---|---|",
         *[f"| {k} | {angka(s)} | {angka(100 * p, 2)}% |" for k, s, p in per_kombinasi],
         "",
+        *bagian_nyata(model),
         "## Tier B (data demo vs `kunci_kebenaran_2026-08.csv`)",
         "",
         f"{demo_ev['bulan_pasien']} bulan-pasien Agustus 2026, {demo_ev['digelembungkan']} di antaranya "

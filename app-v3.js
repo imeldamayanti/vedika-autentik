@@ -1,6 +1,6 @@
 /* Vedika Autentik v3: simulasi konfirmasi suara peserta di aplikasi verifikasi klaim.
 
-   Alur: masuk → beranda → Autentik (antrean konfirmasi) → panggilan berlangsung →
+   Alur: antrean konfirmasi (halaman awal) → panggilan berlangsung →
    kartu bukti → keputusan verifikator → ringkasan rumah sakit → riwayat.
 
    Tidak ada telepon atau AI yang berjalan di sini. Dua sumber data:
@@ -54,21 +54,21 @@
     lencanaCek: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>'
   };
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
-  const logoVeritas = '<img src="assets/veritas-mark.svg" alt="" aria-hidden="true">';
 
   const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
   const koma = (n) => String(n).replace(".", ",");
 
-  /* Skor pola: sinyal prioritas panggilan dari pola nasional, bukan putusan. Dua desimal, koma desimal. */
-  const CATATAN_POLA = "Skor pola: prioritas panggilan, bukan putusan.";
+  /* Skor pola: hanya menentukan urutan panggilan. Dua desimal, koma desimal. Warna hanya untuk pola tidak biasa. */
   const skorTeks = (s) => koma(s.toFixed(2));
   const persenSatu = (x) => koma(x.toFixed(1)) + "%";
   function chipPola(p) {
     if (p.skor_pola == null) return "";
-    return '<span class="chip-pola' + (p.pola_tinggi ? " chip-pola--tinggi" : "") + '" title="' + CATATAN_POLA + '" aria-label="Skor pola ' + skorTeks(p.skor_pola) +
-      (p.pola_tinggi ? ", pola tidak biasa. " : ". ") + CATATAN_POLA + '">Pola ' + skorTeks(p.skor_pola) +
+    const judul = "Skor pola " + skorTeks(p.skor_pola) + (p.pola_tinggi ? ", pola tidak biasa" : "");
+    return '<span class="chip-pola' + (p.pola_tinggi ? " chip-pola--tinggi" : "") + '" title="' + judul + '" aria-label="' + judul + '">Pola ' + skorTeks(p.skor_pola) +
       '<i aria-hidden="true"><b style="width:' + Math.round(p.skor_pola * 100) + '%"></b></i></span>';
   }
+  /* Indikator aktif sebagai teks biasa; arti lengkap di keterangan arah kursor. */
+  const teksIndikator = (daftar) => '<span class="ind-teks">' + daftar.map((i) => '<span title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join(" · ") + "</span>";
   const tunggal = (id) => D.SEMUA[id];
 
   /* Jam kerja simulasi: demo selalu terasa berlangsung pagi hari di kantor cabang. */
@@ -84,7 +84,7 @@
      berjalan tidak disimpan; setelah muat ulang ia kembali Antre.
      keputusan: {id: {tindakan, alasan, ikutSaran, oleh, waktu}} untuk panggilan skenario dan latar. */
   function statusAwal() {
-    return { masuk: false, hasil: {}, keputusan: {} };
+    return { hasil: {}, keputusan: {} };
   }
 
   function muat() {
@@ -111,10 +111,10 @@
 
   /* ============================================================== perute */
 
-  /* #/beranda, #/autentik, #/panggilan/:id, #/kartu/:id, #/ringkasan-rs, #/riwayat */
+  /* #/autentik (halaman awal), #/panggilan/:id, #/kartu/:id, #/ringkasan-rs, #/riwayat */
   function rute() {
     const bagian = (location.hash || "").replace(/^#\/?/, "").split("/").filter(Boolean);
-    return { nama: bagian[0] || "beranda", id: bagian[1] || null };
+    return { nama: bagian[0] || "autentik", id: bagian[1] || null };
   }
   const ke = (h) => { if (location.hash !== h) location.hash = h; else gambar(true); };
 
@@ -283,52 +283,29 @@
     const menunggu = menungguKeputusan();
     return '<div class="kerangka">' +
       '<aside class="sisi' + (ui.menuBuka ? " buka" : "") + '" id="sisi">' +
-        '<a class="merek" href="#/beranda"><span class="merek-ikon">' + ikon("perisai") + "</span><span><b>VEDIKA</b><span>Verifikasi Digital Klaim</span></span></a>" +
+        '<a class="merek" href="#/autentik"><span class="merek-ikon">' + ikon("perisai") + "</span><span><b>VEDIKA</b><span>Verifikasi Digital Klaim</span></span></a>" +
         '<nav class="nav" aria-label="Menu utama">' +
-          '<a href="#/beranda"' + aktif(r.nama === "beranda") + ">" + ikon("rumah") + "Beranda</a>" +
-          '<span class="nav-judul kapital">Verifikasi</span>' +
-          '<button class="mati" type="button" aria-disabled="true" title="Menu Vedika yang sudah ada, tidak termasuk prototipe">' + ikon("berkas") + "Verifikasi klaim<small>Sudah ada</small></button>" +
-          '<a class="nav-autentik induk" href="#/autentik">' + logoVeritas + "Autentik" +
-            (menunggu ? '<span class="lencana" title="Panggilan Tidak sesuai yang belum diputuskan">' + menunggu + "</span>" : "") + "</a>" +
-          '<div class="nav-sub">' +
-            '<a href="#/autentik"' + aktif(dalamAutentik) + ">Antrean konfirmasi</a>" +
-            '<a href="#/ringkasan-rs"' + aktif(r.nama === "ringkasan-rs") + ">Ringkasan RS</a>" +
-          "</div>" +
+          '<span class="nav-judul kapital">Autentik</span>' +
+          '<a href="#/autentik"' + aktif(dalamAutentik) + ">" + ikon("telepon") + "Antrean konfirmasi" +
+            (menunggu ? '<span class="lencana" title="Jawaban Tidak sesuai yang belum diputuskan">' + menunggu + "</span>" : "") + "</a>" +
+          '<a href="#/ringkasan-rs"' + aktif(r.nama === "ringkasan-rs") + ">" + ikon("berkas") + "Ringkasan RS</a>" +
           '<a href="#/riwayat"' + aktif(r.nama === "riwayat") + ">" + ikon("riwayat") + "Riwayat keputusan</a>" +
         "</nav>" +
         '<div class="sisi-kaki nav">' +
           '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
-          '<p class="catatan-prototipe"><b>Prototipe Healthkathon 2026</b><br>Semua data fiktif. ' +
-            (M.hidup ? "Data dari API. Panggilan uji ke nomor tim." : "Mode simulasi: tanpa API, memakai data lokal.") + "</p>" +
         "</div>" +
       "</aside>" +
       '<div class="kolom">' +
         '<header class="atas">' +
           '<button class="tombol-menu" type="button" data-aksi="menu" aria-label="Buka menu">' + ikon("menu") + "</button>" +
           '<div class="jejak-rute">' + jejak + "</div>" +
-          '<div class="atas-kanan"><span class="lencana-simulasi">Simulasi</span>' +
+          '<div class="atas-kanan">' + (M.hidup
+            ? '<span class="lencana-simulasi" title="Prototipe Healthkathon 2026. Data fiktif. Panggilan uji masuk ke nomor tim.">Prototipe</span>'
+            : '<span class="lencana-simulasi" title="API tidak terjangkau. Layar memakai data contoh dan keputusan tidak disimpan.">Simulasi</span>') +
             '<div class="pengguna"><span class="avatar"><img src="assets/foto/verifikator.png" alt="" width="34" height="34"></span><div><b>' + D.VERIFIKATOR.nama + "</b><span>" + D.VERIFIKATOR.peran + " · " + D.VERIFIKATOR.kantor + "</span></div></div></div>" +
         "</header>" +
         '<main class="isi" id="isi">' + isi + "</main>" +
       "</div></div>";
-  }
-
-  /* ============================================================== masuk */
-
-  function lamanMasuk() {
-    return '<div class="masuk"><div class="masuk-foto"><img src="assets/foto/kantor.jpg" alt=""></div><div class="masuk-bungkus">' +
-      '<div class="merek-ikon">' + ikon("perisai") + "</div>" +
-      "<h1>VEDIKA</h1><p>Verifikasi Digital Klaim</p>" +
-      '<span class="lencana-simulasi">Simulasi</span>' +
-      '<div class="masuk-kartu">' +
-        "<h2>Masuk ke Vedika</h2>" +
-        '<div class="medan"><span class="kapital">Username</span><div class="medan-isi">' + ikon("pengguna") + "rsantoso.kc0901</div></div>" +
-        '<div class="medan"><span class="kapital">Kata sandi</span><div class="medan-isi">' + ikon("kunci") + "••••••••••</div></div>" +
-        '<button class="btn btn--primer btn--lebar" type="button" data-aksi="masuk">Masuk sebagai verifikator demo</button>' +
-        '<p class="masuk-catatan">Akun fiktif. Tidak ada data yang dikirim.</p>' +
-      "</div>" +
-      '<p class="masuk-versi">Prototipe Vedika Autentik, Healthkathon 2026</p>' +
-    "</div></div>";
   }
 
   /* ========================================================== layar (isi bertahap) */
@@ -336,23 +313,6 @@
   const kosong = (judul, teks) => '<div class="kosong"><b>' + esc(judul) + "</b>" + esc(teks) + "</div>";
   const kepala = (judul, ket) => '<div class="kepala"><div><h1>' + esc(judul) + "</h1><p>" + esc(ket) + "</p></div></div>";
 
-  /* ============================================================== beranda */
-
-  function lamanBeranda() {
-    const menunggu = M.hidup ? M.antrean.angka.antre : D.URUTAN_ANTREAN.filter((id) => statusBaris(id) === "antre").length;
-    const a = angka();
-    const panah = '<svg class="panah" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
-    return kepala("Beranda", hariIniTeks() + ", " + D.VERIFIKATOR.kantor) +
-      '<div class="pengumuman"><span class="merek-ikon merek-ikon--veritas">' + logoVeritas + "</span>" +
-        "<div><b>Autentik kini bertanya langsung ke peserta</b><p>AI menanyakan berapa sesi fisioterapi yang benar-benar dijalani. Keputusan tetap di tangan Anda.</p></div>" +
-        '<a class="btn btn--primer" href="#/autentik">Buka antrean</a></div>' +
-      '<div class="judul-seksi"><h2>Layanan ' + D.BULAN + "</h2></div>" +
-      kartuAngka() +
-      '<div class="tautan-kartu">' +
-        '<a href="#/autentik"><b>' + menunggu + " pasien menunggu ditelepon</b><span>Antrean konfirmasi</span>" + panah + "</a>" +
-        '<a href="#/ringkasan-rs"><b>' + (a.rsKlarifikasi ? a.rsKlarifikasi + " rumah sakit perlu klarifikasi" : "Belum ada rumah sakit yang perlu klarifikasi") + "</b><span>Ringkasan rumah sakit</span>" + panah + "</a>" +
-      "</div>";
-  }
   /* ============================================================== antrean */
 
   const penerimaTeks = (p) => (p.penerima.hubungan === "peserta" ? "Peserta" : esc(p.penerima.nama) + ' <span class="redup">(' + esc(p.penerima.hubungan) + ")</span>");
@@ -410,14 +370,17 @@
     const jalan = M.hidup ? M.baris.find((b) => berjalan(b.status)) : null;
     const coba = M.hidup ? M.baris.filter(menungguCoba).sort((a, b) => Date.parse(a.cobaLagi) - Date.parse(b.cobaLagi))[0] : null;
     if (!M.hidup) {
-      kelas = "warn"; ico = "awas"; judul = "Mode simulasi";
-      ket = "API tidak terjangkau. Layar memakai data contoh lokal; keputusan tidak tersimpan ke server. Muat ulang halaman setelah API kembali.";
+      /* Simulasi: keadaan panggilan otomatis lokal. Tanda simulasi cukup satu, di kepala halaman. */
+      if (ui.aktif) { kelas = "jalan"; ico = "telepon"; judul = "Sedang menelepon " + esc(D.SKENARIO[ui.aktif.id].pasien); }
+      else if (!ui.otomatis) { kelas = "warn"; ico = "jeda"; judul = "Panggilan otomatis mati"; ket = "Nyalakan untuk menelepon antrean satu per satu."; }
+      else if (ui.jeda) { kelas = "warn"; ico = "jeda"; judul = "Dijeda"; ket = "Tekan Lanjutkan untuk meneruskan antrean."; }
+      else { kelas = "jalan"; ico = "telepon"; judul = "Panggilan otomatis aktif"; ket = "Pasien berikutnya ditelepon begitu saluran kosong."; }
     } else if (!peng.dalam_jam) {
       kelas = "warn"; ico = "jam"; judul = "Di luar jam panggilan (" + jamTitik(peng.jam_mulai) + "–" + jamTitik(peng.jam_selesai) + " WIB)";
       ket = "Antrean dilanjutkan otomatis pada jam kerja.";
     } else if (!s || !s.aktif) {
       kelas = "bad"; ico = "putus"; judul = "Saluran telepon terputus" + (s ? " sejak " + A3.jamTeks(s.terakhir_terlihat) : "");
-      ket = "Antrean menunggu; tidak ada yang hilang. Tim teknis: cek laptop stasiun, kabel USB, dan baterai HP saluran.";
+      ket = "Antrean menunggu sampai saluran pulih. Cek laptop stasiun, kabel USB, dan baterai HP.";
       if (jalan) aksi = '<a class="btn" href="#/panggilan/' + jalan.id + '">Buka panggilan</a>' + (bisaBatal(jalan) ? tombolBatal(jalan.id) : "");
     } else if (!s.siap) {
       kelas = "bad"; ico = "putus"; judul = "Saluran telepon belum siap: " + esc(s.alasan || "sebab tidak diketahui");
@@ -427,7 +390,7 @@
       aksi = '<a class="btn btn--primer" href="#/panggilan/' + jalan.id + '">Buka panggilan</a>' + (bisaBatal(jalan) ? tombolBatal(jalan.id) : "");
     } else if (!peng.mode_otomatis) {
       kelas = "warn"; ico = "jeda"; judul = "Panggilan otomatis mati";
-      ket = "Hanya pasien yang didahulukan yang ditelepon. Nyalakan Panggilan otomatis untuk menelepon antrean satu per satu.";
+      ket = "Hanya pasien yang didahulukan yang ditelepon.";
     } else if (peng.jeda) {
       kelas = "warn"; ico = "jeda"; judul = "Dijeda"; ket = "Tekan Lanjutkan untuk meneruskan antrean.";
     } else if (coba) {
@@ -436,7 +399,7 @@
       kelas = "jalan"; ico = "telepon"; judul = "Panggilan otomatis aktif"; ket = "Pasien berikutnya ditelepon begitu saluran kosong.";
     }
     return '<section class="siap siap--' + kelas + '" id="stripStatus" aria-live="polite"><span class="siap-ikon">' + ikon(ico) + "</span><div><b>" + judul + "</b>" +
-      (ket ? "<p>" + ket + "</p>" : "") + '</div><div class="siap-aksi">' + aksi + "</div>" + chipSehat() + "</section>";
+      (ket ? "<p>" + ket + "</p>" : "") + '</div><div class="siap-aksi">' + aksi + "</div>" + (M.hidup ? chipSehat() : "") + "</section>";
   }
 
   const daftarRsPilihan = () => (M.hidup ? M.antrean.daftar_rs.map((r) => ({ id: r.id_rs, nama: r.nama })) : D.RS.map((r) => ({ id: r.id, nama: r.nama })));
@@ -461,16 +424,17 @@
         '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
         '<td class="sembunyi-hp">' + esc(namaRs(p.rs)) + "</td>" +
         '<td class="angka sembunyi-hp">' + p.ditagih + " sesi</td>" +
-        '<td class="lebar-penuh"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + chipPola(p) + "</div></td>" +
+        '<td class="lebar-penuh"><div class="sel-indikator">' + teksIndikator(p.indikator) + chipPola(p) + "</div></td>" +
         '<td class="sembunyi-hp">' + penerimaTeks(p) + "</td>" +
-        '<td><div class="sel-status"><span class="status-chip status-chip--' + b.st + '">' + (M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : STATUS[b.st]) + "</span>" + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>" : "") + "</div></td>" +
+        '<td><div class="sel-status">' + (lab ? labelChip(lab) + "<small>" + (b.putusan ? D.TINDAKAN[b.putusan].status : "Belum diputuskan") + "</small>"
+          : '<span class="status-chip status-chip--' + b.st + '">' + (M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : STATUS[b.st]) + "</span>") + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
     }).join("");
 
     const oto = otomatisAktif(), jd = jedaAktif();
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih, diurutkan menurut skor pola tertinggi. Antrean ditelepon otomatis satu per satu pukul 09.00–17.00; Dahulukan memindahkan pasien ke urutan berikutnya.</p></div></div>" +
+        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih, diurutkan menurut skor pola. Ditelepon satu per satu pukul 09.00–17.00.</p></div></div>" +
       stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
@@ -483,7 +447,7 @@
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
-        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. ' + CATATAN_POLA + "</p>" +
+        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. Skor pola hanya menentukan urutan panggilan. Hasilnya tetap dari jawaban peserta.</p>' +
       "</section>";
   }
   /* ============================================================== panggilan */
@@ -634,7 +598,7 @@
       return baris.length ? baris.map((x) => '<div class="baris-trans baris-trans--sistem">' + esc(x) + "</div>").join("") : '<p class="kosong-trans">Menunggu percobaan pertama…</p>';
     }
     const n = p.transkrip.length;
-    if (!n) return '<p class="kosong-trans">' + (p.status === "antre" ? "Transkrip muncul di sini setelah panggilan tersambung." : "Menunggu panggilan tersambung…") + "</p>";
+    if (!n) return '<p class="kosong-trans">' + (p.status === "antre" ? "Transkrip tampil setelah panggilan tersambung." : "Menunggu panggilan tersambung…") + "</p>";
     const baru = M.lihat[p.id] != null ? M.lihat[p.id] : n;
     M.lihat[p.id] = n;
     const baris = p.transkrip.map((l, i) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + (i >= baru ? " baru" : "") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") +
@@ -683,10 +647,10 @@
     if (tidakTerhubung(p)) {
       const log = logPercobaan(p, t);
       return log.length ? log.map((e) => '<div class="baris-trans baris-trans--sistem">' + esc(e[1]) + "</div>").join("")
-        : '<p class="kosong-trans">' + (t == null ? "Log percobaan muncul di sini setelah panggilan dimulai." : "Menunggu percobaan pertama…") + "</p>";
+        : '<p class="kosong-trans">' + (t == null ? "Log percobaan tampil setelah panggilan dimulai." : "Menunggu percobaan pertama…") + "</p>";
     }
     const n = barisTampil(p, t), k = titik(p);
-    if (!n) return '<p class="kosong-trans">' + (t == null ? "Transkrip muncul di sini setelah panggilan tersambung." : "Menunggu panggilan tersambung…") + "</p>";
+    if (!n) return '<p class="kosong-trans">' + (t == null ? "Transkrip tampil setelah panggilan tersambung." : "Menunggu panggilan tersambung…") + "</p>";
     const baru = a ? a.barisLihat : n;
     const baris = p.transkrip.slice(0, n).map((l, i) => '<div class="baris-trans baris-trans--' + (l[0] === "A" ? "ai" : "p") + (i >= baru ? " baru" : "") + '"><div class="peran">' + (l[0] === "A" ? "AI" : "Penerima") +
       "<time>" + mmss(l[1]) + "</time></div>" + esc(l[2]) + "</div>").join("");
@@ -730,9 +694,9 @@
   }
 
   function catatanSimulasi(p) {
-    if (M.hidup) return "Data panggilan dibaca dari API tiap detik. Panggilan uji ke nomor tim, bukan ke peserta; rekaman diputar di kartu bukti.";
-    return tidakTerhubung(p) ? "Dua percobaan tanpa jawaban dipadatkan menjadi sekitar 25 detik. Tidak ada suara."
-      : "Percakapan diputar dari rekaman " + mmss(p.durasi) + " dengan suara buatan (ElevenLabs), bukan panggilan nyata.";
+    if (M.hidup) return "Panggilan uji masuk ke nomor tim. Rekamannya ada di kartu bukti.";
+    return tidakTerhubung(p) ? "Dua percobaan tanpa jawaban, dipadatkan menjadi sekitar 25 detik."
+      : "Percakapan contoh " + mmss(p.durasi) + " dengan suara buatan (ElevenLabs).";
   }
 
   /* Keadaan layar HP penerima, dibaca dari tahap progres yang sama dengan kolom Progres (simulasi dan API). */
@@ -867,7 +831,7 @@
           : '<button class="btn btn--primer" type="button" data-aksi="telepon" data-id="' + id + '"' + (!M.hidup && adaAktif() ? ' disabled title="Satu panggilan aktif pada satu waktu"' : ' title="Pindahkan ke urutan berikutnya"') + ">Dahulukan</button>");
     const kop = '<div class="kepala-panggilan"><div><h1>' + esc(p.pasien) + '</h1><p class="sub-judul">' + esc(namaRs(p.rs)) + ", fisioterapi " + D.BULAN + "</p>" +
       '<div class="meta-panggilan"><span><b>Ditagih</b>' + p.ditagih + " sesi</span>" +
-        '<span><b>Indikator</b><span class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</span></span>" +
+        "<span><b>Indikator</b>" + teksIndikator(p.indikator) + "</span>" +
         "<span><b>Tanggal libur</b>" + libur + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div>" +
       '<div class="kepala-aksi">' + aksi + "</div></div>";
     if (selesai) {
@@ -905,18 +869,15 @@
     const obrolan = obrolanWa(p, cadangan);
     const nomor = M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
     const jedaWa = M.hidup ? M.antrean.pengaturan.jeda_wa_menit : D.JEDA_PESAN_MENIT;
-    const petunjuk = cadangan ? "Penerima belum membalas. Jawaban 1–6 menggantikan panggilan." : "Penerima belum membalas. Pesan ini tanpa tautan.";
-    const aturan = cadangan
-      ? ["Dikirim setelah dua kali panggilan tidak diangkat (jeda 2 menit di prototipe, 2 jam di produksi).", "Satu pertanyaan, jawaban cukup dengan angka 1–6.", "Tanpa tautan, tidak meminta data pribadi atau pembayaran.", "Tidak dijawab bukan sinyal negatif: label tetap Tidak terhubung."]
-      : ["Dikirim sebelum panggilan. Jeda " + jedaWa + " menit di prototipe, 10 menit di produksi.", "Tanpa tautan, karena penipu sering menyamar sebagai BPJS.", "Tidak meminta data pribadi, kode OTP, atau pembayaran.", "Mengarahkan penerima mengecek ke Care Center 165."];
+    const petunjuk = cadangan ? "Penerima belum membalas. Jawaban 1–6 menggantikan panggilan." : "Penerima belum membalas.";
+    const keterangan = cadangan ? "Dikirim setelah dua panggilan tidak diangkat." : "Dikirim " + jedaWa + " menit sebelum panggilan.";
     return '<div class="modal-wa" id="modalWa" data-aksi="tutup-wa"><div class="modal-wa-kartu" data-aksi="diam" role="dialog" aria-modal="true" aria-label="Simulasi layar WhatsApp penerima">' +
       '<button class="modal-wa-tutup" type="button" data-aksi="tutup-wa" aria-label="Tutup">' + ikon("x") + "</button>" +
       '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(nomor) + "</b><span>Nomor uji coba</span></div></div>" +
         '<div class="obrolan">' + obrolan + '</div><div class="ponsel-balas"><span class="petunjuk">' + petunjuk + "</span></div></div></div>" +
       '<div class="modal-wa-info"><span class="kapital">' + (cadangan ? "Chat cadangan" : "Pesan pemberitahuan") + "</span><h2>" + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</h2>" +
-        "<p>" + (cadangan ? "Sistem tidak berhasil menelepon, lalu mengirim pertanyaan lewat chat." : "Penerima tahu akan ditelepon dan tidak mengira panggilan ini penipuan.") + "</p>" +
-        (M.hidup ? '<p class="wa-server">' + ikon("cek") + "Dikirim otomatis oleh server" + (statusKirimWa(p, cadangan) ? " · " + statusKirimWa(p, cadangan) : "") + "</p>" : "") +
-        '<ul class="aturan">' + aturan.map((t) => "<li>" + ikon("cek") + "<span>" + t + "</span></li>").join("") + "</ul></div>" +
+        "<p>" + keterangan + "</p>" +
+        (M.hidup ? '<p class="wa-server">' + ikon("cek") + "Dikirim otomatis oleh server" + (statusKirimWa(p, cadangan) ? " · " + statusKirimWa(p, cadangan) : "") + "</p>" : "") + "</div>" +
     "</div></div>";
   }
 
@@ -1064,12 +1025,12 @@
       angka("Ditagih RS", p.ditagih, "netral", "") + angka("Versi peserta", rk.versi, rk.versiGaya, rk.versiKet) + angka("Selisih", rk.selisih, rk.gaya, rk.selisihKet) + "</div>" +
       '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + "</div></section>";
 
-    /* Mengapa panggilan ini diprioritaskan: dua alasan teratas skor pola dan kelangkaan kombinasi indikatornya. */
-    const pola = p.pola ? '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Mengapa diprioritaskan</h2><div class="kanan">' +
+    /* Alasan prioritas: dua alasan teratas skor pola dan kelangkaan gabungan indikatornya. */
+    const pola = p.pola ? '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Alasan prioritas</h2><div class="kanan">' +
         (p.pola.tinggi ? '<span class="lencana-pola">Pola tidak biasa</span>' : "") + chipPola({ skor_pola: p.pola.skor, pola_tinggi: p.pola.tinggi }) + "</div></div>" +
       '<ul class="pola-alasan">' + p.pola.alasan.map((a) => "<li>" + esc(a.teks) + "</li>").join("") + "</ul>" +
       '<p class="pola-kombinasi">' + esc(p.pola.kombinasi.teks) + "</p>" +
-      '<p class="pola-catatan">Skor pola dihitung dari pola nasional data sampel BPJS 2024 (agregat). Bukan putusan; label tetap dari jawaban pasien.</p></section>' : "";
+      '<p class="pola-catatan">Dibandingkan dengan data sampel BPJS 2024.</p></section>' : "";
 
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
@@ -1096,7 +1057,7 @@
     const ulangAngka = p.label === "tidak_sesuai" || p.label === "sesuai";
     const sarankan = '<section class="panel saran saran-kartu"><div class="saran-isi"><span class="kapital">Saran sistem</span><h3>' + saran.nama + "</h3>" +
       "<p>" + (ulangAngka ? "" : esc(p.alasan) + " ") + esc(saran.akibat) + "</p>" + konteks + (tampilPutusan ? "" : aksiKeputusan(p)) +
-      '<p class="catatan-saran">Rekaman adalah bukti awal, bukan dasar tunggal menolak klaim.</p></div>' +
+      '<p class="catatan-saran">Rekaman menjadi bukti awal untuk klarifikasi ke RS.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
@@ -1134,12 +1095,12 @@
   function barisPembanding(r) {
     const b = r.pembanding;
     if (!b) return "";
-    const bagian = ["Terpicu " + persenSatu(r.persen), "RS sejenis nasional " + persenSatu(b.persen_terpicu_nasional)];
-    if (b.terpicu_p95_kelompok != null) bagian.push("95% kelompok RS sejenis ≤ " + persenSatu(b.terpicu_p95_kelompok));
-    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Pembanding: ' + esc(b.tipe) + ', data sampel BPJS 2024 (agregat)">' +
+    const bagian = ["Terpicu " + persenSatu(r.persen), "rata-rata RS sejenis " + persenSatu(b.persen_terpicu_nasional)];
+    if (b.terpicu_p95_kelompok != null) bagian.push("batas 95% RS sejenis " + persenSatu(b.terpicu_p95_kelompok));
+    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Dibandingkan dengan ' + esc(b.tipe) + ' di data sampel BPJS 2024">' +
       "<span>" + bagian.join(" · ") + "</span>" +
       (b.posisi === "di_atas_p95" ? '<span class="lencana-pola">Di atas 95% RS sejenis</span>' : "") +
-      (r.polaTinggiTidakTerpicu > 0 ? '<span class="redup">' + r.polaTinggiTidakTerpicu + " bulan-pasien berpola tidak biasa di bawah ambang aturan (tidak ditelepon)</span>" : "") +
+      (r.polaTinggiTidakTerpicu > 0 ? '<span class="redup">' + r.polaTinggiTidakTerpicu + " pasien berpola tidak biasa tanpa pemicu aturan, tidak ditelepon</span>" : "") +
       "</div></td></tr>";
   }
 
@@ -1152,7 +1113,7 @@
         "<span><b>" + k.tinggi_dan_tidak_sesuai + " dari " + k.tinggi + "</b> panggilan berpola tidak biasa berakhir Tidak sesuai</span>" +
         '<span class="redup">' + k.n + " panggilan terjawab</span>"
       : '<span class="redup">Belum ada panggilan terjawab.</span>';
-    return '<div class="kinerja-pola" title="' + CATATAN_POLA + '"><b>Skor pola vs hasil panggilan</b>' + isi + "</div>";
+    return '<div class="kinerja-pola"><b>Skor pola dan hasil panggilan</b>' + isi + "</div>";
   }
 
   function lamanRingkasanRs() {
@@ -1188,9 +1149,8 @@
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Normal (2 dari 4).</div>' : "") +
       kartuKinerjaPola(data.kinerjaPola) +
-      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
       '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
-        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit. Pembanding RS sejenis berasal dari agregat data sampel BPJS 2024 dan hanya informasi; status RS tetap dari jawaban pasien.</p></section>';
+        '<p class="catatan-kaki"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung. Identitas penerima telepon tidak dibagikan ke RS.</p></section>';
   }
   /* ============================================================== riwayat */
 
@@ -1218,7 +1178,7 @@
 
   /* ============================================================== render */
 
-  const JUDUL_HALAMAN = { beranda: "Beranda", autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan" };
+  const JUDUL_HALAMAN = { autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan" };
 
   function gambar(tetap) {
     const y = window.scrollY;
@@ -1227,19 +1187,14 @@
     const sedangMengetik = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.aksi === "catatan" ? document.activeElement.selectionStart : null;
     document.body.style.overflow = "";
 
-    if (!S.masuk) {
-      akar.innerHTML = lamanMasuk();
-      return;
-    }
-
     const antrean = '<a href="#/autentik">Autentik</a><span>/</span>';
     let isi, jejak;
-    if (r.nama === "autentik") { isi = lamanAntrean(); jejak = antrean + "<b>Antrean konfirmasi</b>"; }
+    if (r.nama === "autentik") { isi = lamanAntrean(); jejak = "<b>Antrean konfirmasi</b>"; }
     else if (r.nama === "panggilan") { isi = lamanPanggilan(r.id); jejak = antrean + '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Panggilan</b>'; }
     else if (r.nama === "kartu") { isi = lamanKartu(r.id); jejak = antrean + '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Kartu bukti</b>'; }
     else if (r.nama === "ringkasan-rs") { isi = lamanRingkasanRs(); jejak = antrean + "<b>Ringkasan RS</b>"; }
     else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = "<b>Riwayat keputusan</b>"; }
-    else { isi = lamanBeranda(); jejak = "<b>Beranda</b>"; }
+    else { isi = lamanAntrean(); jejak = "<b>Antrean konfirmasi</b>"; }
 
     /* Pemutar rekaman di kartu bukti dipertahankan lintas render ulang (buka-tutup transkrip, keputusan),
        jika tidak elemen audio baru menggantikannya dan rekaman yang sedang diputar berhenti. */
@@ -1251,7 +1206,7 @@
       pemutarBaru.replaceWith(pemutarLama);
       if (mainLagi && pemutarLama.paused) pemutarLama.play().catch(() => { /* autoplay ditolak */ });
     }
-    document.title = (JUDUL_HALAMAN[r.nama] || "Beranda") + " · Vedika Autentik";
+    document.title = (JUDUL_HALAMAN[r.nama] || JUDUL_HALAMAN.autentik) + " · Vedika Autentik";
     if (M.hidup && r.nama === "panggilan") {
       const tr = document.getElementById("transkrip");
       if (tr) tr.scrollTop = tr.scrollHeight;
@@ -1370,7 +1325,6 @@
   /* ============================================================== peristiwa */
 
   const AKSI = {
-    masuk() { S.masuk = true; simpan(); ke("#/beranda"); },
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
@@ -1399,8 +1353,7 @@
       }
       /* Hentikan panggilan yang sedang berjalan dan jadwal otomatis, lalu kosongkan semua hasil dan keputusan. */
       clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa(); suaraHenti();
-      const tetapMasuk = S.masuk;
-      S = statusAwal(); S.masuk = tetapMasuk;
+      S = statusAwal();
       Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
       simpan();
       ke("#/autentik");
