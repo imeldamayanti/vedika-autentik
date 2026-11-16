@@ -103,7 +103,7 @@ export async function issueToken(context, { apiKey, model, fetchImpl = fetch, no
       model: `models/${liveModel}`,
       generationConfig: {
         responseModalities: ["AUDIO"],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } },
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } }, languageCode: "id-ID" },
       },
       systemInstruction: { parts: [{ text: instruction }] },
       inputAudioTranscription: {},

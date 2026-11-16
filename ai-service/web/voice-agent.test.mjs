@@ -7,6 +7,7 @@ import {
   CLOSING_HANGUP_MS,
   LINE_POLL_MS,
   LiveEventReducer,
+  PICKUP_SILENCE_MS,
   SILENCE_HANGUP_MS,
   VedikaVoiceSession,
   buildSetupMessage,
@@ -955,9 +956,12 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
   const line = {
     panggil: async (nomor) => { lineCalls.push(["panggil", nomor]); },
     tutup: async () => { lineCalls.push(["tutup"]); },
-    status: async () => ({ panggilan: states.length > 1 ? states.shift() : states[0] }),
+    status: async () => {
+      const state = states.length > 1 ? states.shift() : states[0];
+      return typeof state === "string" ? { panggilan: state } : state;
+    },
   };
-  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null };
+  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null, opened: 0 };
   const operator = createStationOperator({
     line,
     onLog: (entry) => rig.logs.push(entry),
@@ -966,6 +970,7 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
       rig.options = options;
       return {
         playbackRemainingMs: () => playbackMs,
+        openFirst: () => { rig.opened += 1; options.onAnswer(); return true; },
         stop: async (reason) => {
           if (rig.stops.length) return;
           rig.stops.push(reason);
@@ -1146,4 +1151,58 @@ test("station operator hangs up when the session ends by itself and when cancell
   assert.deepEqual(second.stops, ["dibatalkan"]);
   assert.ok(second.lineCalls.filter(([name]) => name === "tutup").length >= 2);
   await second.result;
+});
+
+test("station operator lets the AI open when the network says answered and the recipient is silent", async (t) => {
+  const rig = stationRig(t, { status: [{ panggilan: "offhook", tersambung: false }, { panggilan: "offhook", tersambung: true }] });
+
+  await rig.tick(LINE_POLL_MS * 2);
+  await rig.tick(PICKUP_SILENCE_MS - 1);
+  assert.equal(rig.opened, 0);
+  await rig.tick(1);
+
+  assert.equal(rig.opened, 1);
+  assert.equal(rig.hooks.answered, 1);
+  assert.match(rig.logs[0], /diangkat tanpa suara/);
+  await rig.tick(ANSWER_TIMEOUT_MS); // the no-answer clock is gone once answered
+  assert.deepEqual(rig.stops.filter((reason) => reason === "tidak_diangkat"), []);
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("station operator waits for the recipient's words when they speak right after picking up", async (t) => {
+  const rig = stationRig(t, { status: [{ panggilan: "offhook", tersambung: true }] });
+
+  await rig.tick(LINE_POLL_MS);
+  rig.options.onSpeech("penerima"); // "Halo?" still streaming in
+  await rig.tick(PICKUP_SILENCE_MS * 2);
+  assert.equal(rig.opened, 0);
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("station operator never opens on a call that is only ringing", async (t) => {
+  const rig = stationRig(t, { status: [{ panggilan: "offhook", tersambung: false }] });
+
+  await rig.tick(ANSWER_TIMEOUT_MS);
+
+  assert.equal(rig.opened, 0);
+  assert.deepEqual(rig.stops, ["tidak_diangkat"]);
+  assert.equal((await rig.result).answered, false);
+});
+
+test("voice session openFirst counts the call as answered and sends the opening cue once", () => {
+  const sent = [];
+  const answers = [];
+  const session = new VedikaVoiceSession({ greetFirst: false, onAnswer: () => answers.push(1) });
+
+  assert.equal(session.openFirst(), true);
+  assert.equal(session.openWhenReady, true); // socket not ready yet: cue waits for setupComplete
+  assert.deepEqual(answers, [1]);
+  session.socket = { send: (raw) => sent.push(JSON.parse(raw)) };
+  session.ready = true;
+  session.sendOpeningCue();
+  assert.equal(session.openFirst(), false);
+  assert.equal(sent.length, 1);
+  assert.match(sent[0].clientContent.turns[0].parts[0].text, /pembuka/);
 });

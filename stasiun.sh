@@ -54,7 +54,7 @@ audio="${SALURAN_AUDIO:-$(env_value "$ROOT/ai-service/.env" SALURAN_AUDIO)}"
 meta=$(env_value "$ROOT/backend/.env" META_WA_MODE)
 if [ -z "$(env_value "$ROOT/backend/.env" META_WA_TOKEN)" ] || [ -z "$(env_value "$ROOT/backend/.env" META_WA_PHONE_ID)" ]; then meta=log; fi
 echo "HP saluran : $model"
-echo "SIM        : $sim$(echo "$sim" | grep -q READY || echo '  <- belum siap, panggilan tidak akan dimulai')"
+echo "SIM        : $sim$(echo "$sim" | grep -qE 'READY|LOADED' || echo '  <- belum siap, panggilan tidak akan dimulai')"
 echo "Audio      : ${audio:-speaker}"
 echo "Meta WA    : ${meta:-log}$([ "${meta:-log}" = log ] && echo ' (pesan tidak benar-benar dikirim)')"
 

@@ -40,7 +40,9 @@
   const setStatus = (text) => { $("status").textContent = text; };
   const showError = (error) => { $("galat").textContent = `${jam()} Galat terakhir: ${error.message}`; };
   const PROCESSING = {
-    speaker: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    // Echo cancellation stops the AI hearing itself. Noise suppression stays off: it treats the
+    // narrow-band voice from the phone's loudspeaker as noise and leaves fragments Gemini mishears.
+    speaker: { echoCancellation: true, noiseSuppression: false, autoGainControl: true },
     kabel: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
   };
   const line = createLineApi();

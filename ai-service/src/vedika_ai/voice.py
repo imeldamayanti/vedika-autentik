@@ -17,6 +17,7 @@ LIVE_WEBSOCKET_URL = (
     "BidiGenerateContentConstrained"
 )
 VOICE = "Kore"
+LANGUAGE = "id-ID"
 
 
 class VoiceContext(BaseModel):
@@ -145,7 +146,12 @@ class GeminiTokenIssuer:
                 "model": f"models/{self.model}",
                 "generationConfig": {
                     "responseModalities": ["AUDIO"],
-                    "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}}},
+                    "speechConfig": {
+                        "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}},
+                        # Pin Indonesian: on a phone line Gemini otherwise guesses the language of
+                        # faint speech and transcribes Indonesian as Spanish or German words.
+                        "languageCode": LANGUAGE,
+                    },
                 },
                 "systemInstruction": {"parts": [{"text": instruction}]},
                 "inputAudioTranscription": {},
@@ -177,4 +183,3 @@ class GeminiTokenIssuer:
             instruksi=instruction,
             kedaluwarsa=expire_time,
         )
-

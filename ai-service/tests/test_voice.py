@@ -131,7 +131,6 @@ def test_token_issuer_requests_one_use_constrained_token_without_leaking_server_
     assert result.instruksi == build_voice_instruction(context())
 
 
-
 def test_token_issuer_sends_bidi_generate_content_setup():
     captured = {}
 
@@ -200,5 +199,8 @@ def test_token_locks_the_call_instruction_and_voice_into_the_session_setup():
     assert setup["systemInstruction"] == {"parts": [{"text": build_voice_instruction(context())}]}
     assert setup["generationConfig"] == {
         "responseModalities": ["AUDIO"],
-        "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}}},
+        "speechConfig": {
+            "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}},
+            "languageCode": "id-ID",
+        },
     }

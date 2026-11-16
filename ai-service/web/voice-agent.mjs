@@ -13,6 +13,9 @@ export const DIAL_GRACE_MS = 5000;
 export const LINE_POLL_MS = 1000;
 export const CLOSING_HANGUP_MS = 3000;
 export const SILENCE_HANGUP_MS = 10000;
+// After the network reports the call as answered, how long the recipient may stay silent before
+// the AI opens the conversation itself.
+export const PICKUP_SILENCE_MS = 3000;
 
 const normalize = (teks) => String(teks || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
 const ANNOUNCEMENTS = [
@@ -228,11 +231,14 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     let aiTurns = 0;
     let closing = null;
     let silence = null;
+    let pickup = null;
+    let heardRecipient = false;
     let session = null;
     const clearTimers = () => {
       clearTimeout(noAnswer);
       clearTimeout(closing);
       clearTimeout(silence);
+      clearTimeout(pickup);
       clearInterval(poll);
     };
     const end = (reason, note) => {
@@ -245,9 +251,22 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     };
     const noAnswer = setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
     const poll = setInterval(async () => {
-      const state = await line.status().then((reply) => reply.panggilan).catch(() => null);
+      const reply = await line.status().catch(() => null);
+      const state = reply?.panggilan;
       if (ended || !state) return;
-      if (state !== "idle") { seenOffhook = true; return; }
+      if (state !== "idle") {
+        seenOffhook = true;
+        // Carrier announcements play before the call is answered, so a network "answered" here is
+        // a person (or voicemail), never the operator.
+        if (reply.tersambung && !answered && !heardRecipient && !pickup) {
+          pickup = setTimeout(() => {
+            if (!answered && !ended && !heardRecipient && session?.openFirst?.()) {
+              onLog?.(`${task.id}: diangkat tanpa suara; AI membuka lebih dulu`);
+            }
+          }, PICKUP_SILENCE_MS);
+        }
+        return;
+      }
       if (answered) end("selesai", "penerima menutup telepon");
       else if (seenOffhook || Date.now() - dialedAt > DIAL_GRACE_MS) end("tidak_diangkat", "panggilan berakhir sebelum dijawab");
     }, LINE_POLL_MS);
@@ -266,7 +285,10 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
         onPhase?.("tersambung");
         Promise.resolve(onAnswered()).catch((error) => onError?.(error));
       },
-      onSpeech: () => clearTimeout(silence),
+      onSpeech: (pembicara) => {
+        clearTimeout(silence);
+        if (pembicara === "penerima") { heardRecipient = true; clearTimeout(pickup); }
+      },
       onTranscript: (turn) => {
         onTurn(turn);
         if (!answered || ended || turn.pembicara !== "ai") return;
@@ -350,7 +372,7 @@ export function buildSetupMessage(model, instruction) {
       model: `models/${model.replace(/^models\//, "")}`,
       generationConfig: {
         responseModalities: ["AUDIO"],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }, languageCode: "id-ID" },
       },
       inputAudioTranscription: {},
       outputAudioTranscription: {},
@@ -592,10 +614,8 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
-    if (event.setupComplete && !this.ready && this.options.greetFirst !== false) {
-      this.socket?.send(JSON.stringify({
-        clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
-      }));
+    if (event.setupComplete && !this.ready && (this.options.greetFirst !== false || this.openWhenReady)) {
+      this.sendOpeningCue();
     }
     this.ready ||= event.setupComplete;
     if (action.clearPlayback) this.clearPlayback();
@@ -603,6 +623,25 @@ export class VedikaVoiceSession {
     for (const turn of event.turns) this.appendFragment(turn);
     if (event.turnComplete || event.interrupted) this.flushTurn();
     for (const chunk of event.audioChunks) this.playPcm(chunk);
+  }
+
+  sendOpeningCue() {
+    this.openWhenReady = false;
+    this.socket?.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
+    }));
+  }
+
+  // The phone network says the call is up but the recipient has not said anything: many people
+  // answer an unknown number and wait. Count the call as answered and let the AI open first.
+  openFirst() {
+    if (this.answered || this.stopping) return false;
+    this.answered = true;
+    this.startedAt = performance.now();
+    this.options.onAnswer?.();
+    if (this.ready) this.sendOpeningCue();
+    else this.openWhenReady = true;
+    return true;
   }
 
   // Gemini streams transcription in fragments; the backend wants one line per speaking turn.
