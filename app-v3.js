@@ -1249,6 +1249,8 @@
   const JUDUL_HALAMAN = { autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan" };
 
   function gambar(tetap) {
+    /* API mode before the first queue response: every page reads M.antrean, so wait for mulaiApp to render. */
+    if (M.hidup && !M.antrean) return;
     const y = window.scrollY;
     const r = rute();
     const akar = document.getElementById("akar");
