@@ -76,7 +76,7 @@ async function tanpaGeserSamping(page, nama) {
   await page.click('tbody tr:has(b:text-is("Sari Wulandari")) a');
   await page.waitForSelector(".pola-kartu");
   const m1kartu = await page.textContent(".pola-kartu");
-  cek(m1kartu.includes("Mengapa dipilih") && m1kartu.includes("hanya 1 indikator aktif") && m1kartu.includes("tanpa rujukan FKTP") && m1kartu.includes("kab/kota lain"), "kartu M1 menjelaskan alasan model: tanpa rujukan dan lintas kab/kota", m1kartu.replace(/\s+/g, " ").slice(0, 260));
+  cek(m1kartu.includes("Mengapa dipilih") && m1kartu.includes("tidak ada indikator aktif") && m1kartu.includes("tanpa rujukan FKTP") && m1kartu.includes("kab/kota lain"), "kartu M1 menjelaskan alasan model: tanpa rujukan dan lintas kab/kota", m1kartu.replace(/\s+/g, " ").slice(0, 260));
   cek(await page.isVisible("text=Sari Wulandari belum ditelepon"), "kartu M1 menyatakan belum ditelepon");
   cek(!/fraud|curang/i.test(m1kartu), "alasan model tanpa kata fraud atau curang");
   await page.goto(TARGET + "#/autentik");
@@ -108,7 +108,8 @@ async function tanpaGeserSamping(page, nama) {
   await page.waitForSelector(".baris-pembanding");
   const pembanding = await page.$$eval(".baris-pembanding", (el) => el.map((x) => x.textContent.trim()));
   cek(pembanding.length === 5 && pembanding[0].includes("Terpicu 39,7% · rata-rata RS sejenis 1,5% · batas 95% RS sejenis 8,2%"), "Ringkasan RS: baris pembanding RS sejenis nasional", pembanding[0]);
-  cek((await page.$$(".baris-pembanding .lencana-pola")).length === 1 && pembanding[0].includes("Di atas 95% RS sejenis"), "hanya RS Melati berlencana Di atas 95% RS sejenis");
+  cek((await page.$$(".baris-pembanding .lencana-pola")).length === 2 && pembanding[0].includes("Di atas 95% RS sejenis") && pembanding[0].includes("Jauh di atas harapan"), "hanya RS Melati berlencana: di atas 95% RS sejenis dan jauh di atas harapan corong");
+  cek(pembanding[0].includes("dipilih 27, harapan menurut umur pasien 2,3") && pembanding.slice(1).every((t) => t.includes("harapan menurut umur pasien")), "Ringkasan RS: corong dipilih dibanding harapan menurut umur", pembanding[0]);
   const kinerja = await page.textContent(".kinerja-pola");
   cek(kinerja.includes("Sumber pemilihan dan hasil panggilan") && kinerja.includes("2 dari 2 panggilan yang ditandai model berakhir Tidak sesuai") && kinerja.includes("1 dari 3 panggilan yang hanya dipilih aturan") && kinerja.includes("5 panggilan terjawab"), "kartu sumber pemilihan dan hasil panggilan", kinerja);
   cek(await page.isVisible("text=RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab)"), "RS Melati menjadi Perlu klarifikasi RS (3 dari 5)");
