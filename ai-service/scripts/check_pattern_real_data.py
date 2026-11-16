@@ -16,6 +16,7 @@ from pathlib import Path
 
 from vedika_ai.claim_reference import MINIMUM_SAFE_CELL_COUNT, assert_privacy_safe_aggregate
 from vedika_ai.pola_reference import (
+    HISTOGRAM_MONTHS,
     MINIMUM_GROUP_MONTHS,
     load_pola,
     patient_months,
@@ -116,7 +117,9 @@ def main() -> int:
     parser.add_argument("--chunk-size", type=int, default=200_000)
     args = parser.parse_args()
     model = json.loads(MODEL.read_text(encoding="utf-8"))
-    result = summarise(patient_months(read_visits(args.source.resolve(), args.chunk_size)), model)
+    records = patient_months(read_visits(args.source.resolve(), args.chunk_size))
+    # July-December only: `episode` (rule I3) looks back 6 months and the file starts in January.
+    result = summarise([r for r in records if r["bulan"] in HISTOGRAM_MONTHS], model)
     OUTPUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"output": str(OUTPUT), "persen_tinggi": result["persen_tinggi"]}))
     return 0

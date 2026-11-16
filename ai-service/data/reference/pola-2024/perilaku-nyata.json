@@ -1,72 +1,42 @@
 {
   "versi_model": "pola-v1",
   "ambang_tinggi": 0.898,
-  "n": 41905,
-  "persen_tinggi": 1.81,
-  "persen_terpicu": 1.51,
+  "n": 22457,
+  "persen_tinggi": 1.82,
+  "persen_terpicu": 1.88,
   "silang": {
     "tinggi_terpicu": {
-      "n": 236,
-      "persen": 0.46
+      "n": 168,
+      "persen": 0.59
     },
     "tinggi_tidak_terpicu": {
-      "n": 602,
-      "persen": 1.35
+      "n": 270,
+      "persen": 1.23
     },
     "biasa_terpicu": {
-      "n": 470,
-      "persen": 1.05
+      "n": 278,
+      "persen": 1.29
     },
     "biasa_tidak_terpicu": {
-      "n": 40597,
-      "persen": 97.14
+      "n": 21741,
+      "persen": 96.89
     }
   },
   "tinggi_tidak_terpicu_per_kombinasi": {
     "I2": {
-      "n": 446
+      "n": 200
     },
     "I4": {
-      "n": 156
+      "n": 70
     }
   },
   "terpicu_tampil_satu": {
-    "n": 21
+    "n": 11
   },
   "terpicu": {
-    "n": 706
+    "n": 446
   },
   "per_bulan": {
-    "2024-01": {
-      "n": 3218,
-      "persen_tinggi": 2.2,
-      "persen_terpicu": 2.0
-    },
-    "2024-02": {
-      "n": 3238,
-      "persen_tinggi": 1.8,
-      "persen_terpicu": 0.9
-    },
-    "2024-03": {
-      "n": 3288,
-      "persen_tinggi": 1.9,
-      "persen_terpicu": 1.1
-    },
-    "2024-04": {
-      "n": 2970,
-      "persen_tinggi": 1.9,
-      "persen_terpicu": 0.8
-    },
-    "2024-05": {
-      "n": 3379,
-      "persen_tinggi": 1.7,
-      "persen_terpicu": 1.3
-    },
-    "2024-06": {
-      "n": 3355,
-      "persen_tinggi": 2.8,
-      "persen_terpicu": 1.9
-    },
     "2024-07": {
       "n": 3672,
       "persen_tinggi": 2.3,
@@ -99,10 +69,10 @@
     }
   },
   "kelompok": {
-    "n": 426,
-    "tanpa_tinggi": 284,
+    "n": 216,
+    "tanpa_tinggi": 143,
     "laju_tinggi_p50": 0.0,
-    "laju_tinggi_p90": 5.4,
-    "persen_tinggi_di_10_persen_teratas": 74
+    "laju_tinggi_p90": 6.0,
+    "persen_tinggi_di_10_persen_teratas": 66
   }
 }
