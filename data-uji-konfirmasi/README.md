@@ -14,9 +14,6 @@ Data ini dipakai untuk menguji tiga bagian sistem: indikator (F1), panggilan AI 
 | Rujukan per kunjungan | Sintetis. Semua kunjungan dirujuk FKTP kab/kota yang sama, kecuali 6 kunjungan M1 Agustus (3 tanpa rujukan, 3 dari kab/kota lain). |
 | Model anomali (`referensi-pola/model-anomali-v2.json`) | Nyata, agregat dari Data Sampel Reguler 2023 dan 2024 (40.650 bulan-pasien), tiap sel ≥ 10 baris. |
 | Riwayat panggilan sebelum demo | Sintetis, ditandai `sintetis-riwayat`. |
-| Referensi nasional skor pola (`referensi-pola/referensi.json`) | Nyata, agregat dari Data Sampel Reguler Edisi 2025 (kunjungan 2024, 41.905 bulan-pasien fisioterapi). Tiap sel ≥ 10 baris, tanpa baris peserta riil. |
-| Model skor pola (`referensi-pola/model-pola-v1.json`) | Campuran: kelas normal dari histogram nasional nyata, kelas pelanggaran dari manipulasi buatan. |
-| Skor demo (`referensi-pola/skor_demo.json`) | Sintetis: model di atas diterapkan ke data uji ini. |
 
 ## Berkas
 
@@ -33,11 +30,11 @@ Data ini dipakai untuk menguji tiga bagian sistem: indikator (F1), panggilan AI 
 | `expected_ringkasan_rs.json` | Status tiap RS sebelum skenario dan setelah tiap skenario | Uji F5 |
 | `kunci_kebenaran_2026-08.csv` | Jumlah sesi yang sebenarnya terjadi. **Hanya untuk penguji, tidak boleh dibaca sistem.** | Penguji |
 | `tools/aturan.py` | Aturan referensi: indikator, label, status RS | Zahra, Imelda |
-| `tools/pola.py` | Skor pola: fitur, bin, skor, alasan. Hanya mengurutkan antrean; tidak mengubah indikator, label, atau status RS | Zahra, Imelda |
+| `tools/pola.py` | Fitur kunjungan per bulan-pasien (sesi, minggu terpadat, hari Minggu/libur, bulan berturut-turut) dan indikator I1–I4, dipakai model anomali dan seed | Zahra, Imelda |
 | `tools/uji_pola.py` | Uji `pola.py`, termasuk kesamaan fitur dengan `aturan.py` di 302 bulan-pasien | Semua |
 | `tools/anomali.py` | Model anomali `anomali-v2`: fitur, bin, skor, alasan, corong RS. Ikut memilih siapa ditelepon (aturan ATAU model) | Imelda (backend), Zahra |
 | `tools/anomali_demo.py` | Hasil model anomali untuk data uji (`referensi-pola/anomali_demo.json`, disalin ke `data-v3.js`) | Imelda |
-| `referensi-pola/` | Skor pola (`model-pola-v1.json`, referensi nasional, skor demo, `EVALUASI.md`; `ai-service/scripts/train_pattern_model.py`) dan model anomali (`model-anomali-v2.json`, `EVALUASI-ANOMALI.md`, `BANDING-METODE.md`; `ai-service/scripts/train_anomaly_model.py`). Lihat `docs/rencana-v3-skor-pola/` | Imelda (backend), Zahra |
+| `referensi-pola/` | Model anomali (`model-anomali-v2.json`, `EVALUASI-ANOMALI.md`, `BANDING-METODE.md`; `ai-service/scripts/train_anomaly_model.py`), tabel `model-anomali-v1.json` sebagai pembanding, dan hasil demo (`anomali_demo.json`). Lihat `docs/rencana-v3-skor-pola/MODEL-ANOMALI.md` | Imelda (backend), Zahra |
 | `tools/generate.py` | Pembangkit data (deterministik) | — |
 | `tools/uji.py` | Pemeriksa keluaran aplikasi | Semua |
 
@@ -69,7 +66,7 @@ Ringkasan RS: RS Melati Sehat berstatus Normal sebelum skenario (2 tidak sesuai 
 
 ```bash
 python3 tools/uji.py indikator                       # aturan referensi = expected
-python3 tools/uji_pola.py                            # skor pola: fitur, bin, skor, alasan
+python3 tools/uji_pola.py                            # fitur kunjungan sama dengan aturan.py
 python3 tools/uji.py indikator keluaran_app.csv      # keluaran indikator aplikasi
 python3 tools/uji.py jawaban keluaran_pembaca.json   # keluaran pembaca jawaban
 ```

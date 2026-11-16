@@ -1140,7 +1140,7 @@
       },
       rs: D.RS.map((r, i) => ({
         id: r.id, nama: r.nama, aktif: r.aktif, terpicu: r.terpicu, persen: r.persen, c: ring[i],
-        pembanding: r.pembanding, funnel: r.funnel,
+        funnel: r.funnel,
         daftar: selesai.filter((p) => p.rs === r.id).map((p) => ({
           id: p.id, pasien: p.pasien, label: p.label, ditagih: p.ditagih, jumlah_min: p.jawaban.jumlah_min, jumlah_maks: p.jawaban.jumlah_maks, selisih: D.selisih(p)
         }))
@@ -1154,19 +1154,16 @@
     return '<span class="label label--' + kelas + '">' + c.status + "</span>";
   }
 
-  /* Satu baris pembanding per RS: persen terpicu RS ini, RS sejenis nasional, batas 95% kelompok RS sejenis,
-     dan pasien dipilih (aturan ATAU model) dibanding harapan menurut umur pasiennya (corong). */
+  /* Satu baris corong per RS: persen terpicu aturan, lalu pasien dipilih (aturan ATAU model) dibanding harapan menurut
+     umur pasiennya. Lencana bila RS di luar batas corong setelah memperhitungkan sebaran antar-RS. */
   const LENCANA_CORONG = { above_99_8: "Jauh di atas harapan", above_95: "Di atas harapan" };
-  function barisPembanding(r) {
-    const b = r.pembanding, f = r.funnel;
-    if (!b) return "";
-    const bagian = ["Terpicu " + persenSatu(r.persen), "rata-rata RS sejenis " + persenSatu(b.persen_terpicu_nasional)];
-    if (b.terpicu_p95_kelompok != null) bagian.push("batas 95% RS sejenis " + persenSatu(b.terpicu_p95_kelompok));
-    if (f) bagian.push("dipilih " + f.selected + ", harapan menurut umur pasien " + koma(f.expected.toFixed(1)));
-    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Dibandingkan dengan ' + esc(b.tipe) + ' di data sampel BPJS 2024">' +
-      "<span>" + bagian.join(" · ") + "</span>" +
-      (b.posisi === "di_atas_p95" ? '<span class="lencana-pola">Di atas 95% RS sejenis</span>' : "") +
-      (f && LENCANA_CORONG[f.position] ? '<span class="lencana-pola" title="Di luar batas corong ' + (f.position === "above_99_8" ? "99,8%" : "95%") + ' setelah memperhitungkan umur pasien dan sebaran antar-RS">' + LENCANA_CORONG[f.position] + "</span>" : "") +
+  function barisCorong(r) {
+    const f = r.funnel;
+    if (!f) return "";
+    const lencana = LENCANA_CORONG[f.position];
+    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Harapan dari laju nasional per kelompok umur, data sampel BPJS 2023–2024">' +
+      "<span>Terpicu " + persenSatu(r.persen) + " · dipilih " + f.selected + ", harapan menurut umur pasien " + koma(f.expected.toFixed(1)) + "</span>" +
+      (lencana ? '<span class="lencana-pola" title="Di luar batas corong ' + (f.position === "above_99_8" ? "99,8%" : "95%") + ' setelah memperhitungkan umur pasien dan sebaran antar-RS">' + lencana + "</span>" : "") +
       "</div></td></tr>";
   }
 
@@ -1203,7 +1200,7 @@
         '<td class="angka sembunyi-hp" data-label="Terjawab">' + c.terjawab + "</td>" +
         '<td class="angka" data-label="Tidak sesuai"><span class="nilai">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</span></td>" +
         '<td data-label="Status"><div class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</div></td>" +
-        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisPembanding(r) +
+        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisCorong(r) +
         (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
     }).join("");
 

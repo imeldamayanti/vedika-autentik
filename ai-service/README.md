@@ -54,15 +54,14 @@ Everything that reads the raw sample lives in `src/vedika_ai/ml/`; the voice ser
 |---|---|
 | `privacy.py` | Export rules: minimum cell count, identifier guard, JSON/CSV writers |
 | `cohort.py` | Raw FKRTL visits to participant-months (plus secondary diagnosis and age) |
-| `claim_reference.py`, `pattern_reference.py` | `rehab-2024` and `pola-2024` aggregates |
+| `claim_reference.py` | `rehab-2024` descriptive aggregates |
 | `anomaly_model.py`, `anomaly_evaluation.py` | Train and evaluate `anomali-v2` |
-| `tools.py` | Loads the stdlib scorers in `data-uji-konfirmasi/tools` (`pola.py`, `anomali.py`) |
+| `tools.py` | Loads the stdlib modules in `data-uji-konfirmasi/tools` (`pola.py` visit features, `anomali.py` scorer) |
 
 | Script | Output |
 |---|---|
-| `prepare_claim_reference.py`, `prepare_pattern_reference.py` | `data/reference/rehab-2024`, `data/reference/pola-2024` |
-| `check_pattern_real_data.py`, `train_pattern_model.py` | `pola-v1` behaviour and model |
-| `train_anomaly_model.py`, `compare_anomaly_models.py` | `anomali-v2` model, evaluation, and comparison with v1 |
+| `prepare_claim_reference.py` | `data/reference/rehab-2024` |
+| `train_anomaly_model.py`, `compare_anomaly_models.py` | `anomali-v2` model, evaluation (`data/reference/anomali`), and comparison with v1 |
 
 Full commands for the anomaly model: `../docs/rencana-v3-skor-pola/MODEL-ANOMALI.md` (section 15).
 

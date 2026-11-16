@@ -2,7 +2,7 @@
 
 Scoring is data-uji-konfirmasi/tools/anomali.py, loaded as is (like pola.py and aturan.py); the model is
 the aggregate table referensi-pola/model-anomali-v2.json. Patients are called when the rules OR the model
-select them. The model never sets a label, a recommendation, or a hospital status.
+select them, rarest pattern first. The model never sets a label, a recommendation, or a hospital status.
 """
 import importlib.util
 import json
@@ -16,6 +16,15 @@ VERSION = "anomali-v2"
 @lru_cache
 def anomali():
     spec = importlib.util.spec_from_file_location("anomali", DATA_UJI / "tools" / "anomali.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@lru_cache
+def pola():
+    """Visit-pattern features (tools/pola.py)."""
+    spec = importlib.util.spec_from_file_location("pola", DATA_UJI / "tools" / "pola.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

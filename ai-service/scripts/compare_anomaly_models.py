@@ -3,7 +3,7 @@
 
 anomali-v1 is the frozen Isolation Forest table (model-anomali-v1.json, code in commit d646541); it cannot be
 refitted here, so it has no year-to-year row. Same arguments as train_anomaly_model.py. Writes
-ai-service/data/reference/pola-2024/banding-metode.json and data-uji-konfirmasi/referensi-pola/BANDING-METODE.md.
+ai-service/data/reference/anomali/banding-metode.json and data-uji-konfirmasi/referensi-pola/BANDING-METODE.md.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from vedika_ai.ml.report import number, table, thousands
 
 V1 = tools.MODEL_DIR / "model-anomali-v1.json"
 V2 = tools.MODEL_DIR / "model-anomali-v2.json"
-OUTPUT = tools.REFERENCE_DIR / "pola-2024" / "banding-metode.json"
+OUTPUT = tools.REFERENCE_DIR / "anomali" / "banding-metode.json"
 REPORT = tools.MODEL_DIR / "BANDING-METODE.md"
 METHODS = ("anomali-v1 (Isolation Forest)", "Kelangkaan nasional", "anomali-v2 (umur)")
 INJECTED = 2000
@@ -109,7 +109,7 @@ def compare(
     for kind in INJECTIONS:
         changed = [r | {"anomaly_features": inject(r["anomaly_features"], kind)} for r in chosen]
         rules = sum(
-            sum(pola.indikator({k: c["anomaly_features"][k] for k in pola.FITUR})) >= 2
+            sum(pola.indicators({k: c["anomaly_features"][k] for k in pola.FEATURES})) >= 2
             for c in changed
         )
         injection[kind] = {"Aturan": round(100 * rules / INJECTED, 1)} | {

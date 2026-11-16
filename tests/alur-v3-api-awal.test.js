@@ -31,7 +31,7 @@ const health = { api: "ok", db: "ok", pembaca: "ok", versi_aturan: "2026.10" };
 const queueRow = (over) => Object.assign({
   umur: 54, rs: "RS01", nama_rs: "RS Melati Sehat", ditagih: 11, indikator: ["I1", "I2"],
   label: null, keputusan_tindakan: null, prioritas: false, percobaan: 0, coba_lagi_setelah: null,
-  skor_pola: 0.9, pola_tinggi: true, dipilih: "aturan"
+  dipilih: "aturan"
 }, over);
 
 const queue = {
@@ -58,7 +58,6 @@ const callDetail = {
   tanggal: ["2026-08-03", "2026-08-04", "2026-08-06", "2026-08-10", "2026-08-11", "2026-08-13", "2026-08-16", "2026-08-17", "2026-08-20", "2026-08-24", "2026-08-27"],
   tanda_tanggal: { "2026-08-16": "Minggu", "2026-08-17": "Libur nasional" },
   indikator: ["I1", "I2"],
-  pola: null,
   dipilih: "aturan",
   anomali: null,
   tanggal_libur: ["2026-08-16", "2026-08-17"],
@@ -96,8 +95,6 @@ const callDetail = {
 
 const hospitalSummary = (id, nama, over) => Object.assign({
   id_rs: id, nama, aktif: 68, terpicu: 0, persen: 0,
-  pembanding: { tipe: "RS Swasta Setara Type C", persen_terpicu_nasional: 1.48, sesi_rata_nasional: 3.74, terpicu_p95_kelompok: 8.2, posisi: "wajar" },
-  pola_tinggi_tidak_terpicu: 0,
   funnel: { patient_months: 68, selected: 0, expected: 2.3, z: -1.2, position: "within" },
   sesuai: 0, tidak_sesuai: 0, tidak_yakin: 0, tidak_terhubung: 0, menolak: 0, terjawab: 0, rasio: 0, status: "Normal",
   panggilan: []
@@ -107,7 +104,6 @@ const summary = {
   bulan: "2026-08",
   aturan: "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tidak sesuai/terjawab >= 10%",
   panggilan_selesai: 1,
-  kinerja_pola: { n: 1, skor_rata_tidak_sesuai: 0.9, skor_rata_sesuai: null, tinggi_dan_tidak_sesuai: 1, tinggi: 1 },
   kinerja_model: { n: 1, model: 0, model_tidak_sesuai: 0, aturan: 1, aturan_tidak_sesuai: 1 },
   rs: [
     hospitalSummary("RS01", "RS Melati Sehat", {

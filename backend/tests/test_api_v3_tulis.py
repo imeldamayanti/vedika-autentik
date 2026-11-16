@@ -1,10 +1,8 @@
 """Uji D-03: endpoint tulis untuk FE (pengaturan, mulai, keputusan, rekaman, reset demo)."""
 import json
-from datetime import timedelta
 
 import pytest
 
-from app import config
 from tests.util_v3 import jam_palsu, ubah, wib
 
 S1 = "CALL-P-S1-2026-08"
@@ -86,7 +84,7 @@ def test_pengaturan_tidak_bisa_menimpa_detak_stasiun(klien_v3, conn_v3):
 # ---- POST /panggilan/{id}/mulai ----
 
 def test_dahulukan_menandai_prioritas(klien_v3, conn_v3):
-    r = klien_v3.post(f"/api/v1/panggilan/CALL-P-S3-2026-08/mulai")
+    r = klien_v3.post("/api/v1/panggilan/CALL-P-S3-2026-08/mulai")
     assert r.status_code == 200
     assert r.json()["id"] == "CALL-P-S3-2026-08" and r.json()["prioritas"] is True and r.json()["status"] == "antre"
     assert conn_v3.execute("select prioritas from panggilan where id = 'CALL-P-S3-2026-08'").fetchone()["prioritas"] is True

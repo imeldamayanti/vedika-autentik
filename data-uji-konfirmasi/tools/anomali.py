@@ -1,6 +1,6 @@
 """Anomaly model anomali-v2: how rare a monthly physiotherapy claim pattern is among patients of the same age.
 
-Standard library only, shared by the trainer (ai-service), the demo data, and later the backend.
+Standard library only, shared by the trainer (ai-service), the demo data, and the backend.
 
 A pattern is six call-confirmable features cut into fixed bins. The model stores weighted pattern shares
 nationally and per age group, only for cells with at least `minimum_cell` participant-months. For a group

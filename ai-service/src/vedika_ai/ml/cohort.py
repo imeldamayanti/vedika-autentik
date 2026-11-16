@@ -132,7 +132,6 @@ def read_visits(
     if missing:
         raise ReferenceDataError(f"Source is missing required columns: {', '.join(missing)}")
     clinic_codes = rehabilitation_codes(metadata)
-    type_labels = metadata.value_labels.get(metadata.variable_to_label.get("FKL09"), {})
 
     visits: list[dict[str, Any]] = []
     chunks = pyreadstat.read_file_in_chunks(
@@ -165,7 +164,6 @@ def read_visits(
                     "date": day.date(),
                     "weight": float(weight),
                     "peer_group": peer_group,
-                    "hospital_type": str(type_labels.get(peer_group[3], f"Tipe {peer_group[3]}")),
                     "referred": bool(has_referral),
                     "other_district": bool(other),
                 }
@@ -221,13 +219,11 @@ def patient_months(visits: list[dict[str, Any]]) -> list[dict[str, Any]]:
             by_month[row["date"].strftime("%Y-%m")].append(row)
         active_months = set(by_month)
         for month, month_rows in by_month.items():
-            features = pola.fitur_bulan(
+            features = pola.month_features(
                 [r["date"] for r in month_rows], active_months, month, set()
             )
-            indicators = pola.indikator(features)
-            (peer_group, hospital_type), _ = Counter(
-                (r["peer_group"], r["hospital_type"]) for r in month_rows
-            ).most_common(1)[0]
+            indicators = pola.indicators(features)
+            peer_group = Counter(r["peer_group"] for r in month_rows).most_common(1)[0][0]
             records.append(
                 {
                     "month": month,
@@ -237,13 +233,10 @@ def patient_months(visits: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         [c for r in month_rows for c in r.get("conditions", [])]
                     ),
                     "age_group": anomali.age_group(age_on(month_rows[0].get("born"), month)),
-                    "bins": pola.bin_fitur(features),
-                    "combination": pola.kombinasi(*indicators),
                     "indicators": indicators,
                     "triggered": sum(indicators) >= 2,
                     "weight": float(month_rows[0]["weight"]),
                     "peer_group": peer_group,
-                    "hospital_type": hospital_type,
                 }
             )
     return records
