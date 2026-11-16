@@ -226,3 +226,43 @@ def test_committed_manifest_matches_outputs_and_privacy_flags():
         path = REFERENCE_DIR / output["filename"]
         assert path.stat().st_size == output["size_bytes"]
         assert sha256_file(path) == output["sha256"]
+
+
+MODEL_DIR = Path(__file__).parents[2] / "data-uji-konfirmasi" / "referensi-pola"
+
+
+def test_committed_model_is_a_plain_coefficient_table():
+    pola = load_pola()
+    model = json.loads((MODEL_DIR / "model-pola-v1.json").read_text(encoding="utf-8"))
+
+    assert_privacy_safe_aggregate(model)
+    assert model["versi"] == "pola-v1"
+    assert set(model["fitur"]) <= set(pola.FITUR)
+    assert all(list(model["koefisien"][name]) == pola.BIN[name] for name in model["fitur"])
+    assert 0 < model["ambang_tinggi"] < 1
+    assert model["dilatih_dari"] == "ai-service/data/reference/pola-2024"
+
+
+def test_committed_runtime_reference_is_aggregate_only():
+    reference = json.loads((MODEL_DIR / "referensi.json").read_text(encoding="utf-8"))
+    source = read_json("pembanding_tipe.json")
+
+    assert_privacy_safe_aggregate(reference)
+    assert reference["marginal"] == read_json("marginal.json")["marginal"]
+    assert reference["kombinasi"] == read_json("kombinasi.json")["kombinasi"]
+    assert set(reference["pembanding_tipe"]) == {NATIONAL, *reference["peta_tipe"].values()}
+    for label, cell in reference["pembanding_tipe"].items():
+        assert cell == source[label]
+        assert cell.keys() <= BENCHMARK_KEYS
+
+
+def test_committed_demo_scores_cover_every_august_patient_month():
+    pola = load_pola()
+    model = json.loads((MODEL_DIR / "model-pola-v1.json").read_text(encoding="utf-8"))
+    scores = json.loads((MODEL_DIR / "skor_demo.json").read_text(encoding="utf-8"))
+
+    assert len(scores) == 300
+    for row in scores:
+        assert row["skor"] == pola.skor(model, row["fitur"])
+        assert row["tinggi"] == (row["skor"] >= model["ambang_tinggi"])
+        assert len(row["alasan"]) <= 2

@@ -1,0 +1,173 @@
+{
+  "sumber": "Data Sampel BPJS Kesehatan 2024 (FKRTL reguler, fisioterapi rawat jalan), agregat",
+  "tahun": 2024,
+  "marginal": {
+    "ahad_libur": {
+      "0": 0.995589,
+      "1": 0.003071,
+      "2+": 0.00134
+    },
+    "episode": {
+      "1": 0.331606,
+      "2": 0.226777,
+      "3": 0.14145,
+      "4": 0.071522,
+      "5": 0.049753,
+      "6": 0.036336,
+      "7+": 0.142556
+    },
+    "maks_minggu": {
+      "1": 0.464048,
+      "2": 0.50528,
+      "3": 0.029397,
+      "4": 0.001275
+    },
+    "sesi": {
+      "1": 0.185236,
+      "10": 0.003058,
+      "11": 0.002384,
+      "12": 0.001215,
+      "13+": 0.001234,
+      "2": 0.168034,
+      "3": 0.168329,
+      "4": 0.179775,
+      "5": 0.10318,
+      "6": 0.082924,
+      "7": 0.054551,
+      "8": 0.036592,
+      "9": 0.013488
+    }
+  },
+  "digabung": {
+    "ahad_libur": {},
+    "episode": {},
+    "maks_minggu": {
+      "5": "4",
+      "6+": "4"
+    },
+    "sesi": {}
+  },
+  "kombinasi": {
+    "-": {
+      "n": 35056,
+      "prevalensi": 0.84744
+    },
+    "I1": {
+      "n": 320,
+      "prevalensi": 0.006704
+    },
+    "I1+I2": {
+      "n": 377,
+      "prevalensi": 0.008008
+    },
+    "I1+I2+I3": {
+      "n": 85,
+      "prevalensi": 0.001673
+    },
+    "I1+I2+I3+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I1+I2+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I1+I3": {
+      "n": 86,
+      "prevalensi": 0.002159
+    },
+    "I1+I3+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I1+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I2": {
+      "n": 804,
+      "prevalensi": 0.019076
+    },
+    "I2+I3": {
+      "n": 91,
+      "prevalensi": 0.002092
+    },
+    "I2+I3+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I2+I4": {
+      "prevalensi_maks": 0.000239
+    },
+    "I3": {
+      "n": 4850,
+      "prevalensi": 0.108348
+    },
+    "I3+I4": {
+      "n": 46,
+      "prevalensi": 0.000645
+    },
+    "I4": {
+      "n": 169,
+      "prevalensi": 0.00333
+    }
+  },
+  "pembanding_tipe": {
+    "Nasional": {
+      "bulan_pasien": 41905,
+      "kelompok": 426,
+      "persen_terpicu": 1.51,
+      "sesi_p90": 7,
+      "sesi_p95": 8,
+      "sesi_rata": 3.57,
+      "terpicu_p50": 0.0,
+      "terpicu_p90": 3.8,
+      "terpicu_p95": 9.0
+    },
+    "RS Kelas B": {
+      "bulan_pasien": 6535,
+      "kelompok": 93,
+      "persen_terpicu": 1.12,
+      "sesi_p90": 6,
+      "sesi_p95": 7,
+      "sesi_rata": 3.27,
+      "terpicu_p50": 0.0,
+      "terpicu_p90": 3.6,
+      "terpicu_p95": 14.8
+    },
+    "RS Kelas C": {
+      "bulan_pasien": 6377,
+      "kelompok": 70,
+      "persen_terpicu": 1.06,
+      "sesi_p90": 7,
+      "sesi_p95": 8,
+      "sesi_rata": 3.36,
+      "terpicu_p50": 0.0,
+      "terpicu_p90": 2.8,
+      "terpicu_p95": 6.7
+    },
+    "RS Swasta Setara Type B": {
+      "bulan_pasien": 4203,
+      "kelompok": 39,
+      "persen_terpicu": 0.94,
+      "sesi_p90": 6,
+      "sesi_p95": 7,
+      "sesi_rata": 3.55,
+      "terpicu_p50": 0.0,
+      "terpicu_p90": 2.5,
+      "terpicu_p95": 3.3
+    },
+    "RS Swasta Setara Type C": {
+      "bulan_pasien": 16618,
+      "kelompok": 125,
+      "persen_terpicu": 1.48,
+      "sesi_p90": 7,
+      "sesi_p95": 8,
+      "sesi_rata": 3.74,
+      "terpicu_p50": 0.0,
+      "terpicu_p90": 4.3,
+      "terpicu_p95": 8.2
+    }
+  },
+  "peta_tipe": {
+    "Pemerintah kelas B": "RS Kelas B",
+    "Pemerintah kelas C": "RS Kelas C",
+    "Swasta setara kelas B": "RS Swasta Setara Type B",
+    "Swasta setara kelas C": "RS Swasta Setara Type C"
+  }
+}
