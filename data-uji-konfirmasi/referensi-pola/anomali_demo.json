@@ -1,28 +1,91 @@
 {
- "versi": "anomali-v1",
- "asumsi": "Pasien demo dianggap berujukan FKTP dari kab/kota yang sama; P-M1 dan P-M2 tanpa rujukan dan lintas kab/kota.",
+ "versi": "anomali-v2",
  "ringkas": {
-  "keduanya": 22,
-  "aturan": 8,
+  "keduanya": 21,
+  "aturan": 9,
   "model": 2
  },
+ "rs": {
+  "RS01": {
+   "patient_months": 68,
+   "selected": 27,
+   "expected": 2.3,
+   "z": 10.34,
+   "position": "above_99_8"
+  },
+  "RS02": {
+   "patient_months": 65,
+   "selected": 1,
+   "expected": 2.3,
+   "z": -0.54,
+   "position": "within"
+  },
+  "RS03": {
+   "patient_months": 60,
+   "selected": 2,
+   "expected": 2.1,
+   "z": -0.05,
+   "position": "within"
+  },
+  "RS04": {
+   "patient_months": 53,
+   "selected": 0,
+   "expected": 1.8,
+   "z": -0.85,
+   "position": "within"
+  },
+  "RS05": {
+   "patient_months": 56,
+   "selected": 2,
+   "expected": 1.9,
+   "z": 0.05,
+   "position": "within"
+  }
+ },
  "pasien": {
+  "P-M1": {
+   "dipilih": "model",
+   "rujukan": {
+    "tanpa_rujukan": 0.5,
+    "lintas_wilayah": 0.5
+   },
+   "skor": 7.8631,
+   "ditandai": true,
+   "langka": false,
+   "alasan": [
+    "Sebagian dirujuk dari kab/kota lain: hanya 0,2% tagihan bulanan pasien 40–59 tahun.",
+    "Sebagian kunjungan tanpa rujukan FKTP: hanya 0,6% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 5–8 sesi sebulan, 3–5 bulan berturut-turut, sebagian kunjungan tanpa rujukan FKTP, dan sebagian dirujuk dari kab/kota lain muncul pada kurang dari 0,1% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
+  },
+  "P-M2": {
+   "dipilih": "model",
+   "rujukan": {
+    "tanpa_rujukan": 0.0,
+    "lintas_wilayah": 0.0
+   },
+   "skor": 8.1243,
+   "ditandai": true,
+   "langka": false,
+   "alasan": [
+    "2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 2 sesi atau lebih hari Minggu muncul pada kurang dari 0,1% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
+  },
   "P-S1": {
    "dipilih": "keduanya",
    "rujukan": {
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 2 sesi atau lebih hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 40–59 tahun.",
+    "2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 2 sesi atau lebih hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P-S2": {
    "dipilih": "keduanya",
@@ -30,16 +93,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 6 bulan atau lebih berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas.",
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 6 bulan atau lebih berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P-S3": {
    "dipilih": "aturan",
@@ -47,15 +108,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6372,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.2497,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,5% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,5% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P-S4": {
    "dipilih": "keduanya",
@@ -63,16 +122,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas.",
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P-S5": {
    "dipilih": "keduanya",
@@ -80,16 +137,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,6% tagihan bulanan pasien 18–39 tahun.",
+    "9–12 sesi sebulan: hanya 1,7% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P-S6": {
    "dipilih": "keduanya",
@@ -97,16 +152,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 5–8 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 40–59 tahun.",
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 5–8 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P-S7": {
    "dipilih": null,
@@ -114,13 +167,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P-S8": {
    "dipilih": "aturan",
@@ -128,15 +179,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6372,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.2497,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,5% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,5% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0001": {
    "dipilih": null,
@@ -144,13 +193,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0002": {
    "dipilih": "keduanya",
@@ -158,16 +205,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya kurang dari 0,1% tagihan bulanan pasien di bawah 18 tahun.",
+    "4 sesi atau lebih dalam satu minggu: hanya 0,7% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0003": {
    "dipilih": "aturan",
@@ -175,16 +220,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6606,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.1271,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,7% tagihan bulanan pasien 18–39 tahun.",
+    "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0004": {
    "dipilih": null,
@@ -192,13 +235,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0005": {
    "dipilih": null,
@@ -206,13 +247,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0006": {
    "dipilih": null,
@@ -220,13 +259,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0007": {
    "dipilih": "aturan",
@@ -234,16 +271,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6498,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 3 sesi dalam satu minggu muncul pada 0,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.2871,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,7% tagihan bulanan pasien 18–39 tahun.",
+    "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 3 sesi dalam satu minggu muncul pada 0,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0008": {
    "dipilih": null,
@@ -251,13 +286,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0009": {
    "dipilih": null,
@@ -265,13 +298,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0010": {
    "dipilih": "keduanya",
@@ -279,16 +310,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas.",
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0011": {
    "dipilih": "keduanya",
@@ -296,16 +325,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas.",
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0012": {
    "dipilih": "aturan",
@@ -313,32 +340,28 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6372,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.5549,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,7% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 0,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0013": {
-   "dipilih": "keduanya",
+   "dipilih": "aturan",
    "rujukan": {
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6803,
-    "ditandai": true,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 6 bulan atau lebih berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.9673,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas.",
+    "3 sesi dalam satu minggu: hanya 2,9% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 6 bulan atau lebih berturut-turut muncul pada 0,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0014": {
    "dipilih": null,
@@ -346,13 +369,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0015": {
    "dipilih": null,
@@ -360,13 +381,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0016": {
    "dipilih": null,
@@ -374,13 +393,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0017": {
    "dipilih": null,
@@ -388,13 +405,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0018": {
    "dipilih": "keduanya",
@@ -402,16 +417,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas.",
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0019": {
    "dipilih": null,
@@ -419,13 +432,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0020": {
    "dipilih": null,
@@ -433,13 +444,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0021": {
    "dipilih": "keduanya",
@@ -447,16 +456,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 60 tahun ke atas.",
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0022": {
    "dipilih": null,
@@ -464,13 +471,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0023": {
    "dipilih": null,
@@ -478,13 +483,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.988,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0025": {
    "dipilih": null,
@@ -492,13 +495,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0026": {
    "dipilih": null,
@@ -506,15 +507,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6265,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.9735,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0027": {
    "dipilih": null,
@@ -522,13 +521,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0028": {
    "dipilih": "keduanya",
@@ -536,16 +533,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya kurang dari 0,1% tagihan bulanan pasien di bawah 18 tahun.",
+    "4 sesi atau lebih dalam satu minggu: hanya 0,7% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0029": {
    "dipilih": null,
@@ -553,13 +548,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0032": {
    "dipilih": "keduanya",
@@ -567,16 +560,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 60 tahun ke atas.",
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0033": {
    "dipilih": null,
@@ -584,13 +575,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0034": {
    "dipilih": null,
@@ -598,13 +587,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0035": {
    "dipilih": null,
@@ -612,13 +599,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0036": {
    "dipilih": null,
@@ -626,13 +611,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0037": {
    "dipilih": "keduanya",
@@ -640,16 +623,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 6 bulan atau lebih berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya kurang dari 0,1% tagihan bulanan pasien 18–39 tahun.",
+    "1 sesi hari Minggu: hanya 0,6% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 6 bulan atau lebih berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0038": {
    "dipilih": null,
@@ -657,13 +638,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0039": {
    "dipilih": null,
@@ -671,13 +650,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0041": {
    "dipilih": null,
@@ -685,13 +662,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0042": {
    "dipilih": null,
@@ -699,13 +674,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0044": {
    "dipilih": null,
@@ -713,13 +686,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0045": {
    "dipilih": "keduanya",
@@ -727,16 +698,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.698,
-    "ditandai": true,
-    "langka": false,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 4 sesi atau lebih dalam satu minggu muncul pada kurang dari 0,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 8.7709,
+   "ditandai": true,
+   "langka": false,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya kurang dari 0,1% tagihan bulanan pasien 18–39 tahun.",
+    "9–12 sesi sebulan: hanya 1,7% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 4 sesi atau lebih dalam satu minggu muncul pada kurang dari 0,1% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0046": {
    "dipilih": "keduanya",
@@ -744,16 +713,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 2 sesi atau lebih hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan pasien 40–59 tahun.",
+    "9–12 sesi sebulan: hanya 2,5% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 2 sesi atau lebih hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0049": {
    "dipilih": null,
@@ -761,13 +728,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0050": {
    "dipilih": null,
@@ -775,13 +740,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0051": {
    "dipilih": null,
@@ -789,13 +752,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0052": {
    "dipilih": "aturan",
@@ -803,16 +764,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6606,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.947,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas.",
+    "3 sesi dalam satu minggu: hanya 2,9% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 0,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0053": {
    "dipilih": "keduanya",
@@ -820,16 +779,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 40–59 tahun.",
+    "9–12 sesi sebulan: hanya 2,5% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0055": {
    "dipilih": "keduanya",
@@ -837,16 +794,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 40–59 tahun.",
+    "9–12 sesi sebulan: hanya 2,5% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0056": {
    "dipilih": null,
@@ -854,13 +809,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0057": {
    "dipilih": "keduanya",
@@ -868,16 +821,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 40–59 tahun.",
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 40–59 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0058": {
    "dipilih": null,
@@ -885,13 +836,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0060": {
    "dipilih": null,
@@ -899,13 +848,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0063": {
    "dipilih": "keduanya",
@@ -913,16 +860,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya 0,1% tagihan bulanan pasien 60 tahun ke atas.",
+    "1 sesi hari Minggu: hanya 0,4% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0064": {
    "dipilih": null,
@@ -930,13 +875,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0065": {
    "dipilih": "aturan",
@@ -944,16 +887,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6606,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.2045,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,6% tagihan bulanan pasien di bawah 18 tahun.",
+    "3 sesi dalam satu minggu: hanya 2,4% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0066": {
    "dipilih": null,
@@ -961,13 +902,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0067": {
    "dipilih": "aturan",
@@ -975,16 +914,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6606,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional.",
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.2045,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,6% tagihan bulanan pasien di bawah 18 tahun.",
+    "3 sesi dalam satu minggu: hanya 2,4% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0068": {
    "dipilih": null,
@@ -992,13 +929,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0070": {
    "dipilih": null,
@@ -1006,13 +941,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0071": {
    "dipilih": null,
@@ -1020,13 +953,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0072": {
    "dipilih": "keduanya",
@@ -1034,16 +965,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional.",
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "1 sesi hari Minggu: hanya kurang dari 0,1% tagihan bulanan pasien di bawah 18 tahun.",
+    "9–12 sesi sebulan: hanya 1,6% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 3 sesi dalam satu minggu, dan 1 sesi hari Minggu muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0073": {
    "dipilih": null,
@@ -1051,13 +980,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0076": {
    "dipilih": null,
@@ -1065,13 +992,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0078": {
    "dipilih": "keduanya",
@@ -1079,16 +1004,14 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": null,
-    "ditandai": true,
-    "langka": true,
-    "alasan": [
-     "4 sesi atau lebih dalam satu minggu: hanya 0,2% tagihan bulanan fisioterapi nasional.",
-     "1 sesi hari Minggu: hanya 0,4% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
-   }
+   "skor": null,
+   "ditandai": true,
+   "langka": true,
+   "alasan": [
+    "4 sesi atau lebih dalam satu minggu: hanya kurang dari 0,1% tagihan bulanan pasien 18–39 tahun.",
+    "1 sesi hari Minggu: hanya 0,6% tagihan bulanan pasien 18–39 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 1 sesi hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024."
   },
   "P0079": {
    "dipilih": null,
@@ -1096,13 +1019,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0081": {
    "dipilih": null,
@@ -1110,13 +1031,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0082": {
    "dipilih": null,
@@ -1124,13 +1043,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0083": {
    "dipilih": null,
@@ -1138,13 +1055,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0086": {
    "dipilih": null,
@@ -1152,13 +1067,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0087": {
    "dipilih": null,
@@ -1166,13 +1079,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0088": {
    "dipilih": null,
@@ -1180,13 +1091,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0090": {
    "dipilih": null,
@@ -1194,13 +1103,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0091": {
    "dipilih": null,
@@ -1208,13 +1115,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0093": {
    "dipilih": null,
@@ -1222,13 +1127,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0095": {
    "dipilih": null,
@@ -1236,13 +1139,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0096": {
    "dipilih": null,
@@ -1250,13 +1151,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.5845,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 7,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0097": {
    "dipilih": null,
@@ -1264,13 +1163,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0098": {
    "dipilih": null,
@@ -1278,13 +1175,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0099": {
    "dipilih": null,
@@ -1292,13 +1187,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0101": {
    "dipilih": null,
@@ -1306,13 +1199,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0102": {
    "dipilih": null,
@@ -1320,13 +1211,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0103": {
    "dipilih": null,
@@ -1334,13 +1223,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0105": {
    "dipilih": null,
@@ -1348,13 +1235,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0106": {
    "dipilih": null,
@@ -1362,13 +1247,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0107": {
    "dipilih": null,
@@ -1376,13 +1259,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0108": {
    "dipilih": null,
@@ -1390,13 +1271,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0109": {
    "dipilih": null,
@@ -1404,13 +1283,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0110": {
    "dipilih": null,
@@ -1418,13 +1295,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0111": {
    "dipilih": null,
@@ -1432,13 +1307,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0112": {
    "dipilih": null,
@@ -1446,13 +1319,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0113": {
    "dipilih": null,
@@ -1460,13 +1331,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0114": {
    "dipilih": null,
@@ -1474,13 +1343,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0115": {
    "dipilih": null,
@@ -1488,13 +1355,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0116": {
    "dipilih": null,
@@ -1502,13 +1367,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0117": {
    "dipilih": null,
@@ -1516,13 +1379,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0118": {
    "dipilih": null,
@@ -1530,13 +1391,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0119": {
    "dipilih": null,
@@ -1544,13 +1403,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0120": {
    "dipilih": null,
@@ -1558,13 +1415,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0121": {
    "dipilih": null,
@@ -1572,13 +1427,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0122": {
    "dipilih": null,
@@ -1586,13 +1439,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0123": {
    "dipilih": null,
@@ -1600,13 +1451,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0125": {
    "dipilih": null,
@@ -1614,13 +1463,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0126": {
    "dipilih": null,
@@ -1628,13 +1475,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0127": {
    "dipilih": null,
@@ -1642,13 +1487,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0128": {
    "dipilih": null,
@@ -1656,13 +1499,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0129": {
    "dipilih": null,
@@ -1670,13 +1511,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0130": {
    "dipilih": null,
@@ -1684,13 +1523,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0132": {
    "dipilih": null,
@@ -1698,13 +1535,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0134": {
    "dipilih": null,
@@ -1712,13 +1547,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0135": {
    "dipilih": null,
@@ -1726,13 +1559,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0137": {
    "dipilih": null,
@@ -1740,13 +1571,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0138": {
    "dipilih": null,
@@ -1754,13 +1583,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0142": {
    "dipilih": null,
@@ -1768,13 +1595,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0143": {
    "dipilih": null,
@@ -1782,13 +1607,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.7568,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 2,3% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0144": {
    "dipilih": null,
@@ -1796,13 +1619,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0145": {
    "dipilih": null,
@@ -1810,13 +1631,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0146": {
    "dipilih": null,
@@ -1824,13 +1643,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0147": {
    "dipilih": null,
@@ -1838,13 +1655,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0148": {
    "dipilih": null,
@@ -1852,13 +1667,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0151": {
    "dipilih": null,
@@ -1866,13 +1679,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0152": {
    "dipilih": null,
@@ -1880,13 +1691,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0153": {
    "dipilih": null,
@@ -1894,13 +1703,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0154": {
    "dipilih": null,
@@ -1908,13 +1715,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0155": {
    "dipilih": null,
@@ -1922,13 +1727,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0156": {
    "dipilih": null,
@@ -1936,13 +1739,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0157": {
    "dipilih": null,
@@ -1950,13 +1751,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0158": {
    "dipilih": null,
@@ -1964,13 +1763,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0159": {
    "dipilih": null,
@@ -1978,13 +1775,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0160": {
    "dipilih": null,
@@ -1992,13 +1787,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0161": {
    "dipilih": null,
@@ -2006,13 +1799,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0162": {
    "dipilih": null,
@@ -2020,13 +1811,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0163": {
    "dipilih": null,
@@ -2034,13 +1823,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0164": {
    "dipilih": null,
@@ -2048,13 +1835,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0165": {
    "dipilih": null,
@@ -2062,13 +1847,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0166": {
    "dipilih": null,
@@ -2076,13 +1859,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0167": {
    "dipilih": null,
@@ -2090,13 +1871,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0168": {
    "dipilih": null,
@@ -2104,13 +1883,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0169": {
    "dipilih": null,
@@ -2118,13 +1895,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0170": {
    "dipilih": null,
@@ -2132,13 +1907,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0174": {
    "dipilih": null,
@@ -2146,13 +1919,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0175": {
    "dipilih": null,
@@ -2160,13 +1931,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0176": {
    "dipilih": null,
@@ -2174,13 +1943,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0177": {
    "dipilih": null,
@@ -2188,15 +1955,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6265,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.3306,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,6% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,2% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0179": {
    "dipilih": null,
@@ -2204,13 +1969,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0180": {
    "dipilih": null,
@@ -2218,13 +1981,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0181": {
    "dipilih": null,
@@ -2232,13 +1993,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0182": {
    "dipilih": null,
@@ -2246,13 +2005,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0183": {
    "dipilih": null,
@@ -2260,13 +2017,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0185": {
    "dipilih": null,
@@ -2274,13 +2029,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0186": {
    "dipilih": null,
@@ -2288,13 +2041,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0187": {
    "dipilih": null,
@@ -2302,13 +2053,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0188": {
    "dipilih": null,
@@ -2316,13 +2065,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0189": {
    "dipilih": null,
@@ -2330,13 +2077,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0190": {
    "dipilih": null,
@@ -2344,13 +2089,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0191": {
    "dipilih": null,
@@ -2358,13 +2101,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0192": {
    "dipilih": null,
@@ -2372,13 +2113,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0193": {
    "dipilih": null,
@@ -2386,13 +2125,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0195": {
    "dipilih": null,
@@ -2400,13 +2137,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0197": {
    "dipilih": null,
@@ -2414,13 +2149,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0199": {
    "dipilih": null,
@@ -2428,13 +2161,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0200": {
    "dipilih": null,
@@ -2442,13 +2173,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0201": {
    "dipilih": null,
@@ -2456,13 +2185,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0204": {
    "dipilih": null,
@@ -2470,13 +2197,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0205": {
    "dipilih": null,
@@ -2484,13 +2209,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0210": {
    "dipilih": null,
@@ -2498,13 +2221,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0211": {
    "dipilih": null,
@@ -2512,13 +2233,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0212": {
    "dipilih": null,
@@ -2526,13 +2245,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0213": {
    "dipilih": null,
@@ -2540,13 +2257,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0214": {
    "dipilih": null,
@@ -2554,13 +2269,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0217": {
    "dipilih": null,
@@ -2568,13 +2281,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0218": {
    "dipilih": null,
@@ -2582,13 +2293,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0219": {
    "dipilih": null,
@@ -2596,13 +2305,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0220": {
    "dipilih": null,
@@ -2610,13 +2317,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0223": {
    "dipilih": null,
@@ -2624,13 +2329,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0225": {
    "dipilih": null,
@@ -2638,13 +2341,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0226": {
    "dipilih": null,
@@ -2652,13 +2353,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0227": {
    "dipilih": null,
@@ -2666,13 +2365,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0228": {
    "dipilih": null,
@@ -2680,13 +2377,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0230": {
    "dipilih": null,
@@ -2694,13 +2389,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0231": {
    "dipilih": null,
@@ -2708,13 +2401,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0232": {
    "dipilih": null,
@@ -2722,13 +2413,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0233": {
    "dipilih": null,
@@ -2736,13 +2425,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0234": {
    "dipilih": null,
@@ -2750,13 +2437,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0235": {
    "dipilih": null,
@@ -2764,13 +2449,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0236": {
    "dipilih": null,
@@ -2778,13 +2461,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0237": {
    "dipilih": null,
@@ -2792,13 +2473,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0239": {
    "dipilih": null,
@@ -2806,13 +2485,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.5845,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 7,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0243": {
    "dipilih": null,
@@ -2820,13 +2497,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0248": {
    "dipilih": null,
@@ -2834,13 +2509,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0249": {
    "dipilih": null,
@@ -2848,13 +2521,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0250": {
    "dipilih": null,
@@ -2862,13 +2533,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0253": {
    "dipilih": null,
@@ -2876,13 +2545,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0254": {
    "dipilih": null,
@@ -2890,13 +2557,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0256": {
    "dipilih": null,
@@ -2904,13 +2569,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0257": {
    "dipilih": null,
@@ -2918,13 +2581,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0258": {
    "dipilih": null,
@@ -2932,13 +2593,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0259": {
    "dipilih": null,
@@ -2946,13 +2605,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0260": {
    "dipilih": null,
@@ -2960,13 +2617,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0261": {
    "dipilih": null,
@@ -2974,13 +2629,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0262": {
    "dipilih": null,
@@ -2988,13 +2641,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0263": {
    "dipilih": null,
@@ -3002,13 +2653,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0265": {
    "dipilih": null,
@@ -3016,13 +2665,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0267": {
    "dipilih": null,
@@ -3030,13 +2677,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0268": {
    "dipilih": null,
@@ -3044,13 +2689,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0269": {
    "dipilih": null,
@@ -3058,13 +2701,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0271": {
    "dipilih": null,
@@ -3072,13 +2713,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0272": {
    "dipilih": null,
@@ -3086,13 +2725,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0273": {
    "dipilih": null,
@@ -3100,13 +2737,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0276": {
    "dipilih": null,
@@ -3114,13 +2749,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.7568,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 2,3% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0278": {
    "dipilih": null,
@@ -3128,13 +2761,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0279": {
    "dipilih": null,
@@ -3142,15 +2773,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6176,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 6.062,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 1,6% tagihan bulanan pasien di bawah 18 tahun."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 0,2% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0280": {
    "dipilih": null,
@@ -3158,13 +2787,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0281": {
    "dipilih": null,
@@ -3172,13 +2799,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0282": {
    "dipilih": null,
@@ -3186,13 +2811,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0284": {
    "dipilih": null,
@@ -3200,13 +2823,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0285": {
    "dipilih": null,
@@ -3214,13 +2835,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0286": {
    "dipilih": null,
@@ -3228,13 +2847,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0287": {
    "dipilih": null,
@@ -3242,13 +2859,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0290": {
    "dipilih": null,
@@ -3256,13 +2871,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0291": {
    "dipilih": null,
@@ -3270,13 +2883,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0293": {
    "dipilih": null,
@@ -3284,13 +2895,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.988,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0294": {
    "dipilih": null,
@@ -3298,13 +2907,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0295": {
    "dipilih": null,
@@ -3312,13 +2919,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0296": {
    "dipilih": null,
@@ -3326,13 +2931,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0297": {
    "dipilih": null,
@@ -3340,13 +2943,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0298": {
    "dipilih": null,
@@ -3354,13 +2955,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.0421,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0299": {
    "dipilih": null,
@@ -3368,13 +2967,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0300": {
    "dipilih": null,
@@ -3382,13 +2979,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0301": {
    "dipilih": null,
@@ -3396,13 +2991,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0302": {
    "dipilih": null,
@@ -3410,13 +3003,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0306": {
    "dipilih": null,
@@ -3424,15 +3015,13 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.6265,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [
-     "9–12 sesi sebulan: hanya 2,2% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 5.9735,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [
+    "9–12 sesi sebulan: hanya 2,3% tagihan bulanan pasien 60 tahun ke atas."
+   ],
+   "gabungan": "Gabungan 9–12 sesi sebulan muncul pada 0,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0308": {
    "dipilih": null,
@@ -3440,13 +3029,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0309": {
    "dipilih": null,
@@ -3454,13 +3041,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0310": {
    "dipilih": null,
@@ -3468,13 +3053,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0311": {
    "dipilih": null,
@@ -3482,13 +3065,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0315": {
    "dipilih": null,
@@ -3496,13 +3077,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0318": {
    "dipilih": null,
@@ -3510,13 +3089,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0319": {
    "dipilih": null,
@@ -3524,13 +3101,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0320": {
    "dipilih": null,
@@ -3538,13 +3113,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0322": {
    "dipilih": null,
@@ -3552,13 +3125,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0323": {
    "dipilih": null,
@@ -3566,13 +3137,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0324": {
    "dipilih": null,
@@ -3580,13 +3149,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0325": {
    "dipilih": null,
@@ -3594,13 +3161,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0329": {
    "dipilih": null,
@@ -3608,13 +3173,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0330": {
    "dipilih": null,
@@ -3622,13 +3185,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0331": {
    "dipilih": null,
@@ -3636,13 +3197,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0333": {
    "dipilih": null,
@@ -3650,13 +3209,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0334": {
    "dipilih": null,
@@ -3664,13 +3221,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0335": {
    "dipilih": null,
@@ -3678,13 +3233,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0336": {
    "dipilih": null,
@@ -3692,13 +3245,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0337": {
    "dipilih": null,
@@ -3706,13 +3257,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0339": {
    "dipilih": null,
@@ -3720,13 +3269,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0342": {
    "dipilih": null,
@@ -3734,13 +3281,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0346": {
    "dipilih": null,
@@ -3748,13 +3293,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0347": {
    "dipilih": null,
@@ -3762,13 +3305,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0348": {
    "dipilih": null,
@@ -3776,13 +3317,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4403,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 8,7% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0349": {
    "dipilih": null,
@@ -3790,13 +3329,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0352": {
    "dipilih": null,
@@ -3804,13 +3341,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0353": {
    "dipilih": null,
@@ -3818,13 +3353,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.7134,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0354": {
    "dipilih": null,
@@ -3832,13 +3365,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0356": {
    "dipilih": null,
@@ -3846,13 +3377,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.026,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,2% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0357": {
    "dipilih": null,
@@ -3860,13 +3389,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0358": {
    "dipilih": null,
@@ -3874,13 +3401,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.4094,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0359": {
    "dipilih": null,
@@ -3888,13 +3413,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0361": {
    "dipilih": null,
@@ -3902,13 +3425,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0362": {
    "dipilih": null,
@@ -3916,13 +3437,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.2538,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 3,9% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0363": {
    "dipilih": null,
@@ -3930,13 +3449,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0364": {
    "dipilih": null,
@@ -3944,13 +3461,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0365": {
    "dipilih": null,
@@ -3958,13 +3473,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.1597,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 11,5% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0366": {
    "dipilih": null,
@@ -3972,13 +3485,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.3469,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 9,6% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0367": {
    "dipilih": null,
@@ -3986,13 +3497,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0369": {
    "dipilih": null,
@@ -4000,13 +3509,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0370": {
    "dipilih": null,
@@ -4014,13 +3521,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.8114,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 6% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0372": {
    "dipilih": null,
@@ -4028,13 +3533,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0373": {
    "dipilih": null,
@@ -4042,13 +3545,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0374": {
    "dipilih": null,
@@ -4056,13 +3557,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0379": {
    "dipilih": null,
@@ -4070,13 +3569,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0382": {
    "dipilih": null,
@@ -4084,13 +3581,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4387,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 9,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.2747,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 6 bulan atau lebih berturut-turut muncul pada 10,3% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0383": {
    "dipilih": null,
@@ -4098,13 +3593,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0384": {
    "dipilih": null,
@@ -4112,13 +3605,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.9423,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 14,3% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0386": {
    "dipilih": null,
@@ -4126,13 +3617,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.124,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,4% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0387": {
    "dipilih": null,
@@ -4140,13 +3629,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0388": {
    "dipilih": null,
@@ -4154,13 +3641,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.7568,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 2,3% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0389": {
    "dipilih": null,
@@ -4168,13 +3653,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4079,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 10,2% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6073,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan muncul pada 7,4% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0390": {
    "dipilih": null,
@@ -4182,13 +3665,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.7568,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 2,3% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0392": {
    "dipilih": null,
@@ -4196,13 +3677,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 2.6887,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,8% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0394": {
    "dipilih": null,
@@ -4210,13 +3689,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4253,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 6,3% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.0333,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 3–5 bulan berturut-turut muncul pada 4,8% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0395": {
    "dipilih": null,
@@ -4224,13 +3701,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.2678,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 28,1% tagihan bulanan fisioterapi pasien 60 tahun ke atas di data sampel BPJS 2023–2024."
   },
   "P0396": {
    "dipilih": null,
@@ -4238,13 +3713,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.3737,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 25,3% tagihan bulanan fisioterapi pasien di bawah 18 tahun di data sampel BPJS 2023–2024."
   },
   "P0397": {
    "dipilih": null,
@@ -4252,13 +3725,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4492,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 5% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 3.7568,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 5–8 sesi sebulan dan 6 bulan atau lebih berturut-turut muncul pada 2,3% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0398": {
    "dipilih": null,
@@ -4266,13 +3737,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.0813,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 33,9% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   },
   "P0399": {
    "dipilih": null,
@@ -4280,13 +3749,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.3736,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan pola ini muncul pada 30,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
+   "skor": 1.1661,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan pola ini muncul pada 31,2% tagihan bulanan fisioterapi pasien 40–59 tahun di data sampel BPJS 2023–2024."
   },
   "P0400": {
    "dipilih": null,
@@ -4294,55 +3761,11 @@
     "tanpa_rujukan": 0.0,
     "lintas_wilayah": 0.0
    },
-   "anomali": {
-    "skor": 0.4061,
-    "ditandai": false,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 13,4% tagihan bulanan fisioterapi nasional 2023–2024."
-   }
-  },
-  "P-M1": {
-   "dipilih": "model",
-   "rujukan": {
-    "tanpa_rujukan": 1.0,
-    "lintas_wilayah": 1.0
-   },
-   "anomali": {
-    "skor": 0.6913,
-    "ditandai": true,
-    "langka": false,
-    "alasan": [],
-    "gabungan": "Gabungan 5–8 sesi sebulan, 6 bulan atau lebih berturut-turut, semua kunjungan tanpa rujukan FKTP, dan semua dirujuk dari kab/kota lain muncul pada kurang dari 0,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   },
-   "fitur": {
-    "sesi": 6,
-    "maks_minggu": 2,
-    "ahad_libur": 0,
-    "episode": 7
-   }
-  },
-  "P-M2": {
-   "dipilih": "model",
-   "rujukan": {
-    "tanpa_rujukan": 1.0,
-    "lintas_wilayah": 1.0
-   },
-   "anomali": {
-    "skor": 0.7178,
-    "ditandai": true,
-    "langka": false,
-    "alasan": [
-     "3 sesi dalam satu minggu: hanya 3,1% tagihan bulanan fisioterapi nasional."
-    ],
-    "gabungan": "Gabungan 5–8 sesi sebulan, 3 sesi dalam satu minggu, semua kunjungan tanpa rujukan FKTP, dan semua dirujuk dari kab/kota lain muncul pada kurang dari 0,1% tagihan bulanan fisioterapi nasional 2023–2024."
-   },
-   "fitur": {
-    "sesi": 6,
-    "maks_minggu": 3,
-    "ahad_libur": 0,
-    "episode": 2
-   }
+   "skor": 2.2563,
+   "ditandai": false,
+   "langka": false,
+   "alasan": [],
+   "gabungan": "Gabungan 3–5 bulan berturut-turut muncul pada 10,5% tagihan bulanan fisioterapi pasien 18–39 tahun di data sampel BPJS 2023–2024."
   }
  }
 }

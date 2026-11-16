@@ -26,7 +26,7 @@ def uji_paritas_dengan_aturan():
     sesi = [{"id_peserta": r["id_peserta"], "id_rs": r["id_rs"], "tanggal": date.fromisoformat(r["tanggal"])}
             for r in csv.DictReader(open(ROOT / "klaim_sesi.csv"))]
     ind = hitung_indikator(sesi, libur, BULAN)
-    assert len(fitur) == len(ind) == 300, (len(fitur), len(ind))
+    assert len(fitur) == len(ind) == 302, (len(fitur), len(ind))
     for kunci, h in ind.items():
         f = fitur[kunci]
         assert f["sesi"] == h["sesi_ditagih"], kunci

@@ -1,166 +1,305 @@
 {
-  "bulan_pasien": 40650,
-  "bulan": 12,
-  "kelompok": [
-    {
-      "kelompok": "ditandai_model",
-      "bulan_pasien": 714,
-      "kunjungan": 5766,
-      "persen": 1.53,
-      "per_bulan_nasional": 4345
-    },
-    {
-      "kelompok": "dipicu_aturan",
-      "bulan_pasien": 890,
-      "kunjungan": 8178,
-      "persen": 2.05,
-      "per_bulan_nasional": 5809
-    },
-    {
-      "kelompok": "keduanya",
-      "bulan_pasien": 415,
-      "kunjungan": 4027,
-      "persen": 0.85,
-      "per_bulan_nasional": 2425
-    },
-    {
-      "kelompok": "hanya_model",
-      "bulan_pasien": 299,
-      "kunjungan": 1739,
-      "persen": 0.68,
-      "per_bulan_nasional": 1921
-    },
-    {
-      "kelompok": "hanya_aturan",
-      "bulan_pasien": 475,
-      "kunjungan": 4151,
-      "persen": 1.19,
-      "per_bulan_nasional": 3384
-    },
-    {
-      "kelompok": "dipanggil_aturan_atau_model",
-      "bulan_pasien": 1189,
-      "kunjungan": 9917,
-      "persen": 2.72,
-      "per_bulan_nasional": 7729
-    }
-  ],
-  "alasan_pertama_hanya_model": [
-    {
-      "fitur": "maks_minggu",
-      "bulan_pasien": 116
-    },
-    {
-      "fitur": "gabungan",
-      "bulan_pasien": 61
-    },
-    {
-      "fitur": "lintas_wilayah",
-      "bulan_pasien": 41
-    },
-    {
-      "fitur": "tanpa_rujukan",
-      "bulan_pasien": 39
-    },
-    {
-      "fitur": "ahad_libur",
-      "bulan_pasien": 30
-    },
-    {
-      "fitur": "sesi",
-      "bulan_pasien": 12
-    }
-  ],
-  "pola_teratas_hanya_model": [
-    {
-      "pola": [
-        "5–8 sesi sebulan",
-        "paling banyak 2 sesi seminggu",
-        "tanpa sesi hari Minggu",
-        "6 bulan atau lebih berturut-turut",
-        "semua kunjungan tanpa rujukan FKTP",
-        "semua dirujuk dari kab/kota lain"
-      ],
-      "bulan_pasien": 61
-    },
-    {
-      "pola": [
-        "5–8 sesi sebulan",
-        "3 sesi dalam satu minggu",
-        "tanpa sesi hari Minggu",
-        "3–5 bulan berturut-turut",
-        "semua kunjungan tanpa rujukan FKTP",
-        "dirujuk dari kab/kota yang sama"
-      ],
-      "bulan_pasien": 28
-    },
-    {
-      "pola": [
-        "5–8 sesi sebulan",
-        "3 sesi dalam satu minggu",
-        "tanpa sesi hari Minggu",
-        "1–2 bulan berturut-turut",
-        "semua kunjungan tanpa rujukan FKTP",
-        "semua dirujuk dari kab/kota lain"
-      ],
-      "bulan_pasien": 27
-    },
-    {
-      "pola": [
-        "5–8 sesi sebulan",
-        "3 sesi dalam satu minggu",
-        "tanpa sesi hari Minggu",
-        "3–5 bulan berturut-turut",
-        "semua kunjungan dengan rujukan FKTP",
-        "semua dirujuk dari kab/kota lain"
-      ],
-      "bulan_pasien": 21
-    }
-  ],
-  "persen_bulanan": {
-    "min": 0.9,
-    "maks": 3.29
-  },
-  "kelompok_rs": {
-    "dengan_minimal_bulan_pasien": 423,
-    "minimal_bulan_pasien": 30,
-    "tanpa_ditandai": 272,
-    "pangsa_di_10_persen_teratas": 80.2
-  },
   "data": [
     {
-      "berkas": "202303_fkrtl.dta",
-      "tahun": [
+      "file": "202303_fkrtl.dta",
+      "years": [
         "2023"
       ],
-      "bulan_pasien": 18193
+      "patient_months": 18193
     },
     {
-      "berkas": "202403_fkrtl.dta",
-      "tahun": [
+      "file": "202403_fkrtl.dta",
+      "years": [
         "2024"
       ],
-      "bulan_pasien": 22457
+      "patient_months": 22457
     }
   ],
-  "validasi_waktu": {
-    "latih": [
+  "contexts": {
+    "forward": [
+      {
+        "context": null,
+        "alpha": 10,
+        "groups": 0,
+        "log_likelihood": -2.5997
+      },
+      {
+        "context": "age_group",
+        "alpha": 10,
+        "groups": 4,
+        "log_likelihood": -2.5856
+      },
+      {
+        "context": "age_group",
+        "alpha": 50,
+        "groups": 4,
+        "log_likelihood": -2.5855
+      },
+      {
+        "context": "age_group",
+        "alpha": 200,
+        "groups": 4,
+        "log_likelihood": -2.5852
+      },
+      {
+        "context": "age_group",
+        "alpha": 1000,
+        "groups": 4,
+        "log_likelihood": -2.5851
+      },
+      {
+        "context": "condition",
+        "alpha": 10,
+        "groups": 12,
+        "log_likelihood": -2.6113
+      },
+      {
+        "context": "condition",
+        "alpha": 50,
+        "groups": 12,
+        "log_likelihood": -2.6091
+      },
+      {
+        "context": "condition",
+        "alpha": 200,
+        "groups": 12,
+        "log_likelihood": -2.6042
+      },
+      {
+        "context": "condition",
+        "alpha": 1000,
+        "groups": 12,
+        "log_likelihood": -2.5976
+      }
+    ],
+    "backward": [
+      {
+        "context": null,
+        "alpha": 10,
+        "groups": 0,
+        "log_likelihood": -2.8026
+      },
+      {
+        "context": "age_group",
+        "alpha": 10,
+        "groups": 4,
+        "log_likelihood": -2.7902
+      },
+      {
+        "context": "age_group",
+        "alpha": 50,
+        "groups": 4,
+        "log_likelihood": -2.79
+      },
+      {
+        "context": "age_group",
+        "alpha": 200,
+        "groups": 4,
+        "log_likelihood": -2.7896
+      },
+      {
+        "context": "age_group",
+        "alpha": 1000,
+        "groups": 4,
+        "log_likelihood": -2.789
+      },
+      {
+        "context": "condition",
+        "alpha": 10,
+        "groups": 13,
+        "log_likelihood": -2.8136
+      },
+      {
+        "context": "condition",
+        "alpha": 50,
+        "groups": 13,
+        "log_likelihood": -2.812
+      },
+      {
+        "context": "condition",
+        "alpha": 200,
+        "groups": 13,
+        "log_likelihood": -2.8082
+      },
+      {
+        "context": "condition",
+        "alpha": 1000,
+        "groups": 13,
+        "log_likelihood": -2.8014
+      }
+    ]
+  },
+  "behaviour": {
+    "patient_months": 40650,
+    "months": 12,
+    "groups": [
+      {
+        "group": "flagged_by_model",
+        "patient_months": 772,
+        "visits": 5152,
+        "percent": 1.53,
+        "per_month_national": 4331
+      },
+      {
+        "group": "triggered_by_rules",
+        "patient_months": 890,
+        "visits": 8178,
+        "percent": 2.05,
+        "per_month_national": 5809
+      },
+      {
+        "group": "both",
+        "patient_months": 272,
+        "visits": 2388,
+        "percent": 0.47,
+        "per_month_national": 1345
+      },
+      {
+        "group": "model_only",
+        "patient_months": 500,
+        "visits": 2764,
+        "percent": 1.05,
+        "per_month_national": 2985
+      },
+      {
+        "group": "rules_only",
+        "patient_months": 618,
+        "visits": 5790,
+        "percent": 1.57,
+        "per_month_national": 4463
+      },
+      {
+        "group": "called",
+        "patient_months": 1390,
+        "visits": 10942,
+        "percent": 3.1,
+        "per_month_national": 8794
+      }
+    ],
+    "first_reason_model_only": [
+      {
+        "feature": "maks_minggu",
+        "patient_months": 118
+      },
+      {
+        "feature": "tanpa_rujukan",
+        "patient_months": 112
+      },
+      {
+        "feature": "lintas_wilayah",
+        "patient_months": 104
+      },
+      {
+        "feature": "ahad_libur",
+        "patient_months": 102
+      },
+      {
+        "feature": "sesi",
+        "patient_months": 64
+      }
+    ],
+    "top_patterns_model_only": [
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 24
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "4 sesi atau lebih dalam satu minggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "semua kunjungan dengan rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 20
+      },
+      {
+        "pattern": [
+          "1–4 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "1–2 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "sebagian dirujuk dari kab/kota lain"
+        ],
+        "patient_months": 19
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "2 sesi atau lebih hari Minggu",
+          "1–2 bulan berturut-turut",
+          "semua kunjungan dengan rujukan FKTP",
+          "dirujuk dari kab/kota yang sama"
+        ],
+        "patient_months": 18
+      },
+      {
+        "pattern": [
+          "5–8 sesi sebulan",
+          "paling banyak 2 sesi seminggu",
+          "tanpa sesi hari Minggu",
+          "3–5 bulan berturut-turut",
+          "sebagian kunjungan tanpa rujukan FKTP",
+          "sebagian dirujuk dari kab/kota lain"
+        ],
+        "patient_months": 16
+      }
+    ],
+    "monthly_percent": {
+      "low": 1.35,
+      "high": 2.72
+    },
+    "by_age_group": [
+      {
+        "age_group": "18-39",
+        "patient_months": 4398,
+        "percent_flagged": 1.88
+      },
+      {
+        "age_group": "40-59",
+        "patient_months": 17192,
+        "percent_flagged": 1.59
+      },
+      {
+        "age_group": "60+",
+        "patient_months": 14262,
+        "percent_flagged": 1.26
+      },
+      {
+        "age_group": "<18",
+        "patient_months": 4798,
+        "percent_flagged": 1.88
+      }
+    ]
+  },
+  "over_time": {
+    "train_years": [
       "2023"
     ],
-    "uji": [
+    "test_years": [
       "2024"
     ],
-    "persen_ditandai_model_tahun_lalu": 1.41,
-    "persen_ditandai_model_tahun_ini": 1.51,
-    "jaccard": 0.654,
-    "persen_hanya_model_tahun_lalu": 0.76,
-    "persen_gabungan_tak_dikenal_tahun_lalu": 1.34
+    "percent_flagged_by_past_model": 1.34,
+    "percent_flagged_by_own_model": 1.51,
+    "jaccard": 0.669,
+    "percent_model_only_by_past_model": 0.76,
+    "percent_patterns_unknown_to_past_model": 1.34
   },
-  "uji_luar": [
+  "outside": [
     {
-      "sampel": "KM20152023_fkrtl",
-      "bulan_pasien": 27062,
-      "tahun": [
+      "sample": "KM20152023_fkrtl",
+      "patient_months": 27062,
+      "years": [
         "2015",
         "2016",
         "2017",
@@ -171,14 +310,14 @@
         "2022",
         "2023"
       ],
-      "persen_ditandai_model": 3.59,
-      "persen_dipicu_aturan": 3.34,
-      "persen_hanya_model": 1.51
+      "percent_flagged": 3.7,
+      "percent_triggered": 3.34,
+      "percent_model_only": 2.2
     },
     {
-      "sampel": "COV20152024_fkrtl",
-      "bulan_pasien": 8910,
-      "tahun": [
+      "sample": "COV20152024_fkrtl",
+      "patient_months": 8910,
+      "years": [
         "2015",
         "2016",
         "2017",
@@ -190,52 +329,22 @@
         "2023",
         "2024"
       ],
-      "persen_ditandai_model": 5.37,
-      "persen_dipicu_aturan": 2.52,
-      "persen_hanya_model": 2.85
+      "percent_flagged": 5.73,
+      "percent_triggered": 2.52,
+      "percent_model_only": 3.89
     }
   ],
-  "rs": {
-    "kelompok_rs": 423,
-    "ditandai": 21,
-    "pemicu_utama": [
-      {
-        "fitur": "dx_langka",
-        "kelompok_rs": 7
-      },
-      {
-        "fitur": "dipicu",
-        "kelompok_rs": 6
-      },
-      {
-        "fitur": "cbg_langka",
-        "kelompok_rs": 5
-      },
-      {
-        "fitur": "tanpa_rujukan",
-        "kelompok_rs": 3
-      }
-    ],
-    "median_nasional": {
-      "dipicu": 0.0,
-      "sesi": 3.636,
-      "ahad": 0.0,
-      "tanpa_rujukan": 0.016,
-      "lintas_wilayah": 0.067,
-      "dx_langka": 0.0,
-      "cbg_langka": 0.0
-    }
+  "hospitals": {
+    "peer_groups": 423,
+    "minimum_patient_months": 30,
+    "overdispersion": 2.5421,
+    "above_95": 44,
+    "above_99_8": 27,
+    "expected_by_chance": {
+      "above_95": 10.6,
+      "above_99_8": 0.4
+    },
+    "percent_selected_in_above_99_8": 43.3
   },
-  "pelatihan": {
-    "pangsa_gabungan_langka": 0.0073,
-    "gabungan_dalam_tabel": 77,
-    "gabungan_langka_juga_ditandai_hutan": 0.583,
-    "jaccard_antar_seed": [
-      0.941,
-      0.911,
-      0.808,
-      0.918
-    ]
-  },
-  "dibuat": "2026-11-17"
+  "created_on": "2026-11-17"
 }

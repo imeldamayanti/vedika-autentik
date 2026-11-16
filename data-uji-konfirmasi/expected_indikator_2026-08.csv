@@ -132,6 +132,7 @@ P0157,RS02,2026-08,6,2,False,False,False,False,,0,False
 P0158,RS02,2026-08,5,2,False,False,False,False,,0,False
 P0159,RS02,2026-08,4,1,False,False,False,False,,0,False
 P0160,RS02,2026-08,1,1,False,False,False,False,,0,False
+P-M1,RS03,2026-08,6,2,False,False,False,False,,0,False
 P-S5,RS03,2026-08,10,3,True,True,False,True,2026-08-17,3,True
 P0161,RS03,2026-08,3,2,False,False,False,False,,0,False
 P0162,RS03,2026-08,2,1,False,False,False,False,,0,False
@@ -244,6 +245,7 @@ P0315,RS04,2026-08,6,2,False,False,False,False,,0,False
 P0318,RS04,2026-08,6,2,False,False,False,False,,0,False
 P0319,RS04,2026-08,1,1,False,False,True,False,,1,False
 P0320,RS04,2026-08,4,2,False,False,False,False,,0,False
+P-M2,RS05,2026-08,6,2,False,False,False,True,2026-08-09;2026-08-23,1,False
 P-S8,RS05,2026-08,10,2,True,False,True,False,,2,True
 P0322,RS05,2026-08,3,2,False,False,False,False,,0,False
 P0323,RS05,2026-08,3,1,False,False,False,False,,0,False
