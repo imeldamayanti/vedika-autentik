@@ -5,11 +5,14 @@ import {
   ANSWER_TIMEOUT_MS,
   AUDIO_BLOCKED,
   CLOSING_HANGUP_MS,
+  GOODBYE_TAIL_MS,
   LINE_POLL_MS,
   LiveEventReducer,
   PICKUP_SILENCE_MS,
   SILENCE_HANGUP_MS,
   SILENCE_NUDGE,
+  REPLY_NUDGE,
+  VOICE_ACTIVITY_RMS,
   VedikaVoiceSession,
   buildSetupMessage,
   createAgentApi,
@@ -17,6 +20,7 @@ import {
   createStationOperator,
   isCallGone,
   isClosingLine,
+  isGoodbyePhrase,
   isOperatorAnnouncement,
   pickDevice,
   stationTick,
@@ -508,6 +512,7 @@ test("buildSetupMessage enables audio plus both finalized transcriptions", () =>
 
   assert.equal(message.setup.model, "models/gemini-live-test");
   assert.deepEqual(message.setup.generationConfig.responseModalities, ["AUDIO"]);
+  assert.equal(message.setup.generationConfig.temperature, 0.4);
   assert.deepEqual(message.setup.inputAudioTranscription, { languageCodes: ["id-ID"] });
   assert.equal(message.setup.realtimeInputConfig.automaticActivityDetection.startOfSpeechSensitivity, "START_SENSITIVITY_HIGH");
   assert.deepEqual(message.setup.outputAudioTranscription, {});
@@ -856,6 +861,8 @@ test("isClosingLine matches a farewell at the end of a turn or 'sudah kami catat
     "Baik, sudah kami catat, tiga kali ya. Terima kasih banyak atas waktunya.",
     "SELAMAT MALAM",
     "Terima kasih banyak atas informasinya. Informasi ini tidak memengaruhi layanan atau iuran Bapak.",
+    "Baik, Bapak, sudah saya catat. Jawaban ini tidak akan memengaruhi layanan atau iuran Anda. Terima kasih atas waktunya.",
+    "Terima kasih atas waktunya.",
   ]) assert.equal(isClosingLine(teks), true, teks);
   for (const teks of [
     "Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam. Ini bukan tagihan, dan kami tidak meminta NIK, OTP, rekening, atau uang.",
@@ -963,7 +970,7 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
       return typeof state === "string" ? { panggilan: state } : state;
     },
   };
-  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null, opened: 0, nudges: [], released: 0 };
+  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null, opened: 0, nudges: [], released: 0, playbackMs };
   const operator = createStationOperator({
     line,
     onLog: (entry) => rig.logs.push(entry),
@@ -971,7 +978,7 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
     startSession: (options) => {
       rig.options = options;
       return {
-        playbackRemainingMs: () => playbackMs,
+        playbackRemainingMs: () => rig.playbackMs,
         openFirst: () => { rig.opened += 1; options.onAnswer(); return true; },
         nudge: (text) => { rig.nudges.push(text); return true; },
         releaseInput: () => { rig.released += 1; },
@@ -1091,7 +1098,11 @@ test("station operator hangs up three seconds after the AI's closing line", asyn
   rig.answer();
   rig.say("ai", "Selamat siang, saya asisten otomatis BPJS Kesehatan. Selamat siang."); // opener never closes
   rig.say("penerima", "Iya.");
-  await rig.tick(ANSWER_TIMEOUT_MS); // the no-answer clock stopped at the answer
+  for (let i = 0; i < 5; i += 1) { // 40 s of conversation: the no-answer clock stopped at the answer
+    await rig.tick(8000);
+    rig.say("ai", "Kira-kira berapa kali?");
+    rig.say("penerima", "Tiga kali.");
+  }
   rig.say("ai", "Terima kasih, sudah kami catat. Selamat siang.");
   await rig.tick(CLOSING_HANGUP_MS - 1);
   assert.deepEqual(rig.stops, []);
@@ -1112,6 +1123,7 @@ test("station operator waits for the AI's goodbye to finish playing before hangi
   rig.say("ai", "Terima kasih. Selamat siang.");
   await rig.tick(CLOSING_HANGUP_MS + 3999);
   assert.deepEqual(rig.stops, []);
+  rig.playbackMs = 0; // the goodbye has finished playing
   await rig.tick(1);
 
   assert.deepEqual(rig.stops, ["selesai"]);
@@ -1124,9 +1136,9 @@ test("station operator hangs up after ten silent seconds following an AI turn", 
   rig.answer();
   rig.say("ai", "Kira-kira berapa kali?");
   await rig.tick(SILENCE_HANGUP_MS - 1);
-  rig.options.onSpeech("penerima"); // any speech cancels the silence clock
-  await rig.tick(SILENCE_HANGUP_MS * 2);
-  assert.deepEqual(rig.stops, []);
+  rig.options.onSpeech("penerima"); // the recipient starts answering: no repeat of the question
+  await rig.tick(SILENCE_HANGUP_MS - 1);
+  assert.deepEqual(rig.nudges, []);
 
   rig.say("penerima", "Tiga kali.");
   rig.say("ai", "Baik, tiga kali.");
@@ -1290,4 +1302,119 @@ test("station operator counts the 40 s answer window from the first ring on a sl
 
   assert.deepEqual(rig.stops, ["tidak_diangkat"]);
   assert.equal((await rig.result).answered, false);
+});
+
+test("station operator never asks again after the AI has said goodbye", async (t) => {
+  const rig = stationRig(t, { playbackMs: 20000 });
+  rig.answer();
+  rig.say("ai", "Kira-kira berapa kali?");
+  rig.say("penerima", "Tiga kali.");
+  rig.say("ai", "Jawaban ini tidak akan memengaruhi layanan atau iuran Anda. Terima kasih atas waktunya.");
+  rig.say("penerima", "Aduh."); // noise after the goodbye must not earn a repeat question
+  await rig.tick(SILENCE_HANGUP_MS + 20000);
+  rig.playbackMs = 0;
+  await rig.tick(20000 + GOODBYE_TAIL_MS + CLOSING_HANGUP_MS);
+
+  assert.deepEqual(rig.nudges, []);
+  assert.deepEqual(rig.stops, ["selesai"]);
+  assert.match(rig.logs.at(-1), /AI menutup panggilan|hening 10 detik/);
+});
+
+test("station operator does not nudge while the recipient is still talking", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Kira-kira berapa kali?");
+  for (let i = 0; i < 6; i += 1) { // a long answer whose transcript has not arrived yet
+    await rig.tick(SILENCE_HANGUP_MS - 1000);
+    rig.options.onVoiceActivity();
+  }
+  assert.deepEqual(rig.nudges, []);
+  await rig.tick(SILENCE_HANGUP_MS); // then real silence
+  assert.equal(rig.nudges.length, 1);
+  assert.doesNotMatch(SILENCE_NUDGE, /sapa singkat/i);
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("voice session reports activity only for speech-level audio, at most every 250 ms", () => {
+  const hits = [];
+  const session = new VedikaVoiceSession({ onVoiceActivity: () => hits.push(1) });
+  session.reportVoiceActivity(new Float32Array(1024).fill(VOICE_ACTIVITY_RMS / 2));
+  assert.equal(hits.length, 0);
+  session.reportVoiceActivity(new Float32Array(1024).fill(0.2));
+  session.reportVoiceActivity(new Float32Array(1024).fill(0.2));
+  assert.equal(hits.length, 1);
+});
+
+test("station operator keeps the line open while a goodbye that arrived early is still playing", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Kira-kira berapa kali?");
+  rig.say("penerima", "Lima atau enam.");
+  rig.say("ai", "Baik. Jawaban ini tidak memengaruhi layanan atau iuran. Terima kasih atas waktunya.");
+  rig.playbackMs = 6000; // audio of the goodbye kept streaming after its transcript was flushed
+  await rig.tick(CLOSING_HANGUP_MS);
+  assert.deepEqual(rig.stops, []); // not cut mid-sentence
+  rig.playbackMs = 0;
+  await rig.tick(6000 + GOODBYE_TAIL_MS);
+
+  assert.deepEqual(rig.stops, ["selesai"]);
+  assert.match(rig.logs.at(-1), /AI menutup panggilan/);
+});
+
+test("station operator asks the AI to respond when it stays silent after the recipient's answer", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Apakah Bapak terapi tanggal 9 Agustus?");
+  rig.say("penerima", "Lho, Minggu ya libur to mas."); // Gemini never closes this turn
+  await rig.tick(SILENCE_HANGUP_MS);
+
+  assert.deepEqual(rig.nudges, [REPLY_NUDGE]);
+  assert.match(rig.logs[0], /AI diminta menanggapi jawaban/);
+  rig.say("ai", "Baik. Jawaban ini tidak memengaruhi layanan atau iuran. Terima kasih atas waktunya.");
+  await rig.tick(CLOSING_HANGUP_MS + GOODBYE_TAIL_MS);
+
+  assert.deepEqual(rig.stops, ["selesai"]);
+  assert.match(rig.logs.at(-1), /AI menutup panggilan/);
+});
+
+test("station operator ends a call whose AI never answers even after being asked", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Kira-kira berapa kali?");
+  rig.say("penerima", "Tiga kali.");
+  await rig.tick(SILENCE_HANGUP_MS); // first: the AI is asked to respond
+  assert.deepEqual(rig.nudges, [REPLY_NUDGE]);
+  await rig.tick(SILENCE_HANGUP_MS); // still nothing: end the call
+
+  assert.deepEqual(rig.stops, ["selesai"]);
+  assert.match(rig.logs.at(-1), /AI tidak menanggapi jawaban/);
+});
+
+test("station operator hangs up after the goodbye phrase even when Gemini never closes the turn", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Apakah Bapak terapi tanggal 9 Agustus?");
+  rig.say("penerima", "Enggak, kan hari Minggu libur.");
+  rig.options.onPartial({ pembicara: "ai", teks: "Baik. Jawaban ini tidak memengaruhi layanan atau iuran Bapak." });
+  assert.deepEqual(rig.stops, []);
+  rig.options.onPartial({ pembicara: "ai", teks: "Baik. Jawaban ini tidak memengaruhi layanan atau iuran Bapak. Terima kasih atas waktunya." });
+  await rig.tick(CLOSING_HANGUP_MS);
+
+  assert.deepEqual(rig.stops, ["selesai"]);
+  assert.match(rig.logs.at(-1), /AI menutup panggilan/);
+});
+
+test("isGoodbyePhrase only matches the mandatory last sentence", () => {
+  assert.equal(isGoodbyePhrase("Terima kasih atas waktunya."), true);
+  assert.equal(isGoodbyePhrase("terima kasih atas waktu Bapak"), true);
+  assert.equal(isGoodbyePhrase("Terima kasih, Pak. Kira-kira berapa kali?"), false);
+});
+
+test("voice session reports each fragment of the turn in progress", () => {
+  const partial = [];
+  const session = new VedikaVoiceSession({ onPartial: (turn) => partial.push(turn.teks) });
+  session.appendFragment({ pembicara: "ai", teks: "Terima kasih " });
+  session.appendFragment({ pembicara: "ai", teks: "atas waktunya." });
+  assert.deepEqual(partial, ["Terima kasih ", "Terima kasih atas waktunya."]);
 });
