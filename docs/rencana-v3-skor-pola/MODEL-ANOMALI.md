@@ -1,10 +1,12 @@
 # Model anomali `anomali-v2`: penjelasan teknis
 
-Model **tanpa label** yang ikut memilih tagihan fisioterapi mana yang dikonfirmasi lewat telepon. Dilatih 17 November 2026 dari data sampel reguler BPJS 2023 dan 2024. Semua angka di dokumen ini berasal dari berkas yang dibuat skrip, bukan ditulis tangan:
+Model **tanpa label** yang ikut memilih tagihan fisioterapi mana yang dikonfirmasi lewat telepon. Dilatih 17 November 2026 dari data sampel reguler BPJS 2023 dan 2024. Angka model dan evaluasi berasal dari berkas yang dibuat skrip:
 
 - `data-uji-konfirmasi/referensi-pola/model-anomali-v2.json` (model)
-- `data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md` dan `ai-service/data/reference/pola-2024/anomali-nyata.json` (perilaku di data nyata)
-- `data-uji-konfirmasi/referensi-pola/BANDING-METODE.md` dan `ai-service/data/reference/pola-2024/banding-metode.json` (perbandingan dengan v1)
+- `data-uji-konfirmasi/referensi-pola/EVALUASI-ANOMALI.md` dan `ai-service/data/reference/anomali/anomali-nyata.json` (perilaku di data nyata)
+- `data-uji-konfirmasi/referensi-pola/BANDING-METODE.md` dan `ai-service/data/reference/anomali/banding-metode.json` (perbandingan dengan v1)
+
+Pengecualian, diukur sekali dari data mentah di laptop dan tidak disimpan: tabel "Diperiksa, tidak memberi sinyal" di bagian 3 dan angka "tanpa φ" di bagian 11.
 
 Status: model sudah dilatih, diuji, dan dievaluasi di data nyata, dan tersambung ke backend dan web (mode API dan simulasi): antrean berisi pasien yang dipilih aturan ATAU model, kolom "Dipilih oleh", bagian "Mengapa dipilih", baris corong dan kartu "sumber pemilihan dan hasil panggilan" di Ringkasan RS. Data uji punya dua pasien yang hanya dipilih model (M1, M2).
 
@@ -21,6 +23,8 @@ Klaim fisioterapi bulan ini (per pasien per bulan)
    │                                       ├── ATAU ──► ditelepon agen AI ──► jawaban peserta ──► label (aturan.py)
    └── Model: pola jarang di antara        ┘
        pasien seusia
+
+Urutan antrean: Dahulukan, lalu pola paling jarang (langka dulu, lalu skor tertinggi), lalu id.
 
 Per RS: jumlah pasien dipilih dibanding harapan menurut umur pasiennya (corong) ──► Ringkasan RS
 ```
@@ -218,7 +222,7 @@ Pasien yang dipilih mengumpul di sedikit kelompok RS. Hanya jumlah yang di-commi
 
 Sudah:
 
-1. Backend (`backend/app/anomali_v3.py`, `scripts/seed_v3.py`): `seed_v3` menilai semua bulan-pasien aktif dengan `tools/anomali.py`, umur dari `peserta.umur`, rujukan dari `klaim_sesi.rujukan_fktp` dan `.perujuk_luar_wilayah`. Hasil di `indikator_bulanan.skor_anomali`, `.anomali_ditandai`, `.anomali_langka`, `.alasan_anomali`. Antrean = `dipicu OR anomali_ditandai`.
+1. Backend (`backend/app/anomali_v3.py`, `scripts/seed_v3.py`): `seed_v3` menilai semua bulan-pasien aktif dengan `tools/anomali.py`, umur dari `peserta.umur`, rujukan dari `klaim_sesi.rujukan_fktp` dan `.perujuk_luar_wilayah`. Hasil di `indikator_bulanan.skor_anomali`, `.anomali_ditandai`, `.anomali_langka`, `.alasan_anomali`. Antrean = `dipicu OR anomali_ditandai`, diurutkan pola paling jarang dulu (menggantikan skor pola `pola-v1`, yang dipensiunkan).
 2. API (`docs/api-contract-v3.md`, perubahan 2026-11-17): `dipilih` di antrean dan detail, objek `anomali`, `funnel` per RS, `kinerja_model`.
 3. Web mode API membaca field yang sama dengan mode simulasi.
 
