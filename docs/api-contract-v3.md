@@ -7,8 +7,8 @@ Acuan: `docs/prd-v3-konfirmasi-suara.md` (PRD v3.0) dan `docs/rencana-v3.md` bag
 **2026-11-16, skor pola (`docs/rencana-v3-skor-pola/SKOR-POLA.md`).** Skor 0–1 dari pola nasional data sampel BPJS 2024 yang hanya mengurutkan antrean dan menjelaskan alasannya. Pemicu, label, saran, dan status RS tidak berubah.
 
 - **A.** Baris `GET /antrean` menambah `skor_pola` (angka atau `null`) dan `pola_tinggi`. `GET /panggilan/{id}` menambah objek `pola`. `GET /ringkasan-rs` menambah `kinerja_pola` di tingkat atas serta `pembanding` dan `pola_tinggi_tidak_terpicu` per RS.
-- **A dan B1.** Urutan `antre` berubah: `prioritas` (Dahulukan), lalu `skor_pola` tertinggi (tanpa skor di akhir), lalu `id` biner. Sama untuk daftar antrean dan `POST /agen/ambil`.
-- **DB.** `indikator_bulanan` menambah `skor_pola real`, `alasan_pola jsonb`, `pola_tinggi boolean`; `pengaturan` menambah kunci `versi_pola` (tidak tampil di `GET /pengaturan`). Database yang sudah berjalan perlu `scripts.terapkan_v3` sekali (tanpa `--reset` cukup).
+- **A dan B1.** Urutan `antre` berubah: `prioritas` (Dahulukan), lalu skor pola tertinggi menurut logitnya (tanpa skor di akhir), lalu `id` biner. Logit dipakai karena skor di atas 0,999 tampil sama (1,00). Sama untuk daftar antrean dan `POST /agen/ambil`. Di data demo antrean pertama kini S6, lalu P0037, lalu S1.
+- **DB.** `indikator_bulanan` menambah `skor_pola real`, `alasan_pola jsonb`, `pola_tinggi boolean`, `logit_pola real` (kunci urutan, tidak tampil di API); `pengaturan` menambah kunci `versi_pola` (tidak tampil di `GET /pengaturan`). Database yang sudah berjalan perlu `scripts.terapkan_v3` sekali (tanpa `--reset` cukup).
 - Kata "fraud", "curang", dan "probabilitas" tidak dipakai di API maupun UI. Istilahnya "Skor pola" dan "Pola tidak biasa".
 
 **2026-11-16, stasiun saluran Android (`docs/rencana-v3-otomatis/`).** Panggilan otomatis lewat HP Android di laptop stasiun; WhatsApp hanya untuk pesan dan dikirim server.
@@ -175,7 +175,7 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
 - Tiap baris memuat `coba_lagi_setelah` (ISO atau `null`): terisi selama percobaan ke-2 menunggu jeda. FE menghitung mundur terhadap `waktu_server`.
 - Sebelum menjawab, API melepas panggilan macet (lihat Kontrak B1), jadi FE pulih walau stasiun tidak menarik tugas.
 - `skor_pola` = skor pola bulan-pasien itu (0–1, tiga desimal) atau `null` bila belum dihitung. `pola_tinggi` = skor ≥ ambang model ("Pola tidak biasa"). Keduanya sinyal prioritas panggilan, bukan putusan: tidak memengaruhi siapa yang ditelepon, label, saran, atau status RS. Baris tetap hanya pasien terpicu aturan.
-- Urutan: sedang berjalan (`wa_terkirim` … `membaca_jawaban`), lalu `antre`, lalu `selesai`/`tidak_terhubung` (terbaru dulu). Di dalam `antre`: `prioritas` (Dahulukan) dulu, lalu `skor_pola` tertinggi (`null` di akhir), lalu `id` dengan collation biner (sehingga pada skor yang sama `P-S1`…`P-S8` mendahului `P0002`…). Agen mengambil tugas dengan urutan yang sama.
+- Urutan: sedang berjalan (`wa_terkirim` … `membaca_jawaban`), lalu `antre`, lalu `selesai`/`tidak_terhubung` (terbaru dulu). Di dalam `antre`: `prioritas` (Dahulukan) dulu, lalu skor pola tertinggi menurut logitnya (`indikator_bulanan.logit_pola`; tanpa skor di akhir), lalu `id` dengan collation biner. Logit membedakan baris yang skornya sama-sama tampil 1,00 (di demo: S6 14,7, P0037 14,3, S1 13,7). Agen mengambil tugas dengan urutan yang sama.
 
 ## `GET /api/v1/panggilan/{id}`
 
@@ -479,7 +479,7 @@ Detak stasiun saluran, dikirim agen tiap 3 detik (juga selama panggilan). Wajib 
 Body kosong. Agen memanggil tiap 3 detik saat menganggur dan siap.
 
 - `204`: tidak ada tugas (mode mati atau dijeda dan tidak ada prioritas, di luar jam, ada panggilan lain berjalan, atau antrean kosong/menunggu `coba_lagi_setelah`).
-- `200`: satu tugas. Prioritas dulu, lalu skor pola tertinggi, lalu urutan `id` (sama dengan `GET /antrean`). API langsung mengunci panggilan itu (`diambil_pada`).
+- `200`: satu tugas. Prioritas dulu, lalu skor pola tertinggi menurut logitnya, lalu urutan `id` (sama dengan `GET /antrean`). API langsung mengunci panggilan itu (`diambil_pada`).
   - **Percobaan ke-1:** API mengirim pesan pemberitahuan (Lampiran B) lewat Meta, lalu, apa pun hasil kirimnya, status menjadi `wa_terkirim`, `waktu_wa` diisi, dan log `wa_terkirim` ditulis dengan `catatan` `wa:terkirim`, `wa:simulasi` (Meta belum diatur), atau `wa:gagal (sebab singkat)`. Jeda WA berlaku seperti biasa.
   - **Percobaan ke-2:** tanpa pemberitahuan; status tetap `antre` sampai agen melapor `menelepon`, dan kunci lepas otomatis setelah 5 menit tanpa laporan.
 - **Panggilan macet.** Di awal tiap `agen/ambil` (dan `GET /antrean`), panggilan berstatus `wa_terkirim`, `menelepon`, `tersambung`, atau `merekam` yang laporan terakhirnya (log terbaru, `diambil_pada`, atau akhir jeda WA) lebih dari 5 menit lalu dilepas sebagai satu percobaan gagal dengan `catatan: "macet"`. `membaca_jawaban` tidak pernah dilepas.
@@ -716,7 +716,7 @@ Kolom langsung:
 | `bulan` | `panggilan.bulan_layanan` |
 | `ditagih` | `panggilan.sesi_ditagih` |
 | `indikator`, `tanggal_libur` | `indikator_bulanan` (`i1_…`–`i4_…`, `tanggal_libur`) |
-| `skor_pola`, `pola_tinggi`, `pola.skor`, `pola.tinggi`, `pola.alasan` | `indikator_bulanan.skor_pola`, `.pola_tinggi`, `.alasan_pola` (diisi `seed_v3.py` untuk semua pasien aktif) |
+| `skor_pola`, `pola_tinggi`, `pola.skor`, `pola.tinggi`, `pola.alasan` | `indikator_bulanan.skor_pola`, `.pola_tinggi`, `.alasan_pola` (diisi `seed_v3.py` untuk semua pasien aktif); urutan antre memakai `.logit_pola` |
 | `penerima.nama`, `penerima.hubungan` | `panggilan.nama_penerima`, `panggilan.hubungan` (`peserta` bila `panggilan.penerima = 'peserta'`) |
 | `status`, `percobaan`, `prioritas` | `panggilan.status`, `.percobaan`, `.prioritas` |
 | `coba_lagi_setelah` | `panggilan.coba_lagi_setelah` |

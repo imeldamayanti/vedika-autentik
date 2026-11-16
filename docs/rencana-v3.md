@@ -69,7 +69,7 @@ Kriteria terima: S1 = 11 ditagih, 3 versi peserta, selisih 8, label Tidak sesuai
 - Tabel: pasien + umur, RS, sesi ditagih, chip indikator (Melebihi 8, 3x seminggu, 6 bulan, Libur), penerima telepon, status (Antre, WA terkirim, Menelepon, Selesai, Tidak terhubung), tombol Lihat.
 - Baris berstatus Selesai membuka Kartu bukti; baris sedang berjalan membuka Panggilan; baris Antre non-skenario menampilkan "Belum ditelepon".
 
-Kriteria terima: mengaktifkan mode otomatis memulai S1 tanpa klik tambahan; status baris berubah mengikuti simulasi.
+Kriteria terima: mengaktifkan mode otomatis memulai pasien teratas antrean tanpa klik tambahan (sejak skor pola: S6; S1 lewat Dahulukan); status baris berubah mengikuti simulasi.
 
 ### UI-04 Panggilan berlangsung + simulasi (Gambar 5, R5.1, R3.7)
 

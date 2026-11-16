@@ -142,15 +142,19 @@ def test_fitur_pola_untuk_300_bulan_pasien_sama_dengan_skor_demo(data):
 
 
 def test_skor_tidak_mengubah_indikator_dan_pemicu(data):
-    """baris_indikator hanya menambah tiga kolom skor di belakang; 12 kolom aturan tetap dari aturan.py."""
+    """baris_indikator hanya menambah empat kolom skor di belakang; 12 kolom aturan tetap dari aturan.py."""
     h = data["indikator"][("P-S7", "RS04")]
-    b = seed_v3.baris_indikator(h, {"skor": 0.999, "tinggi": True, "alasan": []})
+    b = seed_v3.baris_indikator(h, {"skor": 0.999, "logit": 7.5, "tinggi": True, "alasan": []})
     assert b[3:9] == (4, 1, False, False, True, False) and b[10:12] == (1, False)
-    assert (b[12], b[13].obj, b[14]) == (0.999, [], True)
+    assert (b[12], b[13].obj, b[14], b[15]) == (0.999, [], True, 7.5)
 
 
 def test_seed_menyimpan_skor_semua_bulan_pasien_sama_dengan_skor_demo(conn_v3):
-    baris = conn_v3.execute("select id_peserta, id_rs, skor_pola, alasan_pola, pola_tinggi from indikator_bulanan").fetchall()
+    baris = conn_v3.execute(
+        "select id_peserta, id_rs, skor_pola, alasan_pola, pola_tinggi, logit_pola from indikator_bulanan"
+    ).fetchall()
+    logit = {(b["id_peserta"], b["id_rs"]): b["logit_pola"] for b in baris}
+    assert all(abs(logit[(r["id_peserta"], r["id_rs"])] - r["logit"]) < 1e-3 for r in SKOR_DEMO)
     ada = {(b["id_peserta"], b["id_rs"]): (round(b["skor_pola"], 3), b["alasan_pola"], b["pola_tinggi"]) for b in baris}
     assert len(ada) == 300
     assert ada == {(r["id_peserta"], r["id_rs"]): (r["skor"], r["alasan"], r["tinggi"]) for r in SKOR_DEMO}

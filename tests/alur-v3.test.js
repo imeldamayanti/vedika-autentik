@@ -58,10 +58,11 @@ async function tanpaGeserSamping(page, nama) {
     .map((r) => parseFloat(r.querySelector(".chip-pola").textContent.replace("Pola", "").replace(",", "."))));
   const menurun = (d) => d.every((x, i) => i === 0 || d[i - 1] >= x);
   cek((await page.$$(".chip-pola")).length === 14, "tiap baris antrean punya chip skor pola", String((await page.$$(".chip-pola")).length));
-  const chipS1 = await page.$eval("tbody tr:first-child .chip-pola", (el) => ({ teks: el.textContent.trim(), kelas: el.className, judul: el.title, lebar: el.querySelector("i b").style.width }));
+  const chipS1 = await page.$eval("tbody tr:nth-child(2) .chip-pola", (el) => ({ teks: el.textContent.trim(), kelas: el.className, judul: el.title, lebar: el.querySelector("i b").style.width }));
   cek(chipS1.teks === "Pola 1,00" && chipS1.kelas.includes("chip-pola--tinggi") && chipS1.lebar === "100%", "chip S1: Pola 1,00 bergaya tinggi dengan batang penuh", JSON.stringify(chipS1));
   cek(chipS1.judul === "Skor pola: prioritas panggilan, bukan putusan.", "tooltip chip: prioritas panggilan, bukan putusan", chipS1.judul);
-  cek((await page.$eval("tbody tr:first-child .nama-berkas b", (el) => el.textContent)) === "Andi Pratama", "S1 paling atas di antrean");
+  const atas = await page.$$eval("tbody tr .nama-berkas b", (el) => el.slice(0, 2).map((x) => x.textContent));
+  cek(atas[0] === "Slamet Riyadi" && atas[1] === "Andi Pratama", "skor 1,00 diurutkan menurut logit: S6 lalu S1", atas.join(", "));
   const awal = await skorAntre();
   cek(awal.length === 10 && menurun(awal) && awal[0] === 1 && awal[9] < 0.2, "antrean terurut skor pola menurun", awal.join(" "));
   cek((await page.$$(".chip-pola:not(.chip-pola--tinggi)")).length >= 2, "skor di bawah ambang memakai chip netral");

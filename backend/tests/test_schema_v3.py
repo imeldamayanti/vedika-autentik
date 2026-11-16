@@ -83,16 +83,17 @@ def test_kolom_d01_ditambahkan_ke_tabel_yang_sudah_ada(conn):
 def test_kolom_skor_pola_ditambahkan_ke_tabel_yang_sudah_ada(conn):
     """Database yang di-seed sebelum skor pola ada harus mendapat tiga kolomnya, dengan bawaan yang aman."""
     conn.execute(SKEMA_V3)
-    conn.execute("alter table uji.indikator_bulanan drop column skor_pola, drop column alasan_pola, drop column pola_tinggi")
+    conn.execute("alter table uji.indikator_bulanan drop column skor_pola, drop column alasan_pola, drop column pola_tinggi,"
+                 " drop column logit_pola")
     conn.execute("insert into uji.rumah_sakit (id_rs, nama_rs) values ('RS01', 'RS Uji')")
     conn.execute("insert into uji.peserta (id_peserta, nama) values ('P01', 'Peserta Uji')")
     conn.execute(
         "insert into uji.indikator_bulanan values ('P01', 'RS01', '2026-08', 9, 3, true, true, false, false, '{}', 2, true)"
     )
-    assert not {"skor_pola", "alasan_pola", "pola_tinggi"} & kolom(conn, "indikator_bulanan")
+    assert not {"skor_pola", "alasan_pola", "pola_tinggi", "logit_pola"} & kolom(conn, "indikator_bulanan")
     conn.execute(SKEMA_V3)
     conn.execute(SKEMA_V3)
-    assert {"skor_pola", "alasan_pola", "pola_tinggi"} <= kolom(conn, "indikator_bulanan")
+    assert {"skor_pola", "alasan_pola", "pola_tinggi", "logit_pola"} <= kolom(conn, "indikator_bulanan")
     baris = conn.execute("select skor_pola, alasan_pola, pola_tinggi, dipicu from uji.indikator_bulanan").fetchone()
     assert baris == {"skor_pola": None, "alasan_pola": [], "pola_tinggi": False, "dipicu": True}
     with pytest.raises(psycopg.errors.NotNullViolation):

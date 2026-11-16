@@ -8,7 +8,7 @@ KOLOM_BARIS = (
     " p.status, p.percobaan, p.prioritas, p.label, p.coba_lagi_setelah, p.diambil_pada, p.waktu_mulai,"
     " p.waktu_selesai, p.jawaban, s.nama as pasien, s.umur, s.jenis_kelamin, r.nama_rs,"
     " i.i1_lebih_8_sebulan as i1, i.i2_3x_seminggu as i2, i.i3_episode_6_bulan as i3, i.i4_hari_libur as i4,"
-    " i.skor_pola, i.pola_tinggi,"
+    " i.skor_pola, i.pola_tinggi, i.logit_pola,"
     " (select k.tindakan from keputusan_panggilan k where k.panggilan_id = p.id order by k.waktu desc, k.id desc limit 1)"
     " as keputusan_tindakan"
 )
@@ -210,7 +210,7 @@ def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None
         " and (p.diambil_pada is null or p.diambil_pada <= %s)"
         " and (p.coba_lagi_setelah is null or p.coba_lagi_setelah <= %s)"
         " and (p.prioritas or %s)"
-        ' order by p.prioritas desc, i.skor_pola desc nulls last, p.id collate "C" limit 1'
+        ' order by p.prioritas desc, i.logit_pola desc nulls last, p.id collate "C" limit 1'
         " for update of p skip locked) returning id",
         (sekarang, batas_kunci, sekarang, boleh_otomatis),
     ).fetchone()

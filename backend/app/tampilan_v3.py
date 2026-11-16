@@ -35,15 +35,15 @@ def baris_antre(r: dict) -> dict:
 
 
 def urutan_antrean(r: dict) -> tuple:
-    """Sedang berjalan, lalu antre (prioritas, skor pola tertinggi, id biner), lalu selesai (terbaru dulu).
-    Urutan antre sama dengan repo_v3.kunci_tugas."""
+    """Sedang berjalan, lalu antre (prioritas, skor pola tertinggi menurut logitnya, id biner), lalu selesai
+    (terbaru dulu). Urutan antre sama dengan repo_v3.kunci_tugas."""
     if r["status"] in URUT_STATUS:
-        return (0, URUT_STATUS[r["status"]], 0, r["id"])
+        return (0, URUT_STATUS[r["status"]], 0, 0, r["id"])
     if r["status"] == "antre":
-        skor = r.get("skor_pola")
-        return (1, 0 if r["prioritas"] else 1, 1 if skor is None else -skor, r["id"])
+        logit = r.get("logit_pola")
+        return (1, 0 if r["prioritas"] else 1, 1 if logit is None else 0, -(logit or 0), r["id"])
     selesai = r["waktu_selesai"] or r["waktu_mulai"]
-    return (2, -(selesai.timestamp() if selesai else 0), 0, r["id"])
+    return (2, -(selesai.timestamp() if selesai else 0), 0, 0, r["id"])
 
 
 def dalam_jam(pengaturan: dict, sekarang) -> bool:

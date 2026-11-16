@@ -67,6 +67,8 @@ create index if not exists indikator_dipicu_idx on public.indikator_bulanan (bul
 alter table public.indikator_bulanan add column if not exists skor_pola real;
 alter table public.indikator_bulanan add column if not exists alasan_pola jsonb not null default '[]';
 alter table public.indikator_bulanan add column if not exists pola_tinggi boolean not null default false;
+-- Kunci urutan antrean: skor di atas 0,999 tampil sama (1,00), logitnya masih berbeda.
+alter table public.indikator_bulanan add column if not exists logit_pola real;
 
 -- F2-F5: satu baris per pasien-RS-bulan yang ditelepon. Antrean = indikator dipicu yang belum punya baris di sini.
 create table if not exists public.panggilan (

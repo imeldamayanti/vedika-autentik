@@ -78,12 +78,12 @@ def baris_klaim(r):
 
 
 def baris_indikator(h, pola):
-    """pola: keluaran pola_v3.nilai untuk bulan-pasien ini (skor, tinggi, alasan)."""
+    """pola: keluaran pola_v3.nilai untuk bulan-pasien ini (skor, logit, tinggi, alasan)."""
     return (
         h["id_peserta"], h["id_rs"], h["bulan"], h["sesi_ditagih"], h["maks_sesi_seminggu"],
         h["I1_lebih_8_sebulan"], h["I2_3x_seminggu"], h["I3_episode_6_bulan"], h["I4_hari_libur"],
         [date.fromisoformat(t) for t in h["tanggal_libur"]], h["jumlah_indikator"], h["dipicu"],
-        pola["skor"], Jsonb(pola["alasan"]), pola["tinggi"],
+        pola["skor"], Jsonb(pola["alasan"]), pola["tinggi"], pola["logit"],
     )
 
 
@@ -207,10 +207,10 @@ def isi_ke(conn, d, reset=False):
     cur.executemany(
         "insert into indikator_bulanan (id_peserta, id_rs, bulan, sesi_ditagih, maks_sesi_seminggu, i1_lebih_8_sebulan,"
         " i2_3x_seminggu, i3_episode_6_bulan, i4_hari_libur, tanggal_libur, jumlah_indikator, dipicu, skor_pola,"
-        " alasan_pola, pola_tinggi) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        " alasan_pola, pola_tinggi, logit_pola) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         # baris lama (database yang di-seed sebelum skor pola ada) hanya menerima skor; indikator tidak disentuh
         " on conflict (id_peserta, id_rs, bulan) do update set skor_pola = excluded.skor_pola,"
-        " alasan_pola = excluded.alasan_pola, pola_tinggi = excluded.pola_tinggi",
+        " alasan_pola = excluded.alasan_pola, pola_tinggi = excluded.pola_tinggi, logit_pola = excluded.logit_pola",
         [baris_indikator(h, pola_v3.nilai(d["fitur_pola"][kunci], versi)) for kunci, h in d["indikator"].items()],
     )
     cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])

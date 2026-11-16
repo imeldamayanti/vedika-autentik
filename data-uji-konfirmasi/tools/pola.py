@@ -61,10 +61,19 @@ def kombinasi(i1, i2, i3, i4):
     return "+".join(aktif) or "-"
 
 
-def skor(model, fitur):
+def _z(model, fitur):
     b = bin_fitur(fitur)
-    z = model["intersep"] + sum(model["koefisien"][f].get(b[f], 0.0) for f in model["fitur"])
-    return round(1 / (1 + math.exp(-z)), 3)
+    return model["intersep"] + sum(model["koefisien"][f].get(b[f], 0.0) for f in model["fitur"])
+
+
+def logit(model, fitur):
+    """Nilai sebelum fungsi logistik. Dipakai mengurutkan antrean: skor di atas 0,999 tampil sama (1,00),
+    logitnya masih berbeda. Urutan logit selalu sama dengan urutan skor yang belum dibulatkan."""
+    return round(_z(model, fitur), 4)
+
+
+def skor(model, fitur):
+    return round(1 / (1 + math.exp(-_z(model, fitur))), 3)
 
 
 def persen(x):

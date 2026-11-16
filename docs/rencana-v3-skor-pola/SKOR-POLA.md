@@ -43,7 +43,7 @@ indikator_bulanan.skor_pola → antrean, kartu bukti, Ringkasan RS
 
 ## Membaca layar
 
-- **Antrean.** Chip `Pola 0,93` dengan batang tipis. Chip berwarna merah bila skor ≥ ambang. Urutan antre: Dahulukan, lalu skor tertinggi, lalu id. Agen mengambil tugas dengan urutan yang sama.
+- **Antrean.** Chip `Pola 0,93` dengan batang tipis. Chip berwarna merah bila skor ≥ ambang. Urutan antre: Dahulukan, lalu skor tertinggi menurut logitnya, lalu id. Agen mengambil tugas dengan urutan yang sama. Logit dipakai karena skor di atas 0,999 tampil sama (1,00) padahal modelnya masih membedakan; di demo antrean dibuka S6 (Slamet, logit 14,7), P0037 (14,3), lalu S1 (Andi, 13,7). Untuk demo S1, tekan Dahulukan pada Andi Pratama.
 - **Kartu bukti, "Mengapa diprioritaskan".** Dua alasan, lalu satu kalimat tentang seberapa jarang kombinasi indikatornya di data nasional. Kombinasi yang muncul kurang dari 10 kali di data sampel hanya punya batas atas ("kurang dari 0,03%").
 - **Ringkasan RS.** Satu baris per RS: persen terpicu RS ini, rata-rata RS sejenis nasional, dan batas 95% kelompok RS sejenis. Lencana "Di atas 95% RS sejenis" bila RS melewati batas itu. Kartu "Skor pola vs hasil panggilan" membandingkan skor dengan label Sesuai dan Tidak sesuai.
 
@@ -87,7 +87,7 @@ Ekspor hanya berisi fitur yang sudah dibin dan label (1 = Tidak sesuai) dari pan
 ## Batasan
 
 - Kelas pelanggaran dibuat dari aturan yang sama dengan aturan pemicu. Skor karena itu sangat sejalan dengan aturan dan belum menemukan pola baru. Di data demo tidak ada kasus yang lolos aturan tetapi berskor tinggi.
-- Sesi hari Minggu di data nyata langka (0,44% bulan-pasien) dan hanya muncul di sel kasar dengan paling banyak 2 sesi seminggu; Minggu bersama 3 sesi atau lebih seminggu tetap tersembunyi. Model karena itu masih sangat yakin pada kombinasi Minggu + padat: di antrean demo, 20 dari 26 panggilan tampil sebagai 1,00. Logitnya berbeda (7,8 sampai 14,7), tetapi pembulatan tiga desimal membuatnya sama, jadi urutannya ditentukan id.
+- Sesi hari Minggu di data nyata langka (0,44% bulan-pasien) dan hanya muncul di sel kasar dengan paling banyak 2 sesi seminggu; Minggu bersama 3 sesi atau lebih seminggu tetap tersembunyi. Model karena itu masih sangat yakin pada kombinasi Minggu + padat: di antrean demo, 20 dari 26 panggilan tampil sebagai 1,00. Antrean diurutkan menurut logitnya (7,8 sampai 14,7), jadi urutannya tetap ditentukan model, tetapi chip di layar tidak menunjukkan bedanya.
 - Di dalam sel kasar, fitur dianggap saling bebas saat dipecah ke bin halus.
 - Koefisien `sesi` tidak naik terus: 9–13 sesi berkoefisien lebih rendah dari 7–8 sesi, dan bulan-pasien yang hanya melanggar I1 berskor rendah. Model membaca "banyak sesi tetapi tersebar rata" sebagai pola nyata yang wajar.
 - Pangsa nasional di atas ambang (1,61%) dihitung dari sel yang tidak disembunyikan. Dengan sisa yang tersembunyi, nilainya antara kira-kira 1,6% dan 1,7%.

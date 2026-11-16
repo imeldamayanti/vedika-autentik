@@ -263,7 +263,7 @@ def skor_demo(model: dict, referensi: dict, demo: dict) -> list[dict]:
     for (id_peserta, id_rs), f in sorted(demo.items()):
         s = pola.skor(model, f)
         hasil.append({
-            "id_peserta": id_peserta, "id_rs": id_rs, "bulan": BULAN_DEMO, "fitur": f, "skor": s,
+            "id_peserta": id_peserta, "id_rs": id_rs, "bulan": BULAN_DEMO, "fitur": f, "skor": s, "logit": pola.logit(model, f),
             "tinggi": s >= model["ambang_tinggi"], "alasan": pola.alasan(model, referensi, f),
         })
     return hasil

@@ -33,10 +33,13 @@ def referensi() -> dict:
 
 
 def nilai(fitur: dict, versi: str = VERSI_BAWAAN) -> dict:
-    """Skor, penanda tinggi, dan dua alasan teratas untuk satu bulan-pasien."""
+    """Skor, logit (kunci urutan antrean), penanda tinggi, dan dua alasan teratas untuk satu bulan-pasien."""
     m = model(versi)
     skor = pola().skor(m, fitur)
-    return {"skor": skor, "tinggi": skor >= m["ambang_tinggi"], "alasan": pola().alasan(m, referensi(), fitur)}
+    return {
+        "skor": skor, "logit": pola().logit(m, fitur), "tinggi": skor >= m["ambang_tinggi"],
+        "alasan": pola().alasan(m, referensi(), fitur),
+    }
 
 
 def _persen(x: float) -> str:

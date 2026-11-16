@@ -28,14 +28,17 @@ def test_antrean_s7_tidak_pernah_muncul(klien_v3):
     assert all(len(r["indikator"]) >= 2 for r in klien_v3.get("/api/v1/antrean").json()["baris"])
 
 
-def test_antrean_urutan_skor_pola_lalu_id_riwayat_terbaru_di_akhir(klien_v3):
+def test_antrean_urutan_logit_skor_pola_riwayat_terbaru_di_akhir(klien_v3):
     baris = klien_v3.get("/api/v1/antrean").json()["baris"]
     ids = [r["id"] for r in baris]
     antre = [r for r in baris if r["status"] == "antre"]
     assert antre == baris[:26]
-    assert [r["id"] for r in antre] == [r["id"] for r in sorted(antre, key=lambda r: (-r["skor_pola"], r["id"]))]
-    # skor sama (1,0) diurutkan menurut id biner; S8 dan S3 (pola wajar) turun ke akhir antrean
-    assert ids[:6] == [f"CALL-P-S{n}-2026-08" for n in (1, 2, 4, 5, 6)] + ["CALL-P0010-2026-08"]
+    skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
+    logit = [skor[r["id"][5:-8]]["logit"] for r in antre]
+    assert all(a > b or (a == b and x["id"] < y["id"]) for a, b, x, y in zip(logit, logit[1:], antre, antre[1:]))
+    assert [r["skor_pola"] for r in antre] == sorted((r["skor_pola"] for r in antre), reverse=True)
+    # skor 1,00 tidak lagi diurutkan menurut id: S6 (logit 14,7) mendahului S1 (13,7)
+    assert ids[:3] == ["CALL-P-S6-2026-08", "CALL-P0037-2026-08", S1]
     assert ids[24:26] == ["CALL-P-S8-2026-08", "CALL-P-S3-2026-08"]
     assert ids[-4:] == ["CALL-LATAR-004", "CALL-LATAR-003", "CALL-LATAR-002", "CALL-LATAR-001"]
 
@@ -51,8 +54,8 @@ def test_antrean_skor_pola_sama_dengan_skor_demo(klien_v3):
 
 
 def test_antrean_tanpa_skor_di_akhir_antre_dan_skor_tidak_mengubah_pemicu(klien_v3, conn_v3):
-    conn_v3.execute("update indikator_bulanan set skor_pola = null, pola_tinggi = false where id_peserta = 'P-S1'")
-    conn_v3.execute("update indikator_bulanan set skor_pola = 0.999, pola_tinggi = true where id_peserta = 'P-S7'")
+    conn_v3.execute("update indikator_bulanan set skor_pola = null, logit_pola = null, pola_tinggi = false where id_peserta = 'P-S1'")
+    conn_v3.execute("update indikator_bulanan set skor_pola = 1.0, logit_pola = 99, pola_tinggi = true where id_peserta = 'P-S7'")
     h = klien_v3.get("/api/v1/antrean").json()
     antre = [r for r in h["baris"] if r["status"] == "antre"]
     assert antre[-1]["id"] == S1 and antre[-1]["skor_pola"] is None and antre[-1]["pola_tinggi"] is False
@@ -85,7 +88,7 @@ def test_antrean_urutan_berjalan_prioritas_antre_selesai(klien_v3, conn_v3):
     ubah(conn_v3, S1, status="tidak_terhubung", label="Tidak terhubung", waktu_selesai=datetime(2026, 10, 6, 12, tzinfo=config.ZONA))
     ids = [r["id"] for r in klien_v3.get("/api/v1/antrean").json()["baris"]]
     assert ids[:2] == ["CALL-P-S3-2026-08", "CALL-P-S8-2026-08"]  # berjalan, lalu Dahulukan walau skornya rendah
-    assert ids[2] == "CALL-P-S2-2026-08"
+    assert ids[2] == "CALL-P-S6-2026-08"  # antre pertama menurut logit skor pola
     assert ids[-5] == S1  # selesai terbaru dulu, di atas empat riwayat
 
 

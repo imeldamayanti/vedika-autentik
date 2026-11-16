@@ -90,6 +90,13 @@ S1 = {"sesi": 11, "maks_minggu": 4, "ahad_libur": 2, "episode": 3}
 def uji_skor_hitung_tangan():
     # z = -2 + 1.5 + 0.8 + 2.0 = 2.3; episode tidak ada di model["fitur"], jadi diabaikan
     assert pola.skor(MODEL, S1) == round(1 / (1 + math.exp(-2.3)), 3) == 0.909
+    assert pola.logit(MODEL, S1) == 2.3
+    # skor sama setelah dibulatkan, logit tetap membedakan
+    tinggi = {"sesi": 11, "maks_minggu": 4, "ahad_libur": 2, "episode": 1}
+    model_kuat = {**MODEL, "intersep": 8.0}
+    assert pola.skor(model_kuat, S1) == pola.skor(model_kuat, tinggi) == 1.0
+    assert pola.logit(model_kuat, S1) == 12.3 and pola.logit(model_kuat, tinggi) == 12.3
+    assert pola.logit(model_kuat, {**S1, "ahad_libur": 0}) == 10.2
     # bin yang tidak ada di model bernilai 0: z = -2
     assert pola.skor(MODEL, {"sesi": 5, "maks_minggu": 2, "ahad_libur": 1, "episode": 1}) == 0.119
 
