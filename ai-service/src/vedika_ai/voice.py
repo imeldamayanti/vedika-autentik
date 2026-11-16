@@ -18,12 +18,13 @@ LIVE_WEBSOCKET_URL = (
 )
 VOICE = "Kore"
 LANGUAGE = "id-ID"
+TEMPERATURE = 0.4
 REALTIME_INPUT = {
     "automaticActivityDetection": {
         "startOfSpeechSensitivity": "START_SENSITIVITY_HIGH",
-        "endOfSpeechSensitivity": "END_SENSITIVITY_LOW",
+        "endOfSpeechSensitivity": "END_SENSITIVITY_HIGH",
         "prefixPaddingMs": 200,
-        "silenceDurationMs": 800,
+        "silenceDurationMs": 1500,
     }
 }
 
@@ -99,17 +100,23 @@ C. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.
 D. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.
 {holiday_rule}
 F. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi
-layanan atau iuran.
+layanan atau iuran. Akhiri dengan kalimat persis "Terima kasih atas waktunya." lalu diam.
+Setelah itu jangan bertanya atau berbicara lagi.
 
 Aturan bicara:
 - Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.
+- Gaya suara sama dari awal sampai akhir panggilan dan sama di setiap panggilan: perempuan,
+tenang, ramah, tempo sedang, intonasi profesional. Jangan berubah nada, berbisik, atau berseru.
 - Akhiri setiap giliran dengan satu pertanyaan sampai langkah F, lalu berhenti dan tunggu jawaban.
+- Jika penerima sedang bicara atau berhenti sejenak di tengah kalimat, tunggu sampai ia selesai.
+Jangan memotong, dan jangan mengucapkan halo lagi setelah pembuka.
 - Ucapkan pembuka (langkah A) hanya sekali. Jangan mengulang pembuka.
 - Jangan menganggap penerima sudah menjawab atau menyebut angka bila kamu tidak mendengarnya.
 Jika jawaban tidak jelas, ulangi pertanyaannya saja dengan singkat, paling banyak sekali
 untuk setiap pertanyaan.
-- Untuk langkah B, jawaban singkat seperti "iya", "benar", atau "saya sendiri" sudah cukup.
-Lanjutkan.
+- Tanyakan langkah B sekali saja. Jawaban apa pun yang bukan penolakan atau "salah sambung",
+termasuk "iya", "benar", atau "saya sendiri", berarti benar: langsung lanjut ke langkah C.
+Ulangi langkah B hanya bila sama sekali tidak ada jawaban.
 - Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.
 - Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.
 - Jangan memakai kata curang atau fraud kepada penerima.
@@ -161,6 +168,8 @@ class GeminiTokenIssuer:
                 "model": f"models/{self.model}",
                 "generationConfig": {
                     "responseModalities": ["AUDIO"],
+                    # Low temperature keeps the voice and wording steady from call to call.
+                    "temperature": TEMPERATURE,
                     "speechConfig": {
                         "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}},
                         # Pin Indonesian: on a phone line Gemini otherwise guesses the language of

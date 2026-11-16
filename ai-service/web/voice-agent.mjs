@@ -12,14 +12,20 @@ export const ANSWER_TIMEOUT_MS = 40000;
 export const DIAL_GRACE_MS = 5000;
 export const LINE_POLL_MS = 1000;
 export const CLOSING_HANGUP_MS = 3000;
+// Pause kept after the last audio of the goodbye before the line is cut.
+export const GOODBYE_TAIL_MS = 1000;
 export const SILENCE_HANGUP_MS = 10000;
 // Sent to the model after the first silence following its question: on a phone line the answer is
 // often missed, so the AI asks once more before the call is ended.
-export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Sapa singkat, lalu ulangi pertanyaan terakhir. "
-  + "Jangan menganggap penerima sudah menjawab atau membenarkan.";
+export const REPLY_NUDGE = "Penerima sudah selesai menjawab. Tanggapi jawabannya dengan singkat, lalu lanjutkan "
+  + "ke langkah berikutnya. Jangan mengulang pertanyaan yang sudah dijawab.";
+export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Ulangi pertanyaan terakhir dengan singkat, "
+  + "tanpa sapaan dan tanpa kata halo. Jangan menganggap penerima sudah menjawab atau membenarkan.";
 // After the network reports the call as answered, how long the recipient may stay silent before
 // the AI opens the conversation itself.
 export const PICKUP_SILENCE_MS = 3000;
+// Microphone level (RMS, 0..1 after Chrome's gain control) above which the line counts as speech.
+export const VOICE_ACTIVITY_RMS = 0.035;
 
 const normalize = (teks) => String(teks || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
 const ANNOUNCEMENTS = [
@@ -39,9 +45,15 @@ export const isOperatorAnnouncement = (teks) => {
 export const isClosingLine = (teks) => {
   if (String(teks || "").trim().endsWith("?")) return false;
   const text = normalize(teks);
-  return text.includes("sudah kami catat") || text.includes("tidak memengaruhi layanan")
+  return /sudah (kami|saya) catat/.test(text)
+    || /tidak (akan )?(memengaruhi|mempengaruhi) layanan/.test(text)
+    || /terima kasih atas waktu(nya)?/.test(text)
     || /selamat (pagi|siang|sore|malam)/.test(text.slice(-60));
 };
+
+// The script's mandatory last sentence (step F). Matched while the AI is still speaking, because
+// Gemini does not always close the turn after its goodbye.
+export const isGoodbyePhrase = (teks) => /terima kasih atas waktu(nya)?/.test(normalize(teks));
 
 // The officer cancelled or the backend released the call: nothing more may be reported for it.
 export const isCallGone = (error) => error?.status === 404
@@ -238,6 +250,7 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     let pickup = null;
     let heardRecipient = false;
     let nudged = false;
+    let lastSpeaker = null;
     let session = null;
     const clearTimers = () => {
       clearTimeout(noAnswer);
@@ -254,13 +267,22 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       hangUp();
       Promise.resolve(session?.stop(reason)).catch((error) => onError?.(error));
     };
-    const noAnswer = setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
+    const noAnswerAfter = () => setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
+    let noAnswer = noAnswerAfter();
+    let ringingSeen = false;
     const poll = setInterval(async () => {
       const reply = await line.status().catch(() => null);
       const state = reply?.panggilan;
       if (ended || !state) return;
       if (state !== "idle") {
         seenOffhook = true;
+        // Some networks take 30 s before the recipient's phone rings; the 40 s answer window counts
+        // from the first ring, not from dialing.
+        if (reply.berdering && !ringingSeen && !answered) {
+          ringingSeen = true;
+          clearTimeout(noAnswer);
+          noAnswer = noAnswerAfter();
+        }
         // tersambung true: answered. null/absent: this line cannot tell (fake phone), so listen now.
         if (reply.tersambung !== false) session?.releaseInput?.();
         // Carrier announcements play before the call is answered, so a network "answered" here is
@@ -278,16 +300,32 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       else if (seenOffhook || Date.now() - dialedAt > DIAL_GRACE_MS) end("tidak_diangkat", "panggilan berakhir sebelum dijawab");
     }, LINE_POLL_MS);
     const afterPlayback = (ms) => ms + (session?.playbackRemainingMs?.() || 0);
+    // The goodbye's transcript can arrive while its audio is still streaming in (the recipient spoke
+    // over it), so check again just before hanging up and wait out whatever is still playing.
+    const hangUpAfterGoodbye = () => {
+      if (ended) return;
+      const left = session?.playbackRemainingMs?.() || 0;
+      if (left > 0) {
+        closing = setTimeout(hangUpAfterGoodbye, left + GOODBYE_TAIL_MS);
+        return;
+      }
+      end("selesai", "AI menutup panggilan");
+    };
     // First silence after an AI turn: the AI asks again. Second silence in a row: end the call.
     const onSilence = () => {
-      if (ended) return;
-      if (!nudged && session?.nudge?.(SILENCE_NUDGE)) {
+      // After the goodbye only hangUpAfterGoodbye ends the call, once its audio has played.
+      if (ended || closing) return;
+      // Never ask again once the AI has said goodbye.
+      // Recipient spoke last but the AI never answered (Gemini did not hear the end of the turn):
+      // ask it to respond. AI spoke last: ask it to repeat the question.
+      const recipientLast = lastSpeaker === "penerima";
+      if (!nudged && session?.nudge?.(recipientLast ? REPLY_NUDGE : SILENCE_NUDGE)) {
         nudged = true;
-        onLog?.(`${task.id}: hening 10 detik; AI mengulang pertanyaan`);
+        onLog?.(`${task.id}: hening 10 detik; ${recipientLast ? "AI diminta menanggapi jawaban" : "AI mengulang pertanyaan"}`);
         silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
         return;
       }
-      end("selesai", "hening 10 detik setelah giliran AI");
+      end("selesai", recipientLast ? "AI tidak menanggapi jawaban" : "hening 10 detik setelah giliran AI");
     };
 
     current = { stop: (reason) => end(reason) };
@@ -306,7 +344,24 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       },
       onSpeech: (pembicara) => {
         clearTimeout(silence);
-        if (pembicara === "penerima") { heardRecipient = true; nudged = false; clearTimeout(pickup); }
+        silence = null;
+        lastSpeaker = pembicara;
+        if (pembicara === "penerima") {
+          heardRecipient = true;
+          nudged = false;
+          clearTimeout(pickup);
+          // The AI normally answers within seconds; this clock only runs out if it never does.
+          if (answered && !closing && !ended) silence = setTimeout(onSilence, SILENCE_HANGUP_MS);
+        }
+      },
+      onPartial: (turn) => {
+        if (turn.pembicara !== "ai" || !answered || ended || closing || aiTurns < 1) return;
+        if (isGoodbyePhrase(turn.teks)) closing = setTimeout(hangUpAfterGoodbye, afterPlayback(CLOSING_HANGUP_MS));
+      },
+      onVoiceActivity: () => {
+        if (!silence || ended || closing) return;
+        clearTimeout(silence);
+        silence = setTimeout(onSilence, SILENCE_HANGUP_MS);
       },
       onTranscript: (turn) => {
         onTurn(turn);
@@ -316,7 +371,7 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
         silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
         // The opener can start with "Selamat siang"; only a later turn can close the call.
         if (aiTurns > 1 && isClosingLine(turn.teks) && !closing) {
-          closing = setTimeout(() => end("selesai", "AI menutup panggilan"), afterPlayback(CLOSING_HANGUP_MS));
+          closing = setTimeout(hangUpAfterGoodbye, afterPlayback(CLOSING_HANGUP_MS));
         }
       },
       onError,
@@ -391,15 +446,16 @@ export function buildSetupMessage(model, instruction) {
       model: `models/${model.replace(/^models\//, "")}`,
       generationConfig: {
         responseModalities: ["AUDIO"],
+        temperature: 0.4,
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }, languageCode: "id-ID" },
       },
       inputAudioTranscription: { languageCodes: ["id-ID"] },
       realtimeInputConfig: {
         automaticActivityDetection: {
           startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
-          endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+          endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
           prefixPaddingMs: 200,
-          silenceDurationMs: 800,
+          silenceDurationMs: 1500,
         },
       },
       outputAudioTranscription: {},
@@ -498,6 +554,18 @@ export class VedikaVoiceSession {
 
   releaseInput() {
     this.inputHeld = false;
+  }
+
+  // Transcripts arrive only after the recipient finishes a sentence, so silence is judged from the
+  // microphone level itself: someone still talking on the line keeps the call from being nudged.
+  reportVoiceActivity(samples) {
+    let energy = 0;
+    for (let i = 0; i < samples.length; i += 1) energy += samples[i] * samples[i];
+    if (Math.sqrt(energy / Math.max(1, samples.length)) < VOICE_ACTIVITY_RMS) return;
+    const now = performance.now();
+    if (now - (this.lastVoiceAt ?? -Infinity) < 250) return;
+    this.lastVoiceAt = now;
+    this.options.onVoiceActivity?.();
   }
 
   emitStatus(status) {
@@ -601,11 +669,9 @@ export class VedikaVoiceSession {
           || this.inputHeld
           || this.socket?.readyState !== this.WebSocketImpl.OPEN
         ) return;
-        const downsampled = resample(
-          event.inputBuffer.getChannelData(0),
-          this.audioContext.sampleRate,
-          INPUT_RATE,
-        );
+        const samples = event.inputBuffer.getChannelData(0);
+        this.reportVoiceActivity(samples);
+        const downsampled = resample(samples, this.audioContext.sampleRate, INPUT_RATE);
         const pcm = float32ToPcm16(downsampled);
         this.socket.send(JSON.stringify({
           realtimeInput: {
@@ -694,10 +760,11 @@ export class VedikaVoiceSession {
     this.options.onSpeech?.(pembicara);
     if (this.pendingTurn) {
       this.pendingTurn.teks += teks;
-      return;
+    } else {
+      const detik = Math.max(0, Math.floor((performance.now() - this.startedAt) / 1000));
+      this.pendingTurn = { detik, pembicara, teks };
     }
-    const detik = Math.max(0, Math.floor((performance.now() - this.startedAt) / 1000));
-    this.pendingTurn = { detik, pembicara, teks };
+    this.options.onPartial?.({ ...this.pendingTurn });
   }
 
   flushTurn() {

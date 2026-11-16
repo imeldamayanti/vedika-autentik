@@ -82,6 +82,11 @@ def parse_call_state(output: str) -> CallState:
     return "ringing" if "1" in states else "idle"
 
 
+def parse_ringing(output: str) -> bool:
+    """True while the recipient's phone is ringing (foreground call state ALERTING)."""
+    return "4" in FOREGROUND_STATE_PATTERN.findall(output)
+
+
 def parse_connected(output: str) -> bool:
     """True once the network reports a call as answered (foreground call state ACTIVE)."""
     return "1" in FOREGROUND_STATE_PATTERN.findall(output)
@@ -194,7 +199,9 @@ class AdbPhone:
     def line_status(self) -> dict:
         registry = self.shell("dumpsys", "telephony.registry")
         call = parse_call_state(registry)
-        return {"panggilan": call, "tersambung": call == "offhook" and parse_connected(registry)}
+        connected = call == "offhook" and parse_connected(registry)
+        ringing = call == "offhook" and not connected and parse_ringing(registry)
+        return {"panggilan": call, "tersambung": connected, "berdering": ringing}
 
     def dial(self, number: str) -> None:
         output = self.shell(
@@ -260,7 +267,7 @@ class FakePhone:
     def line_status(self) -> dict:
         # The fake phone cannot tell ringing from answered (None = unknown); the robot recipient
         # speaks first, so the agent listens from the start.
-        return {"panggilan": self.state, "tersambung": None}
+        return {"panggilan": self.state, "tersambung": None, "berdering": None}
 
     def dial(self, number: str) -> None:
         del number
