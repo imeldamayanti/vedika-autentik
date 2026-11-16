@@ -9,6 +9,7 @@ import {
   LiveEventReducer,
   PICKUP_SILENCE_MS,
   SILENCE_HANGUP_MS,
+  SILENCE_NUDGE,
   VedikaVoiceSession,
   buildSetupMessage,
   createAgentApi,
@@ -507,7 +508,8 @@ test("buildSetupMessage enables audio plus both finalized transcriptions", () =>
 
   assert.equal(message.setup.model, "models/gemini-live-test");
   assert.deepEqual(message.setup.generationConfig.responseModalities, ["AUDIO"]);
-  assert.deepEqual(message.setup.inputAudioTranscription, {});
+  assert.deepEqual(message.setup.inputAudioTranscription, { languageCodes: ["id-ID"] });
+  assert.equal(message.setup.realtimeInputConfig.automaticActivityDetection.startOfSpeechSensitivity, "START_SENSITIVITY_HIGH");
   assert.deepEqual(message.setup.outputAudioTranscription, {});
   assert.equal(message.setup.systemInstruction.parts[0].text, "Instruksi aman");
 });
@@ -961,7 +963,7 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
       return typeof state === "string" ? { panggilan: state } : state;
     },
   };
-  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null, opened: 0 };
+  const rig = { line, lineCalls, states, logs: [], phases: [], stops: [], options: null, opened: 0, nudges: [], released: 0 };
   const operator = createStationOperator({
     line,
     onLog: (entry) => rig.logs.push(entry),
@@ -971,6 +973,8 @@ function stationRig(t, { status = ["offhook"], playbackMs = 0 } = {}) {
       return {
         playbackRemainingMs: () => playbackMs,
         openFirst: () => { rig.opened += 1; options.onAnswer(); return true; },
+        nudge: (text) => { rig.nudges.push(text); return true; },
+        releaseInput: () => { rig.released += 1; },
         stop: async (reason) => {
           if (rig.stops.length) return;
           rig.stops.push(reason);
@@ -1128,10 +1132,15 @@ test("station operator hangs up after ten silent seconds following an AI turn", 
   rig.say("ai", "Baik, tiga kali.");
   await rig.tick(SILENCE_HANGUP_MS - 1);
   assert.deepEqual(rig.stops, []);
-  await rig.tick(1);
+  await rig.tick(1); // first silence: the AI asks again instead of hanging up
+
+  assert.deepEqual(rig.stops, []);
+  assert.deepEqual(rig.nudges, [SILENCE_NUDGE]);
+  assert.match(rig.logs[0], /AI mengulang pertanyaan/);
+  await rig.tick(SILENCE_HANGUP_MS); // still silent after the repeat: end the call
 
   assert.deepEqual(rig.stops, ["selesai"]);
-  assert.match(rig.logs[0], /hening 10 detik/);
+  assert.match(rig.logs[1], /hening 10 detik setelah giliran AI/);
   assert.equal((await rig.result).answered, true);
 });
 
@@ -1205,4 +1214,64 @@ test("voice session openFirst counts the call as answered and sends the opening 
   assert.equal(session.openFirst(), false);
   assert.equal(sent.length, 1);
   assert.match(sent[0].clientContent.turns[0].parts[0].text, /pembuka/);
+});
+
+test("station operator repeats the question once per silence and again after the recipient speaks", async (t) => {
+  const rig = stationRig(t);
+  rig.answer();
+  rig.say("ai", "Apakah benar saya berbicara dengan Bapak Andi Pratama?");
+  await rig.tick(SILENCE_HANGUP_MS);
+  assert.equal(rig.nudges.length, 1);
+
+  rig.say("ai", "Halo, Bapak? Apakah benar ini Bapak Andi Pratama?"); // the repeat resets the clock
+  rig.say("penerima", "Iya, saya sendiri.");
+  rig.say("ai", "Kira-kira berapa kali Bapak terapi?");
+  await rig.tick(SILENCE_HANGUP_MS);
+  assert.equal(rig.nudges.length, 2); // a new question earns a new repeat
+  assert.deepEqual(rig.stops, []);
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("voice session nudge sends a user turn only while the socket is ready", () => {
+  const sent = [];
+  const session = new VedikaVoiceSession({ greetFirst: false });
+  assert.equal(session.nudge("ulangi"), false);
+  session.socket = { send: (raw) => sent.push(JSON.parse(raw)) };
+  session.ready = true;
+  assert.equal(session.nudge("ulangi"), true);
+  assert.equal(sent[0].clientContent.turns[0].parts[0].text, "ulangi");
+});
+
+test("station operator holds the microphone until the network reports the call as answered", async (t) => {
+  const rig = stationRig(t, { status: [
+    { panggilan: "offhook", tersambung: false },
+    { panggilan: "offhook", tersambung: false },
+    { panggilan: "offhook", tersambung: true },
+  ] });
+
+  assert.equal(rig.options.holdInput, true);
+  await rig.tick(LINE_POLL_MS * 2);
+  assert.equal(rig.released, 0); // ringing: Gemini hears nothing
+  await rig.tick(LINE_POLL_MS);
+  assert.ok(rig.released >= 1);
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("station operator listens at once on a line that cannot report answering", async (t) => {
+  const rig = stationRig(t, { status: [{ panggilan: "offhook", tersambung: null }] });
+  await rig.tick(LINE_POLL_MS);
+  assert.ok(rig.released >= 1);
+  assert.equal(rig.opened, 0); // unknown is not "answered": no AI opening without the recipient
+  await rig.operator.batal();
+  await rig.result;
+});
+
+test("voice session drops microphone audio while input is held", () => {
+  const session = new VedikaVoiceSession({ holdInput: true });
+  assert.equal(session.inputHeld, true);
+  session.releaseInput();
+  assert.equal(session.inputHeld, false);
+  assert.equal(new VedikaVoiceSession({}).inputHeld, false);
 });

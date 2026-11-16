@@ -13,6 +13,10 @@ export const DIAL_GRACE_MS = 5000;
 export const LINE_POLL_MS = 1000;
 export const CLOSING_HANGUP_MS = 3000;
 export const SILENCE_HANGUP_MS = 10000;
+// Sent to the model after the first silence following its question: on a phone line the answer is
+// often missed, so the AI asks once more before the call is ended.
+export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Sapa singkat, lalu ulangi pertanyaan terakhir. "
+  + "Jangan menganggap penerima sudah menjawab atau membenarkan.";
 // After the network reports the call as answered, how long the recipient may stay silent before
 // the AI opens the conversation itself.
 export const PICKUP_SILENCE_MS = 3000;
@@ -233,6 +237,7 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     let silence = null;
     let pickup = null;
     let heardRecipient = false;
+    let nudged = false;
     let session = null;
     const clearTimers = () => {
       clearTimeout(noAnswer);
@@ -256,6 +261,8 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       if (ended || !state) return;
       if (state !== "idle") {
         seenOffhook = true;
+        // tersambung true: answered. null/absent: this line cannot tell (fake phone), so listen now.
+        if (reply.tersambung !== false) session?.releaseInput?.();
         // Carrier announcements play before the call is answered, so a network "answered" here is
         // a person (or voicemail), never the operator.
         if (reply.tersambung && !answered && !heardRecipient && !pickup) {
@@ -271,11 +278,23 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       else if (seenOffhook || Date.now() - dialedAt > DIAL_GRACE_MS) end("tidak_diangkat", "panggilan berakhir sebelum dijawab");
     }, LINE_POLL_MS);
     const afterPlayback = (ms) => ms + (session?.playbackRemainingMs?.() || 0);
+    // First silence after an AI turn: the AI asks again. Second silence in a row: end the call.
+    const onSilence = () => {
+      if (ended) return;
+      if (!nudged && session?.nudge?.(SILENCE_NUDGE)) {
+        nudged = true;
+        onLog?.(`${task.id}: hening 10 detik; AI mengulang pertanyaan`);
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
+        return;
+      }
+      end("selesai", "hening 10 detik setelah giliran AI");
+    };
 
     current = { stop: (reason) => end(reason) };
     onPhase?.("menelepon");
     session = startSession({
       greetFirst: false,
+      holdInput: true,
       context: task.skrip,
       acceptAnswer: (teks) => !isOperatorAnnouncement(teks),
       onRejectedAnswer: () => end("tidak_diangkat", "pengumuman operator, bukan jawaban"),
@@ -287,14 +306,14 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       },
       onSpeech: (pembicara) => {
         clearTimeout(silence);
-        if (pembicara === "penerima") { heardRecipient = true; clearTimeout(pickup); }
+        if (pembicara === "penerima") { heardRecipient = true; nudged = false; clearTimeout(pickup); }
       },
       onTranscript: (turn) => {
         onTurn(turn);
         if (!answered || ended || turn.pembicara !== "ai") return;
         aiTurns += 1;
         clearTimeout(silence);
-        silence = setTimeout(() => end("selesai", "hening 10 detik setelah giliran AI"), afterPlayback(SILENCE_HANGUP_MS));
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
         // The opener can start with "Selamat siang"; only a later turn can close the call.
         if (aiTurns > 1 && isClosingLine(turn.teks) && !closing) {
           closing = setTimeout(() => end("selesai", "AI menutup panggilan"), afterPlayback(CLOSING_HANGUP_MS));
@@ -374,7 +393,15 @@ export function buildSetupMessage(model, instruction) {
         responseModalities: ["AUDIO"],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }, languageCode: "id-ID" },
       },
-      inputAudioTranscription: {},
+      inputAudioTranscription: { languageCodes: ["id-ID"] },
+      realtimeInputConfig: {
+        automaticActivityDetection: {
+          startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
+          endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+          prefixPaddingMs: 200,
+          silenceDurationMs: 800,
+        },
+      },
       outputAudioTranscription: {},
       systemInstruction: { parts: [{ text: instruction }] },
     },
@@ -464,6 +491,13 @@ export class VedikaVoiceSession {
     this.cleanupPromise = null;
     this.messageQueue = Promise.resolve();
     this.stoppedTracks = new Set();
+    // Station calls hold the microphone until the phone network reports the call as answered, so
+    // ringback, room noise or a carrier recording never reach Gemini as the recipient's words.
+    this.inputHeld = Boolean(options.holdInput);
+  }
+
+  releaseInput() {
+    this.inputHeld = false;
   }
 
   emitStatus(status) {
@@ -564,6 +598,7 @@ export class VedikaVoiceSession {
         if (
           this.stopping
           || !this.ready
+          || this.inputHeld
           || this.socket?.readyState !== this.WebSocketImpl.OPEN
         ) return;
         const downsampled = resample(
@@ -623,6 +658,15 @@ export class VedikaVoiceSession {
     for (const turn of event.turns) this.appendFragment(turn);
     if (event.turnComplete || event.interrupted) this.flushTurn();
     for (const chunk of event.audioChunks) this.playPcm(chunk);
+  }
+
+  // Ask the model to speak again (for example after the recipient stayed silent).
+  nudge(text) {
+    if (this.stopping || !this.ready || !this.socket) return false;
+    this.socket.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text }] }], turnComplete: true },
+    }));
+    return true;
   }
 
   sendOpeningCue() {

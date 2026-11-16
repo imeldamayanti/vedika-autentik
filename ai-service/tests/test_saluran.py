@@ -400,14 +400,14 @@ def test_fake_phone_follows_dial_hang_up_and_remote_hang_up():
         "panggilan": "idle",
     }
     assert client.post("/v1/saluran/panggil", json={"nomor": "081234567890"}).json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "offhook", "tersambung": False}
+    assert client.get("/v1/saluran/status").json() == {"panggilan": "offhook", "tersambung": None}
     assert client.get("/v1/saluran/kesehatan").json()["alasan"] == "HP sedang dalam panggilan"
     assert client.post("/v1/saluran/palsu/tutup-penerima").json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": False}
+    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": None}
     client.post("/v1/saluran/panggil", json={"nomor": "081234567890"})
     assert client.post("/v1/saluran/tutup").json() == {"ok": True}
     assert client.post("/v1/saluran/tutup").json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": False}
+    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": None}
     assert client.post("/v1/saluran/panggil", json={"nomor": "123"}).status_code == 422
 
 

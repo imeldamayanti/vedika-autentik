@@ -156,7 +156,9 @@ def test_token_issuer_sends_bidi_generate_content_setup():
     setup = body["bidiGenerateContentSetup"]
     assert setup["model"] == "models/gemini-live-test"
     assert setup["generationConfig"]["responseModalities"] == ["AUDIO"]
-    assert setup["inputAudioTranscription"] == {}
+    assert setup["inputAudioTranscription"] == {"languageCodes": ["id-ID"]}
+    detection = setup["realtimeInputConfig"]["automaticActivityDetection"]
+    assert detection["startOfSpeechSensitivity"] == "START_SENSITIVITY_HIGH"
     assert setup["outputAudioTranscription"] == {}
 
 

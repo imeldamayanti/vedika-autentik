@@ -258,8 +258,9 @@ class FakePhone:
         return self.state
 
     def line_status(self) -> dict:
-        # The fake phone cannot tell ringing from answered; the robot recipient speaks first.
-        return {"panggilan": self.state, "tersambung": False}
+        # The fake phone cannot tell ringing from answered (None = unknown); the robot recipient
+        # speaks first, so the agent listens from the start.
+        return {"panggilan": self.state, "tersambung": None}
 
     def dial(self, number: str) -> None:
         del number
