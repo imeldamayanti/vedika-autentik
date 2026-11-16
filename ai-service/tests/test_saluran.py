@@ -263,7 +263,11 @@ def test_hang_up_is_idempotent_and_status_reads_the_registry():
     assert client.post("/v1/saluran/tutup").json() == {"ok": True}
     ends = [call for call in adb.calls if call[-1] == "KEYCODE_ENDCALL"]
     assert ends == [["shell", "input", "keyevent", "KEYCODE_ENDCALL"]] * 2
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "offhook", "tersambung": False}
+    assert client.get("/v1/saluran/status").json() == {
+        "panggilan": "offhook",
+        "tersambung": False,
+        "berdering": False,
+    }
     assert client_for(run=FakeAdb(fail={"dumpsys"})).get("/v1/saluran/status").status_code == 502
 
 
@@ -400,14 +404,26 @@ def test_fake_phone_follows_dial_hang_up_and_remote_hang_up():
         "panggilan": "idle",
     }
     assert client.post("/v1/saluran/panggil", json={"nomor": "081234567890"}).json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "offhook", "tersambung": None}
+    assert client.get("/v1/saluran/status").json() == {
+        "panggilan": "offhook",
+        "tersambung": None,
+        "berdering": None,
+    }
     assert client.get("/v1/saluran/kesehatan").json()["alasan"] == "HP sedang dalam panggilan"
     assert client.post("/v1/saluran/palsu/tutup-penerima").json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": None}
+    assert client.get("/v1/saluran/status").json() == {
+        "panggilan": "idle",
+        "tersambung": None,
+        "berdering": None,
+    }
     client.post("/v1/saluran/panggil", json={"nomor": "081234567890"})
     assert client.post("/v1/saluran/tutup").json() == {"ok": True}
     assert client.post("/v1/saluran/tutup").json() == {"ok": True}
-    assert client.get("/v1/saluran/status").json() == {"panggilan": "idle", "tersambung": None}
+    assert client.get("/v1/saluran/status").json() == {
+        "panggilan": "idle",
+        "tersambung": None,
+        "berdering": None,
+    }
     assert client.post("/v1/saluran/panggil", json={"nomor": "123"}).status_code == 422
 
 
@@ -526,6 +542,7 @@ def test_dial_turns_the_speaker_on_in_speaker_mode_only(monkeypatch):
 # ---- answered by the network ----
 
 DIALING = "  mCallState=2\n  mForegroundCallState=3\n  mCallState=0\n  mForegroundCallState=0\n"
+RINGING = "  mCallState=2\n  mForegroundCallState=4\n  mCallState=0\n  mForegroundCallState=0\n"
 ANSWERED = "  mCallState=2\n  mForegroundCallState=1\n  mCallState=0\n  mForegroundCallState=-1\n"
 
 
@@ -546,8 +563,23 @@ def test_status_reports_when_the_call_is_answered():
     assert client_for(run=FakeAdb(registry=DIALING)).get("/v1/saluran/status").json() == {
         "panggilan": "offhook",
         "tersambung": False,
+        "berdering": False,
+    }
+    assert client_for(run=FakeAdb(registry=RINGING)).get("/v1/saluran/status").json() == {
+        "panggilan": "offhook",
+        "tersambung": False,
+        "berdering": True,
     }
     assert client_for(run=FakeAdb(registry=ANSWERED)).get("/v1/saluran/status").json() == {
         "panggilan": "offhook",
         "tersambung": True,
+        "berdering": False,
     }
+
+
+@pytest.mark.parametrize(
+    ("registry", "ringing"),
+    [(DIALING, False), (RINGING, True), (ANSWERED, False), (REGISTRY_IDLE, False)],
+)
+def test_parse_ringing(registry, ringing):
+    assert saluran.parse_ringing(registry) is ringing

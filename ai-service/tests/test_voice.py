@@ -201,6 +201,7 @@ def test_token_locks_the_call_instruction_and_voice_into_the_session_setup():
     assert setup["systemInstruction"] == {"parts": [{"text": build_voice_instruction(context())}]}
     assert setup["generationConfig"] == {
         "responseModalities": ["AUDIO"],
+        "temperature": 0.4,
         "speechConfig": {
             "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}},
             "languageCode": "id-ID",

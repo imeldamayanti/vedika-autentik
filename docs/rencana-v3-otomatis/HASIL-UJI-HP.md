@@ -1,7 +1,7 @@
 # Hasil uji dengan HP nyata (16 November 2026)
 
 Uji pertama stasiun saluran dengan HP Android sungguhan, mengikuti [UJI-HP.md](UJI-HP.md). Semua sebelumnya baru diuji
-dengan HP palsu. Data tetap sintetis; semua panggilan hanya ke satu nomor penguji (HP Zahra).
+dengan HP palsu. Data tetap sintetis; semua panggilan hanya ke nomor penguji tim (HP Zahra, lalu HP Imelda).
 
 | | |
 |---|---|
@@ -9,7 +9,7 @@ dengan HP palsu. Data tetap sintetis; semua panggilan hanya ke satu nomor penguj
 | SIM panggilan | SIM 1 (Tri), diatur sebagai SIM bawaan untuk panggilan |
 | Laptop | MacBook Pro, mikrofon dan speaker bawaan |
 | Mode audio | speaker |
-| Mode Meta | log (WA belum dikirim sungguhan) |
+| Mode Meta | log; sejak 21:30 WIB `template`, tetapi ditolak Meta (kode 132001) |
 | Database | Postgres lokal (`vedika_uji`), karena Supabase proyek masih tidak bisa diakses |
 
 ## Ringkasan
@@ -17,10 +17,10 @@ dengan HP palsu. Data tetap sintetis; semua panggilan hanya ke satu nomor penguj
 Alur penuh sudah berjalan di HP nyata tanpa disentuh: antrean → WA (simulasi) → jeda 1 menit → HP menekan nomor →
 speakerphone menyala → penerima mengangkat → AI membuka dan bertanya → telepon ditutup → jawaban dibaca → label.
 
-**S1 lulus di percobaan ke-9**: label Tidak sesuai, ditagih 11 vs versi peserta 3 (selisih 8), rekaman tersimpan, RS
-Melati Sehat menjadi Perlu klarifikasi RS (3 dari 5). Keenam field kunci S1 benar. Delapan percobaan sebelumnya
-membuka sepuluh perbaikan di bawah; yang terbesar menyangkut mutu suara mode speaker. Satu panggilan lulus belum cukup
-untuk gerbang R3.6 (tiga panggilan berturut-turut, transkrip ≥ 90%).
+**S1 sampai S8 lulus di HP nyata** (putaran lengkap 21:05–21:39 WIB, penguji Imelda). Ketujuh label sesuai harapan,
+S7 tidak pernah masuk antrean, dan ringkasan RS akhir **cocok persis** dengan `expected_ringkasan_rs.json` (RS01 2/5/1/0/0
+Perlu klarifikasi RS; RS02 Sesuai 1; RS03 Tidak terhubung 1; RS05 Menolak 1). S1 juga lulus tiga kali dengan dua
+penguji. Jalan ke sana membuka enam belas perbaikan di bawah.
 
 ## Bagian A: pemeriksaan ADB
 
@@ -61,12 +61,30 @@ untuk gerbang R3.6 (tiga panggilan berturut-turut, transkrip ≥ 90%).
 | 8 (19:52) | Pendeteksi suara Gemini dibuat peka. Saat HP penguji masih berdering, gumaman di ruangan dianggap jawaban, AI mulai bicara, panggilan putus 5 detik kemudian | Tidak terhubung (salah). Memicu temuan 10 |
 | 9 (19:55) | Mikrofon ditahan sampai jaringan menyatakan diangkat. Semua jawaban tertranskrip benar: "Iya, benar", "tiga kali", "Enggak pernah, hari Minggu kan tutup". Pertanyaan identitas diulang sekali (sesuai aturan), pembuka sekali | **Tidak sesuai, 11 vs 3, selisih 8.** 59 detik, rekaman tersimpan. Lulus |
 
+| 10 (20:13) | Setelah temuan 11 dan 12. Berdering 10 detik setelah ditekan, diangkat, lalu ditutup dari HP penguji 1 detik kemudian (REMOTE, normal call clearing). Penguji sedang tidak bisa; uji dijeda | Tidak diangkat, percobaan 2 dijadwalkan (benar) |
+
 Akurasi field kunci percobaan 9 (UJI-HP bagian E): penerima, hadir, jumlah sesi, keyakinan, tanggal libur, tanda
 bahaya, **6 dari 6 benar**.
 
 Di setiap panggilan yang diangkat, AI mematuhi naskah: mengaku asisten otomatis, menyebut panggilan direkam, bukan
 tagihan, tidak meminta NIK/OTP/rekening/uang, dan tidak memakai kata "curang" atau "fraud". Label Tidak yakin juga
 benar menurut `aturan.py`, karena jumlah sesi tidak tertangkap; rekaman dan transkripnya tidak disimpan, sesuai aturan.
+
+## Putaran lengkap S1–S8 (penguji Imelda)
+
+Data direset sekali, lalu skenario ditelepon berurutan dengan Dahulukan (mode otomatis mati). Bila HP penguji menolak
+(BUSY), skenario dikembalikan ke percobaan 0 dan ditelepon ulang; S1 kena tiga kali sebelum diangkat.
+
+| Skenario | Label | Rincian | Catatan percakapan |
+|---|---|---|---|
+| S1 Andi | Tidak sesuai | 11 vs 3, selisih 8, rekaman | Identitas sekali, tanpa pengulangan, AI pamit dan stasiun menutup |
+| S2 Siti (Dewi, anak) | Tidak sesuai | 10 vs 2, tanda bahaya "tanda tangan tanpa layanan", penerima keluarga/anak | Identitas diulang sekali atas permintaan penguji |
+| S3 Budi | Sesuai | 9 vs 9–10 | Satu pertanyaan ulang setelah hening 10 detik |
+| S4 Karti (Bayu, anak) | Tidak yakin | 5–6, keyakinan rendah, tanpa rekaman | Penutup sempat terpotong; memicu temuan 13 |
+| S5 Joko | Tidak terhubung | 2 percobaan berjarak 2 menit, chat cadangan tercatat | Uji pertama gagal karena penguji mengangkat percobaan 2; diulang |
+| S6 Slamet | Tidak sesuai | 8 vs 2, selisih 6, membantah 9 Agustus | Uji pertama: AI diam setelah jawaban penguji (temuan 16); diulang dan lulus |
+| S7 Rina | (tidak antre) | 0 baris panggilan | |
+| S8 Hendra | Menolak | tanpa rekaman | AI mengakui kekhawatiran wajar, menyebut Care Center 165, menawarkan sekali, pamit, stasiun menutup |
 
 ## Temuan dan perbaikan
 
@@ -82,19 +100,27 @@ benar menurut `aturan.py`, karena jumlah sesi tidak tertangkap; rekaman dan tran
 | 8 | AI menganggap penerima sudah membenarkan padahal jawabannya tidak terdengar, lalu telepon ditutup sebelum penerima menjawab | Naskah: setiap giliran diakhiri satu pertanyaan, dilarang menganggap sudah dijawab. Hening pertama setelah giliran AI memicu pertanyaan ulang (`SILENCE_NUDGE`); telepon ditutup hanya bila hening lagi |
 | 9 | Pembuka diulang; jawaban pendek penerima terlewat atau ditranskrip dalam huruf lain | Naskah: pembuka sekali, ulang hanya pertanyaannya, paling banyak sekali per pertanyaan; "iya/benar/saya sendiri" cukup untuk identitas. Gemini: `startOfSpeechSensitivity` HIGH, `endOfSpeechSensitivity` LOW, `inputAudioTranscription.languageCodes` id-ID |
 | 10 | Dengan pendeteksi peka, bunyi saat masih berdering dianggap jawaban | Halaman agen menahan audio mikrofon (`holdInput`) sampai Phone helper melaporkan `tersambung: true`. HP palsu melaporkan `tersambung: null` dan langsung didengar seperti sebelumnya |
+| 11 | Pertanyaan identitas diulang saat "iya" penerima tertangkap samar | Naskah: langkah B ditanyakan sekali; jawaban apa pun yang bukan penolakan atau "salah sambung" berarti benar. Diulang hanya bila tidak ada jawaban sama sekali. **Belum diuji di HP** |
+| 12 | Di jaringan Tri, HP penerima bisa baru berdering 30 detik setelah ditekan, sementara batas "tidak diangkat" 40 detik dihitung sejak menekan | `/v1/saluran/status` menambah `berdering` (`mForegroundCallState=4`); batas 40 detik dimulai ulang saat penerima mulai berdering |
+| 13 | Penutup terpotong, atau AI bertanya lagi setelah pamit karena "tidak akan memengaruhi layanan" tidak dikenali dan transkrip pamit kadang baru tiba saat panggilan berakhir | Langkah F wajib diakhiri "Terima kasih atas waktunya." lalu diam. Kalimat itu dikenali dari transkrip yang masih mengalir (`isGoodbyePhrase`); pola penutup diperluas; sesudah pamit tidak ada pertanyaan ulang; telepon baru diputus setelah audio pamit habis diputar (`GOODBYE_TAIL_MS`) |
+| 14 | Gaya suara AI terdengar berubah-ubah | Naskah mengunci gaya bicara (perempuan, tenang, ramah, tempo sedang); `temperature` 0,4. Diukur: tiga sesi Gemini dengan kalimat sama bernada median 174, 183, 183 Hz (suara Kore sama). Perbedaan yang terdengar di telepon berasal dari jalur speaker laptop → mikrofon HP → jaringan seluler; mode kabel menghilangkannya |
+| 15 | Pertanyaan ulang ("Halo, mohon maaf…") memotong penerima yang masih menjawab, karena transkrip baru tiba setelah kalimat selesai | Hening diukur dari level mikrofon (`VOICE_ACTIVITY_RMS` 0,035). Pertanyaan ulang tanpa sapaan. Gemini menunggu jeda 1,5 detik (`silenceDurationMs`). Naskah melarang memotong dan mengulang "halo" |
+| 16 | Gemini tidak pernah menutup giliran penerima (desis speaker HP), sehingga AI diam sampai batas waktu | `endOfSpeechSensitivity` kembali HIGH (jeda tetap 1,5 detik). Jaring pengaman: penerima sudah bicara lalu sunyi 10 detik dan AI diam → AI diminta menanggapi (`REPLY_NUDGE`); bila tetap diam, telepon ditutup |
 
 Uji otomatis setelah perbaikan: ai-service pytest lulus semua (1 dilewati seperti sebelumnya), `node --test
-ai-service/web/voice-agent.test.mjs` 66 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih, backend 296
+ai-service/web/voice-agent.test.mjs` 76 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih, backend 296
 lulus, `node tests/alur-v3.test.js` 19 lulus.
 
 ## Yang masih terbuka
 
-1. **Gerbang R3.6.** Ulangi S1 dua kali lagi berturut-turut, lalu S2–S8. Bila transkrip turun di bawah 90%, pindah ke
-   mode kabel (`SALURAN_AUDIO=kabel`, lihat [STASIUN.md](STASIUN.md) bagian 1).
-2. **Jaringan lambat.** Pada percobaan 3, HP penerima baru berdering sekitar 30 detik setelah nomor ditekan, padahal batas
-   "tidak diangkat" 40 detik dihitung sejak menekan. Status `mForegroundCallState=4` (berdering di penerima) sudah terbaca,
-   jadi batas itu bisa dihitung sejak berdering. Belum diubah.
-3. **Meta WhatsApp** (dikerjakan Zahra, lihat di bawah).
+1. **Mutu suara mode speaker** masih menjadi titik lemah: transkrip penerima kadang terpotong ("A", "in", "tuan ya
+   BPJS"), sehingga AI sesekali bertanya ulang. Label tetap benar karena jawaban utama tertangkap. Untuk demo di ruangan
+   ramai, mode kabel lebih aman.
+2. **Penerima menolak panggilan nomor tak dikenal** (BUSY) cukup sering. Simpan nomor stasiun di HP penguji sebelum demo.
+3. **Meta WhatsApp**: pengaturan sudah diisi (mode `template`, template `pemberitahuan_telepon`), tetapi Meta menjawab
+   `HTTP 404, kode 132001` (template dengan nama dan bahasa itu tidak ditemukan). Cek di dasbor Meta bahwa template
+   sudah **Approved**, namanya persis sama, dan bahasanya Indonesian (`id`). Template chat cadangan belum diisi. Telepon
+   tetap berjalan saat WA gagal.
 4. **B4–B6, A11–A12, bagian D** belum dijalankan.
 5. **Cloudflare Worker** belum di-deploy ulang dengan pengaturan suara baru.
 6. Rekaman halaman agen tidak menyimpan transkrip untuk label Tidak yakin, jadi diagnosis mutu suara bergantung pada
