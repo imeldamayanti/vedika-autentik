@@ -90,6 +90,27 @@
 .btn--otomatis[aria-pressed="true"] .saklar::after { transform: translateX(12px); }
 @media (prefers-reduced-motion: reduce) { .saklar, .saklar::after { transition: none; } }
 .keadaan-otomatis { font-size: 13px; color: var(--muted-fg); }
+
+/* Strip status di atas kartu angka: satu keadaan, plus chip kesehatan. */
+.siap { margin-bottom: 4px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-panel); border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow); }
+.siap-ikon { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--lolos-bg); color: var(--lolos-fg); }
+.siap-ikon svg { width: 20px; height: 20px; }
+.siap--jalan .siap-ikon { background: var(--primary-subtle); color: var(--primary); }
+.siap--warn .siap-ikon { background: var(--cek-bg); color: var(--cek-fg); }
+.siap--bad .siap-ikon { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.siap b { font-size: 15px; display: block; overflow-wrap: anywhere; }
+.siap p { color: var(--muted-fg); font-size: 13px; margin: 2px 0 0; }
+.siap-aksi { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.siap-aksi:empty { display: none; }
+.sehat { grid-column: 1 / -1; display: flex; gap: 6px 16px; flex-wrap: wrap; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 12px; color: var(--muted-fg); }
+.sehat span { display: inline-flex; align-items: center; gap: 6px; }
+.sehat i { width: 7px; height: 7px; border-radius: 50%; background: var(--lolos); }
+.sehat i.no { background: var(--prioritas); }
+.hitung { font-variant-numeric: tabular-nums; }
+.btn--bahaya { color: var(--prioritas-fg); border-color: var(--prioritas); background: var(--prioritas-bg); }
+.kepala-aksi { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wa-server { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted-fg); }
+.wa-server svg { width: 15px; height: 15px; flex: none; }
 .chip-ind-wadah { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip-ind {
   display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11.5px; font-weight: 700;
@@ -400,4 +421,10 @@
   .bar-antrean .kanan .btn { flex: 1; }
   .bar-antrean .pilih { flex: 1; min-width: 0; }
   .tabel td.aksi { text-align: left; }
+}
+
+@media (max-width: 640px) {
+  .siap { grid-template-columns: auto minmax(0, 1fr); }
+  .siap-aksi { grid-column: 1 / -1; justify-content: stretch; }
+  .siap-aksi .btn { flex: 1; }
 }

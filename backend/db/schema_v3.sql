@@ -151,7 +151,7 @@ create table if not exists public.pengaturan (
   nilai jsonb not null
 );
 insert into public.pengaturan (kunci, nilai) values
-  ('mode_otomatis', 'false'::jsonb),
+  ('mode_otomatis', 'true'::jsonb),
   ('jeda', 'false'::jsonb),
   ('jam_mulai', '"09:00"'::jsonb),
   ('jam_selesai', '"17:00"'::jsonb),

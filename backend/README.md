@@ -59,22 +59,57 @@ Kontrak: [docs/api-contract-v3.md](../docs/api-contract-v3.md). Serah terima bag
 ```
 FE (index.html) ──Kontrak A──▶ API ──Kontrak B2──▶ pembaca jawaban (stub_mesin: POST /v1/baca)
                                  ▲
-agen suara (scripts/stub_agen.py) ──Kontrak B1──┘
+agen suara (stasiun HP Android, atau scripts/stub_agen.py) ──Kontrak B1──┘   API ──▶ Meta WhatsApp Cloud API
 ```
 
-Perlu di `backend/.env`: `AGEN_KEY` (kunci agen), `NOMOR_PENGUJI`; lihat `.env.example`.
+Perlu di `backend/.env`: `AGEN_KEY` (kunci agen), `NOMOR_PENGUJI`, `NOMOR_PENELEPON`; lihat `.env.example`.
 
 ```bash
 .venv/bin/python -m scripts.terapkan_v3 --reset            # skema v3 + seed keadaan awal (mengubah DB!)
 .venv/bin/uvicorn stub_mesin.main:app --port 8001           # stub pembaca jawaban
 .venv/bin/uvicorn app.main:app --port 8000                  # API
-.venv/bin/python -m scripts.stub_agen --skenario S1         # stub agen: Telepon sekarang S1 sampai selesai
+.venv/bin/python -m scripts.stub_agen                       # stub agen: menelepon antrean berurutan (mode otomatis bawaan aktif)
+.venv/bin/python -m scripts.stub_agen --skenario S1         # atau: Dahulukan S1 lalu selesai
 python3 -m http.server 8899                                 # website (dari akar repo)
 ```
 
+Stasiun nyata (HP Android + halaman agen) dijalankan dengan `./stasiun.sh` dari akar repo; lihat
+[docs/rencana-v3-otomatis/STASIUN.md](../docs/rencana-v3-otomatis/STASIUN.md).
+
 Demo cepat: `PUT /api/v1/pengaturan {"jeda_wa_menit": 0, "jeda_percobaan_menit": 0}` dan, di luar jam 09.00–17.00,
 `{"jam_mulai": "00:00", "jam_selesai": "23:59"}`. Tombol "Mulai ulang demo" (atau `POST /api/v1/demo/reset`) mengembalikan
-panggilan, log, dan keputusan ke keadaan awal.
+panggilan, log, dan keputusan ke keadaan awal, dan menyalakan mode otomatis.
+
+### Panggilan otomatis
+
+- Mode otomatis **menyala sejak awal**. "Dahulukan" (`POST /panggilan/{id}/mulai`) memindahkan pasien ke urutan berikutnya.
+- `POST /agen/detak` (kunci agen): detak stasiun, disimpan di `pengaturan["stasiun"]`. `GET /antrean` mengembalikannya
+  sebagai `pengaturan.stasiun` dengan `aktif` = terlihat dalam 30 detik terakhir.
+- `POST /panggilan/{id}/batal` (tanpa kunci): verifikator membatalkan panggilan yang tertahan; dihitung satu percobaan gagal.
+- Panggilan berjalan yang 5 menit tanpa laporan dilepas otomatis (`KUNCI_MACET_MENIT`), di awal `agen/ambil` dan `GET /antrean`.
+- Tidak diangkat, dibatalkan, dan macet memakai satu fungsi (`agen._gagal_satu_percobaan`): percobaan ke-1 kembali antre,
+  percobaan ke-2 menjadi Tidak terhubung dan chat cadangan dikirim.
+
+### WhatsApp (Meta Cloud API)
+
+Pesan pemberitahuan (Lampiran B) dikirim server saat agen mengambil tugas; chat cadangan saat percobaan ke-2 gagal
+(`app/wa.py`). Satu percobaan, batas 10 detik; gagal kirim tidak pernah menahan panggilan. Hasilnya tercatat di log
+panggilan (`wa:terkirim|simulasi|gagal`, `chat:…`). Token, nomor, dan isi pesan tidak pernah dicatat.
+
+| Variabel | Isi |
+|---|---|
+| `META_WA_MODE` | `log` (bawaan: tidak mengirim, tercatat `simulasi`), `teks`, atau `template` |
+| `META_WA_TOKEN`, `META_WA_PHONE_ID` | Dari dasbor aplikasi Meta. Salah satunya kosong = mode selalu `log` |
+| `META_WA_API_VERSION` | Versi Graph API yang tampil di dasbor aplikasi Meta. Wajib di mode `teks` dan `template`; tanpa nilai bawaan |
+| `META_WA_TEMPLATE_PEMBERITAHUAN`, `META_WA_TEMPLATE_CADANGAN`, `META_WA_TEMPLATE_BAHASA` | Nama dan bahasa template (mode `template`; bahasa bawaan `id`) |
+
+Mode `teks` hanya sampai dalam 24 jam setelah penerima terakhir mengirim pesan ke nomor bisnis. Urutan parameter template:
+
+- pemberitahuan: `[nama_penerima, jeda_menit, nomor_penelepon, nama_pasien, nama_rs, bulan]`
+- cadangan: `[nama_pasien, nama_rs, bulan]`
+
+Isi badan template dan langkah di Meta: [STASIUN.md](../docs/rencana-v3-otomatis/STASIUN.md) bagian 5.
 
 Uji: `.venv/bin/pytest` (±10 menit karena DB jauh). Uji v3 berjalan dalam satu transaksi di schema sementara `uji3`
-yang di-rollback di akhir sesi; tabel produksi tidak tersentuh. Pembaca jawaban diganti objek palsu di uji.
+yang di-rollback di akhir sesi; tabel produksi tidak tersentuh. Pembaca jawaban diganti objek palsu di uji, dan Meta
+tidak pernah dihubungi (`tests/test_wa.py` memakai `httpx.MockTransport`).

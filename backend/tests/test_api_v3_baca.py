@@ -40,6 +40,7 @@ def test_antrean_bentuk_baris_s1_dan_riwayat(klien_v3):
         "id": S1, "pasien": "Andi Pratama", "umur": 54, "rs": "RS01", "nama_rs": "RS Melati Sehat", "ditagih": 11,
         "indikator": ["I1", "I2", "I4"], "penerima": {"nama": "Andi Pratama", "hubungan": "peserta"},
         "status": "antre", "label": None, "keputusan_tindakan": None, "prioritas": False, "percobaan": 0,
+        "coba_lagi_setelah": None,
     }
     assert baris["CALL-P-S2-2026-08"]["penerima"] == {"nama": "Dewi Rahmawati", "hubungan": "anak"}
     r1 = baris["CALL-LATAR-001"]
@@ -66,8 +67,8 @@ def test_antrean_pengaturan_dan_jam(klien_v3, monkeypatch):
     jam_palsu(monkeypatch, jam_=10)
     p = klien_v3.get("/api/v1/antrean").json()["pengaturan"]
     assert p == {
-        "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00", "jeda_wa_menit": 1,
-        "jeda_percobaan_menit": 2, "dalam_jam": True, "waktu_server": "2026-10-06T10:00:00+07:00",
+        "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00", "jeda_wa_menit": 1,
+        "jeda_percobaan_menit": 2, "dalam_jam": True, "waktu_server": "2026-10-06T10:00:00+07:00", "stasiun": None,
     }
     jam_palsu(monkeypatch, jam_=17, menit=0)
     assert klien_v3.get("/api/v1/antrean").json()["pengaturan"]["dalam_jam"] is False
@@ -256,7 +257,7 @@ def test_keputusan_kosong_lalu_terkini_per_panggilan(klien_v3, conn_v3):
 
 def test_pengaturan_baca(klien_v3):
     assert klien_v3.get("/api/v1/pengaturan").json() == {
-        "mode_otomatis": False, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
+        "mode_otomatis": True, "jeda": False, "jam_mulai": "09:00", "jam_selesai": "17:00",
         "jeda_wa_menit": 1, "jeda_percobaan_menit": 2,
     }
 

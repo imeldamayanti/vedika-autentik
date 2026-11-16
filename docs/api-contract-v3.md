@@ -2,14 +2,24 @@
 
 Acuan: `docs/prd-v3-konfirmasi-suara.md` (PRD v3.0) dan `docs/rencana-v3.md` bagian C. Kontrak v2 (`docs/api-contract.md`, pemeriksaan berkas PDF) tetap berlaku untuk `/api/v1/berkas` dan tidak diubah oleh dokumen ini.
 
+## Perubahan
+
+**2026-11-16, stasiun saluran Android (`docs/rencana-v3-otomatis/`).** Panggilan otomatis lewat HP Android di laptop stasiun; WhatsApp hanya untuk pesan dan dikirim server.
+
+- **B1.** API mengirim pesan pemberitahuan lewat Meta WhatsApp Cloud API saat tugas diambil, lalu langsung `wa_terkirim`; agen tidak lagi melapor `wa_terkirim`. Objek `wa` menjadi `{lewati, dikirim_server, status, teks}` (tanpa `tautan`). Chat cadangan juga dikirim API; `chat_cadangan` menjadi `{teks, dikirim_server, status}` dan laporan `chat_cadangan_terkirim` tinggal untuk agen lama (idempoten).
+- **B1.** Endpoint baru `POST /agen/detak` (detak stasiun). Panggilan berjalan yang 5 menit tanpa laporan dilepas otomatis sebagai satu percobaan gagal (`catatan: "macet"`). Laporan untuk panggilan yang sudah dibatalkan atau dilepas dibalas `409 urutan_salah` atau `409 bukan_berlangsung`.
+- **A.** Endpoint baru `POST /panggilan/{id}/batal`. `GET /antrean` menambah `pengaturan.stasiun`; baris antrean dan detail menambah `coba_lagi_setelah`. `mode_otomatis` bawaan `true` (juga setelah `POST /demo/reset`). "Telepon sekarang" di FE berganti nama "Dahulukan" (endpoint `…/mulai` tetap).
+- Log panggilan memakai `catatan` baru: `wa:terkirim|simulasi|gagal`, `chat:terkirim|simulasi|gagal`, `dibatalkan_verifikator`, `macet`.
+
 Tiga sambungan, satu kontrak di tiap sambungan:
 
 ```
-FE verifikator (statis)                Agen suara (browser, laptop telepon)
+FE verifikator (statis)                Agen suara (browser, laptop stasiun + HP Android)
    │  Kontrak A: /api/v1                  │  Kontrak B1: /api/v1/agen, /api/v1/panggilan/{id}/*
    │  (siap tampil, polling 1 detik)      │  (tarik tugas, lapor status, kirim hasil)
    ▼                                      ▼
                  API (FastAPI) ──── Supabase (Postgres) + disk lokal (rekaman)
+                    │  └── Meta WhatsApp Cloud API (pesan pemberitahuan, chat cadangan)
                     │  Kontrak B2: /v1/baca
                     ▼
         Pembaca jawaban (ai-service, LLM, tanpa state)
@@ -63,6 +73,7 @@ Saran per label (PRD tabel F4): `sesuai → tutup`, `tidak_sesuai → klarifikas
 | `panggilan_tidak_ada` | 404 | semua endpoint `…/panggilan/{id}…` |
 | `rekaman_tidak_ada` | 404 | `GET …/rekaman` |
 | `bukan_antre` | 409 | `POST …/mulai` |
+| `tidak_bisa_dibatalkan` | 409 | `POST …/batal` |
 | `belum_selesai` | 409 | `POST …/keputusan` |
 | `alasan_wajib` | 422 | `POST …/keputusan` |
 | `tindakan_tidak_dikenal` | 422 | `POST …/keputusan` |
@@ -112,9 +123,13 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
     "antre": 26, "menunggu_keputusan": 2
   },
   "pengaturan": {
-    "mode_otomatis": false, "jeda": false, "jam_mulai": "09:00", "jam_selesai": "17:00",
+    "mode_otomatis": true, "jeda": false, "jam_mulai": "09:00", "jam_selesai": "17:00",
     "jeda_wa_menit": 1, "jeda_percobaan_menit": 2,
-    "dalam_jam": true, "waktu_server": "2026-10-06T09:20:00+07:00"
+    "dalam_jam": true, "waktu_server": "2026-10-06T09:20:00+07:00",
+    "stasiun": {
+      "aktif": true, "siap": true, "alasan": null, "perangkat": "Pixel 7",
+      "terakhir_terlihat": "2026-10-06T09:19:58+07:00"
+    }
   },
   "daftar_rs": [
     { "id_rs": "RS01", "nama": "RS Melati Sehat" },
@@ -146,6 +161,9 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
 - `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server; FE memakainya untuk tanggal di Beranda).
 - `daftar_rs` = semua RS (termasuk yang tidak punya pasien terpicu), untuk pilihan filter.
 - `label` terisi bila status `selesai` atau `tidak_terhubung`. `keputusan_tindakan` = `tindakan` keputusan terkini (enum `tindakan`) atau `null` bila belum diputuskan.
+- `pengaturan.stasiun` = detak terakhir stasiun saluran (`POST /agen/detak`), atau `null` bila belum pernah terlihat. `aktif` = `terakhir_terlihat` paling lama 30 detik sebelum `waktu_server`. `siap: false` disertai `alasan` (mis. `"SIM tidak siap"`). FE menampilkan "Saluran telepon terputus sejak HH.MM" bila `null` atau tidak aktif.
+- Tiap baris memuat `coba_lagi_setelah` (ISO atau `null`): terisi selama percobaan ke-2 menunggu jeda. FE menghitung mundur terhadap `waktu_server`.
+- Sebelum menjawab, API melepas panggilan macet (lihat Kontrak B1), jadi FE pulih walau stasiun tidak menarik tugas.
 - Urutan: sedang berjalan (`wa_terkirim` … `membaca_jawaban`), lalu `prioritas`, lalu `antre` (urut `id` dengan collation biner, sehingga `P-S1`…`P-S8` mendahului `P0002`…), lalu `selesai`/`tidak_terhubung` (terbaru dulu). Agen mengambil tugas dengan urutan yang sama.
 
 ## `GET /api/v1/panggilan/{id}`
@@ -230,9 +248,21 @@ Audio rekaman (`audio/webm`), mendukung `Range`. Galat: `404 rekaman_tidak_ada` 
 
 ## `POST /api/v1/panggilan/{id}/mulai`
 
-"Telepon sekarang" dari baris antrean. Body kosong. Menandai `prioritas = true`; agen mengambilnya di giliran berikutnya walau mode otomatis mati atau dijeda. Batas jam tetap berlaku.
+"Dahulukan" dari baris antrean (dulu "Telepon sekarang"). Body kosong. Menandai `prioritas = true`; agen mengambilnya di giliran berikutnya walau mode otomatis mati atau dijeda. Batas jam tetap berlaku.
 
 Balasan `200`: baris antrean (bentuk sama dengan `baris[]`). Galat: `404 panggilan_tidak_ada`, `409 bukan_antre` (status bukan `antre`).
+
+## `POST /api/v1/panggilan/{id}/batal`
+
+"Batalkan panggilan" dari FE, untuk panggilan yang tertahan (stasiun terputus atau laporan terakhir sudah lebih dari 60 detik). Body kosong, tanpa kunci.
+
+| Status panggilan | Akibat |
+|---|---|
+| `wa_terkirim`, `menelepon`, `tersambung`, `merekam` | Dihitung satu percobaan gagal, sama dengan `tidak_diangkat` (lihat B1), dengan log `menelepon` ber-`catatan` `"dibatalkan_verifikator"`. Percobaan ke-1: kembali `antre` + `coba_lagi_setelah`. Percobaan ke-2: `tidak_terhubung` dan chat cadangan dikirim |
+| `antre` yang sudah diambil agen (percobaan ke-2 belum dimulai) | Hanya kunci ambil yang dilepas |
+| lainnya (`antre` belum diambil, `membaca_jawaban`, `selesai`, `tidak_terhubung`) | `409 tidak_bisa_dibatalkan` |
+
+Balasan `200`: baris antrean terbaru. Galat: `404 panggilan_tidak_ada`, `409 tidak_bisa_dibatalkan`. Laporan agen berikutnya untuk panggilan itu ditolak (`409`), dan agen menutup telepon.
 
 ## `POST /api/v1/panggilan/{id}/keputusan`
 
@@ -311,7 +341,9 @@ Query opsional: `bulan` (bawaan `2026-08`).
 
 - `mode_otomatis` diubah ke nilai apa pun → `jeda` otomatis `false`.
 - `jeda: true` hanya sah bila `mode_otomatis` true; selain itu `422 pengaturan_tidak_valid`.
-- `jeda` menahan pengambilan tugas otomatis. Panggilan yang sedang berjalan diselesaikan dulu; "Telepon sekarang" tetap diambil.
+- `jeda` menahan pengambilan tugas otomatis. Panggilan yang sedang berjalan diselesaikan dulu; "Dahulukan" tetap diambil.
+- `mode_otomatis` bawaan `true`, juga setelah `POST /demo/reset` (database lama tetap memakai nilainya sampai di-reset).
+- Kunci lain (termasuk `stasiun`) diabaikan: detak stasiun hanya bisa ditulis lewat `POST /agen/detak`.
 
 Galat: `422 pengaturan_tidak_valid`.
 
@@ -400,12 +432,25 @@ Hasil review KT-06 terhadap `app-v3.js` dan isi `DATA3` di `data-v3.js`. Aturan:
 
 Semua endpoint di bagian ini wajib header `X-Kunci-Agen: <AGEN_KEY dari backend/.env>`. Tanpa atau salah → `401 kunci_salah`. Halaman agen berjalan di origin sendiri (mis. `http://localhost:5173`); origin itu ditambahkan ke `CORS_ORIGINS`. Prototipe: kunci terlihat di browser dan ini diterima (produksi: token per perangkat).
 
+## `POST /api/v1/agen/detak`
+
+Detak stasiun saluran, dikirim agen tiap 3 detik (juga selama panggilan). Wajib `X-Kunci-Agen`.
+
+```json
+{ "siap": true, "alasan": null, "perangkat": "Pixel 7" }
+```
+
+`alasan` maksimal 200 karakter, terisi bila `siap: false` (mis. `"HP tidak terhubung ke laptop"`, `"SIM tidak siap"`, `"Chrome memblokir audio; jalankan lewat stasiun.sh"`). Balasan `204`. Disimpan di `pengaturan["stasiun"]` bersama waktu server, dan tampil sebagai `pengaturan.stasiun` di `GET /antrean`. Agen hanya memanggil `agen/ambil` bila `siap`.
+
 ## `POST /api/v1/agen/ambil`
 
-Body kosong. Agen memanggil tiap 3 detik saat menganggur.
+Body kosong. Agen memanggil tiap 3 detik saat menganggur dan siap.
 
 - `204`: tidak ada tugas (mode mati atau dijeda dan tidak ada prioritas, di luar jam, ada panggilan lain berjalan, atau antrean kosong/menunggu `coba_lagi_setelah`).
-- `200`: satu tugas. Prioritas dulu, lalu `antre` dengan urutan `id` (sama dengan `GET /antrean`). API langsung mengunci panggilan itu (`diambil_pada`; status tetap `antre` sampai agen melapor; kunci lepas otomatis setelah 5 menit tanpa laporan).
+- `200`: satu tugas. Prioritas dulu, lalu `antre` dengan urutan `id` (sama dengan `GET /antrean`). API langsung mengunci panggilan itu (`diambil_pada`).
+  - **Percobaan ke-1:** API mengirim pesan pemberitahuan (Lampiran B) lewat Meta, lalu, apa pun hasil kirimnya, status menjadi `wa_terkirim`, `waktu_wa` diisi, dan log `wa_terkirim` ditulis dengan `catatan` `wa:terkirim`, `wa:simulasi` (Meta belum diatur), atau `wa:gagal (sebab singkat)`. Jeda WA berlaku seperti biasa.
+  - **Percobaan ke-2:** tanpa pemberitahuan; status tetap `antre` sampai agen melapor `menelepon`, dan kunci lepas otomatis setelah 5 menit tanpa laporan.
+- **Panggilan macet.** Di awal tiap `agen/ambil` (dan `GET /antrean`), panggilan berstatus `wa_terkirim`, `menelepon`, `tersambung`, atau `merekam` yang laporan terakhirnya (log terbaru, `diambil_pada`, atau akhir jeda WA) lebih dari 5 menit lalu dilepas sebagai satu percobaan gagal dengan `catatan: "macet"`. `membaca_jawaban` tidak pernah dilepas.
 
 ```json
 {
@@ -423,9 +468,10 @@ Body kosong. Agen memanggil tiap 3 detik saat menganggur.
     "tanggal_libur": ["16 Agustus", "17 Agustus"]
   },
   "wa": {
-    "lewati": false,
-    "teks": "Halo Andi Pratama. Ini BPJS Kesehatan. Dalam 1 menit kami akan menelepon dari nomor 0800-0000-0165 untuk konfirmasi singkat layanan fisioterapi Andi Pratama di RS Melati Sehat bulan Agustus. Ini bukan tagihan. Kami tidak akan meminta data pribadi, kode OTP, atau pembayaran. Untuk memastikan pesan ini, hubungi Care Center 165.",
-    "tautan": "https://wa.me/628xxxxxxxxxx?text=Halo%20Andi%20Pratama..."
+    "lewati": true,
+    "dikirim_server": true,
+    "status": "terkirim",
+    "teks": "Halo Andi Pratama. Ini BPJS Kesehatan. Dalam 1 menit kami akan menelepon dari nomor 0811-xxxx-xxxx untuk konfirmasi singkat layanan fisioterapi Andi Pratama di RS Melati Sehat bulan Agustus. Ini bukan tagihan. Kami tidak akan meminta data pribadi, kode OTP, atau pembayaran. Untuk memastikan pesan ini, hubungi Care Center 165."
   },
   "jeda_wa_menit": 1,
   "batas_detik": 150
@@ -433,10 +479,10 @@ Body kosong. Agen memanggil tiap 3 detik saat menganggur.
 ```
 
 - `percobaan` = percobaan ke-n yang akan dijalankan (`panggilan.percobaan + 1`). Nilai di DB naik saat agen melapor `menelepon`, bukan saat tugas diambil, supaya kunci yang kedaluwarsa tidak menghabiskan percobaan.
-- `no_tujuan` prototipe = `NOMOR_PENGUJI` dari `.env` (R2.1), disimpan di `panggilan.no_tujuan`. `wa.tautan` memakai nomor itu dalam format `62…`.
+- `no_tujuan` prototipe = `NOMOR_PENGUJI` dari `.env` (R2.1), disimpan di `panggilan.no_tujuan`. Pesan WA dan panggilan menuju nomor yang sama.
 - `skrip` mengisi variabel Lampiran A (R3.1). `hubungan` salah satu `peserta`, `anak`, `orang tua`, `pasangan`. `tanggal_libur` kosong bila I4 tidak aktif; agen tidak bertanya soal libur (S3).
 - `sapaan_pasien` (`Bapak`/`Ibu`) dari `peserta.jenis_kelamin` pasien (`L` → Bapak, `P` → Ibu). `sapaan_penerima` sama dengan `sapaan_pasien` bila penerima peserta; bila keluarga, `Bapak/Ibu` karena jenis kelamin keluarga tidak tercatat, dan agen boleh menyesuaikan dari `nama_penerima`. Contoh S2: `sapaan_pasien: "Ibu"`, `sapaan_penerima: "Bapak/Ibu"`, `hubungan: "anak"`.
-- `wa.teks` = Lampiran B persis (R2.3), tanpa tautan di dalam teks. `wa.lewati = true` pada percobaan ke-2 (pemberitahuan cukup sekali); `wa.teks` dan `wa.tautan` tetap terisi.
+- `wa.dikirim_server` selalu `true` dan `wa.lewati` selalu `true`: agen tidak mengirim apa pun dan tidak melapor `wa_terkirim`. `wa.status` = `terkirim`, `simulasi`, atau `gagal`; `wa.teks` = Lampiran B persis (R2.3), tanpa tautan, dengan `nomor_penelepon` = `NOMOR_PENELEPON` (nomor SIM stasiun). Keduanya `null` pada percobaan ke-2 (pemberitahuan cukup sekali).
 - `batas_detik` = batas panggilan 2,5 menit (R3.3, Lampiran A).
 
 ## `POST /api/v1/panggilan/{id}/status`
@@ -447,20 +493,20 @@ Body kosong. Agen memanggil tiap 3 detik saat menganggur.
 
 | `laporan` | Akibat di API |
 |---|---|
-| `wa_terkirim` | status `wa_terkirim`, `waktu_wa` diisi, log |
+| `wa_terkirim` | (agen lama) status `wa_terkirim`, `waktu_wa` diisi, log. Sejak WA dikirim server, status ini sudah ditulis saat `agen/ambil`, jadi laporan ini dibalas `409 urutan_salah` |
 | `menelepon` | status `menelepon`, `percobaan` naik 1, log. Percobaan ke-1: bila belum lewat `jeda_wa_menit` sejak `waktu_wa` → `409 jeda_belum_lewat`. Percobaan ke-2: tanpa pemeriksaan jeda WA |
 | `tersambung` | status `tersambung`, `waktu_mulai` diisi, log |
 | `merekam` | status `merekam`, log |
-| `tidak_diangkat` | log `menelepon` dengan `catatan = "tidak_diangkat"`. Percobaan ke-1: status kembali `antre`, `coba_lagi_setelah = sekarang + jeda_percobaan_menit`. Percobaan ke-2: status `tidak_terhubung`, label `Tidak terhubung` (R3.5), `jawaban` disusun API (lihat `GET /panggilan/{id}`), `waktu_selesai` diisi |
-| `chat_cadangan_terkirim` | `chat_cadangan_terkirim = true`, log `tidak_terhubung` dengan catatan |
+| `tidak_diangkat` | log `menelepon` dengan `catatan = "tidak_diangkat"`. Percobaan ke-1: status kembali `antre`, `coba_lagi_setelah = sekarang + jeda_percobaan_menit`. Percobaan ke-2: status `tidak_terhubung`, label `Tidak terhubung` (R3.5), `jawaban` disusun API (lihat `GET /panggilan/{id}`), `waktu_selesai` diisi; API mengirim chat cadangan lewat Meta, mengisi `chat_cadangan_terkirim` (true bila `terkirim` atau `simulasi`), dan menulis log `tidak_terhubung` ber-`catatan` `chat:<status>`. Transkrip dan tangkapan sementara percobaan itu dibuang |
+| `chat_cadangan_terkirim` | (agen lama) bila sudah `true`: dibalas `200` tanpa perubahan (idempoten). Bila belum (kirim server gagal dan agen mengirim sendiri): diisi `true`, log `tidak_terhubung` dengan catatan |
 
 Urutan laporan yang sah (selain itu `409 urutan_salah`):
 
 | Dari status | Laporan yang boleh |
 |---|---|
-| `antre`, percobaan ke-1 | `wa_terkirim` |
-| `wa_terkirim` | `menelepon` |
-| `antre`, percobaan ke-2 (WA dilewati) | `menelepon` |
+| `wa_terkirim` (ditulis API saat ambil) | `menelepon` |
+| `antre` yang sudah diambil, percobaan ke-2 | `menelepon` |
+| `antre` yang belum diambil, atau sudah dibatalkan/dilepas | tidak ada (`409 urutan_salah`) |
 | `menelepon` | `tersambung`, `tidak_diangkat` |
 | `tersambung` | `merekam` |
 | `tidak_terhubung` | `chat_cadangan_terkirim` |
@@ -473,7 +519,7 @@ Balasan `200`:
 { "status": "antre", "percobaan": 1, "coba_lagi_setelah": "2026-10-06T10:16:00+07:00", "chat_cadangan": null }
 ```
 
-Pada percobaan ke-2 yang tidak diangkat, `chat_cadangan` terisi dan agen membuka tautannya, lalu melapor `chat_cadangan_terkirim`:
+Agen melapor `menelepon` dulu (API menahan dengan `409 jeda_belum_lewat` sampai jeda WA lewat), baru menekan nomor. Pada percobaan ke-2 yang tidak diangkat, `chat_cadangan` terisi; chat sudah dikirim API, agen tidak perlu berbuat apa-apa:
 
 ```json
 {
@@ -482,12 +528,15 @@ Pada percobaan ke-2 yang tidak diangkat, `chat_cadangan` terisi dan agen membuka
   "coba_lagi_setelah": null,
   "chat_cadangan": {
     "teks": "Kami belum berhasil menelepon. Kira-kira berapa kali Joko Prasetyo menjalani fisioterapi di RS Cempaka Asri bulan Agustus? Balas dengan angka: 1) 1–2 kali  2) 3–4 kali  3) 5–8 kali  4) lebih dari 8 kali  5) tidak ingat  6) tidak pernah terapi di sana.",
-    "tautan": "https://wa.me/628xxxxxxxxxx?text=Kami%20belum%20berhasil..."
+    "dikirim_server": true,
+    "status": "terkirim"
   }
 }
 ```
 
 Galat: `404 panggilan_tidak_ada`, `409 urutan_salah`, `409 jeda_belum_lewat`, `422 laporan_tidak_dikenal`.
+
+**Panggilan dibatalkan atau dilepas.** Bila laporan status, transkrip, atau hasil dibalas `404`, `409 urutan_salah`, atau `409 bukan_berlangsung`, verifikator sudah membatalkan panggilan itu atau API sudah melepasnya. Agen menghentikan sesi, menutup telepon, dan lanjut ke tugas berikutnya tanpa melapor apa pun lagi.
 
 ## `POST /api/v1/panggilan/{id}/transkrip`
 
@@ -589,12 +638,12 @@ Uji pembaca: `python3 data-uji-konfirmasi/tools/uji.py jawaban keluaran.json` lu
 
 ## S1 (Tidak sesuai)
 
-1. Verifikator menekan AKTIF → FE `PUT /pengaturan {"mode_otomatis": true}`.
-2. Agen `POST /agen/ambil` → tugas S1.
-3. Agen membuka `wa.tautan` di WhatsApp Desktop, operator menekan kirim, agen `status wa_terkirim`.
-4. Setelah `jeda_wa_menit`, agen menelepon: `status menelepon`, lalu `tersambung`, `merekam`.
+1. Mode otomatis menyala sejak awal (bawaan); stasiun berdetak `POST /agen/detak` tiap 3 detik.
+2. Agen `POST /agen/ambil` → tugas S1. API mengirim pesan WA lewat Meta dan menulis `wa_terkirim` (log `wa:terkirim`).
+3. Agen `status menelepon` (ditahan `409 jeda_belum_lewat` sampai `jeda_wa_menit` lewat), lalu menekan nomor lewat HP saluran.
+4. Penerima mengangkat dan bicara: agen `status tersambung`, lalu `merekam`.
 5. Selama bicara, agen `POST …/transkrip` per giliran. FE (polling `GET /panggilan/{id}`) menampilkan transkrip mengalir.
-6. Panggilan ditutup, agen `POST …/hasil` (rekaman + transkrip final) → `202`.
+6. Panggilan ditutup (AI berpamitan, penerima menutup, atau hening 10 detik), agen `POST …/hasil` (rekaman + transkrip final) → `202`.
 7. API memanggil `/v1/baca`, menghitung label `Tidak sesuai`, selisih 8, `hapus_pada = null`, status `selesai`.
 8. FE melihat `selesai` dan pindah ke Kartu bukti: 11 vs 3, selisih 8, saran Minta klarifikasi RS.
 9. Verifikator `POST …/keputusan {"ikut_saran": true}`.
@@ -602,9 +651,19 @@ Uji pembaca: `python3 data-uji-konfirmasi/tools/uji.py jawaban keluaran.json` lu
 
 ## S5 (Tidak terhubung)
 
-1. Ambil → WA → `menelepon` → `tidak_diangkat` → status `antre`, `coba_lagi_setelah` +2 menit.
-2. Setelah lewat, ambil lagi (`percobaan: 2`, `wa.lewati: true`) → `menelepon` → `tidak_diangkat` → status `tidak_terhubung`, label `tidak_terhubung`, `jawaban` disusun API, balasan berisi `chat_cadangan`.
-3. Agen membuka tautan chat, operator kirim, agen `status chat_cadangan_terkirim`. Tidak dihitung di ringkasan RS.
+1. Ambil (WA dikirim API) → `menelepon` → 40 detik tanpa jawaban → `tidak_diangkat` → status `antre`, `coba_lagi_setelah` +2 menit.
+2. Setelah lewat, ambil lagi (`percobaan: 2`, tanpa WA) → `menelepon` → `tidak_diangkat` → status `tidak_terhubung`, label `tidak_terhubung`, `jawaban` disusun API.
+3. API mengirim chat cadangan lewat Meta (log `chat:terkirim`); balasan berisi `chat_cadangan` dengan `dikirim_server: true`. Tidak dihitung di ringkasan RS.
+
+## Pengumuman operator
+
+Nomor tidak aktif atau di luar jangkauan: yang terdengar rekaman operator ("Nomor yang Anda tuju…"), bukan penerima. Agen tidak melapor `tersambung`; ia menutup telepon dan melapor `tidak_diangkat`, sehingga alurnya sama dengan S5.
+
+## Stasiun terputus di tengah panggilan
+
+1. Detak berhenti; setelah 30 detik `pengaturan.stasiun.aktif` menjadi `false` dan FE menampilkan "Saluran telepon terputus" serta tombol "Batalkan panggilan".
+2. Verifikator menekan tombol itu → `POST …/batal` → satu percobaan gagal, percobaan ke-2 dijadwalkan, antrean lanjut.
+3. Bila tidak disentuh, API melepasnya sendiri setelah 5 menit (`catatan: "macet"`).
 
 ## S8 (Menolak)
 
@@ -685,7 +744,7 @@ Perubahan seed riwayat (`seed_v3.py`, empat baris `CALL-LATAR-001`…`004`), sup
 | R1.3 penerima | `penerima` di `GET /antrean`, `skrip` di `agen/ambil` |
 | R1.4 layar Antrean | `GET /antrean` |
 | R1.5 mode otomatis, jam, Jeda | `PUT /pengaturan` (`mode_otomatis`, `jeda`), aturan `agen/ambil`, `POST …/mulai` |
-| R2.1 pesan WA | `wa.teks` + `wa.tautan` di `agen/ambil` |
+| R2.1 pesan WA | dikirim API lewat Meta saat `agen/ambil`; `wa.status` + `wa.teks` |
 | R2.2 jeda pesan ke panggilan | `jeda_wa_menit`, `409 jeda_belum_lewat`, `panggilan_log` |
 | R2.3 isi pesan | `wa.teks` = Lampiran B tanpa tautan; `pesan_wa` di `GET /panggilan/{id}` |
 | R3.4 rekaman + transkrip | `POST …/hasil`, `GET …/rekaman` |

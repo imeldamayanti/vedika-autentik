@@ -183,6 +183,18 @@ def ada_panggilan_aktif(conn, batas_kunci) -> bool:
     ).fetchone() is not None
 
 
+def panggilan_macet(conn, batas) -> list[str]:
+    """Panggilan berjalan yang laporan terakhirnya (log, kunci ambil, atau akhir jeda WA) lebih lama dari batas.
+    membaca_jawaban tidak termasuk: pembacaan selalu selesai sendiri."""
+    return [r["id"] for r in conn.execute(
+        "select p.id from panggilan p where p.status = any(%s) and greatest("
+        " (select max(l.waktu) from panggilan_log l where l.panggilan_id = p.id), p.diambil_pada,"
+        " case when p.status = 'wa_terkirim' then p.waktu_wa + make_interval(mins => p.jeda_wa_menit) end) < %s"
+        ' order by p.id collate "C"',
+        (["wa_terkirim", "menelepon", "tersambung", "merekam"], batas),
+    )]
+
+
 def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None:
     """Ambil dan kunci satu panggilan antre: prioritas dulu, lalu urutan id biner. Kunci yang lewat batas boleh diambil lagi."""
     r = conn.execute(

@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="id">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vedika Alur Petugas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: VEDIKA shell (sidebar + header) under a dark prototype-control band. Single light theme, as in the real app (app.css). */
+:root {
+  --bg: oklch(100% 0 0);
+  --surface-2: oklch(97.8% .006 205);
+  --muted: oklch(98% .002 90);
+  --fg: oklch(14% .002 90);
+  --fg-2: oklch(36% .006 90);
+  --muted-fg: oklch(52% .006 90);
+  --border: oklch(92% .004 90);
+  --border-strong: oklch(86% .006 90);
+  --primary: oklch(48% .075 205);
+  --primary-hover: oklch(43% .075 205);
+  --primary-fg: oklch(100% 0 0);
+  --primary-subtle: oklch(96% .018 205);
+  --brand: oklch(64% .11 184);
+  --ring: oklch(64% .11 184 / .45);
+  --ok: oklch(57% .13 150); --ok-bg: oklch(96.5% .03 150); --ok-fg: oklch(40% .1 150);
+  --info: oklch(53% .16 261); --info-bg: oklch(96.5% .02 261); --info-fg: oklch(42% .14 261);
+  --warn: oklch(68% .135 75); --warn-bg: oklch(96.8% .045 85); --warn-fg: oklch(46% .1 60);
+  --bad: oklch(55% .19 27); --bad-bg: oklch(96.5% .025 27); --bad-fg: oklch(46% .17 27);
+  --grey-bg: oklch(95% .004 90); --grey-fg: oklch(40% .006 90);
+  --wa: oklch(93% .05 150); --wa-fg: oklch(25% .03 150);
+  --band: oklch(24% .02 230); --band-2: oklch(31% .025 230); --band-fg: oklch(94% .01 230); --band-muted: oklch(72% .02 230);
+  --new: oklch(62% .2 300); --new-bg: oklch(96% .03 300);
+  --radius: 6px; --radius-panel: 10px;
+  --shadow: 0 1px 2px oklch(20% .01 205 / .06), 0 1px 1px oklch(20% .01 205 / .03);
+  --shadow-pop: 0 12px 32px oklch(20% .02 205 / .14), 0 2px 6px oklch(20% .02 205 / .08);
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--surface-2); color: var(--fg); font: 400 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- prototype band ---------- */
+.band { background: var(--band); color: var(--band-fg); padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.band-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.band-title { font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--band-muted); }
+.band-title b { color: var(--band-fg); letter-spacing: .02em; text-transform: none; font-size: 14px; margin-left: 6px; }
+.ctl { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--band-muted); }
+.seg { display: inline-flex; background: var(--band-2); border-radius: 6px; padding: 2px; }
+.seg button { border: 0; background: transparent; color: var(--band-muted); padding: 4px 9px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--band-fg); color: var(--band); }
+.band-btn { border: 1px solid oklch(45% .03 230); background: transparent; color: var(--band-fg); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.band-btn:hover { background: var(--band-2); }
+.band-btn:disabled { opacity: .45; cursor: not-allowed; }
+.band-sp { flex: 1; }
+.alur { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 16px; font-size: 12.5px; }
+.alur li { list-style: none; display: flex; gap: 8px; align-items: flex-start; color: var(--band-muted); }
+.alur li.ok { color: var(--band-fg); }
+.alur .bul { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid oklch(50% .03 230); display: grid; place-items: center; font-size: 10px; font-weight: 700; margin-top: 1px; }
+.alur li.ok .bul { background: var(--brand); border-color: var(--brand); color: var(--band); }
+.alur ol { margin: 0; padding: 0; display: contents; }
+.band-note { font-size: 12px; color: var(--band-muted); margin-top: 8px; max-width: 90ch; }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: calc(100vh - 52px); }
+.side { background: var(--bg); border-right: 1px solid var(--border); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; }
+.merek { display: flex; gap: 10px; align-items: center; padding: 4px 6px; }
+.merek-ikon { width: 34px; height: 34px; border-radius: 8px; background: var(--primary); color: var(--primary-fg); display: grid; place-items: center; }
+.merek-ikon svg { width: 20px; height: 20px; }
+.merek b { display: block; font-size: 15px; letter-spacing: .04em; }
+.merek span span { display: block; font-size: 11px; color: var(--muted-fg); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-h { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); padding: 8px 10px 4px; }
+.nav button { display: flex; align-items: center; gap: 10px; border: 0; background: transparent; text-align: left; padding: 8px 10px; border-radius: 6px; color: var(--fg-2); font-weight: 500; }
+.nav button:hover { background: var(--muted); }
+.nav button[aria-current="page"] { background: var(--primary-subtle); color: var(--primary); font-weight: 700; }
+.nav svg { width: 18px; height: 18px; flex: none; }
+.nav .hit { margin-left: auto; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 0 7px; }
+.side-foot { margin-top: auto; font-size: 12px; color: var(--muted-fg); padding: 0 6px; }
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+.top { height: 60px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.jejak { font-size: 13px; color: var(--muted-fg); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jejak b { color: var(--fg); }
+.top-sp { flex: 1; }
+.simulasi { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--warn-fg); background: var(--warn-bg); border: 1px solid oklch(88% .07 85); padding: 2px 8px; border-radius: 99px; }
+.siapa { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.siapa .av { width: 30px; height: 30px; border-radius: 50%; background: var(--primary-subtle); color: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+.siapa small { display: block; color: var(--muted-fg); font-size: 11px; }
+.isi { padding: 20px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 16px; max-width: 1240px; width: 100%; }
+
+/* ---------- components ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--bg); color: var(--fg); font-weight: 600; white-space: nowrap; }
+.btn:hover { background: var(--muted); }
+.btn svg { width: 17px; height: 17px; }
+.btn--primer { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+.btn--primer:hover { background: var(--primary-hover); }
+.btn--kecil { height: 32px; padding: 0 12px; font-size: 13px; }
+.btn--telepon { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); height: 32px; padding: 0 12px; font-size: 13px; }
+.btn--telepon:hover { background: var(--primary-hover); }
+.btn--bahaya { color: var(--bad-fg); border-color: oklch(85% .06 27); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.panel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-panel); box-shadow: var(--shadow); }
+.panel-k { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.panel-k h2 { font-size: 15px; }
+.panel-b { padding: 16px; }
+.kepala h1 { font-size: 22px; }
+.kepala p { color: var(--muted-fg); margin-top: 4px; }
+.kepala { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; justify-content: space-between; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+
+.label { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+.label--tidak_sesuai { background: var(--bad-bg); color: var(--bad-fg); }
+.label--sesuai { background: var(--ok-bg); color: var(--ok-fg); }
+.label--tidak_yakin { background: var(--warn-bg); color: var(--warn-fg); }
+.label--tidak_terhubung { background: var(--info-bg); color: var(--info-fg); }
+.label--menolak { background: var(--grey-bg); color: var(--grey-fg); }
+.label--besar { font-size: 14px; padding: 4px 12px; }
+.chip { display: inline-flex; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 4px; background: var(--muted); border: 1px solid var(--border); color: var(--fg-2); white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
+.st--jalan::before { background: var(--brand); box-shadow: 0 0 0 0 var(--ring); animation: denyut 1.4s infinite; }
+.st--selesai::before { background: var(--ok); }
+.st--gagal::before { background: var(--bad); }
+.st--tunggu::before { background: var(--warn); }
+.st--info::before { background: var(--info); }
+@keyframes denyut { 0% { box-shadow: 0 0 0 0 var(--ring); } 100% { box-shadow: 0 0 0 8px transparent; } }
+
+.baru { display: inline-flex; align-items: center; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--new); background: var(--new-bg); border: 1px solid oklch(85% .08 300); border-radius: 4px; padding: 0 5px; vertical-align: middle; cursor: help; }
+body.tanpa-baru .baru { display: none; }
+
+/* readiness strip */
+.siap { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-panel); border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow); }
+.siap-ikon { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; }
+.siap-ikon svg { width: 20px; height: 20px; }
+.siap--ok .siap-ikon { background: var(--ok-bg); color: var(--ok-fg); }
+.siap--jalan .siap-ikon { background: var(--primary-subtle); color: var(--primary); }
+.siap--warn .siap-ikon { background: var(--warn-bg); color: var(--warn-fg); }
+.siap--bad .siap-ikon { background: var(--bad-bg); color: var(--bad-fg); }
+.siap b { font-size: 15px; display: block; }
+.siap p { color: var(--fg-2); font-size: 13px; }
+.siap-aksi { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.sehat { grid-column: 1 / -1; display: flex; gap: 6px 16px; flex-wrap: wrap; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 12px; color: var(--muted-fg); }
+.sehat span { display: inline-flex; align-items: center; gap: 6px; }
+.sehat i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.sehat i.no { background: var(--bad); }
+.sehat i.wait { background: var(--warn); }
+
+.tindakan-bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-radius: var(--radius-panel); background: var(--warn-bg); border: 1px solid oklch(86% .08 85); }
+.tindakan-bar .siap-ikon { background: var(--bg); color: var(--warn-fg); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; }
+.tindakan-bar svg { width: 18px; height: 18px; }
+.tindakan-bar b { display: block; }
+.tindakan-bar p { font-size: 13px; color: var(--fg-2); }
+.simbanner { padding: 10px 16px; border-radius: var(--radius-panel); background: var(--info-bg); color: var(--info-fg); border: 1px solid oklch(86% .05 261); font-size: 13px; }
+.simbanner b { margin-right: 6px; }
+
+.angka { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.angka div { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 12px 14px; }
+.angka b { display: block; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.angka span { font-size: 12.5px; color: var(--muted-fg); }
+
+.kontrol { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.saklar-btn { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--bg); font-weight: 600; }
+.saklar { width: 34px; height: 20px; border-radius: 99px; background: var(--border-strong); position: relative; transition: background .2s; }
+.saklar::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: var(--shadow); }
+.saklar-btn[aria-pressed="true"] .saklar { background: var(--brand); }
+.saklar-btn[aria-pressed="true"] .saklar::after { transform: translateX(14px); }
+
+.tabel-wadah { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-fg); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; background: var(--muted); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+tr.aktif td { background: var(--primary-subtle); }
+td .nama b { display: block; }
+td .nama span { font-size: 12px; color: var(--muted-fg); }
+.aksi-sel { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.redup { color: var(--muted-fg); }
+
+/* call screen */
+.kop { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 14px 16px; }
+.kop div span { display: block; font-size: 11.5px; color: var(--muted-fg); }
+.kop div b { font-size: 14px; }
+.tiga { display: grid; grid-template-columns: 260px minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.langkah { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.langkah li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; padding: 9px 0; position: relative; }
+.langkah li:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 33px; bottom: -3px; width: 2px; background: var(--border); }
+.langkah .bul { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--bg); display: grid; place-items: center; }
+.langkah .bul svg { width: 13px; height: 13px; }
+.langkah li.selesai .bul { background: var(--ok); border-color: var(--ok); color: #fff; }
+.langkah li.jalan .bul { border-color: var(--brand); box-shadow: 0 0 0 4px var(--ring); }
+.langkah li.gagal .bul { background: var(--bad); border-color: var(--bad); color: #fff; }
+.langkah li.tunggu .bul { border-color: var(--warn); background: var(--warn-bg); }
+.langkah b { font-size: 13.5px; display: block; }
+.langkah small { color: var(--muted-fg); font-size: 12px; display: block; }
+.langkah .jam { font-family: var(--mono); font-size: 12px; color: var(--muted-fg); }
+.transkrip { height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+.baris { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; animation: muncul .3s ease-out; }
+@keyframes muncul { from { opacity: 0; transform: translateY(4px); } }
+.baris .siapa-b { font-size: 11.5px; font-weight: 700; color: var(--muted-fg); }
+.baris .siapa-b small { display: block; font-family: var(--mono); font-weight: 400; }
+.baris.ai p { color: var(--fg-2); }
+.baris.pen p { background: var(--primary-subtle); padding: 6px 10px; border-radius: 8px; color: var(--fg); justify-self: start; }
+.kosong { color: var(--muted-fg); font-size: 13px; text-align: center; margin: auto; max-width: 32ch; }
+.tangkap { display: grid; gap: 0; }
+.tangkap div { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.tangkap div:last-child { border-bottom: 0; }
+.tangkap span { color: var(--muted-fg); }
+.tangkap b { text-align: right; }
+.tangkap .belum { color: var(--border-strong); font-weight: 400; }
+.instruksi { border: 2px solid var(--warn); background: var(--warn-bg); border-radius: var(--radius-panel); padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.instruksi b { font-size: 16px; display: block; }
+.instruksi p { color: var(--fg-2); margin-top: 2px; }
+.instruksi .langkah-no { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--warn-fg); }
+.wa-bubble { grid-column: 1 / -1; background: var(--wa); color: var(--wa-fg); border-radius: 10px 10px 10px 2px; padding: 10px 12px; font-size: 13px; max-width: 62ch; }
+.wa-bubble small { display: block; font-size: 11px; opacity: .7; margin-bottom: 4px; }
+.otomatis-info { border: 1px solid var(--border); background: var(--primary-subtle); color: var(--primary); border-radius: var(--radius-panel); padding: 12px 16px; font-size: 13px; display: flex; gap: 10px; align-items: center; }
+.otomatis-info svg { width: 18px; height: 18px; flex: none; }
+.hitung { font-family: var(--mono); font-weight: 600; }
+
+/* evidence card */
+.bukti3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bukti3 > div { border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 14px; background: var(--bg); }
+.bukti3 .besar { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+.bukti3 .besar small { font-size: 14px; font-weight: 600; color: var(--muted-fg); letter-spacing: 0; }
+.bukti3 .selisih { background: var(--bad-bg); border-color: oklch(88% .05 27); }
+.bukti3 .selisih .besar { color: var(--bad-fg); }
+.bukti3 .selisih.aman { background: var(--ok-bg); border-color: oklch(88% .05 150); }
+.bukti3 .selisih.aman .besar { color: var(--ok-fg); }
+.tgl { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.tgl span { font-family: var(--mono); font-size: 12px; padding: 2px 6px; border-radius: 4px; background: var(--muted); border: 1px solid var(--border); }
+.tgl span.tanda { background: var(--bad-bg); border-color: oklch(85% .06 27); color: var(--bad-fg); font-weight: 600; }
+.bukti3 p { font-size: 12.5px; color: var(--fg-2); margin-top: 8px; }
+.dua { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.kutipan { font-size: 17px; font-weight: 600; line-height: 1.45; border-left: 3px solid var(--primary); padding-left: 14px; }
+.pemutar { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--muted); }
+.pemutar button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; display: grid; place-items: center; flex: none; }
+.pemutar button svg { width: 15px; height: 15px; }
+.gel { flex: 1; height: 28px; display: flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; }
+.gel i { flex: 1; background: var(--border-strong); border-radius: 2px; min-width: 2px; }
+.gel i.lewat { background: var(--primary); }
+.pemutar .jam { font-family: var(--mono); font-size: 12px; color: var(--muted-fg); }
+.saran { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); }
+.saran-k { padding: 14px 16px; display: grid; gap: 4px; border-bottom: 1px solid var(--border); }
+.saran-k b { font-size: 17px; }
+.saran-k p { font-size: 13px; color: var(--fg-2); }
+.saran-b { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.pilihan { display: grid; gap: 6px; }
+.pilihan label { display: flex; gap: 10px; align-items: center; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.pilihan label:has(input:checked) { border-color: var(--primary); background: var(--primary-subtle); }
+textarea { width: 100%; min-height: 76px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); resize: vertical; }
+.catatan-kecil { font-size: 12px; color: var(--muted-fg); }
+.diputus { background: var(--ok-bg); border: 1px solid oklch(86% .06 150); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+.diputus b { color: var(--ok-fg); }
+.berikut { border: 1px dashed var(--primary); border-radius: 8px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--primary-subtle); }
+.bahaya { background: var(--bad-bg); color: var(--bad-fg); border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; }
+.log-mini { font-size: 13px; display: grid; gap: 6px; }
+.log-mini div { display: flex; justify-content: space-between; gap: 10px; }
+.log-mini span { font-family: var(--mono); font-size: 12px; color: var(--muted-fg); }
+
+/* login */
+.masuk-wadah { min-height: calc(100vh - 52px); display: grid; place-items: center; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.masuk { width: 100%; max-width: 400px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-pop); padding: 28px; display: grid; gap: 16px; }
+.masuk h1 { font-size: 20px; }
+.masuk p { color: var(--muted-fg); font-size: 13px; }
+.isian { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.isian input { height: 40px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-weight: 400; }
+
+/* modal */
+.latar { position: fixed; inset: 0; background: oklch(20% .02 230 / .45); display: grid; place-items: center; padding: 16px; z-index: 30; }
+.modal { width: 100%; max-width: 520px; background: var(--bg); border-radius: 14px; box-shadow: var(--shadow-pop); display: grid; max-height: 90vh; overflow: auto; }
+.modal-k { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.modal-k h2 { font-size: 17px; }
+.modal-k p { color: var(--muted-fg); font-size: 13px; margin-top: 4px; }
+.modal-b { padding: 16px 20px; display: grid; gap: 4px; }
+.modal-f { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.cek { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.cek:last-child { border-bottom: 0; }
+.cek .bul { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-strong); display: grid; place-items: center; }
+.cek .bul svg { width: 12px; height: 12px; }
+.cek.ok .bul { background: var(--ok); border-color: var(--ok); color: #fff; }
+.cek.jalan .bul { border-color: var(--brand); border-top-color: transparent; animation: putar .8s linear infinite; }
+@keyframes putar { to { transform: rotate(360deg); } }
+.cek b { font-size: 13.5px; display: block; }
+.cek small { color: var(--muted-fg); font-size: 12px; }
+
+.toast-wadah { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); display: grid; gap: 8px; z-index: 40; max-width: min(380px, calc(100vw - 32px)); }
+.toast { background: var(--fg); color: var(--bg); padding: 11px 14px; border-radius: 8px; box-shadow: var(--shadow-pop); font-size: 13px; animation: muncul .25s ease-out; }
+.toast button { background: none; border: 0; color: oklch(80% .1 184); font-weight: 700; padding: 0; margin-left: 6px; text-decoration: underline; text-underline-offset: 3px; }
+
+.rs-status { font-weight: 700; font-size: 12.5px; }
+.rs-status.klar { color: var(--bad-fg); background: var(--bad-bg); padding: 2px 8px; border-radius: 99px; }
+.rs-status.normal { color: var(--ok-fg); }
+.aturan { font-size: 13px; color: var(--fg-2); padding: 12px 16px; border-top: 1px solid var(--border); background: var(--muted); border-radius: 0 0 var(--radius-panel) var(--radius-panel); }
+
+/* responsive */
+@media (max-width: 1080px) {
+  .tiga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .tiga > :first-child { grid-column: 1 / -1; }
+  .dua { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 820px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { border-right: 0; border-bottom: 1px solid var(--border); padding: 10px 12px; flex-direction: row; align-items: center; gap: 8px; overflow-x: auto; }
+  .merek span span, .nav-h, .side-foot { display: none; }
+  .nav { flex-direction: row; }
+  .nav button { white-space: nowrap; }
+  .angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiga, .bukti3 { grid-template-columns: minmax(0, 1fr); }
+  .siap, .tindakan-bar { grid-template-columns: auto minmax(0, 1fr); }
+  .siap-aksi, .tindakan-bar > :last-child { grid-column: 1 / -1; justify-content: flex-start; }
+  .instruksi { grid-template-columns: minmax(0, 1fr); }
+  .siapa div { display: none; }
+  .transkrip { height: 300px; }
+}
+</style>
+
+<div class="band" id="band"></div>
+<div id="akar"></div>
+<div class="toast-wadah" id="toast" aria-live="polite"></div>
+<div id="modal"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ------------------------------------------------------------ data (synthetic, from data-v3.js) */
+  const RS = [
+    { id: "RS01", nama: "RS Melati Sehat", aktif: 68, terpicu: 27, persen: "39,7" },
+    { id: "RS02", nama: "RSU Bakti Mulia", aktif: 65, terpicu: 1, persen: "1,5" },
+    { id: "RS03", nama: "RS Cempaka Asri", aktif: 59, terpicu: 1, persen: "1,7" },
+    { id: "RS04", nama: "RSU Nusa Sejahtera", aktif: 53, terpicu: 0, persen: "0,0" },
+    { id: "RS05", nama: "RS Kenanga Medika", aktif: 55, terpicu: 1, persen: "1,8" }
+  ];
+  const rsNama = (id) => RS.find((r) => r.id === id).nama;
+  const IND = { I1: "Melebihi 8", I2: "3x seminggu", I3: "6 bulan", I4: "Libur" };
+  const LABEL = { tidak_sesuai: "Tidak sesuai", sesuai: "Sesuai", tidak_yakin: "Tidak yakin", tidak_terhubung: "Tidak terhubung", menolak: "Menolak" };
+  const SARAN = { tidak_sesuai: "Minta klarifikasi RS", sesuai: "Tutup kasus", tidak_yakin: "Pantau", tidak_terhubung: "Pantau", menolak: "Pantau" };
+  const TINDAKAN = { tutup: "Tutup kasus", klarifikasi: "Minta klarifikasi RS", teruskan: "Teruskan ke Tim PK-JKN", pantau: "Pantau" };
+  const SARAN_KODE = { tidak_sesuai: "klarifikasi", sesuai: "tutup", tidak_yakin: "pantau", tidak_terhubung: "pantau", menolak: "pantau" };
+  const RETENSI = {
+    tidak_sesuai: "Rekaman dan transkrip disimpan terenkripsi sampai klarifikasi ke RS selesai.",
+    sesuai: "Rekaman dan transkrip dihapus otomatis setelah 30 hari. Hasil terstruktur tetap disimpan.",
+    tidak_yakin: "Hanya status yang disimpan. Tidak ada rekaman atau transkrip.",
+    tidak_terhubung: "Hanya status yang disimpan. Tidak ada rekaman atau transkrip.",
+    menolak: "Hanya status yang disimpan. Tidak ada rekaman atau transkrip."
+  };
+  const NOMOR_PENELEPON = "0800-0000-0165";
+  const NOMOR_PENGUJI = "0812-0000-4417";
+  const BUKA = (s) => `Selamat siang, saya asisten otomatis dari BPJS Kesehatan. Panggilan ini direkam untuk konfirmasi layanan. Ini bukan tagihan, dan saya tidak akan meminta data pribadi, kode OTP, atau pembayaran apa pun. Apakah benar saya bicara dengan ${s}?`;
+
+  const P = {
+    S1: { pasien: "Andi Pratama", umur: 54, rs: "RS01", ditagih: 11, tanggal: [3, 4, 6, 10, 11, 13, 16, 17, 20, 24, 27], tanda: { 16: "Minggu", 17: "Libur" }, ind: ["I1", "I2", "I4"],
+      pen: { nama: "Andi Pratama", hub: "peserta" }, label: "tidak_sesuai", min: 3, max: 3, keyakinan: "tinggi", libur: "Membantah 16 dan 17 Agustus", bahaya: null,
+      kutipan: "Tiga kali... Nggak pernah. Hari Minggu kan tutup.", durasi: 63,
+      tx: [["A", 0, BUKA("Bapak Andi Pratama")], ["P", 19.4, "Iya, saya sendiri."],
+        ["A", 21.4, "Terima kasih, Pak Andi. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 33.5, "Iya, betul."], ["A", 35.1, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"],
+        ["P", 39.4, "Tiga kali. Awal bulan, pertengahan, terus sekali lagi tanggal dua puluhan."],
+        ["A", 43.7, "Baik, tiga kali. Satu lagi, Pak. Apakah Bapak pernah terapi di hari Minggu tanggal 16 Agustus atau tanggal 17 Agustus?"],
+        ["P", 53.0, "Nggak pernah. Hari Minggu kan tutup."],
+        ["A", 55.5, "Terima kasih, Pak Andi. Jawaban Bapak sudah kami catat dan tidak memengaruhi layanan atau iuran Bapak. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 8 } },
+    S2: { pasien: "Siti Rahmawati", umur: 67, rs: "RS01", ditagih: 10, tanggal: [1, 3, 5, 7, 12, 14, 19, 23, 26, 28], tanda: { 23: "Minggu" }, ind: ["I1", "I2", "I3", "I4"],
+      pen: { nama: "Dewi Rahmawati", hub: "anak" }, label: "tidak_sesuai", min: 2, max: 2, keyakinan: "tinggi", libur: "Membantah 23 Agustus", bahaya: "Tanda tangan tanpa layanan",
+      kutipan: "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus.", durasi: 72,
+      tx: [["A", 0, BUKA("keluarga Ibu Siti Rahmawati")], ["P", 19.6, "Iya, saya Dewi, anaknya."],
+        ["A", 22.5, "Terima kasih, Bu Dewi. Saya mau konfirmasi singkat soal fisioterapi Ibu Siti di RS Melati Sehat bulan Agustus. Apakah Ibu Siti menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 34.7, "Iya, saya yang nganter."], ["A", 37.0, "Kira-kira berapa kali Ibu Siti terapi di bulan Agustus?"],
+        ["P", 41.3, "Dua kali aja. Tapi waktu itu Ibu disuruh tanda tangan di beberapa lembar sekaligus, katanya buat jadwal berikutnya."],
+        ["A", 51.1, "Baik, dua kali, dan Ibu Siti diminta tanda tangan beberapa lembar sekaligus. Apakah Ibu Siti pernah terapi di hari Minggu, tanggal 23 Agustus?"],
+        ["P", 61.8, "Nggak, Minggu kami di rumah."],
+        ["A", 64.1, "Terima kasih, Bu Dewi. Jawaban Ibu sudah kami catat dan tidak memengaruhi layanan atau iuran keluarga. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 5 } },
+    S3: { pasien: "Budi Santoso", umur: 45, rs: "RS02", ditagih: 9, tanggal: [1, 3, 6, 10, 13, 18, 21, 25, 28], tanda: {}, ind: ["I1", "I3"],
+      pen: { nama: "Budi Santoso", hub: "peserta" }, label: "sesuai", min: 9, max: 10, keyakinan: "tinggi", libur: "Tidak ditanyakan", bahaya: null,
+      kutipan: "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali.", durasi: 48,
+      tx: [["A", 0, BUKA("Bapak Budi Santoso")], ["P", 19, "Iya, betul."],
+        ["A", 21, "Terima kasih, Pak Budi. Apakah Bapak menjalani fisioterapi di RSU Bakti Mulia bulan Agustus?"], ["P", 29, "Iya."],
+        ["A", 31, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"], ["P", 35, "Rutin, seminggu dua kali. Agustus berarti sembilan atau sepuluh kali."],
+        ["A", 41, "Baik, sembilan atau sepuluh kali. Terima kasih, Pak Budi. Jawaban Bapak sudah kami catat. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 6, bahaya: 6 } },
+    S4: { pasien: "Karti Lestari", umur: 72, rs: "RS01", ditagih: 9, tanggal: [4, 6, 11, 13, 16, 18, 20, 25, 27], tanda: { 16: "Minggu" }, ind: ["I1", "I2", "I4"],
+      pen: { nama: "Bayu Lestari", hub: "anak" }, label: "tidak_yakin", min: 5, max: 6, keyakinan: "rendah", libur: "Tidak tahu", bahaya: null,
+      kutipan: "Saya kurang tahu persis. Mungkin lima atau enam kali.", durasi: 58,
+      tx: [["A", 0, BUKA("keluarga Ibu Karti Lestari")], ["P", 19, "Iya, saya Bayu, anaknya."],
+        ["A", 21.6, "Terima kasih, Pak Bayu. Apakah Ibu Karti menjalani fisioterapi di RS Melati Sehat bulan Agustus?"], ["P", 30, "Iya, kadang adik saya yang antar."],
+        ["A", 33, "Kira-kira berapa kali Ibu Karti terapi di bulan Agustus?"], ["P", 37, "Saya kurang tahu persis. Mungkin lima atau enam kali."],
+        ["A", 43, "Baik. Apakah Ibu Karti pernah terapi di hari Minggu tanggal 16 Agustus?"], ["P", 49, "Wah, kurang tahu juga."],
+        ["A", 52, "Terima kasih, Pak Bayu. Jawaban Bapak sudah kami catat. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 8 } },
+    S5: { pasien: "Joko Prasetyo", umur: 39, rs: "RS03", ditagih: 10, tanggal: [3, 4, 5, 10, 12, 17, 19, 24, 26, 31], tanda: { 17: "Libur" }, ind: ["I1", "I2", "I4"],
+      pen: { nama: "Joko Prasetyo", hub: "peserta" }, label: "tidak_terhubung", tidakDiangkat: true, tx: [] },
+    S6: { pasien: "Slamet Riyadi", umur: 58, rs: "RS01", ditagih: 8, tanggal: [3, 5, 7, 9, 12, 19, 24, 26], tanda: { 9: "Minggu" }, ind: ["I2", "I4"],
+      pen: { nama: "Slamet Riyadi", hub: "peserta" }, label: "tidak_sesuai", min: 2, max: 2, keyakinan: "tinggi", libur: "Membantah 9 Agustus", bahaya: null,
+      kutipan: "Cuma dua kali kok. Wong kakinya udah enakan.", durasi: 55,
+      tx: [["A", 0, BUKA("Bapak Slamet Riyadi")], ["P", 18.5, "Iya, saya."],
+        ["A", 21.1, "Terima kasih, Pak Slamet. Saya mau konfirmasi singkat soal fisioterapi Bapak di RS Melati Sehat bulan Agustus. Apakah Bapak menjalani fisioterapi di sana bulan Agustus?"],
+        ["P", 32, "Iya, pernah."], ["A", 34, "Kira-kira berapa kali Bapak datang terapi di bulan Agustus?"], ["P", 38, "Cuma dua kali kok. Wong kakinya udah enakan."],
+        ["A", 43, "Baik, dua kali. Apakah Bapak pernah terapi di hari Minggu tanggal 9 Agustus?"], ["P", 49, "Nggak, Minggu saya di rumah."],
+        ["A", 51, "Terima kasih, Pak Slamet. Jawaban Bapak sudah kami catat. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 7, bahaya: 8 } },
+    S8: { pasien: "Hendra Wijaya", umur: 50, rs: "RS05", ditagih: 10, tanggal: [1, 3, 5, 10, 12, 18, 20, 24, 26, 31], tanda: {}, ind: ["I1", "I3"],
+      pen: { nama: "Hendra Wijaya", hub: "peserta" }, label: "menolak", kutipan: "Nggak, saya nggak mau. Nanti saya telepon 165 aja.", durasi: 31,
+      tx: [["A", 0, BUKA("Bapak Hendra Wijaya")], ["P", 18, "Nggak, saya nggak mau. Nanti saya telepon 165 aja."],
+        ["A", 23, "Baik, Pak, tidak apa-apa. Bapak bisa memastikan lewat Care Center 165. Terima kasih, selamat siang."]],
+      tangkap: { penerima: 1 } },
+    A1: { pasien: "Sri Kurniawan", umur: 26, rs: "RS01", ditagih: 10, tanggal: [2, 4, 6, 9, 11, 13, 18, 20, 25, 27], tanda: {}, ind: ["I1", "I2"],
+      pen: { nama: "Sri Kurniawan", hub: "peserta" }, label: "sesuai", min: 9, max: 10, keyakinan: "tinggi", libur: "Tidak ditanyakan", bahaya: null,
+      kutipan: "Sekitar sembilan sampai sepuluh kali.", durasi: 44,
+      tx: [["A", 0, BUKA("Ibu Sri Kurniawan")], ["P", 18, "Iya, saya."], ["A", 20, "Apakah Ibu menjalani fisioterapi di RS Melati Sehat bulan Agustus?"], ["P", 27, "Iya."],
+        ["A", 29, "Kira-kira berapa kali Ibu datang terapi di bulan Agustus?"], ["P", 33, "Sekitar sembilan sampai sepuluh kali."], ["A", 38, "Baik. Terima kasih, Bu Sri. Selamat siang."]],
+      tangkap: { penerima: 1, hadir: 3, jumlah: 5, keyakinan: 5, libur: 6, bahaya: 6 } },
+    A2: { pasien: "Tuti Hidayat", umur: 71, rs: "RS01", ditagih: 9, tanggal: [3, 5, 9, 12, 16, 19, 23, 26, 30], tanda: { 9: "Minggu" }, ind: ["I1", "I2", "I4"], pen: { nama: "Bayu Firmansyah", hub: "anak" }, label: "tidak_terhubung", tidakDiangkat: true, tx: [] },
+    A3: { pasien: "Sri Gunawan", umur: 69, rs: "RS01", ditagih: 9, tanggal: [2, 5, 9, 12, 17, 19, 23, 26, 30], tanda: { 17: "Libur" }, ind: ["I1", "I2", "I4"], pen: { nama: "Bayu Handayani", hub: "anak" }, label: "tidak_terhubung", tidakDiangkat: true, tx: [] },
+    R1: { pasien: "Bayu Utami", umur: 5, rs: "RS01", ditagih: 11, tanggal: [6, 7, 8, 12, 17, 20, 24, 25, 26, 29, 31], tanda: { 17: "Libur" }, ind: ["I1", "I2", "I4"], pen: { nama: "Wahyu Gunawan", hub: "orang tua" }, label: "tidak_sesuai", min: 1, max: 1, kutipan: "Seingat saya cuma 1 kali.", durasi: 84, riwayat: "5 Okt, 09.42" },
+    R2: { pasien: "Yuni Setiawan", umur: 35, rs: "RS01", ditagih: 9, tanggal: [1, 3, 8, 14, 19, 21, 22, 27, 28], tanda: {}, ind: ["I1", "I2"], pen: { nama: "Yuni Setiawan", hub: "peserta" }, label: "tidak_sesuai", min: 3, max: 3, kutipan: "Seingat saya cuma 3 kali.", durasi: 71, riwayat: "5 Okt, 10.05" },
+    R3: { pasien: "Ani Siregar", umur: 28, rs: "RS01", ditagih: 9, tanggal: [1, 4, 7, 10, 15, 19, 22, 24, 29], tanda: {}, ind: ["I1", "I3"], pen: { nama: "Ani Siregar", hub: "peserta" }, label: "sesuai", min: 8, max: 10, kutipan: "Kurang lebih 9 kali.", durasi: 66, riwayat: "5 Okt, 10.31" },
+    R4: { pasien: "Ratna Handayani", umur: 8, rs: "RS01", ditagih: 11, tanggal: [1, 6, 7, 10, 12, 14, 20, 22, 27, 29, 31], tanda: {}, ind: ["I1", "I2"], pen: { nama: "Dimas Rahayu", hub: "orang tua" }, label: "sesuai", min: 10, max: 12, kutipan: "Kurang lebih 11 kali.", durasi: 74, riwayat: "5 Okt, 11.18" }
+  };
+  const URUT = ["S1", "S2", "S3", "S4", "S5", "S6", "S8", "A1", "A2", "A3", "R1", "R2", "R3", "R4"];
+
+  const pesanWa = (p) => `Halo ${p.pen.nama}. Ini BPJS Kesehatan. Dalam 1 menit kami akan menelepon dari nomor ${NOMOR_PENELEPON} untuk konfirmasi singkat layanan fisioterapi ${p.pasien} di ${rsNama(p.rs)} bulan Agustus. Ini bukan tagihan. Kami tidak akan meminta data pribadi, kode OTP, atau pembayaran. Untuk memastikan pesan ini, hubungi Care Center 165.`;
+  const pesanCadangan = (p) => `Kami belum berhasil menelepon. Kira-kira berapa kali ${p.pasien} menjalani fisioterapi di ${rsNama(p.rs)} bulan Agustus? Balas dengan angka: 1) 1–2 kali  2) 3–4 kali  3) 5–8 kali  4) lebih dari 8 kali  5) tidak ingat  6) tidak pernah terapi di sana.`;
+
+  /* ------------------------------------------------------------ state */
+  const awal = () => ({
+    view: "masuk", id: null, user: null,
+    stasiun: true, hours: true, api: true, showNew: true, alurBuka: true,
+    auto: true, jeda: false, active: null, calls: {}, keputusan: {}, klarifikasi: {}, alur: {},
+    modal: null, setupStep: 0, pending: null, pilihLain: false, tindakanLain: null, alasan: "", main: null
+  });
+  let S = awal();
+  const T0 = { t: Date.now() };
+  const timers = {};
+
+  function resetCalls() {
+    S.calls = {};
+    URUT.forEach((id) => {
+      const p = P[id];
+      S.calls[id] = p.riwayat
+        ? { status: "selesai", label: p.label, attempt: 1, log: [{ t: "Kartu bukti siap", jam: p.riwayat.split(", ")[1] }], tx: 0, waktu: p.riwayat }
+        : { status: "antre", attempt: 1, log: [], tx: 0, prioritas: false };
+    });
+  }
+  resetCalls();
+
+  /* ------------------------------------------------------------ util */
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const IK = {
+    perisai: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    telepon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    daftar: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+    gedung: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+    riwayat: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    cek: '<path d="M20 6 9 17l-5-5"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    awas: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    jam: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    main: '<polygon points="6 3 20 12 6 21 6 3"/>',
+    jeda: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
+    sinyal: '<path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/>',
+    putus: '<path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><path d="m22 2-20 20"/>',
+    wa: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    tangan: '<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+    otomatis: '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>'
+  };
+  const ik = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IK[n]}</svg>`;
+  const baru = (why) => ` <span class="baru" title="${esc(why)}">Baru</span>`;
+  const labelChip = (k, besar) => `<span class="label label--${k}${besar ? " label--besar" : ""}">${LABEL[k]}</span>`;
+  const menitSim = () => (S.hours ? 9 * 60 + 20 : 17 * 60 + 12) + Math.floor((Date.now() - T0.t) / 10000);
+  const jam = () => { const m = menitSim(); return String(Math.floor(m / 60) % 24).padStart(2, "0") + "." + String(m % 60).padStart(2, "0"); };
+  const fmtDetik = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  const sisa = (t) => Math.max(0, Math.ceil((t - Date.now()) / 1000));
+  const sapaPen = (p) => p.pen.hub === "peserta" ? "Peserta" : `${p.pen.nama} (${p.pen.hub})`;
+
+  function toast(pesan, aksi, label) {
+    const w = document.getElementById("toast");
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerHTML = esc(pesan) + (aksi ? ` <button type="button">${esc(label || "Buka")}</button>` : "");
+    if (aksi) t.querySelector("button").addEventListener("click", () => { aksi(); t.remove(); });
+    w.appendChild(t);
+    setTimeout(() => { t.style.transition = "opacity .3s"; t.style.opacity = "0"; setTimeout(() => t.remove(), 320); }, 4800);
+  }
+
+  const tandai = (k) => { if (!S.alur[k]) { S.alur[k] = true; gambarBand(); } };
+
+  /* ------------------------------------------------------------ call engine (compressed timing) */
+  const BERJALAN = ["wa_siap", "wa", "jeda", "telepon_siap", "menelepon", "merekam", "membaca", "cadangan_siap"];
+  const berjalan = (st) => BERJALAN.includes(st);
+  const c = (id) => S.calls[id];
+  const nanti = (id, ms, fn) => { clearTimeout(timers[id]); timers[id] = setTimeout(fn, ms); };
+  const log = (id, t, gagal) => c(id).log.push({ t, jam: jam(), gagal: !!gagal });
+
+  function alasanTidakBisa() {
+    if (!S.hours) return "Di luar jam panggilan (09.00–17.00).";
+    return null;
+  }
+
+  function telepon(id, dariOtomatis) {
+    const halangan = alasanTidakBisa();
+    if (halangan) { toast(halangan + " Panggilan bisa dimulai lagi besok pukul 09.00."); return; }
+    if (!S.stasiun) { toast("Saluran telepon terputus. Panggilan dimulai lagi begitu HP saluran tersambung."); return; }
+    if (S.active && S.active !== id) {
+      c(id).prioritas = true;
+      toast(`${P[id].pasien} masuk giliran berikutnya. Dimulai otomatis setelah panggilan ${P[S.active].pasien} selesai.`);
+      gambar();
+      return;
+    }
+    const k = c(id);
+    S.active = id; k.prioritas = false; k.retryAt = null;
+    if (!dariOtomatis) { S.view = "panggilan"; S.id = id; }
+    tandai(id === "S1" ? "s1" : id === "S5" ? "s5" : "lain");
+    if (k.attempt === 1) langkahWa(id); else langkahTelepon(id);
+    gambar();
+  }
+
+  function langkahWa(id) {
+    const k = c(id);
+    k.status = "wa_siap";
+    nanti(id, 1100, () => { log(id, "Pesan WA terkirim otomatis"); langkahJeda(id); gambar(); });
+  }
+  function konfirmasi(id) {
+    const k = c(id);
+    if (k.tunggu === "kirim") { k.tunggu = null; log(id, "Pesan WA terkirim"); langkahJeda(id); }
+    else if (k.tunggu === "telepon") { k.tunggu = null; dering(id); }
+    else if (k.tunggu === "cadangan") { k.tunggu = null; log(id, "Chat cadangan terkirim"); selesai(id, "tidak_terhubung"); }
+    gambar();
+  }
+  function langkahJeda(id) {
+    const k = c(id);
+    k.status = "jeda"; k.jedaSampai = Date.now() + 5000;
+    nanti(id, 5000, () => { langkahTelepon(id); gambar(); });
+  }
+  function langkahTelepon(id) {
+    const k = c(id);
+    k.status = "telepon_siap";
+    nanti(id, 600, () => { dering(id); gambar(); });
+  }
+  function dering(id) {
+    const k = c(id);
+    k.status = "menelepon"; log(id, `Memanggil (percobaan ${k.attempt})`);
+    nanti(id, P[id].tidakDiangkat ? 4000 : 2600, () => { (P[id].tidakDiangkat ? tidakDiangkat : tersambung)(id); gambar(); });
+  }
+  function tidakDiangkat(id) {
+    const k = c(id);
+    log(id, "Tidak diangkat", true);
+    if (k.attempt === 1) {
+      k.attempt = 2; k.status = "retry"; k.retryAt = Date.now() + 12000; S.active = null;
+      toast(`${P[id].pasien} tidak mengangkat. Percobaan ke-2 dijadwalkan otomatis.`);
+      return;
+    }
+    k.status = "cadangan_siap";
+    nanti(id, 1100, () => { log(id, "Chat cadangan terkirim otomatis"); selesai(id, "tidak_terhubung"); gambar(); });
+  }
+  function tersambung(id) {
+    const k = c(id), p = P[id];
+    log(id, "Tersambung"); k.status = "merekam"; k.tx = 0; k.mulai = Date.now();
+    const lanjut = () => {
+      if (k.status !== "merekam") return;
+      if (k.tx < p.tx.length) {
+        k.tx += 1;
+        const jeda = k.tx < p.tx.length ? Math.max(900, (p.tx[k.tx][1] - p.tx[k.tx - 1][1]) * 110) : 1100;
+        nanti(id, jeda, () => { lanjut(); gambarRingan(id); });
+      } else membaca(id);
+    };
+    lanjut();
+  }
+  function membaca(id) {
+    const k = c(id);
+    k.status = "membaca"; log(id, "Membaca jawaban");
+    nanti(id, 1800, () => { selesai(id, P[id].label); gambar(); });
+  }
+  function selesai(id, label) {
+    const k = c(id);
+    k.status = label === "tidak_terhubung" ? "tidak_terhubung" : "selesai"; k.label = label; k.tunggu = null;
+    k.waktu = "6 Okt, " + jam();
+    log(id, "Kartu bukti siap");
+    S.active = null;
+    const p = P[id];
+    if (S.view === "panggilan" && S.id === id) { S.view = "kartu"; S.pilihLain = false; S.alasan = ""; S.tindakanLain = null; }
+    else toast(`Panggilan selesai: ${p.pasien} · ${LABEL[label]}.`, () => buka("kartu", id), "Buka kartu bukti");
+  }
+  function lewati(id) {
+    const k = c(id), p = P[id];
+    clearTimeout(timers[id]);
+    if (k.status === "merekam") { k.tx = p.tx.length; membaca(id); }
+    gambar();
+  }
+  function putuskan() {
+    const id = S.active;
+    if (!id) return;
+    clearTimeout(timers[id]);
+    const k = c(id);
+    k.status = "terputus"; k.tunggu = null; log(id, "Terputus: saluran hilang", true);
+    S.active = null; tandai("putus");
+    toast(`Panggilan ${P[id].pasien} terputus. Antrean tetap berjalan.`);
+    gambar();
+  }
+  function cobaLagi(id) { const k = c(id); k.status = "antre"; k.tx = 0; telepon(id); }
+  function tandaiGagal(id) {
+    const k = c(id);
+    if (k.attempt === 1) { k.attempt = 2; k.status = "retry"; k.retryAt = Date.now() + 12000; log(id, "Ditandai gagal oleh verifikator", true); }
+    else { log(id, "Ditandai gagal oleh verifikator", true); k.status = "cadangan_siap"; S.active = id; nanti(id, 1000, () => { log(id, "Chat cadangan terkirim otomatis"); selesai(id, "tidak_terhubung"); gambar(); }); }
+    gambar();
+  }
+
+  /* scheduler: retries due, priority requests, and automatic mode */
+  setInterval(() => {
+    document.querySelectorAll("[data-hitung]").forEach((el) => { el.textContent = fmtDetik(sisa(Number(el.dataset.hitung))); });
+    if (S.view === "masuk" || S.active || !S.hours) return;
+    if (!S.stasiun) return;
+    const due = URUT.find((id) => c(id).status === "retry" && c(id).retryAt <= Date.now());
+    if (due) { telepon(due, !(S.view === "panggilan" && S.id === due)); return; }
+    const prio = URUT.find((id) => c(id).status === "antre" && c(id).prioritas);
+    if (prio) { telepon(prio, true); toast(`Memulai panggilan berikutnya: ${P[prio].pasien}.`, () => buka("panggilan", prio), "Buka panggilan"); return; }
+    if (S.auto && !S.jeda) {
+      const next = URUT.find((id) => c(id).status === "antre");
+      if (next) { telepon(next, true); toast(`Panggilan otomatis: menelepon ${P[next].pasien}.`, () => buka("panggilan", next), "Buka panggilan"); }
+      else { S.auto = false; toast("Semua pasien di antrean sudah ditelepon. Panggilan otomatis dimatikan."); gambar(); }
+    }
+  }, 1000);
+
+  /* ------------------------------------------------------------ derived numbers */
+  function ringkasan() {
+    return RS.map((r) => {
+      const cs = URUT.filter((id) => P[id].rs === r.id && ["selesai", "tidak_terhubung"].includes(c(id).status)).map((id) => c(id).label);
+      const ts = cs.filter((l) => l === "tidak_sesuai").length;
+      const terjawab = cs.filter((l) => l === "tidak_sesuai" || l === "sesuai").length;
+      const klar = ts >= 3 && terjawab > 0 && ts / terjawab >= 0.1;
+      return Object.assign({}, r, { ts, terjawab, klar, ids: URUT.filter((id) => P[id].rs === r.id && ["selesai", "tidak_terhubung"].includes(c(id).status)) });
+    });
+  }
+  const selesaiIds = () => URUT.filter((id) => ["selesai", "tidak_terhubung"].includes(c(id).status));
+
+  /* ------------------------------------------------------------ navigation */
+  function buka(view, id) {
+    S.view = view; S.id = id || null; S.pilihLain = false; S.tindakanLain = null; S.alasan = "";
+    if (view === "ringkasan") tandai("rs");
+    gambar(); window.scrollTo(0, 0);
+  }
+
+  function gambarModal() { document.getElementById("modal").innerHTML = ""; }
+
+  /* ------------------------------------------------------------ band (prototype controls) */
+  function gambarBand() {
+    const b = document.getElementById("band");
+    const seg = (key, opts) => `<span class="seg">${opts.map(([v, t]) => `<button type="button" data-a="set" data-k="${key}" data-v="${v}" aria-pressed="${String(S[key]) === String(v)}">${t}</button>`).join("")}</span>`;
+    const langkah = [
+      ["masuk", "Sign in with your name (decisions record who)"],
+      ["s1", "Watch Andi Pratama (S1) get called automatically, no click"],
+      ["putusan", "Decide on the evidence card"],
+      ["rs", "See RS Melati turn Perlu klarifikasi RS"],
+      ["s5", "Joko Prasetyo (S5): no answer, auto retry, fallback chat"],
+      ["putus", "Set Line station to Offline during a call, then recover"],
+      ["dahulukan", "Press Dahulukan to move a patient to the front"],
+      ["auto", "Pause or switch off Panggilan otomatis"]
+    ];
+    const selesaiSetup = false;
+    b.innerHTML = `<div class="band-row">
+        <span class="band-title">Prototype<b>Vedika target flow for officers</b></span>
+        <span class="ctl">Line station ${seg("stasiun", [["true", "Online"], ["false", "Offline"]])}</span>
+        <span class="ctl">Clock ${seg("hours", [["true", "09.20"], ["false", "17.12"]])}</span>
+        <span class="ctl">API ${seg("api", [["true", "Up"], ["false", "Down"]])}</span>
+        <button class="band-btn" type="button" data-a="putus-sim" ${S.active ? "" : "disabled"}>Drop running call</button>
+        <span class="band-sp"></span>
+        <button class="band-btn" type="button" data-a="tog-baru">${S.showNew ? "Hide" : "Show"} “Baru” tags</button>
+        <button class="band-btn" type="button" data-a="tog-alur">${S.alurBuka ? "Hide" : "Show"} checklist</button>
+        <button class="band-btn" type="button" data-a="reset">Reset</button>
+      </div>
+      ${S.alurBuka ? `<ul class="alur">${langkah.map(([k, t], i) => `<li class="${S.alur[k] || (k === "setup" && selesaiSetup && S.alur.masuk) ? "ok" : ""}"><span class="bul">${S.alur[k] || (k === "setup" && selesaiSetup && S.alur.masuk) ? "✓" : i + 1}</span><span>${t}</span></li>`).join("")}</ul>
+      <p class="band-note">Calls come from an Android phone on a team laptop (the line station); officers never touch it. Timing is compressed (1-minute WA delay = 5 s, 2-minute retry = 12 s). Purple “Baru” tags mark what changes from today's system; hover one for the reason. All data is synthetic.</p>` : ""}`;
+    document.body.classList.toggle("tanpa-baru", !S.showNew);
+  }
+
+  /* ------------------------------------------------------------ screens */
+  function shell(isi, jejak) {
+    const nAksi = URUT.filter((id) => c(id).status === "selesai" && c(id).label === "tidak_sesuai" && !S.keputusan[id]).length;
+    const nav = (v, ico, t, extra) => `<button type="button" data-a="nav" data-v="${v}" ${S.view === v || (v === "antrean" && ["panggilan", "kartu"].includes(S.view)) ? 'aria-current="page"' : ""}>${ik(ico)}${t}${extra || ""}</button>`;
+    const inisial = S.user.nama.split(" ").map((x) => x[0]).slice(0, 2).join("");
+    return `<div class="app">
+      <aside class="side">
+        <div class="merek"><span class="merek-ikon">${ik("perisai")}</span><span><b>VEDIKA</b><span>Verifikasi Digital Klaim</span></span></div>
+        <nav class="nav" aria-label="Menu">
+          <span class="nav-h">Autentik</span>
+          ${nav("antrean", "daftar", "Antrean konfirmasi", nAksi ? `<span class="hit">${nAksi}</span>` : "")}
+          ${nav("ringkasan", "gedung", "Ringkasan RS")}
+          ${nav("riwayat", "riwayat", "Riwayat keputusan")}
+        </nav>
+        <p class="side-foot">Satu halaman untuk semua: antrean, panggilan, kartu bukti, dan keputusan.</p>
+      </aside>
+      <div class="main">
+        <header class="top"><div class="jejak">${jejak}</div><span class="top-sp"></span><span class="simulasi">Simulasi</span>
+          <div class="siapa"><span class="av">${esc(inisial)}</span><div>${esc(S.user.nama)}<small>Verifikator · KC Jakarta Selatan</small></div></div></header>
+        <main class="isi">${S.api ? "" : `<div class="simbanner"><b>Mode simulasi.</b>API tidak terjangkau. Layar memakai data contoh lokal; keputusan tidak tersimpan ke server sampai API kembali.${baru("Today the app silently falls back to data-v3.js with only a toast.")}</div>`}${barTindakan()}${isi}</main>
+      </div></div>`;
+  }
+
+  const barTindakan = () => "";
+
+  function stripSiap() {
+    let kelas = "ok", ico = "cek", judul, ket, aksi = "";
+    const retry = URUT.find((id) => c(id).status === "retry");
+    const putus = URUT.find((id) => c(id).status === "terputus");
+    if (!S.hours) { kelas = "warn"; ico = "jam"; judul = "Di luar jam panggilan"; ket = "Panggilan hanya berjalan pukul 09.00–17.00 WIB. Antrean dilanjutkan otomatis besok pukul 09.00."; }
+    else if (!S.stasiun) { kelas = "bad"; ico = "putus"; judul = "Saluran telepon terputus"; ket = "HP saluran tidak terhubung ke laptop stasiun sejak " + jam() + ". Antrean menunggu; tidak ada yang hilang. Tim teknis: cek kabel USB dan baterai HP."; }
+    else if (S.active) { kelas = "jalan"; ico = "telepon"; judul = `Sedang menelepon ${P[S.active].pasien}`; ket = statusPanjang(S.active) + (c(S.active).tunggu ? " · menunggu tindakan Anda" : ""); aksi = `<button class="btn btn--primer" type="button" data-a="buka-panggilan" data-id="${S.active}">Buka panggilan</button>`; }
+    else if (putus) { kelas = "bad"; ico = "putus"; judul = `Panggilan ${P[putus].pasien} terputus`; ket = "Antrean tidak tertahan. Pilih coba lagi sekarang, atau tandai sebagai satu percobaan gagal."; aksi = `<button class="btn" type="button" data-a="tandai-gagal" data-id="${putus}">Tandai gagal</button><button class="btn btn--primer" type="button" data-a="coba-lagi" data-id="${putus}">Coba lagi</button>`; }
+    else if (S.auto && !S.jeda) { kelas = "jalan"; ico = "otomatis"; judul = "Panggilan otomatis aktif"; ket = "Pasien berikutnya ditelepon begitu saluran kosong."; }
+    else if (retry) { judul = "Siap menelepon"; ket = `${P[retry].pasien} dicoba lagi otomatis dalam <span class="hitung" data-hitung="${c(retry).retryAt}">${fmtDetik(sisa(c(retry).retryAt))}</span>.`; }
+    else { judul = "Siap menelepon"; ket = "Tekan Telepon pada pasien, atau nyalakan Panggilan otomatis untuk menelepon antrean satu per satu."; }
+    const sal = S.stasiun ? ["", "Saluran: HP saluran siap, SIM aktif"] : ["no", "Saluran: HP saluran terputus"];
+    return `<section class="siap siap--${kelas}" aria-live="polite"><span class="siap-ikon">${ik(ico)}</span><div><b>${judul}${baru("Today nothing tells the officer why no call is starting (mode off, outside hours, agent page closed, retry pending).")}</b><p>${ket}</p></div><div class="siap-aksi">${aksi}</div>
+      <div class="sehat"><span><i class="${S.api ? "" : "no"}"></i>API</span><span><i class="${S.api ? "" : "no"}"></i>Database</span><span><i></i>Pembaca jawaban</span><span><i class="${sal[0]}"></i>${sal[1]}</span><span>Jam kantor cabang ${jam()} WIB</span></div></section>`;
+  }
+
+  function statusPanjang(id) {
+    const k = c(id);
+    return { wa_siap: "Menyiapkan pesan WA", wa: "Pesan WA terkirim", jeda: "Jeda setelah pesan WA", telepon_siap: "Siap memanggil", menelepon: `Memanggil, percobaan ${k.attempt}`, merekam: "Sedang berbicara dan merekam", membaca: "Membaca jawaban", cadangan_siap: "Mengirim chat cadangan" }[k.status] || "";
+  }
+  function sel(id) {
+    const k = c(id);
+    if (berjalan(k.status)) return `<span class="st st--jalan">${k.tunggu ? "Perlu tindakan" : statusPanjang(id)}</span>`;
+    if (k.status === "selesai") return `<span class="st st--selesai">Selesai</span>`;
+    if (k.status === "tidak_terhubung") return `<span class="st st--info">Tidak terhubung</span>`;
+    if (k.status === "terputus") return `<span class="st st--gagal">Terputus</span>`;
+    if (k.status === "retry") return `<span class="st st--tunggu">Coba lagi <span class="hitung" data-hitung="${k.retryAt}">${fmtDetik(sisa(k.retryAt))}</span></span>`;
+    return `<span class="st">${k.prioritas ? "Giliran berikutnya" : "Antre"}</span>`;
+  }
+  function aksiBaris(id) {
+    const k = c(id);
+    if (k.status === "antre") return `<button class="btn btn--kecil" type="button" data-a="dahulukan" data-id="${id}" ${!S.hours ? 'disabled title="Di luar jam panggilan"' : 'title="Pindahkan ke urutan berikutnya"'}>Dahulukan</button>`;
+    if (berjalan(k.status)) return `<button class="btn btn--kecil" type="button" data-a="buka-panggilan" data-id="${id}">Lihat panggilan</button>`;
+    if (k.status === "retry") return `<button class="btn btn--kecil" type="button" data-a="telepon" data-id="${id}" ${!S.hours ? "disabled" : ""}>Telepon sekarang</button>`;
+    if (k.status === "terputus") return `<button class="btn btn--kecil" type="button" data-a="tandai-gagal" data-id="${id}">Tandai gagal</button><button class="btn btn--telepon" type="button" data-a="coba-lagi" data-id="${id}">Coba lagi</button>`;
+    return `<button class="btn btn--kecil" type="button" data-a="buka-kartu" data-id="${id}">Buka kartu</button>`;
+  }
+
+  function lamanAntrean() {
+    const sudah = selesaiIds().length;
+    const ts = selesaiIds().filter((id) => c(id).label === "tidak_sesuai").length;
+    const nKlar = ringkasan().filter((r) => r.klar).length;
+    const baris = URUT.map((id) => {
+      const p = P[id], k = c(id);
+      const lab = k.label ? labelChip(k.label) : "";
+      return `<tr class="${S.active === id ? "aktif" : ""}"><td><div class="nama"><b>${esc(p.pasien)}</b><span>${p.umur} th</span></div></td><td>${esc(rsNama(p.rs))}</td><td class="num">${p.ditagih}</td>
+        <td><div class="chips">${p.ind.map((i) => `<span class="chip">${IND[i]}</span>`).join("")}</div></td><td>${esc(sapaPen(p))}</td><td>${sel(id)} ${lab}</td><td><div class="aksi-sel">${aksiBaris(id)}</div></td></tr>`;
+    }).join("");
+    return `<div class="kepala"><div><span class="eyebrow">Autentik</span><h1>Antrean konfirmasi · layanan Agustus 2026</h1><p>Pasien dengan dua indikator atau lebih. Satu panggilan berjalan pada satu waktu.</p></div>
+      <div class="kontrol"><button class="saklar-btn" type="button" data-a="auto" aria-pressed="${S.auto}"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>
+      <button class="btn" type="button" data-a="jeda" ${S.auto ? "" : "disabled"}>${ik(S.jeda ? "main" : "jeda")}${S.jeda ? "Lanjutkan" : "Jeda"}</button></div></div>
+      ${stripSiap()}
+      <div class="angka"><div><b class="num">30</b><span>pasien terpicu dari 300 aktif</span></div><div><b class="num">${sudah}</b><span>sudah ditelepon</span></div><div><b class="num">${ts}</b><span>jawaban tidak sesuai</span></div><div><b class="num">${nKlar}</b><span>RS perlu klarifikasi</span></div></div>
+      <section class="panel"><div class="panel-k"><h2>Pasien</h2><span class="redup" style="font-size:13px">Antrean ditelepon otomatis satu per satu. Dahulukan memindahkan pasien ke urutan berikutnya.${baru("Automatic by default: the line station dials by itself. Officers never open a separate agent page.")}</span></div>
+      <div class="tabel-wadah"><table><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator</th><th>Penerima telepon</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${baris}</tbody></table></div></section>`;
+  }
+
+  function lamanPanggilan(id) {
+    const p = P[id], k = c(id);
+    if (!p) return "";
+    if (["selesai", "tidak_terhubung"].includes(k.status)) return lamanKartu(id);
+    const kop = `<section class="panel"><div class="kop">
+      <div><span>Pasien</span><b>${esc(p.pasien)}, ${p.umur} th</b></div><div><span>Rumah sakit</span><b>${esc(rsNama(p.rs))}</b></div><div><span>Layanan</span><b>Agustus 2026</b></div>
+      <div><span>Sesi ditagih</span><b class="num">${p.ditagih}</b></div><div><span>Penerima</span><b>${esc(sapaPen(p))}</b></div><div><span>Tanggal libur</span><b>${Object.keys(p.tanda).length ? Object.keys(p.tanda).map((d) => d + " Agu").join(", ") : "Tidak ada"}</b></div>
+      <div><span>Indikator</span><div class="chips">${p.ind.map((i) => `<span class="chip">${IND[i]}</span>`).join("")}</div></div></div></section>`;
+    if (k.status === "antre" || k.status === "retry" || k.status === "terputus") {
+      return `<div class="kepala"><div><span class="eyebrow">Panggilan</span><h1>${esc(p.pasien)}</h1></div></div>${kop}
+        <section class="panel"><div class="panel-b" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><b>${k.status === "terputus" ? "Panggilan terputus" : k.status === "retry" ? "Menunggu percobaan ke-2" : "Belum ditelepon"}</b><p class="redup">${k.status === "retry" ? `Dicoba lagi otomatis dalam <span class="hitung" data-hitung="${k.retryAt}">${fmtDetik(sisa(k.retryAt))}</span>.` : "Tekan Telepon untuk memulai."}</p></div><div class="aksi-sel">${aksiBaris(id)}</div></div></section>`;
+    }
+    const sudah = (t) => k.log.find((l) => l.t.startsWith(t));
+    const stA = (cond, act) => cond ? "selesai" : act ? (k.tunggu ? "tunggu" : "jalan") : "";
+    const gagal = k.log.filter((l) => l.t === "Tidak diangkat").length;
+    const langkah = [
+      { n: "Pesan WA terkirim", s: k.attempt > 1 ? "selesai" : stA(sudah("Pesan WA terkirim"), k.status === "wa_siap"), jam: (sudah("Pesan WA terkirim") || {}).jam, ket: k.attempt > 1 ? "Dikirim di percobaan 1" : "Dikirim otomatis oleh server" },
+      { n: "Jeda pesan", s: stA(k.attempt > 1 || ["telepon_siap", "menelepon", "merekam", "membaca", "cadangan_siap"].includes(k.status), k.status === "jeda"), ket: k.status === "jeda" ? `Memanggil dalam <span class="hitung" data-hitung="${k.jedaSampai}">${fmtDetik(sisa(k.jedaSampai))}</span> (1 menit, dipadatkan)` : "1 menit agar penerima sempat membaca" },
+      { n: `Memanggil${k.attempt > 1 ? " · percobaan 2" : ""}`, s: gagal && k.status === "cadangan_siap" ? "gagal" : stA(sudah("Tersambung"), ["telepon_siap", "menelepon"].includes(k.status)), jam: (sudah("Memanggil") || {}).jam, ket: k.status === "menelepon" ? `Berdering ke ${NOMOR_PENGUJI}` : gagal ? `${gagal}× tidak diangkat` : "" },
+      { n: "Tersambung dan merekam", s: stA(["membaca"].includes(k.status), k.status === "merekam"), jam: (sudah("Tersambung") || {}).jam },
+      { n: "Membaca jawaban", s: stA(false, k.status === "membaca"), jam: (sudah("Membaca") || {}).jam, ket: k.status === "membaca" ? "Label dihitung dengan aturan, bukan oleh AI" : "" },
+      { n: "Kartu bukti", s: "", ket: "Terbuka otomatis setelah selesai" }
+    ];
+    if (k.status === "cadangan_siap") langkah.splice(3, 3, { n: "Chat cadangan", s: k.tunggu ? "tunggu" : "jalan", ket: "Pertanyaan jumlah sesi dengan pilihan 1–6" });
+    const daftarLangkah = `<ol class="langkah">${langkah.map((l) => `<li class="${l.s}"><span class="bul">${l.s === "selesai" ? ik("cek") : l.s === "gagal" ? ik("x") : ""}</span><div><b>${l.n}</b>${l.ket ? `<small>${l.ket}</small>` : ""}</div><span class="jam">${l.jam || ""}</span></li>`).join("")}</ol>`;
+
+    let instruksi = "";
+    if (["wa_siap", "jeda", "telepon_siap", "menelepon", "cadangan_siap"].includes(k.status)) {
+      instruksi = `<div class="otomatis-info">${ik("otomatis")}<span>Semua langkah berjalan otomatis: pesan WhatsApp dari server, panggilan dari HP saluran, dan chat cadangan bila perlu. Tidak ada yang perlu Anda tekan.${baru("No officer action during a call.")}</span></div>`;
+    }
+
+    const tx = p.tx.slice(0, k.tx);
+    const transkrip = tx.length
+      ? tx.map((b) => `<div class="baris ${b[0] === "A" ? "ai" : "pen"}"><span class="siapa-b">${b[0] === "A" ? "AI" : "Penerima"}<small>${fmtDetik(b[1])}</small></span><p>${esc(b[2])}</p></div>`).join("")
+      : `<p class="kosong">${k.status === "menelepon" ? "Berdering… AI mulai bicara begitu penerima menjawab." : k.status === "cadangan_siap" ? "Tidak ada percakapan. Penerima tidak mengangkat dua kali." : "Transkrip muncul di sini begitu panggilan tersambung."}</p>`;
+    const t = p.tangkap || {}, n = k.tx;
+    const v = (key, val) => (t[key] != null && n > t[key]) ? `<b>${val}</b>` : `<b class="belum">—</b>`;
+    const tangkap = p.tidakDiangkat ? `<p class="kosong">Tidak ada yang ditangkap.</p>` : `<div class="tangkap">
+      <div><span>Penerima</span>${v("penerima", esc(sapaPen(p)))}</div>
+      <div><span>Hadir</span>${v("hadir", p.label === "menolak" ? "—" : "Ya")}</div>
+      <div><span>Jumlah sesi</span>${v("jumlah", p.min === p.max ? p.min + " sesi" : p.min + "–" + p.max + " sesi")}</div>
+      <div><span>Keyakinan</span>${v("keyakinan", p.keyakinan === "tinggi" ? "Tinggi" : "Rendah")}</div>
+      <div><span>Tanggal libur</span>${v("libur", esc(p.libur || ""))}</div>
+      <div><span>Tanda bahaya</span>${v("bahaya", p.bahaya ? esc(p.bahaya) : "Tidak ada")}</div></div>`;
+
+    return `<div class="kepala"><div><span class="eyebrow">Panggilan berlangsung</span><h1>${esc(p.pasien)}</h1><p>${statusPanjang(id)}</p></div>
+      <div class="kontrol">${k.status === "merekam" ? `<button class="btn" type="button" data-a="lewati" data-id="${id}">Lewati ke akhir</button>` : ""}<button class="btn" type="button" data-a="nav" data-v="antrean">Kembali ke antrean</button></div></div>
+      ${kop}${instruksi}
+      <div class="tiga">
+        <section class="panel"><div class="panel-k"><h2>Progres</h2></div><div class="panel-b">${daftarLangkah}</div></section>
+        <section class="panel"><div class="panel-k"><h2>Transkrip langsung</h2>${k.status === "merekam" ? '<span class="st st--jalan">Merekam</span>' : ""}</div><div class="transkrip" id="transkrip">${transkrip}</div></section>
+        <section class="panel"><div class="panel-k"><h2>Yang ditangkap AI</h2></div><div class="panel-b">${tangkap}<p class="catatan-kecil" style="margin-top:10px">Hanya untuk dipantau. Label dihitung dari jawaban akhir.</p></div></section>
+      </div>`;
+  }
+
+  function lamanKartu(id) {
+    const p = P[id], k = c(id);
+    if (!p || !["selesai", "tidak_terhubung"].includes(k.status)) return `<section class="panel"><div class="panel-b">Kartu bukti dibuat setelah panggilan selesai.</div></section>`;
+    const lab = k.label;
+    const r = ringkasan().find((x) => x.id === p.rs);
+    const terjawab = lab === "tidak_sesuai" || lab === "sesuai";
+    const selisih = terjawab ? p.ditagih - p.max : null;
+    const tgl = `<div class="tgl">${p.tanggal.map((d) => `<span class="${p.tanda[d] ? "tanda" : ""}" title="${p.tanda[d] || ""}">${d}${p.tanda[d] ? " · " + p.tanda[d] : ""}</span>`).join("")}</div>`;
+    const tiga = terjawab ? `<div class="bukti3">
+        <div><span class="eyebrow">Ditagih rumah sakit</span><div class="besar num">${p.ditagih} <small>sesi</small></div>${tgl}</div>
+        <div><span class="eyebrow">Versi ${p.pen.hub === "peserta" ? "peserta" : "keluarga"}</span><div class="besar num">${p.min === p.max ? p.max : p.min + "–" + p.max} <small>sesi</small></div><p>${p.libur && p.libur.startsWith("Membantah") ? p.libur.replace("Membantah", "Membantah ada sesi") + "." : "Tidak ada bantahan tanggal."}</p></div>
+        <div class="selisih ${selisih <= 2 ? "aman" : ""}"><span class="eyebrow">Selisih</span><div class="besar num">${Math.max(selisih, 0)} <small>sesi</small></div><p>Toleransi salah ingat 2 sesi. ${selisih > 2 ? "Melewati toleransi." : "Masih dalam toleransi."}</p></div></div>`
+      : `<div class="bukti3"><div><span class="eyebrow">Ditagih rumah sakit</span><div class="besar num">${p.ditagih} <small>sesi</small></div>${tgl}</div>
+        <div style="grid-column: span 2"><span class="eyebrow">Hasil panggilan</span><div class="log-mini" style="margin-top:8px">${k.log.map((l) => `<div><b style="font-weight:${l.gagal ? 700 : 500};color:${l.gagal ? "var(--bad-fg)" : "inherit"}">${esc(l.t)}</b><span>${l.jam}</span></div>`).join("")}</div>
+        ${lab === "tidak_terhubung" ? `<div class="wa-bubble" style="margin-top:12px"><small>Chat cadangan yang terkirim</small>${esc(pesanCadangan(p))}</div>` : ""}</div></div>`;
+
+    const rekaman = terjawab && !p.riwayat
+      ? `<div class="pemutar"><button type="button" data-a="putar" aria-label="Putar rekaman">${ik(S.main === id ? "jeda" : "main")}</button><div class="gel" id="gel">${Array.from({ length: 56 }, (_, i) => `<i style="height:${20 + Math.round(70 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * .37)))}%"></i>`).join("")}</div><span class="jam">${fmtDetik(p.durasi)}</span></div><p class="catatan-kecil" style="margin-top:6px">Contoh pemutar, tanpa suara di prototipe.</p>`
+      : "";
+    const kutipan = p.kutipan ? `<section class="panel"><div class="panel-k"><h2>Kutipan kunci</h2></div><div class="panel-b"><p class="kutipan">“${esc(p.kutipan)}”</p>${p.bahaya ? `<p class="bahaya" style="margin-top:12px">Tanda bahaya: ${esc(p.bahaya)}</p>` : ""}${rekaman}</div></section>` : "";
+
+    const kep = S.keputusan[id];
+    const saranKode = SARAN_KODE[lab];
+    let putusan;
+    if (kep) {
+      const berikut = URUT.find((x) => c(x).status === "antre");
+      putusan = `<div class="diputus"><b>${TINDAKAN[kep.tindakan]}</b><span style="font-size:13px">${kep.ikut ? "Mengikuti saran." : "Tidak mengikuti saran. Alasan: " + esc(kep.alasan)}</span><span class="catatan-kecil">Oleh ${esc(kep.oleh)} · ${kep.waktu}${baru("Decision records the signed-in verifier, not a demo account.")}</span></div>
+        ${kep.tindakan === "klarifikasi" ? (S.klarifikasi[id] ? `<p class="catatan-kecil">Klarifikasi RS selesai ${S.klarifikasi[id]}. Rekaman dan transkrip dijadwalkan untuk dihapus.</p>` : `<button class="btn" type="button" data-a="klar" data-id="${id}">Tandai klarifikasi RS selesai${baru("Needed for retention rule R5.5; there's no UI for it today.")}</button>`) : ""}
+        <button class="btn" type="button" data-a="unduh">Unduh kartu bukti (PDF)${baru("Export for the clarification letter / Tim PK-JKN.")}</button>
+        ${berikut ? `<div class="berikut"><span><b>Berikutnya: ${esc(P[berikut].pasien)}</b><br><span class="catatan-kecil">${esc(rsNama(P[berikut].rs))} · ${P[berikut].ditagih} sesi ditagih</span></span><button class="btn btn--kecil" type="button" data-a="dahulukan" data-id="${berikut}" ${!S.hours ? "disabled" : ""}>Dahulukan${baru("The station keeps calling the queue while the officer decides; this moves a patient to the front.")}</button></div>` : ""}`;
+    } else if (S.pilihLain) {
+      putusan = `<div class="pilihan" role="radiogroup" aria-label="Tindakan">${["tutup", "klarifikasi", "teruskan"].map((t) => `<label><input type="radio" name="tl" value="${t}" data-a="pilih-tindakan" ${S.tindakanLain === t ? "checked" : ""}>${TINDAKAN[t]}</label>`).join("")}</div>
+        <label class="isian" for="alasan">Alasan (wajib)<textarea id="alasan" data-a="alasan" placeholder="Contoh: RS sudah mengirim bukti kehadiran lengkap">${esc(S.alasan)}</textarea></label>
+        <div class="kontrol"><button class="btn" type="button" data-a="batal-lain">Batal</button><button class="btn btn--primer" type="button" id="simpanLain" data-a="simpan-lain" data-id="${id}" ${S.tindakanLain && S.alasan.trim() ? "" : "disabled"}>Simpan keputusan</button></div>`;
+    } else {
+      putusan = `<div class="kontrol"><button class="btn btn--primer" type="button" data-a="setujui" data-id="${id}">${ik("cek")}Setujui saran</button><button class="btn" type="button" data-a="pilih-lain">Pilih tindakan lain</button></div>`;
+    }
+    const konteks = r.terjawab ? `RS ini: ${r.ts} jawaban tidak sesuai dari ${r.terjawab} terjawab${r.klar ? " · Perlu klarifikasi RS" : ""}.` : "Belum ada jawaban lain dari RS ini.";
+    const saranTeks = { klarifikasi: "Minta klarifikasi RS", tutup: "Tutup kasus", pantau: "Pantau. Tidak dihitung di ringkasan RS." }[saranKode];
+
+    return `<div class="kepala"><div><span class="eyebrow">Kartu bukti</span><h1>${esc(p.pasien)} ${labelChip(lab, true)}</h1><p>${esc(rsNama(p.rs))} · layanan Agustus 2026 · ${k.waktu || ""}${p.durasi && terjawab ? " · " + fmtDetik(p.durasi) : ""} · penerima ${esc(sapaPen(p))}</p></div>
+      <div class="kontrol"><button class="btn" type="button" data-a="nav" data-v="antrean">Kembali ke antrean</button></div></div>
+      ${tiga}
+      <div class="dua">${kutipan || `<section class="panel"><div class="panel-b"><p class="redup">${RETENSI[lab]}</p></div></section>`}
+        <section class="saran"><div class="saran-k"><span class="eyebrow">Langkah yang disarankan</span><b>${saranTeks}</b><p>${konteks}</p></div><div class="saran-b">${putusan}<p class="catatan-kecil">${RETENSI[lab]} Identitas penerima tidak dibagikan ke RS.</p></div></section>
+      </div>`;
+  }
+
+  function lamanRingkasan() {
+    const rs = ringkasan();
+    return `<div class="kepala"><div><span class="eyebrow">Autentik</span><h1>Ringkasan rumah sakit · Agustus 2026</h1><p>Diperbarui setiap kali panggilan selesai.</p></div></div>
+      <section class="panel"><div class="tabel-wadah"><table><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th></th></tr></thead><tbody>
+      ${rs.map((r) => `<tr><td><b>${esc(r.nama)}</b></td><td class="num">${r.aktif}</td><td class="num">${r.terpicu} (${r.persen}%)</td><td class="num">${r.terjawab}</td><td class="num">${r.ts}</td>
+        <td><span class="rs-status ${r.klar ? "klar" : "normal"}">${r.klar ? "Perlu klarifikasi RS" : "Normal"}</span></td><td><div class="aksi-sel">${r.ids.length ? `<button class="btn btn--kecil" type="button" data-a="buka-kartu" data-id="${r.ids.find((x) => c(x).label === "tidak_sesuai") || r.ids[0]}">Lihat kartu</button>` : ""}</div></td></tr>`).join("")}
+      </tbody></table></div><p class="aturan">Satu jawaban belum cukup. Status menjadi Perlu klarifikasi RS bila ada ≥3 jawaban tidak sesuai dan ≥10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</p></section>`;
+  }
+
+  function lamanRiwayat() {
+    const ids = Object.keys(S.keputusan);
+    return `<div class="kepala"><div><span class="eyebrow">Autentik</span><h1>Riwayat keputusan</h1><p>Siapa memutuskan apa, kapan, dan alasannya.</p></div></div>
+      <section class="panel">${ids.length ? `<div class="tabel-wadah"><table><thead><tr><th>Waktu</th><th>Pasien</th><th>Rumah sakit</th><th>Label</th><th>Tindakan</th><th>Ikut saran</th><th>Alasan</th><th>Verifikator</th></tr></thead><tbody>
+        ${ids.map((id) => { const k = S.keputusan[id]; return `<tr><td class="redup num">${k.waktu}</td><td><b>${esc(P[id].pasien)}</b></td><td>${esc(rsNama(P[id].rs))}</td><td>${labelChip(c(id).label)}</td><td>${TINDAKAN[k.tindakan]}</td><td>${k.ikut ? "Ya" : "Tidak"}</td><td>${esc(k.alasan || "—")}</td><td>${esc(k.oleh)}</td></tr>`; }).join("")}
+      </tbody></table></div>` : `<div class="panel-b"><p class="redup">Belum ada keputusan. Keputusan dari kartu bukti muncul di sini.</p></div>`}</section>`;
+  }
+
+  function lamanMasuk() {
+    return `<div class="masuk-wadah"><form class="masuk" id="formMasuk">
+      <div class="merek"><span class="merek-ikon">${ik("perisai")}</span><span><b>VEDIKA</b><span>Verifikasi Digital Klaim</span></span></div>
+      <div><h1>Masuk sebagai verifikator</h1><p>Nama Anda dicatat di setiap keputusan.${baru("Today: one 'Masuk sebagai verifikator demo' button with no identity.")}</p></div>
+      <label class="isian" for="nama">Nama<input id="nama" value="Dina Maharani" autocomplete="name"></label>
+      <label class="isian" for="nip">NIP<input id="nip" value="19880412 201503 2 007" inputmode="numeric"></label>
+      <button class="btn btn--primer" type="submit">Masuk</button>
+      <p>Simulasi. Seluruh data sintetis.</p></form></div>`;
+  }
+
+  /* ------------------------------------------------------------ render */
+  const JEJAK = { antrean: "Autentik / <b>Antrean konfirmasi</b>", panggilan: "Autentik / Antrean konfirmasi / <b>Panggilan</b>", kartu: "Autentik / Antrean konfirmasi / <b>Kartu bukti</b>", ringkasan: "Autentik / <b>Ringkasan RS</b>", riwayat: "<b>Riwayat keputusan</b>" };
+  function gambar() {
+    gambarBand();
+    const akar = document.getElementById("akar");
+    const fokus = document.activeElement && document.activeElement.id === "alasan" ? document.activeElement.selectionStart : null;
+    if (S.view === "masuk") { akar.innerHTML = lamanMasuk(); return; }
+    const isi = { antrean: lamanAntrean, panggilan: () => lamanPanggilan(S.id), kartu: () => lamanKartu(S.id), ringkasan: lamanRingkasan, riwayat: lamanRiwayat }[S.view]();
+    const v = S.view === "panggilan" && ["selesai", "tidak_terhubung"].includes(c(S.id).status) ? "kartu" : S.view;
+    akar.innerHTML = shell(isi, JEJAK[v]);
+    const tr = document.getElementById("transkrip");
+    if (tr) tr.scrollTop = tr.scrollHeight;
+    if (fokus != null) { const a = document.getElementById("alasan"); if (a) { a.focus(); a.setSelectionRange(fokus, fokus); } }
+  }
+  /* streaming transcript lines: redraw only when the officer is watching */
+  function gambarRingan(id) { if (S.view === "panggilan" && S.id === id) gambar(); else if (S.view === "antrean") gambar(); }
+
+  /* ------------------------------------------------------------ events */
+  document.addEventListener("submit", (e) => {
+    if (e.target.id !== "formMasuk") return;
+    e.preventDefault();
+    const nama = document.getElementById("nama").value.trim() || "Verifikator";
+    S.user = { nama }; S.view = "antrean"; tandai("masuk"); gambar();
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.dataset.a === "alasan") {
+      S.alasan = e.target.value;
+      const b = document.getElementById("simpanLain");
+      if (b) b.disabled = !(S.tindakanLain && S.alasan.trim());
+    }
+  });
+  document.addEventListener("change", (e) => {
+    if (e.target.dataset.a === "pilih-tindakan") { S.tindakanLain = e.target.value; const b = document.getElementById("simpanLain"); if (b) b.disabled = !(S.tindakanLain && S.alasan.trim()); }
+  });
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-a]");
+    if (!el) return;
+    const a = el.dataset.a, id = el.dataset.id;
+    if (a === "diam") return;
+    const act = {
+      set() {
+        const k = el.dataset.k; let v = el.dataset.v;
+        if (k === "hours" || k === "api" || k === "stasiun") v = v === "true";
+        S[k] = v; if (k === "hours") T0.t = Date.now();
+        if (k === "stasiun" && !v && S.active) { putuskan(); return; }
+        if (k === "stasiun" && v) toast("HP saluran tersambung lagi. Antrean dilanjutkan.");
+        gambar();
+      },
+      "tog-baru"() { S.showNew = !S.showNew; gambarBand(); },
+      "tog-alur"() { S.alurBuka = !S.alurBuka; gambarBand(); },
+      reset() { Object.values(timers).forEach(clearTimeout); const u = S.user; S = awal(); resetCalls(); if (u) { S.user = u; S.view = "antrean"; S.alur.masuk = true; } T0.t = Date.now(); gambarModal(); gambar(); toast("Prototipe dimulai ulang."); },
+      "putus-sim"() { putuskan(); },
+      nav() { buka(el.dataset.v); },
+      telepon() { telepon(id); },
+      dahulukan() { tandai("dahulukan"); telepon(id); },
+      konfirmasi() { konfirmasi(id); },
+      "buka-panggilan"() { buka("panggilan", id); },
+      "buka-kartu"() { buka("kartu", id); },
+      lewati() { lewati(id); },
+      "coba-lagi"() { cobaLagi(id); },
+      "tandai-gagal"() { tandaiGagal(id); },
+      auto() {
+        S.auto = !S.auto; S.jeda = false; if (S.auto) tandai("auto");
+        toast(S.auto ? (S.hours ? "Panggilan otomatis aktif. Antrean ditelepon satu per satu." : "Panggilan otomatis aktif. Mulai pukul 09.00 besok.") : "Panggilan otomatis dimatikan.");
+        gambar();
+      },
+      jeda() { S.jeda = !S.jeda; toast(S.jeda ? "Dijeda. Panggilan yang sedang berjalan diselesaikan dulu." : "Dilanjutkan."); gambar(); },
+      setujui() { const lab = c(id).label; S.keputusan[id] = { tindakan: SARAN_KODE[lab], ikut: true, alasan: "", oleh: S.user.nama, waktu: "6 Okt, " + jam() }; tandai("putusan"); toast(`${TINDAKAN[SARAN_KODE[lab]]} · ${P[id].pasien}`, () => buka("riwayat"), "Lihat riwayat"); gambar(); },
+      "pilih-lain"() { S.pilihLain = true; S.tindakanLain = null; S.alasan = ""; gambar(); },
+      "batal-lain"() { S.pilihLain = false; gambar(); },
+      "simpan-lain"() { if (!(S.tindakanLain && S.alasan.trim())) return; S.keputusan[id] = { tindakan: S.tindakanLain, ikut: false, alasan: S.alasan.trim(), oleh: S.user.nama, waktu: "6 Okt, " + jam() }; S.pilihLain = false; tandai("putusan"); toast(`${TINDAKAN[S.tindakanLain]} · ${P[id].pasien}`, () => buka("riwayat"), "Lihat riwayat"); gambar(); },
+      klar() { S.klarifikasi[id] = "6 Okt, " + jam(); gambar(); },
+      unduh() { toast("Di aplikasi asli tombol ini mengunduh kartu bukti sebagai PDF."); },
+      putar() {
+        S.main = S.main === S.id ? null : S.id; gambar();
+        if (!S.main) return;
+        const bars = () => document.querySelectorAll("#gel i");
+        let i = 0;
+        const step = () => { if (S.main !== S.id) return; const b = bars(); if (i >= b.length) { S.main = null; gambar(); return; } b[i].classList.add("lewat"); i += 1; setTimeout(step, 90); };
+        step();
+      }
+    }[a];
+    if (act) act();
+  });
+
+  gambar();
+})();
+</script>
+
+</html>

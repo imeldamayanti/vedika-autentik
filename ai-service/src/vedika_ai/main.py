@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
-from . import config
+from . import config, saluran
 from .answer_reader import AnswerReader, AnswerResponse, ReadAnswerRequest
 from .errors import ServiceError
 from .gemini import GeminiError, GeminiTransport
@@ -160,6 +160,17 @@ def voice_token(
 
 
 app.include_router(router)
+
+
+def mount_line_helper(target: FastAPI) -> bool:
+    """Station laptop only: without SALURAN_ADB the /v1/saluran routes do not exist."""
+    mode = config.line_mode()
+    if mode:
+        target.include_router(saluran.create_router(mode))
+    return bool(mode)
+
+
+mount_line_helper(app)
 
 PACKAGE_WEB_DIR = Path(__file__).resolve().parent / "web"
 SOURCE_WEB_DIR = Path(__file__).resolve().parents[2] / "web"

@@ -1,5 +1,5 @@
 """Membentuk respons Kontrak A v3 (docs/api-contract-v3.md) dari baris database."""
-from datetime import time
+from datetime import datetime, time
 
 from . import aturan_v3 as at
 from . import config, jam, repo_v3
@@ -24,7 +24,7 @@ def baris_antre(r: dict) -> dict:
         "id": r["id"], "pasien": r["pasien"], "umur": r["umur"], "rs": r["id_rs"], "nama_rs": r["nama_rs"],
         "ditagih": r["sesi_ditagih"], "indikator": indikator(r), "penerima": penerima(r), "status": r["status"],
         "label": label_api(r), "keputusan_tindakan": at.TINDAKAN_API.get(r["keputusan_tindakan"]),
-        "prioritas": r["prioritas"], "percobaan": r["percobaan"],
+        "prioritas": r["prioritas"], "percobaan": r["percobaan"], "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),
     }
 
 
@@ -46,6 +46,18 @@ def dalam_jam(pengaturan: dict, sekarang) -> bool:
 
 def pengaturan_publik(pengaturan: dict) -> dict:
     return {k: pengaturan[k] for k in at.BAWAAN_PENGATURAN}
+
+
+def stasiun_publik(pengaturan: dict, sekarang) -> dict | None:
+    """Detak terakhir stasiun saluran (POST /agen/detak); None bila belum pernah terlihat."""
+    s = pengaturan.get("stasiun")
+    if not s:
+        return None
+    umur = (sekarang - datetime.fromisoformat(s["terakhir_terlihat"])).total_seconds()
+    return {
+        "aktif": umur <= config.STASIUN_AKTIF_DETIK, "siap": s["siap"], "alasan": s["alasan"],
+        "perangkat": s["perangkat"], "terakhir_terlihat": s["terakhir_terlihat"],
+    }
 
 
 def ringkasan_rs(conn, bulan: str) -> dict:
@@ -96,7 +108,7 @@ def antrean(conn, bulan: str, id_rs: str | None = None, status: str | None = Non
         "bulan": bulan, "angka": angka,
         "pengaturan": {
             **pengaturan_publik(pengaturan), "dalam_jam": dalam_jam(pengaturan, sekarang),
-            "waktu_server": jam.iso(sekarang),
+            "waktu_server": jam.iso(sekarang), "stasiun": stasiun_publik(pengaturan, sekarang),
         },
         "daftar_rs": [{"id_rs": r["id_rs"], "nama": r["nama_rs"]} for r in repo_v3.semua_rs(conn)],
         "baris": [baris_antre(r) for r in sorted(terpilih, key=urutan_antrean)],
@@ -164,6 +176,7 @@ def detail(conn, id_: str) -> dict | None:
         "indikator": indikator(r),
         "tanggal_libur": [t.isoformat() for t in repo_v3.tanggal_libur(conn, r["id_peserta"], r["id_rs"], r["bulan_layanan"])],
         "penerima": penerima(r), "status": r["status"], "percobaan": r["percobaan"],
+        "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),
         "waktu": jam.iso(r["waktu_mulai"] or pertama_menelepon),
         "log": [
             {"status": x["status"], "waktu": jam.iso(x["waktu"]), "percobaan": x["percobaan"], "catatan": x["catatan"]}

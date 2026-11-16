@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from . import aturan_v3 as at
-from . import config, jam, repo_v3, tampilan_v3
+from . import agen, config, jam, repo_v3, tampilan_v3
 from .deps import get_conn, get_penyimpanan
 from .galat import Galat
 
@@ -21,6 +21,8 @@ def antrean(
     status: str | None = None,
     conn=Depends(get_conn),
 ):
+    agen.lepas_macet(conn)  # situs tetap pulih walau stasiun tidak menarik tugas
+    conn.commit()
     return tampilan_v3.antrean(conn, bulan, id_rs, status)
 
 
@@ -98,6 +100,13 @@ def telepon_sekarang(id_: str, conn=Depends(get_conn)):
     repo_v3.tandai_prioritas(conn, id_)
     conn.commit()
     return tampilan_v3.baris_antre({**r, "prioritas": True})
+
+
+@router.post("/panggilan/{id_}/batal")
+def batalkan(id_: str, conn=Depends(get_conn)):
+    baris = agen.batalkan(conn, id_)
+    conn.commit()
+    return baris
 
 
 class KeputusanBaru(BaseModel):

@@ -158,7 +158,7 @@ def test_voice_console_is_served_by_ai_service():
     response = client.get("/voice/")
 
     assert response.status_code == 200
-    assert "Vedika Agen Suara" in response.text
+    assert "Stasiun saluran Vedika" in response.text
 
 
 def test_service_key_is_required_only_when_configured(monkeypatch):
