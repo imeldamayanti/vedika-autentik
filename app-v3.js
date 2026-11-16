@@ -66,11 +66,11 @@
   const persenSatu = (x) => koma(x.toFixed(1)) + "%";
 
   /* Sumber pemilihan: pasien ditelepon bila aturan (≥ 2 indikator) ATAU model anomali menandainya.
-     Mode API belum membawa model anomali, jadi semua baris API dipilih aturan. */
+     Simulasi dan API sama-sama membawa field dipilih. */
   const DIPILIH = {
     keduanya: { nama: "Aturan + model", arti: "Dipilih aturan (dua indikator atau lebih) dan model anomali" },
     aturan: { nama: "Aturan", arti: "Dipilih aturan: dua indikator atau lebih" },
-    model: { nama: "Model", arti: "Dipilih model anomali: polanya jarang dibanding tagihan nasional, walau tidak terkena aturan" }
+    model: { nama: "Model", arti: "Dipilih model anomali: polanya jarang di antara tagihan pasien seusia, walau tidak terkena aturan" }
   };
   const sumberDipilih = (p) => p.dipilih || "aturan";
   function chipDipilih(p) {
@@ -223,7 +223,7 @@
   function angka() {
     if (M.hidup) {
       const a = M.antrean.angka;
-      return { dipilih: a.terpicu, terpicu: a.terpicu, hanyaModel: 0, aktif: a.pasien_aktif, ditelepon: a.sudah_ditelepon, tidakSesuai: a.tidak_sesuai, rsKlarifikasi: a.rs_perlu_klarifikasi };
+      return { dipilih: a.dipilih, terpicu: a.terpicu, hanyaModel: a.hanya_model, aktif: a.pasien_aktif, ditelepon: a.sudah_ditelepon, tidakSesuai: a.tidak_sesuai, rsKlarifikasi: a.rs_perlu_klarifikasi };
     }
     const selesai = panggilanSelesai();
     return {
@@ -1037,7 +1037,8 @@
       return kepala("Kartu bukti tidak ditemukan", "Kartu bukti hanya ada untuk pasien yang sudah ditelepon.") + '<section class="panel"><div class="belum-mulai"><b>Tidak ada kartu untuk ' + esc(id || "") + '</b><a class="btn btn--primer" href="#/autentik">Ke antrean konfirmasi</a></div></section>';
     }
     if (M.hidup ? !selesaiSt(p.status) : D.SKENARIO[id] && !S.hasil[id]) {
-      return kepala("Kartu bukti belum tersedia", p.pasien) + '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + ' belum ditelepon</b><p>Kartu bukti dibuat setelah panggilan selesai.</p><a class="btn btn--primer" href="#/panggilan/' + id + '">Ke layar panggilan</a></div></section>';
+      return kepala("Kartu bukti belum tersedia", p.pasien) + '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + ' belum ditelepon</b><p>Kartu bukti dibuat setelah panggilan selesai.</p><a class="btn btn--primer" href="#/panggilan/' + id + '">Ke layar panggilan</a></div></section>' +
+        (M.hidup ? sectionDipilih(p) : "");
     }
     const j = p.jawaban, rk = ringkasKartu(p), latar = M.hidup ? p.sumber === "sintetis-riwayat" : !!D.LATAR[id];
     const saran = D.TINDAKAN[saranP(p)];
@@ -1108,10 +1109,10 @@
     const k = sumberDipilih(p), a = p.anomali;
     const aturan = p.indikator.length >= 2
       ? "<li><b>Aturan:</b> " + p.indikator.length + " indikator aktif (" + p.indikator.map((i) => D.INDIKATOR[i].nama.toLowerCase()).join(", ") + ").</li>"
-      : "<li><b>Aturan:</b> hanya " + p.indikator.length + " indikator aktif, belum cukup untuk dipilih aturan.</li>";
+      : "<li><b>Aturan:</b> " + (p.indikator.length ? "hanya " + p.indikator.length + " indikator aktif" : "tidak ada indikator aktif") + ", belum cukup untuk dipilih aturan.</li>";
     const model = !a ? ""
       : a.ditandai ? "<li><b>Model anomali:</b> " + esc(a.gabungan) + (a.alasan.length ? '<ul class="pola-alasan">' + a.alasan.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") + "</li>"
-      : "<li><b>Model anomali:</b> polanya tidak jarang secara nasional, jadi model tidak menandainya.</li>";
+      : "<li><b>Model anomali:</b> polanya tidak jarang di antara pasien seusia, jadi model tidak menandainya.</li>";
     return '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Mengapa dipilih</h2><div class="kanan">' + chipDipilih(p) + "</div></div>" +
       '<ul class="pola-alasan">' + aturan + model + "</ul>" +
       '<p class="pola-catatan">' + (a ? "Model dibandingkan dengan data sampel BPJS 2023–2024. Hasil tetap ditentukan jawaban peserta." : "Hasil tetap ditentukan jawaban peserta.") + "</p></section>";
@@ -1139,7 +1140,7 @@
       },
       rs: D.RS.map((r, i) => ({
         id: r.id, nama: r.nama, aktif: r.aktif, terpicu: r.terpicu, persen: r.persen, c: ring[i],
-        pembanding: r.pembanding,
+        pembanding: r.pembanding, funnel: r.funnel,
         daftar: selesai.filter((p) => p.rs === r.id).map((p) => ({
           id: p.id, pasien: p.pasien, label: p.label, ditagih: p.ditagih, jumlah_min: p.jawaban.jumlah_min, jumlah_maks: p.jawaban.jumlah_maks, selisih: D.selisih(p)
         }))
@@ -1153,20 +1154,24 @@
     return '<span class="label label--' + kelas + '">' + c.status + "</span>";
   }
 
-  /* Satu baris pembanding per RS: persen terpicu RS ini, RS sejenis nasional, dan batas 95% kelompok RS sejenis. */
+  /* Satu baris pembanding per RS: persen terpicu RS ini, RS sejenis nasional, batas 95% kelompok RS sejenis,
+     dan pasien dipilih (aturan ATAU model) dibanding harapan menurut umur pasiennya (corong). */
+  const LENCANA_CORONG = { above_99_8: "Jauh di atas harapan", above_95: "Di atas harapan" };
   function barisPembanding(r) {
-    const b = r.pembanding;
+    const b = r.pembanding, f = r.funnel;
     if (!b) return "";
     const bagian = ["Terpicu " + persenSatu(r.persen), "rata-rata RS sejenis " + persenSatu(b.persen_terpicu_nasional)];
     if (b.terpicu_p95_kelompok != null) bagian.push("batas 95% RS sejenis " + persenSatu(b.terpicu_p95_kelompok));
+    if (f) bagian.push("dipilih " + f.selected + ", harapan menurut umur pasien " + koma(f.expected.toFixed(1)));
     return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Dibandingkan dengan ' + esc(b.tipe) + ' di data sampel BPJS 2024">' +
       "<span>" + bagian.join(" · ") + "</span>" +
       (b.posisi === "di_atas_p95" ? '<span class="lencana-pola">Di atas 95% RS sejenis</span>' : "") +
+      (f && LENCANA_CORONG[f.position] ? '<span class="lencana-pola" title="Di luar batas corong ' + (f.position === "above_99_8" ? "99,8%" : "95%") + ' setelah memperhitungkan umur pasien dan sebaran antar-RS">' + LENCANA_CORONG[f.position] + "</span>" : "") +
       "</div></td></tr>";
   }
 
   /* Kartu kecil: berapa panggilan dari tiap sumber pemilihan berakhir Tidak sesuai (hanya Sesuai dan Tidak sesuai).
-     Inilah ukuran ketepatan model yang tidak bisa dihitung dari data klaim saja. Mode API belum membawa model anomali. */
+     Inilah ukuran ketepatan model yang tidak bisa dihitung dari data klaim saja. */
   function kartuKinerjaModel(k) {
     if (!k) return "";
     const isi = k.n
