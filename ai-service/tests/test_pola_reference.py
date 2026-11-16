@@ -220,7 +220,14 @@ def test_committed_histogram_has_only_binned_safe_cells():
 
 
 @pytest.mark.parametrize(
-    "name", ["marginal.json", "kombinasi.json", "pembanding_tipe.json", "manifest.json"]
+    "name",
+    [
+        "marginal.json",
+        "kombinasi.json",
+        "pembanding_tipe.json",
+        "manifest.json",
+        "perilaku-nyata.json",
+    ],
 )
 def test_committed_json_has_no_identifiers_small_counts_or_extremes(name):
     payload = read_json(name)

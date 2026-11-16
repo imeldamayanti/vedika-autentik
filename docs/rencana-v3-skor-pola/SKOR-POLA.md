@@ -68,7 +68,11 @@ uv run --group data python scripts/prepare_pattern_reference.py \
   --output data/reference/pola-2024
 # 2. model, referensi, skor demo, dan EVALUASI.md (hanya membaca berkas yang di-commit)
 uv run --group data python scripts/train_pattern_model.py
-# 3. isi skor ke database (tanpa --reset cukup untuk database yang sudah berjalan)
+# 3. perilaku model pada semua bulan-pasien nyata (laptop; agregat ke perilaku-nyata.json), lalu ulangi langkah 2
+uv run --group data python scripts/check_pattern_real_data.py \
+  --source "../Folder Data Asli/2025 2/Data Sampel Reguler Edisi 2025/data/202403_fkrtl.dta"
+uv run --group data python scripts/train_pattern_model.py
+# 4. isi skor ke database (tanpa --reset cukup untuk database yang sudah berjalan)
 cd ../backend && .venv/bin/python -m scripts.terapkan_v3
 ```
 
@@ -86,7 +90,7 @@ Ekspor hanya berisi fitur yang sudah dibin dan label (1 = Tidak sesuai) dari pan
 
 ## Batasan
 
-- Kelas pelanggaran dibuat dari aturan yang sama dengan aturan pemicu. Skor karena itu sangat sejalan dengan aturan dan belum menemukan pola baru. Di data demo tidak ada kasus yang lolos aturan tetapi berskor tinggi.
+- Kelas pelanggaran dibuat dari aturan yang sama dengan aturan pemicu. Di data demo skor karena itu hampir sama dengan aturan. Di 41.905 bulan-pasien nyata tidak: hanya 236 dari 706 yang terpicu juga berpola tidak biasa, dan 602 berpola tidak biasa tanpa terpicu (satu minggu padat saja, atau sesi hari Minggu saja). Pola tidak biasa juga mengumpul: 10% kelompok RS sejenis memuat 74%-nya. Angka ini perilaku, bukan akurasi; rinciannya di `EVALUASI.md`.
 - Sesi hari Minggu di data nyata langka (0,44% bulan-pasien) dan hanya muncul di sel kasar dengan paling banyak 2 sesi seminggu; Minggu bersama 3 sesi atau lebih seminggu tetap tersembunyi. Model karena itu masih sangat yakin pada kombinasi Minggu + padat: di antrean demo, 20 dari 26 panggilan tampil sebagai 1,00. Antrean diurutkan menurut logitnya (7,8 sampai 14,7), jadi urutannya tetap ditentukan model, tetapi chip di layar tidak menunjukkan bedanya.
 - Di dalam sel kasar, fitur dianggap saling bebas saat dipecah ke bin halus.
 - Koefisien `sesi` tidak naik terus: 9–13 sesi berkoefisien lebih rendah dari 7–8 sesi, dan bulan-pasien yang hanya melanggar I1 berskor rendah. Model membaca "banyak sesi tetapi tersebar rata" sebagai pola nyata yang wajar.

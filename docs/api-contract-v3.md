@@ -199,10 +199,10 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
     "tinggi": true,
     "ambang": 0.898,
     "alasan": [
-      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional" },
-      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini" }
+      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional." },
+      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini." }
     ],
-    "kombinasi": { "kunci": "I1+I2+I4", "teks": "Kombinasi I1+I2+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024." },
+    "kombinasi": { "kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024." },
     "versi": "pola-v1"
   },
   "tanggal_libur": ["2026-08-16", "2026-08-17"],
@@ -258,7 +258,7 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
 - `jawaban` selalu terisi saat status `selesai` atau `tidak_terhubung`. Untuk `tidak_terhubung` pembaca tidak dipanggil: API menyusun `{"status_panggilan": "tidak_terhubung", "penerima": null, "hubungan": null, "hadir": null, "jumlah_min": null, "jumlah_maks": null, "keyakinan": null, "tanda_bahaya": [], "membantah_tanggal_libur": null, "kutipan_kunci": "", "ringkasan": "Panggilan tidak diangkat 2 kali."}`. Key yang tidak ada pada baris lama (riwayat tanpa `membantah_tanggal_libur`) dilengkapi `null`. `versi_pembaca` ikut tersimpan di dalam `jawaban`; FE mengabaikannya.
 - `alasan` dari `aturan.py` apa adanya, untuk S2: `Ada pernyataan berisiko: tanda_tangan_tanpa_layanan.` FE menampilkan nama tanda bahaya dengan mengganti kode di teks itu; isi di API tidak diubah (uji E membandingkan dengan `expected_alasan`).
 - `konteks_rs` = ringkasan RS terkini untuk RS panggilan ini (dipakai teks saran di kartu bukti).
-- `pola` = alasan prioritas (bagian "Mengapa diprioritaskan" di kartu bukti), atau `null` bila bulan-pasien belum punya skor. `skor` dan `tinggi` sama dengan baris antrean; `ambang` = `ambang_tinggi` model; `versi` = `pengaturan.versi_pola` (bawaan `pola-v1`). `alasan` = paling banyak dua fitur dengan sumbangan positif terbesar (`fitur`: `sesi`, `maks_minggu`, `ahad_libur`, `episode`); `persentil_nasional` = persen bulan-pasien nasional dengan nilai ≤ nilai ini; `teks` siap tampil. `kombinasi.teks` memakai prevalensi nasional kombinasi indikator; kombinasi di bawah 10 baris pada data sampel hanya punya batas atas ("kurang dari 0,03%"). `pola` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
+- `pola` = alasan prioritas (bagian "Alasan prioritas" di kartu bukti), atau `null` bila bulan-pasien belum punya skor. `skor` dan `tinggi` sama dengan baris antrean; `ambang` = `ambang_tinggi` model; `versi` = `pengaturan.versi_pola` (bawaan `pola-v1`). `alasan` = paling banyak dua fitur dengan sumbangan positif terbesar (`fitur`: `sesi`, `maks_minggu`, `ahad_libur`, `episode`); `persentil_nasional` = persen bulan-pasien nasional dengan nilai ≤ nilai ini; `teks` siap tampil. `kombinasi.teks` memakai prevalensi nasional kombinasi indikator; kombinasi di bawah 10 baris pada data sampel hanya punya batas atas ("kurang dari 0,03%"). `pola` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
 - `pesan_wa.pemberitahuan` = Lampiran B persis (sumber yang sama dengan `wa.teks` di `agen/ambil`), `pesan_wa.cadangan` = teks chat cadangan, hanya terisi untuk label `tidak_terhubung`; `dari` = nomor penelepon di konfigurasi API (`NOMOR_PENELEPON`). FE memakainya untuk mockup WA.
 - `keputusan` berisi objek seperti di `GET /keputusan` (tanpa field gabungan) bila sudah diputuskan.
 - Identitas penerima tidak ikut dalam data apa pun yang dibagikan ke RS (R5.6); endpoint ini hanya untuk verifikator.

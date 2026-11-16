@@ -132,12 +132,12 @@ def test_detail_pola_s1_dua_alasan_dan_kombinasi(klien_v3):
     pola = klien_v3.get(f"/api/v1/panggilan/{S1}").json()["pola"]
     assert (pola["skor"], pola["tinggi"], pola["ambang"], pola["versi"]) == (1.0, True, 0.898, "pola-v1")
     assert [a["fitur"] for a in pola["alasan"]] == ["maks_minggu", "ahad_libur"]
-    assert pola["alasan"][0]["teks"] == "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
-    assert pola["alasan"][1]["teks"] == "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
+    assert pola["alasan"][0]["teks"] == "4 sesi dalam satu minggu, lebih padat dari 99,9% tagihan bulanan fisioterapi nasional."
+    assert pola["alasan"][1]["teks"] == "2 sesi pada hari Minggu atau libur. Hanya 0,4% tagihan bulanan nasional memuat sesi seperti ini."
     assert all(a.keys() == {"fitur", "nilai", "kontribusi", "persentil_nasional", "teks"} for a in pola["alasan"])
     assert pola["kombinasi"] == {
         "kunci": "I1+I2+I4",
-        "teks": "Kombinasi I1+I2+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024.",
+        "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024.",
     }
 
 
@@ -145,7 +145,7 @@ def test_detail_pola_s3_wajar_dengan_prevalensi_pasti(klien_v3):
     pola = klien_v3.get("/api/v1/panggilan/CALL-P-S3-2026-08").json()["pola"]
     assert (pola["skor"], pola["tinggi"]) == (0.124, False)
     assert pola["kombinasi"] == {
-        "kunci": "I1+I3", "teks": "Kombinasi I1+I3 terjadi pada 0,22% bulan-pasien fisioterapi nasional 2024.",
+        "kunci": "I1+I3", "teks": "Gabungan indikator ini muncul pada 0,22% tagihan bulanan fisioterapi nasional 2024.",
     }
 
 

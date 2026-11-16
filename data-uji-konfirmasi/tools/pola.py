@@ -99,14 +99,15 @@ def persen(x):
 
 
 def _teks(f, nilai, di_bawah, punya_libur):
+    """Satu kalimat untuk verifikator. 'Tagihan bulanan' = tagihan satu pasien dalam satu bulan (bulan-pasien)."""
     if f == "sesi":
-        return f"{nilai} sesi dalam sebulan; lebih tinggi dari {persen(di_bawah)}% bulan-pasien fisioterapi nasional"
+        return f"{nilai} sesi dalam sebulan, lebih banyak dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
     if f == "maks_minggu":
-        return f"{nilai} sesi dalam satu minggu; lebih tinggi dari {persen(di_bawah)}% bulan-pasien fisioterapi nasional"
+        return f"{nilai} sesi dalam satu minggu, lebih padat dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
     if f == "ahad_libur":
-        return f"{nilai} sesi di hari Minggu/libur; hanya {persen(punya_libur)}% bulan-pasien nasional punya sesi seperti ini"
+        return f"{nilai} sesi pada hari Minggu atau libur. Hanya {persen(punya_libur)}% tagihan bulanan nasional memuat sesi seperti ini."
     lama = f"{nilai} bulan atau lebih" if nilai >= EPISODE_MAKS else f"{nilai} bulan"
-    return f"{lama} berturut-turut ada sesi; lebih panjang dari {persen(di_bawah)}% bulan-pasien fisioterapi nasional"
+    return f"Ada sesi {lama} berturut-turut, lebih lama dari {persen(di_bawah)}% tagihan bulanan fisioterapi nasional."
 
 
 def alasan(model, referensi, fitur, n=2):
