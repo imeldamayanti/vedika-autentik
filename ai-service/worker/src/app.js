@@ -31,8 +31,13 @@ const apiKey = (env, what) => {
 async function route(request, env, fetchImpl) {
   const { pathname } = new URL(request.url);
   if (!pathname.startsWith("/v1/")) return json({ detail: "Not Found" }, 404);
-  if (env.AI_SERVICE_KEY && !sameSecret(request.headers.get("X-Kunci-Layanan") ?? "", env.AI_SERVICE_KEY)) {
-    throw fail(401, "kunci_salah", "Header X-Kunci-Layanan kosong atau salah.");
+  const supplied = request.headers.get("X-Kunci-Layanan");
+  if (env.AI_SERVICE_KEY && !sameSecret(supplied ?? "", env.AI_SERVICE_KEY)) {
+    // Say why, never what: missing header or wrong length helps debug a misconfigured caller.
+    const why = supplied === null
+      ? "missing"
+      : `mismatch length ${supplied.length} expected ${env.AI_SERVICE_KEY.length}`;
+    throw Object.assign(fail(401, "kunci_salah", "Header X-Kunci-Layanan kosong atau salah."), { why });
   }
   if (pathname === "/v1/kesehatan" && request.method === "GET") {
     return json({
@@ -71,11 +76,13 @@ export async function handle(request, env, fetchImpl = fetch) {
   const requestId = crypto.randomUUID().replaceAll("-", "");
   let response;
   let code = null;
+  let key;
   try {
     response = await route(request, env, fetchImpl);
   } catch (error) {
     if (!error.kode) throw error;
     code = error.kode;
+    key = error.why;
     response = galat(error);
   }
   response.headers.set("X-Request-ID", requestId);
@@ -86,6 +93,7 @@ export async function handle(request, env, fetchImpl = fetch) {
     path: new URL(request.url).pathname,
     status: response.status,
     code,
+    key,
     duration_ms: Date.now() - started,
   }));
   return response;

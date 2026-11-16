@@ -60,6 +60,20 @@ describe("GET /v1/kesehatan", () => {
     expect((await missing.json()).galat.kode).toBe("kunci_salah");
     expect((await call("/v1/kesehatan", { env, headers: { "X-Kunci-Layanan": "secret" } })).status).toBe(200);
   });
+
+  test("logs why a key was rejected without logging the key", async () => {
+    const env = { AI_SERVICE_KEY: "secret" };
+    const logs = [];
+    const log = spyOn(console, "log").mockImplementation((line) => logs.push(JSON.parse(line)));
+    try {
+      await call("/v1/kesehatan", { env });
+      await call("/v1/kesehatan", { env, headers: { "X-Kunci-Layanan": "wrong-value" } });
+    } finally {
+      log.mockRestore();
+    }
+    expect(logs.map((l) => l.key)).toEqual(["missing", "mismatch length 11 expected 6"]);
+    expect(JSON.stringify(logs)).not.toContain("wrong-value");
+  });
 });
 
 describe("POST /v1/baca (Kontrak B2)", () => {
