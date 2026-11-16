@@ -123,36 +123,98 @@ def patient_months(visits: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return records
 
 
-def _histogram(records: list[dict[str, Any]], minimum: int) -> tuple[list[dict[str, Any]], dict]:
+def _bands(*groups: tuple[str, ...]) -> dict[str, tuple[str, ...]]:
+    """Band label -> fine bins; a single bin keeps its own label."""
+
+    def label(group: tuple[str, ...]) -> str:
+        if len(group) == 1:
+            return group[0]
+        if group[-1].endswith("+"):
+            return f"{group[0]}+"
+        return f"{group[0]}-{group[-1]}"
+
+    return {label(group): group for group in groups}
+
+
+# Coarser levels for histogram cells that stay under the minimum. Band edges sit on the rule
+# thresholds (I1 sesi > 8, I2 maks_minggu >= 3, I3 episode >= 6, I4 ahad_libur > 0), so the
+# indicators of every exported cell stay exact. Level 0 is pola.BIN itself.
+COARSE_LEVELS = (
+    {
+        "sesi": _bands(
+            ("1", "2"), ("3", "4"), ("5", "6"), ("7", "8"), ("9", "10", "11", "12"), ("13+",)
+        ),
+        "maks_minggu": _bands(("1",), ("2",), ("3",), ("4", "5", "6+")),
+        "ahad_libur": _bands(("0",), ("1",), ("2+",)),
+        "episode": _bands(("1",), ("2", "3"), ("4", "5"), ("6",), ("7+",)),
+    },
+    {
+        "sesi": _bands(("1", "2", "3", "4"), ("5", "6", "7", "8"), ("9", "10", "11", "12", "13+")),
+        "maks_minggu": _bands(("1", "2"), ("3", "4", "5", "6+")),
+        "ahad_libur": _bands(("0",), ("1", "2+")),
+        "episode": _bands(("1", "2", "3", "4", "5"), ("6", "7+")),
+    },
+)
+
+
+def histogram_levels() -> list[dict[str, dict[str, tuple[str, ...]]]]:
+    """All levels, finest first: feature -> band label -> fine bins."""
+
     pola = load_pola()
-    counts: Counter[tuple[str, ...]] = Counter()
-    weights: Counter[tuple[str, ...]] = Counter()
-    for record in records:
-        key = tuple(record["bin"][name] for name in pola.FITUR)
-        counts[key] += 1
-        weights[key] += record["bobot"]
-    kept = sorted(
-        (key for key, count in counts.items() if count >= minimum),
-        key=lambda key: [pola.BIN[name].index(key[n]) for n, name in enumerate(pola.FITUR)],
-    )
-    rows = [
-        {
-            **dict(zip(pola.FITUR, key, strict=True)),
-            "n": counts[key],
-            "bobot": round(weights[key], 2),
-        }
-        for key in kept
-    ]
-    total_n = sum(counts.values())
-    total_weight = sum(weights.values())
-    kept_n = sum(counts[key] for key in kept)
-    kept_weight = sum(weights[key] for key in kept)
+    fine = {name: {label: (label,) for label in pola.BIN[name]} for name in pola.FITUR}
+    return [fine, *COARSE_LEVELS]
+
+
+def _band_of(level: dict[str, dict[str, tuple[str, ...]]], name: str, fine_label: str) -> str:
+    return next(band for band, members in level[name].items() if fine_label in members)
+
+
+def _histogram(records: list[dict[str, Any]], minimum: int) -> tuple[list[dict[str, Any]], dict]:
+    """Multi-level histogram: each record is counted once, in the finest cell with >= minimum rows.
+
+    Records in a fine cell under the minimum move to the next coarser level; whatever is still
+    under the minimum at the coarsest level is suppressed.
+    """
+
+    pola = load_pola()
+    levels = histogram_levels()
+    remaining = [tuple(record["bin"][name] for name in pola.FITUR) for record in records]
+    weights_in = [record["bobot"] for record in records]
+    pending = list(range(len(records)))
+    rows: list[dict[str, Any]] = []
+    per_level = []
+    for depth, level in enumerate(levels):
+        cells: dict[tuple[str, ...], list[int]] = defaultdict(list)
+        for index in pending:
+            key = tuple(
+                _band_of(level, name, remaining[index][n]) for n, name in enumerate(pola.FITUR)
+            )
+            cells[key].append(index)
+        kept = sorted(
+            (key for key, members in cells.items() if len(members) >= minimum),
+            key=lambda key: [list(level[name]).index(key[n]) for n, name in enumerate(pola.FITUR)],
+        )
+        for key in kept:
+            rows.append(
+                {
+                    "tingkat": depth,
+                    **dict(zip(pola.FITUR, key, strict=True)),
+                    "n": len(cells[key]),
+                    "bobot": round(sum(weights_in[i] for i in cells[key]), 2),
+                }
+            )
+        per_level.append(len(kept))
+        kept_set = set(kept)
+        pending = [i for key, members in cells.items() if key not in kept_set for i in members]
+
+    total_n = len(records)
+    total_weight = sum(weights_in)
     suppression = {
-        "cells_total": len(counts),
-        "cells_suppressed": len(counts) - len(kept),
-        "row_share_suppressed": round(1 - kept_n / total_n, 4) if total_n else 0.0,
+        "cells_per_level": per_level,
+        "rows_suppressed": len(pending),
+        "row_share_suppressed": round(len(pending) / total_n, 4) if total_n else 0.0,
         "weight_share_suppressed": (
-            round(1 - kept_weight / total_weight, 4) if total_weight else 0.0
+            round(sum(weights_in[i] for i in pending) / total_weight, 4) if total_weight else 0.0
         ),
     }
     return rows, suppression
@@ -386,7 +448,9 @@ def build_pattern_reference(
         name: output_dir / name
         for name in ("histogram.csv", "marginal.json", "kombinasi.json", "pembanding_tipe.json")
     }
-    _write_csv(paths["histogram.csv"], (*pola.FITUR, "n", "bobot"), result["histogram"])
+    _write_csv(
+        paths["histogram.csv"], ("tingkat", *pola.FITUR, "n", "bobot"), result["histogram"]
+    )
     _write_json(paths["marginal.json"], result["marginal"])
     _write_json(paths["kombinasi.json"], result["kombinasi"])
     _write_json(paths["pembanding_tipe.json"], result["pembanding_tipe"])
@@ -407,6 +471,9 @@ def build_pattern_reference(
             "minimum_group_patient_months": MINIMUM_GROUP_MONTHS,
             "minimum_groups_for_percentiles": MINIMUM_GROUPS_FOR_PERCENTILES,
             "minimum_type_patient_months": MINIMUM_TYPE_MONTHS,
+            "histogram_levels": [
+                {name: list(bands) for name, bands in level.items()} for level in COARSE_LEVELS
+            ],
             "holiday_list": "none (ahad_libur and I4 count Sundays only in the 2024 data)",
             "peer_group": "FKL06 + FKL07 + FKL08 + FKL09 of most visits in the patient-month",
             "episode_note": (

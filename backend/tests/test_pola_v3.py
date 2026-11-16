@@ -14,7 +14,7 @@ def test_model_dan_referensi_dimuat_dari_data_uji():
 def test_nilai_s1_tinggi_dengan_dua_alasan():
     n = pola_v3.nilai({"sesi": 11, "maks_minggu": 4, "ahad_libur": 2, "episode": 3})
     assert n["skor"] >= pola_v3.model()["ambang_tinggi"] and n["tinggi"] is True
-    assert [a["fitur"] for a in n["alasan"]] == ["ahad_libur", "maks_minggu"]
+    assert [a["fitur"] for a in n["alasan"]] == ["maks_minggu", "ahad_libur"]
 
 
 def test_nilai_pasien_wajar_rendah():

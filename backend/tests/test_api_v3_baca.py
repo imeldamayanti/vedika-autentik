@@ -47,7 +47,7 @@ def test_antrean_skor_pola_sama_dengan_skor_demo(klien_v3):
         if r["status"] == "antre":
             pid = r["id"].removeprefix("CALL-").removesuffix("-2026-08")
             assert (r["skor_pola"], r["pola_tinggi"]) == (skor[pid]["skor"], skor[pid]["tinggi"]), r["id"]
-    assert sum(r["pola_tinggi"] for r in baris) == 23
+    assert sum(r["pola_tinggi"] for r in baris) == 22
 
 
 def test_antrean_tanpa_skor_di_akhir_antre_dan_skor_tidak_mengubah_pemicu(klien_v3, conn_v3):
@@ -127,10 +127,10 @@ def test_detail_s1_sebelum_ditelepon(klien_v3):
 
 def test_detail_pola_s1_dua_alasan_dan_kombinasi(klien_v3):
     pola = klien_v3.get(f"/api/v1/panggilan/{S1}").json()["pola"]
-    assert (pola["skor"], pola["tinggi"], pola["ambang"], pola["versi"]) == (1.0, True, 0.878, "pola-v1")
-    assert [a["fitur"] for a in pola["alasan"]] == ["ahad_libur", "maks_minggu"]
-    assert pola["alasan"][0]["teks"] == "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-    assert pola["alasan"][1]["teks"] == "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+    assert (pola["skor"], pola["tinggi"], pola["ambang"], pola["versi"]) == (1.0, True, 0.898, "pola-v1")
+    assert [a["fitur"] for a in pola["alasan"]] == ["maks_minggu", "ahad_libur"]
+    assert pola["alasan"][0]["teks"] == "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+    assert pola["alasan"][1]["teks"] == "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
     assert all(a.keys() == {"fitur", "nilai", "kontribusi", "persentil_nasional", "teks"} for a in pola["alasan"])
     assert pola["kombinasi"] == {
         "kunci": "I1+I2+I4",
@@ -140,7 +140,7 @@ def test_detail_pola_s1_dua_alasan_dan_kombinasi(klien_v3):
 
 def test_detail_pola_s3_wajar_dengan_prevalensi_pasti(klien_v3):
     pola = klien_v3.get("/api/v1/panggilan/CALL-P-S3-2026-08").json()["pola"]
-    assert (pola["skor"], pola["tinggi"]) == (0.141, False)
+    assert (pola["skor"], pola["tinggi"]) == (0.124, False)
     assert pola["kombinasi"] == {
         "kunci": "I1+I3", "teks": "Kombinasi I1+I3 terjadi pada 0,22% bulan-pasien fisioterapi nasional 2024.",
     }
@@ -328,13 +328,13 @@ def test_ringkasan_rs_bulan_tanpa_data_tidak_punya_pembanding(klien_v3):
 
 def test_ringkasan_rs_kinerja_pola_hanya_sesuai_dan_tidak_sesuai(klien_v3, conn_v3):
     awal = klien_v3.get("/api/v1/ringkasan-rs").json()["kinerja_pola"]
-    assert awal == {"n": 4, "skor_rata_tidak_sesuai": 0.881, "skor_rata_sesuai": 0.507, "tinggi_dan_tidak_sesuai": 1, "tinggi": 1}
+    assert awal == {"n": 4, "skor_rata_tidak_sesuai": 0.838, "skor_rata_sesuai": 0.468, "tinggi_dan_tidak_sesuai": 1, "tinggi": 1}
     ubah(conn_v3, S1, status="selesai", label="Tidak sesuai")
     ubah(conn_v3, "CALL-P-S3-2026-08", status="selesai", label="Sesuai")
     ubah(conn_v3, "CALL-P-S4-2026-08", status="selesai", label="Tidak yakin")  # tidak dihitung
     ubah(conn_v3, "CALL-P-S5-2026-08", status="tidak_terhubung", label="Tidak terhubung")  # tidak dihitung
     k = klien_v3.get("/api/v1/ringkasan-rs").json()["kinerja_pola"]
-    assert k == {"n": 6, "skor_rata_tidak_sesuai": 0.921, "skor_rata_sesuai": 0.385, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2}
+    assert k == {"n": 6, "skor_rata_tidak_sesuai": 0.892, "skor_rata_sesuai": 0.354, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2}
 
 
 # ---- GET /keputusan, /pengaturan, /kesehatan ----

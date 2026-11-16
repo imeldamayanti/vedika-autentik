@@ -20,7 +20,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from vedika_ai.pola_reference import load_pola, weighted_percentile
+from vedika_ai.pola_reference import histogram_levels, load_pola, weighted_percentile
 
 AKAR = Path(__file__).resolve().parents[2]
 REFERENSI = AKAR / "ai-service" / "data" / "reference" / "pola-2024"
@@ -64,12 +64,25 @@ def ribuan(n: int) -> str:
     return f"{n:,}".replace(",", ".")
 
 
-def baca_histogram() -> list[dict]:
-    """Sel histogram nasional sebagai fitur mentah (bin teratas memakai batas bawahnya)."""
-    return [
-        {**{f: int(r[f].rstrip("+")) for f in pola.FITUR}, "n": int(r["n"]), "bobot": float(r["bobot"])}
-        for r in baca_csv(REFERENSI / "histogram.csv")
-    ]
+def pecah_sel(r: dict, tingkat: list[dict], marginal: dict) -> list[dict]:
+    """Satu sel histogram menjadi sel bin halus. Sel kasar (tingkat > 0) dibagi menurut marginal nasional
+    di dalam rentangnya, dengan anggapan fitur saling bebas di dalam sel itu. Bin teratas memakai batas bawahnya."""
+    pilihan = []
+    for f in pola.FITUR:
+        anggota = tingkat[int(r["tingkat"])][f][r[f]]
+        p = {b: marginal[f].get(b, 0.0) for b in anggota}
+        total = sum(p.values())
+        pilihan.append([(b, p[b] / total) for b in anggota if p[b] > 0] if total else [(anggota[0], 1.0)])
+    hasil = [({}, float(r["bobot"]))]
+    for f, opsi in zip(pola.FITUR, pilihan, strict=True):
+        hasil = [({**fitur, f: int(b.rstrip("+"))}, w * bagian) for fitur, w in hasil for b, bagian in opsi]
+    return [{**fitur, "tingkat": int(r["tingkat"]), "bobot": w} for fitur, w in hasil]
+
+
+def baca_histogram(marginal: dict) -> list[dict]:
+    """Histogram nasional sebagai sel fitur mentah berbobot; sel kasar dipecah ke bin halus."""
+    tingkat = histogram_levels()
+    return [x for r in baca_csv(REFERENSI / "histogram.csv") for x in pecah_sel(r, tingkat, marginal)]
 
 
 def manipulasi(fitur: dict, rng: random.Random) -> dict:
@@ -296,11 +309,11 @@ def tulis_evaluasi(model, kecocokan, auc_sintetis, tingkat, per_kombinasi, demo_
         f"- Ambang `ambang_tinggi` = **{angka(model['ambang_tinggi'])}** (persentil berbobot "
         f"{angka(100 * PERSENTIL_TINGGI, 1)} skor atas histogram nasional).",
         f"- Pangsa bulan-pasien nasional dengan skor ≥ ambang: **{angka(100 * tingkat, 2)}%**.",
-        f"- Histogram dipakai setelah sel di bawah 10 baris disembunyikan ({angka(100 * tersembunyi, 2)}% "
-        "bobot). Sel yang tersembunyi kebanyakan ada di ekor, termasuk semua bulan-pasien dengan sesi "
-        f"hari Minggu ({angka(100 * punya_minggu, 2)}% nasional), yang skornya pasti di atas ambang. "
-        f"Pangsa nasional sebenarnya karena itu di antara kira-kira {angka(100 * tingkat * (1 - tersembunyi), 1)}% "
-        f"dan {angka(100 * (tingkat * (1 - tersembunyi) + tersembunyi), 1)}%.",
+        f"- Histogram bertingkat: sel di bawah 10 baris digabung ke rentang yang lebih kasar (batas rentang tepat di "
+        f"ambang aturan), dan hanya sisa yang tetap di bawah 10 baris di tingkat terkasar yang disembunyikan "
+        f"({angka(100 * tersembunyi, 2)}% bobot). Bulan-pasien dengan sesi hari Minggu ({angka(100 * punya_minggu, 2)}% "
+        f"nasional) ikut masuk kelas normal lewat sel kasar. Pangsa nasional sebenarnya di antara kira-kira "
+        f"{angka(100 * tingkat * (1 - tersembunyi), 1)}% dan {angka(100 * (tingkat * (1 - tersembunyi) + tersembunyi), 1)}%.",
         "",
         "Rata-rata skor per kombinasi aturan (sel histogram yang tidak tersembunyi):",
         "",
@@ -340,9 +353,9 @@ def tulis_evaluasi(model, kecocokan, auc_sintetis, tingkat, per_kombinasi, demo_
         "Skor bukan peluang kecurangan dan bukan putusan.",
         "- Kelas normal adalah data nyata apa adanya, jadi bisa memuat manipulasi yang tidak terdeteksi.",
         "- Di data nyata 2024 tidak ada daftar libur, jadi `ahad_libur` dan I4 hanya menghitung hari Minggu.",
-        "- Semua sel histogram yang memuat sesi hari Minggu berisi kurang dari 10 baris dan tersembunyi. "
-        "Kelas normal karenanya tidak punya sesi hari Minggu, dan koefisien `ahad_libur` sepenuhnya berasal "
-        "dari manipulasi buatan.",
+        "- Sel kasar dipecah ke bin halus memakai marginal nasional, dengan anggapan fitur saling bebas di "
+        "dalam sel itu. Sesi hari Minggu di data nyata hanya muncul di sel kasar dengan paling banyak 2 sesi "
+        "seminggu; Minggu bersama 3 sesi atau lebih seminggu tetap tersembunyi.",
         "- Data sampel tidak memuat identitas RS dan tidak memuat bulan sebelum Januari 2024.",
         "- Skor hanya mengurutkan antrean. Pemicu panggilan, label, saran, dan status RS tetap dari aturan.",
         "",
@@ -400,8 +413,8 @@ def main() -> int:
     ap.add_argument("--label-panggilan", type=Path, help="label-panggilan.json dari backend/scripts/ekspor_label_pola.py")
     arg = ap.parse_args()
 
-    histogram = baca_histogram()
     marginal = baca_json(REFERENSI / "marginal.json")
+    histogram = baca_histogram(marginal["marginal"])
     kombinasi = baca_json(REFERENSI / "kombinasi.json")
     pembanding = baca_json(REFERENSI / "pembanding_tipe.json")
     manifest = baca_json(REFERENSI / "manifest.json")

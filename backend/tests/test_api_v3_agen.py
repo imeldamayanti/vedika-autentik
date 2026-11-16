@@ -160,7 +160,7 @@ def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkey
     """Dahulukan menang atas skor; sesudahnya skor tertinggi, dan skor sama diurutkan menurut id biner."""
     jam_palsu(monkeypatch)
     nyalakan(klien_agen)
-    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,141, terendah di antrean
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,124, terendah di antrean
     conn_v3.execute("update indikator_bulanan set skor_pola = 0.999 where id_peserta = 'P-S1'")
     conn_v3.execute("update indikator_bulanan set skor_pola = null where id_peserta = 'P-S2'")
     urutan = []

@@ -15,6 +15,7 @@ from vedika_ai.claim_reference import (
 from vedika_ai.pola_reference import (
     NATIONAL,
     aggregate,
+    histogram_levels,
     load_pola,
     patient_months,
     percentile,
@@ -74,6 +75,7 @@ def test_aggregate_suppresses_small_cells_everywhere():
 
     assert result["histogram"] == [
         {
+            "tingkat": 0,
             "sesi": "2",
             "maks_minggu": "1",
             "ahad_libur": "0",
@@ -83,8 +85,8 @@ def test_aggregate_suppresses_small_cells_everywhere():
         }
     ]
     assert result["suppression"]["histogram"] == {
-        "cells_total": 2,
-        "cells_suppressed": 1,
+        "cells_per_level": [1, 0, 0],
+        "rows_suppressed": 3,
         "row_share_suppressed": 0.2,
         "weight_share_suppressed": 0.2,
     }
@@ -99,6 +101,37 @@ def test_aggregate_suppresses_small_cells_everywhere():
     assert result["pembanding_tipe"].keys() == {NATIONAL}
     assert result["suppression"]["types_omitted_under_100_patient_months"] == 1
     assert "100" not in json.dumps(result["histogram"])
+
+
+def test_small_cells_roll_up_to_coarser_bands_on_rule_thresholds():
+    sunday = ["2024-08-04", "2024-08-05"]
+    spread = ["2024-08-04", "2024-08-05", "2024-08-12"]
+    visits = frame(range(1, 6), sunday) + frame(range(10, 16), spread)
+    visits += frame(range(100, 112), ["2024-08-05"])
+
+    result = aggregate(visits)
+
+    # 5 rows (2 sessions) and 6 rows (3 sessions) with a Sunday are each under 10, also at level 1;
+    # together they reach 11 at level 2, still on the right side of every rule threshold.
+    cells = [
+        (r["tingkat"], r["sesi"], r["maks_minggu"], r["ahad_libur"], r["episode"], r["n"])
+        for r in result["histogram"]
+    ]
+    assert cells == [(0, "1", "1", "0", "1", 12), (2, "1-4", "1-2", "1+", "1-5", 11)]
+    assert result["suppression"]["histogram"]["rows_suppressed"] == 0
+
+
+def test_coarse_bands_never_straddle_a_rule_threshold():
+    thresholds = {"sesi": 8, "maks_minggu": 2, "ahad_libur": 0, "episode": 5}
+    for level in histogram_levels():
+        for name, bands in level.items():
+            covered = [label for members in bands.values() for label in members]
+            assert covered == load_pola().BIN[name], (name, covered)
+            for members in bands.values():
+                values = [int(label.rstrip("+")) for label in members]
+                assert all(v <= thresholds[name] for v in values) or all(
+                    v > thresholds[name] for v in values
+                ), (name, members)
 
 
 def test_aggregate_keeps_months_outside_the_window_out_of_the_histogram():
@@ -161,11 +194,13 @@ def test_committed_histogram_has_only_binned_safe_cells():
         rows = list(csv.DictReader(source))
 
     assert rows
-    assert list(rows[0]) == [*pola.FITUR, "n", "bobot"]
+    levels = histogram_levels()
+    assert list(rows[0]) == ["tingkat", *pola.FITUR, "n", "bobot"]
     assert not {name.casefold() for name in rows[0]} & _FORBIDDEN_AGGREGATE_KEYS
     assert all(int(row["n"]) >= MINIMUM_SAFE_CELL_COUNT for row in rows)
-    assert all(row[name] in pola.BIN[name] for row in rows for name in pola.FITUR)
-    assert len({tuple(row[name] for name in pola.FITUR) for row in rows}) == len(rows)
+    for row in rows:
+        assert all(row[name] in levels[int(row["tingkat"])][name] for name in pola.FITUR), row
+    assert len({tuple(row[name] for name in ("tingkat", *pola.FITUR)) for row in rows}) == len(rows)
 
 
 @pytest.mark.parametrize(

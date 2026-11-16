@@ -13,8 +13,8 @@
   "outputs": [
     {
       "filename": "histogram.csv",
-      "sha256": "8d3b7b3998a772f23aa1c90f755141a7014107fb0a686c8865f96265bb0906ac",
-      "size_bytes": 2426
+      "sha256": "e702349e3bd59337a4ca3d47e24f6089c0d5349f8b3555b3222e1738dc802706",
+      "size_bytes": 3009
     },
     {
       "filename": "marginal.json",
@@ -35,6 +35,55 @@
   "parameters": {
     "chunk_size": 200000,
     "episode_note": "Months before 2024-01 are not in the source, so I3 is undercounted in the all-month prevalence; the histogram uses 2024-07 to 2024-12 only.",
+    "histogram_levels": [
+      {
+        "ahad_libur": [
+          "0",
+          "1",
+          "2+"
+        ],
+        "episode": [
+          "1",
+          "2-3",
+          "4-5",
+          "6",
+          "7+"
+        ],
+        "maks_minggu": [
+          "1",
+          "2",
+          "3",
+          "4+"
+        ],
+        "sesi": [
+          "1-2",
+          "3-4",
+          "5-6",
+          "7-8",
+          "9-12",
+          "13+"
+        ]
+      },
+      {
+        "ahad_libur": [
+          "0",
+          "1+"
+        ],
+        "episode": [
+          "1-5",
+          "6+"
+        ],
+        "maks_minggu": [
+          "1-2",
+          "3+"
+        ],
+        "sesi": [
+          "1-4",
+          "5-8",
+          "9+"
+        ]
+      }
+    ],
     "histogram_months": [
       "2024-07",
       "2024-08",
@@ -64,10 +113,14 @@
   },
   "suppression": {
     "histogram": {
-      "cells_suppressed": 151,
-      "cells_total": 270,
-      "row_share_suppressed": 0.0147,
-      "weight_share_suppressed": 0.0153
+      "cells_per_level": [
+        119,
+        4,
+        9
+      ],
+      "row_share_suppressed": 0.0013,
+      "rows_suppressed": 30,
+      "weight_share_suppressed": 0.001
     },
     "types_omitted_under_100_patient_months": 1
   }

@@ -15,8 +15,11 @@ and participant-level data must never be placed here.
 voice-confirmation call queue. Built by `scripts/prepare_pattern_reference.py` from the same
 outpatient physiotherapy cohort, with features defined in `data-uji-konfirmasi/tools/pola.py`:
 
-- `histogram.csv`: participant-month counts and PSTV15 weight sums per binned feature cell
-  (`sesi`, `maks_minggu`, `ahad_libur`, `episode`), July to December 2024, cells below 10 suppressed;
+- `histogram.csv`: participant-month counts and PSTV15 weight sums per feature cell
+  (`sesi`, `maks_minggu`, `ahad_libur`, `episode`), July to December 2024. Multi-level: `tingkat` 0
+  uses the fine bins; rows from fine cells under 10 move to coarser bands (`tingkat` 1, then 2) whose
+  edges sit on the rule thresholds, and only what is still under 10 at level 2 is suppressed. Each
+  participant-month is counted in exactly one row; the bands are listed in `manifest.json`;
 - `marginal.json`: weighted national share per bin of each feature (small bins merged into a neighbour);
 - `kombinasi.json`: weighted prevalence of each I1 to I4 rule combination; combinations below 10
   rows carry only an upper bound (`prevalensi_maks`);

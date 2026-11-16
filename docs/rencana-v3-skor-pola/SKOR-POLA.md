@@ -18,7 +18,7 @@ Skor tidak pernah membuat panggilan, label, saran, atau status RS. Skor bukan pe
 Folder Data Asli (laptop, tidak di-commit)
    │  ai-service/scripts/prepare_pattern_reference.py
    ▼
-ai-service/data/reference/pola-2024/      agregat, tiap sel ≥ 10 baris
+ai-service/data/reference/pola-2024/      agregat bertingkat, tiap sel ≥ 10 baris
    │  ai-service/scripts/train_pattern_model.py
    ▼
 data-uji-konfirmasi/referensi-pola/       koefisien model + referensi nasional
@@ -28,14 +28,14 @@ indikator_bulanan.skor_pola → antrean, kartu bukti, Ringkasan RS
 ```
 
 - Data mentah hanya dibaca pembangun referensi di laptop. Backend tidak pernah membacanya, dan tidak membaca `kunci_kebenaran_*`.
-- Yang di-commit hanya agregat: tanpa nomor peserta, keluarga, atau kunjungan; tanpa baris per orang; tanpa nilai maksimum atau minimum; sel di bawah 10 baris disembunyikan.
+- Yang di-commit hanya agregat: tanpa nomor peserta, keluarga, atau kunjungan; tanpa baris per orang; tanpa nilai maksimum atau minimum. Sel histogram di bawah 10 baris digabung ke rentang yang lebih kasar; hanya sisa yang tetap di bawah 10 baris di tingkat terkasar yang disembunyikan (0,1% bobot).
 - Model dilatih dari histogram agregat, bukan dari baris mentah, jadi pelatihan bisa diulang tanpa folder data asli.
 - Data sampel tidak memuat identitas RS. "Kelompok RS sejenis" = kab/kota + kepemilikan + jenis + tipe, dan hanya mendekati satu RS.
 
 ## Cara kerja
 
 1. **Fitur** (`tools/pola.py`, satu definisi untuk semua pemakai): `sesi` (jumlah sesi sebulan), `maks_minggu` (sesi terbanyak dalam satu minggu Senin–Minggu), `ahad_libur` (sesi di hari Minggu atau libur), `episode` (bulan berturut-turut, maksimal 7). Tiap fitur dibagi ke dalam bin.
-2. **Kelas normal**: 50.000 bulan-pasien yang diambil dari histogram nasional Juli–Desember 2024.
+2. **Kelas normal**: 50.000 bulan-pasien yang diambil dari histogram nasional Juli–Desember 2024. Histogramnya bertingkat: tingkat 0 memakai bin halus, tingkat 1 dan 2 memakai rentang yang batasnya tepat di ambang aturan (sesi 8/9, seminggu 2/3, Minggu 0/1, episode 5/6), sehingga I1–I4 tetap pasti di setiap sel. Sel kasar dipecah kembali ke bin halus memakai marginal nasional.
 3. **Kelas pelanggaran**: 50.000 bulan-pasien normal yang diubah dengan 1–2 manipulasi yang meniru aturan (tambah sesi, sesi hari libur, pemadatan dalam seminggu, perpanjangan episode). Metode ini disebut supervisi lemah berpandu pengetahuan (mengikuti CleverCatch, arXiv 2510.13205).
 4. **Model**: regresi logistik atas bin. Hasilnya tabel koefisien di `model-pola-v1.json`. Skor = logistik(intersep + jumlah koefisien bin yang aktif).
 5. **Ambang** `ambang_tinggi` = persentil 98,5 skor nasional, supaya "Pola tidak biasa" menyala pada kira-kira 1,5% bulan-pasien nasional, setara dengan tingkat pemicu aturan.
@@ -87,9 +87,10 @@ Ekspor hanya berisi fitur yang sudah dibin dan label (1 = Tidak sesuai) dari pan
 ## Batasan
 
 - Kelas pelanggaran dibuat dari aturan yang sama dengan aturan pemicu. Skor karena itu sangat sejalan dengan aturan dan belum menemukan pola baru. Di data demo tidak ada kasus yang lolos aturan tetapi berskor tinggi.
-- Di data nyata, semua sel yang memuat sesi hari Minggu berisi kurang dari 10 baris dan disembunyikan. Kelas normal jadi tidak punya sesi hari Minggu, dan model memberi skor hampir 1,00 pada setiap bulan-pasien yang punya sesi Minggu atau libur. Di antrean demo, 19 dari 26 panggilan berskor 1,00 dan urutannya ditentukan id.
+- Sesi hari Minggu di data nyata langka (0,44% bulan-pasien) dan hanya muncul di sel kasar dengan paling banyak 2 sesi seminggu; Minggu bersama 3 sesi atau lebih seminggu tetap tersembunyi. Model karena itu masih sangat yakin pada kombinasi Minggu + padat: di antrean demo, 20 dari 26 panggilan tampil sebagai 1,00. Logitnya berbeda (7,8 sampai 14,7), tetapi pembulatan tiga desimal membuatnya sama, jadi urutannya ditentukan id.
+- Di dalam sel kasar, fitur dianggap saling bebas saat dipecah ke bin halus.
 - Koefisien `sesi` tidak naik terus: 9–13 sesi berkoefisien lebih rendah dari 7–8 sesi, dan bulan-pasien yang hanya melanggar I1 berskor rendah. Model membaca "banyak sesi tetapi tersebar rata" sebagai pola nyata yang wajar.
-- Pangsa nasional di atas ambang (1,56%) dihitung dari sel yang tidak disembunyikan. Dengan sel tersembunyi, nilainya antara kira-kira 1,5% dan 3,1%.
+- Pangsa nasional di atas ambang (1,61%) dihitung dari sel yang tidak disembunyikan. Dengan sisa yang tersembunyi, nilainya antara kira-kira 1,6% dan 1,7%.
 - Data 2024 tidak punya daftar libur, jadi `ahad_libur` dan I4 di data nyata hanya hari Minggu. Bulan sebelum Januari 2024 tidak ada, jadi I3 di prevalensi semua bulan terhitung lebih rendah; histogram hanya memakai Juli–Desember.
 - Kelas normal adalah data nyata apa adanya dan bisa memuat manipulasi yang tidak terdeteksi.
 - Pembanding per tipe wajib dibaca dalam tipenya. Contoh: RS Khusus Bedah punya tingkat terpicu jauh lebih tinggi, kemungkinan karena rehabilitasi pascabedah yang sah.

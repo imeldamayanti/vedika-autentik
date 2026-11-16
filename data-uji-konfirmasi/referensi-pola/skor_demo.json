@@ -13,18 +13,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 2,
-        "kontribusi": 11.805,
-        "persentil_nasional": 100.0,
-        "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 2,
+        "kontribusi": 7.794,
+        "persentil_nasional": 100.0,
+        "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -44,14 +44,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -67,20 +67,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.141,
+    "skor": 0.124,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       }
@@ -102,14 +102,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -131,14 +131,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -158,18 +158,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -183,20 +183,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.17,
+    "skor": 0.167,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -212,20 +212,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.205,
+    "skor": 0.182,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 10,
-        "kontribusi": 1.335,
+        "kontribusi": 1.225,
         "persentil_nasional": 99.5,
         "teks": "10 sesi dalam sebulan; lebih tinggi dari 99,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -241,20 +241,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.069,
+    "skor": 0.067,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -274,18 +274,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -299,20 +299,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.762,
+    "skor": 0.675,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       }
@@ -342,13 +342,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -364,13 +364,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.041,
+    "skor": 0.046,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -386,20 +386,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.878,
-    "tinggi": true,
+    "skor": 0.819,
+    "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 10,
-        "kontribusi": 1.335,
+        "kontribusi": 1.225,
         "persentil_nasional": 99.5,
         "teks": "10 sesi dalam sebulan; lebih tinggi dari 99,2% bulan-pasien fisioterapi nasional"
       }
@@ -415,13 +415,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.008,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -437,20 +437,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.137,
+    "skor": 0.121,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -472,14 +472,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -501,14 +501,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -524,20 +524,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.141,
+    "skor": 0.124,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       }
@@ -553,20 +553,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.965,
+    "skor": 0.941,
     "tinggi": true,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 11,
-        "kontribusi": 1.656,
+        "kontribusi": 1.512,
         "persentil_nasional": 99.8,
         "teks": "11 sesi dalam sebulan; lebih tinggi dari 99,5% bulan-pasien fisioterapi nasional"
       }
@@ -596,7 +596,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -610,13 +610,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.004,
+    "skor": 0.023,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -652,14 +652,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -675,13 +675,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -697,7 +697,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -715,18 +715,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -740,20 +740,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.05,
+    "skor": 0.058,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -769,20 +769,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.229,
+    "skor": 0.21,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -798,20 +798,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.05,
+    "skor": 0.058,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -827,20 +827,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.033,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -862,14 +862,14 @@
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -891,14 +891,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 6,
-        "kontribusi": 3.584,
+        "kontribusi": 3.827,
         "persentil_nasional": 100.0,
         "teks": "6 sesi dalam satu minggu; lebih tinggi dari 100% bulan-pasien fisioterapi nasional"
       }
@@ -932,18 +932,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -971,20 +971,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.078,
+    "skor": 0.072,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -1000,7 +1000,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -1014,13 +1014,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.056,
+    "skor": 0.061,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -1040,18 +1040,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -1065,13 +1065,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.004,
+    "skor": 0.023,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -1087,20 +1087,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.436,
+    "skor": 0.381,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -1116,20 +1116,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1145,20 +1145,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.156,
+    "skor": 0.162,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1174,13 +1174,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.04,
+    "skor": 0.044,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -1196,20 +1196,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.721,
+    "skor": 0.753,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 6,
-        "kontribusi": 3.584,
+        "kontribusi": 3.827,
         "persentil_nasional": 100.0,
         "teks": "6 sesi dalam satu minggu; lebih tinggi dari 100% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 11,
-        "kontribusi": 1.656,
+        "kontribusi": 1.512,
         "persentil_nasional": 99.8,
         "teks": "11 sesi dalam sebulan; lebih tinggi dari 99,5% bulan-pasien fisioterapi nasional"
       }
@@ -1231,14 +1231,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 2,
-        "kontribusi": 11.805,
+        "kontribusi": 7.794,
         "persentil_nasional": 100.0,
         "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -1254,20 +1254,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.128,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -1283,20 +1283,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -1312,13 +1312,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -1334,20 +1334,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.867,
+    "skor": 0.778,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       }
@@ -1369,14 +1369,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -1398,14 +1398,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -1421,20 +1421,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -1456,14 +1456,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 6,
-        "kontribusi": 3.584,
+        "kontribusi": 3.827,
         "persentil_nasional": 100.0,
         "teks": "6 sesi dalam satu minggu; lebih tinggi dari 100% bulan-pasien fisioterapi nasional"
       }
@@ -1479,20 +1479,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1508,20 +1508,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.087,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1541,18 +1541,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -1566,13 +1566,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.049,
+    "skor": 0.052,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -1588,20 +1588,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.874,
+    "skor": 0.813,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 11,
-        "kontribusi": 1.656,
+        "kontribusi": 1.512,
         "persentil_nasional": 99.8,
         "teks": "11 sesi dalam sebulan; lebih tinggi dari 99,5% bulan-pasien fisioterapi nasional"
       }
@@ -1617,20 +1617,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.102,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1646,20 +1646,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.952,
+    "skor": 0.907,
     "tinggi": true,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "sesi",
         "nilai": 11,
-        "kontribusi": 1.656,
+        "kontribusi": 1.512,
         "persentil_nasional": 99.8,
         "teks": "11 sesi dalam sebulan; lebih tinggi dari 99,5% bulan-pasien fisioterapi nasional"
       }
@@ -1675,20 +1675,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.176,
+    "skor": 0.139,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -1704,20 +1704,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.387,
+    "skor": 0.329,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -1733,20 +1733,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.309,
+    "skor": 0.27,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -1768,14 +1768,14 @@
       {
         "fitur": "ahad_libur",
         "nilai": 1,
-        "kontribusi": 11.827,
+        "kontribusi": 7.14,
         "persentil_nasional": 99.9,
         "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 3,
-        "kontribusi": 4.406,
+        "kontribusi": 4.055,
         "persentil_nasional": 99.9,
         "teks": "3 sesi dalam satu minggu; lebih tinggi dari 96,9% bulan-pasien fisioterapi nasional"
       }
@@ -1791,20 +1791,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.059,
+    "skor": 0.06,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1820,13 +1820,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.056,
+    "skor": 0.061,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -1846,18 +1846,18 @@
     "tinggi": true,
     "alasan": [
       {
-        "fitur": "ahad_libur",
-        "nilai": 1,
-        "kontribusi": 11.827,
-        "persentil_nasional": 99.9,
-        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
-      },
-      {
         "fitur": "maks_minggu",
         "nilai": 4,
-        "kontribusi": 9.837,
+        "kontribusi": 8.511,
         "persentil_nasional": 100.0,
         "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional"
+      },
+      {
+        "fitur": "ahad_libur",
+        "nilai": 1,
+        "kontribusi": 7.14,
+        "persentil_nasional": 99.9,
+        "teks": "1 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini"
       }
     ]
   },
@@ -1871,20 +1871,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.069,
+    "skor": 0.067,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1900,20 +1900,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -1929,20 +1929,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -1958,20 +1958,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.137,
+    "skor": 0.121,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -1987,13 +1987,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.002,
+    "skor": 0.01,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2023,13 +2023,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -2045,13 +2045,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2067,20 +2067,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2096,13 +2096,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.041,
+    "skor": 0.046,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -2118,7 +2118,7 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2132,13 +2132,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -2154,20 +2154,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.213,
+    "skor": 0.216,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2183,20 +2183,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2212,7 +2212,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2226,7 +2226,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2240,13 +2240,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.002,
+    "skor": 0.011,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2262,20 +2262,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2291,20 +2291,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2320,13 +2320,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.002,
+    "skor": 0.01,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2342,20 +2342,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.069,
+    "skor": 0.067,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2371,20 +2371,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.059,
+    "skor": 0.06,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2400,7 +2400,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2442,13 +2442,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.003,
+    "skor": 0.014,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -2464,20 +2464,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -2507,13 +2507,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.002,
+    "skor": 0.011,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2529,20 +2529,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -2558,7 +2558,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -2586,7 +2586,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2600,20 +2600,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2629,7 +2629,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2643,20 +2643,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2672,7 +2672,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -2700,20 +2700,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.2,
+    "skor": 0.206,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -2743,20 +2743,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.078,
+    "skor": 0.072,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -2772,20 +2772,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2801,20 +2801,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2830,13 +2830,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.002,
+    "skor": 0.013,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2852,20 +2852,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.102,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2881,13 +2881,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -2903,20 +2903,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.05,
+    "skor": 0.058,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2932,20 +2932,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.238,
+    "skor": 0.234,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2961,20 +2961,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -2990,20 +2990,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.466,
+    "skor": 0.448,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -3019,20 +3019,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.082,
+    "skor": 0.089,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3048,13 +3048,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.002,
+    "skor": 0.013,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3070,20 +3070,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.082,
+    "skor": 0.089,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3099,20 +3099,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3128,20 +3128,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.072,
+    "skor": 0.076,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3157,13 +3157,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -3179,13 +3179,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.049,
+    "skor": 0.052,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -3201,13 +3201,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -3223,20 +3223,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3252,20 +3252,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3287,14 +3287,14 @@
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3310,20 +3310,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.087,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3339,20 +3339,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3368,20 +3368,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.095,
+    "skor": 0.084,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3397,13 +3397,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3419,20 +3419,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.153,
+    "skor": 0.136,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -3448,7 +3448,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -3462,7 +3462,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -3476,20 +3476,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.087,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3533,20 +3533,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.069,
+    "skor": 0.067,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3562,13 +3562,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -3590,14 +3590,14 @@
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3613,20 +3613,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.003,
+    "skor": 0.016,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3642,20 +3642,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.095,
+    "skor": 0.084,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3685,13 +3685,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.003,
+    "skor": 0.014,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -3707,20 +3707,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.055,
+    "skor": 0.051,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3750,20 +3750,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.102,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3779,13 +3779,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -3801,7 +3801,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -3815,13 +3815,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.041,
+    "skor": 0.046,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -3837,20 +3837,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.078,
+    "skor": 0.072,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3866,20 +3866,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3895,13 +3895,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.002,
+    "skor": 0.013,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -3917,20 +3917,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.137,
+    "skor": 0.121,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3946,13 +3946,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -3982,13 +3982,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.04,
+    "skor": 0.044,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -4004,20 +4004,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4033,20 +4033,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.107,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4062,13 +4062,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.004,
+    "skor": 0.023,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4084,20 +4084,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.153,
+    "skor": 0.136,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4113,20 +4113,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -4156,13 +4156,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4206,13 +4206,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4228,20 +4228,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.095,
+    "skor": 0.084,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -4257,20 +4257,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -4286,13 +4286,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4322,20 +4322,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.087,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4351,7 +4351,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -4365,20 +4365,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.246,
+    "skor": 0.207,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4394,20 +4394,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.182,
+    "skor": 0.155,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4423,20 +4423,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4452,20 +4452,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -4495,20 +4495,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.003,
+    "skor": 0.016,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4524,20 +4524,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4553,13 +4553,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -4575,20 +4575,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.176,
+    "skor": 0.139,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4604,20 +4604,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.246,
+    "skor": 0.207,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4633,13 +4633,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -4655,20 +4655,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.182,
+    "skor": 0.155,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -4684,20 +4684,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.072,
+    "skor": 0.076,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4727,20 +4727,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4756,13 +4756,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -4792,20 +4792,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.059,
+    "skor": 0.06,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4821,7 +4821,7 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -4835,20 +4835,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.087,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4878,20 +4878,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4907,13 +4907,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.04,
+    "skor": 0.044,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -4935,14 +4935,14 @@
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4958,20 +4958,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -4987,20 +4987,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.096,
+    "skor": 0.091,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5016,20 +5016,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5045,20 +5045,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5088,13 +5088,13 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.049,
+    "skor": 0.052,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       }
@@ -5110,20 +5110,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.059,
+    "skor": 0.06,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5153,20 +5153,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.137,
+    "skor": 0.121,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -5182,20 +5182,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.069,
+    "skor": 0.067,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5211,20 +5211,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -5240,20 +5240,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5269,20 +5269,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5298,20 +5298,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.518,
+    "skor": 0.504,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -5327,20 +5327,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5356,20 +5356,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.04,
+    "skor": 0.037,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5385,20 +5385,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.153,
+    "skor": 0.136,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5414,13 +5414,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.002,
+    "skor": 0.011,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -5436,13 +5436,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -5458,7 +5458,7 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -5472,20 +5472,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.078,
+    "skor": 0.072,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -5501,20 +5501,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5530,13 +5530,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.003,
+    "skor": 0.014,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5566,7 +5566,7 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -5580,20 +5580,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.311,
+    "skor": 0.302,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -5609,20 +5609,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.246,
+    "skor": 0.207,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5638,20 +5638,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.107,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5667,7 +5667,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -5681,20 +5681,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.182,
+    "skor": 0.155,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5710,20 +5710,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.072,
+    "skor": 0.076,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5739,20 +5739,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.107,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -5768,20 +5768,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.059,
+    "skor": 0.06,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5825,20 +5825,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.055,
+    "skor": 0.051,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 9,
-        "kontribusi": 0.882,
+        "kontribusi": 0.777,
         "persentil_nasional": 99.2,
         "teks": "9 sesi dalam sebulan; lebih tinggi dari 97,9% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5854,13 +5854,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -5876,20 +5876,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5905,20 +5905,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.096,
+    "skor": 0.091,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5934,20 +5934,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5963,20 +5963,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -5992,20 +5992,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.139,
+    "skor": 0.14,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6021,13 +6021,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6043,20 +6043,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.182,
+    "skor": 0.155,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -6072,20 +6072,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.059,
+    "skor": 0.066,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6101,20 +6101,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.107,
+    "skor": 0.094,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -6150,14 +6150,14 @@
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6173,20 +6173,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.061,
+    "skor": 0.068,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6208,14 +6208,14 @@
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6231,7 +6231,7 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.001,
+    "skor": 0.006,
     "tinggi": false,
     "alasan": []
   },
@@ -6245,20 +6245,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.082,
+    "skor": 0.089,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6274,20 +6274,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.176,
+    "skor": 0.139,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -6303,20 +6303,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.102,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6332,20 +6332,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6361,20 +6361,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.236,
+    "skor": 0.233,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6390,13 +6390,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -6412,13 +6412,13 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -6434,20 +6434,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.238,
+    "skor": 0.234,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6463,20 +6463,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.099,
+    "skor": 0.102,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6492,20 +6492,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.006,
+    "skor": 0.035,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6521,20 +6521,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.096,
+    "skor": 0.091,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6550,20 +6550,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.2,
+    "skor": 0.206,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6579,20 +6579,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.355,
+    "skor": 0.316,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -6608,20 +6608,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.102,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6637,20 +6637,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.078,
+    "skor": 0.072,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -6666,13 +6666,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.056,
+    "skor": 0.061,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -6688,13 +6688,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.001,
+    "skor": 0.0,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6710,20 +6710,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -6753,20 +6753,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.518,
+    "skor": 0.504,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6782,13 +6782,13 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.056,
+    "skor": 0.061,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -6804,20 +6804,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -6833,20 +6833,20 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.156,
+    "skor": 0.162,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6862,20 +6862,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.096,
+    "skor": 0.091,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -6891,20 +6891,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.2,
+    "skor": 0.206,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6920,20 +6920,20 @@
       "ahad_libur": 0,
       "episode": 5
     },
-    "skor": 0.436,
+    "skor": 0.381,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 5,
-        "kontribusi": 0.68,
+        "kontribusi": 0.465,
         "persentil_nasional": 82.1,
         "teks": "5 bulan berturut-turut ada sesi; lebih panjang dari 77,1% bulan-pasien fisioterapi nasional"
       }
@@ -6949,20 +6949,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.466,
+    "skor": 0.448,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -6978,20 +6978,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.003,
+    "skor": 0.016,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -7007,20 +7007,20 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.082,
+    "skor": 0.089,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -7036,20 +7036,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.188,
+    "skor": 0.164,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 6,
-        "kontribusi": 1.894,
+        "kontribusi": 1.892,
         "persentil_nasional": 88.7,
         "teks": "6 sesi dalam sebulan; lebih tinggi dari 80,5% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -7065,13 +7065,13 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.002,
+    "skor": 0.011,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -7087,13 +7087,13 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.004,
+    "skor": 0.023,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -7123,20 +7123,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.137,
+    "skor": 0.121,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 4,
-        "kontribusi": 1.514,
+        "kontribusi": 1.536,
         "persentil_nasional": 70.1,
         "teks": "4 sesi dalam sebulan; lebih tinggi dari 52,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -7152,20 +7152,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -7181,7 +7181,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -7195,20 +7195,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.229,
+    "skor": 0.21,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -7230,7 +7230,7 @@
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       }
@@ -7246,20 +7246,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.229,
+    "skor": 0.21,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -7275,20 +7275,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.132,
+    "skor": 0.108,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 5,
-        "kontribusi": 1.475,
+        "kontribusi": 1.406,
         "persentil_nasional": 80.5,
         "teks": "5 sesi dalam sebulan; lebih tinggi dari 70,1% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }
@@ -7304,20 +7304,20 @@
       "ahad_libur": 0,
       "episode": 3
     },
-    "skor": 0.213,
+    "skor": 0.216,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 8,
-        "kontribusi": 2.761,
+        "kontribusi": 2.747,
         "persentil_nasional": 97.9,
         "teks": "8 sesi dalam sebulan; lebih tinggi dari 94,2% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "maks_minggu",
         "nilai": 2,
-        "kontribusi": 0.051,
+        "kontribusi": 0.062,
         "persentil_nasional": 96.9,
         "teks": "2 sesi dalam satu minggu; lebih tinggi dari 46,4% bulan-pasien fisioterapi nasional"
       }
@@ -7333,7 +7333,7 @@
       "ahad_libur": 0,
       "episode": 1
     },
-    "skor": 0.001,
+    "skor": 0.009,
     "tinggi": false,
     "alasan": []
   },
@@ -7347,13 +7347,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -7369,20 +7369,20 @@
       "ahad_libur": 0,
       "episode": 6
     },
-    "skor": 0.466,
+    "skor": 0.448,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 7,
-        "kontribusi": 2.555,
+        "kontribusi": 2.521,
         "persentil_nasional": 94.2,
         "teks": "7 sesi dalam sebulan; lebih tinggi dari 88,7% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 6,
-        "kontribusi": 1.006,
+        "kontribusi": 0.967,
         "persentil_nasional": 85.7,
         "teks": "6 bulan berturut-turut ada sesi; lebih panjang dari 82,1% bulan-pasien fisioterapi nasional"
       }
@@ -7398,13 +7398,13 @@
       "ahad_libur": 0,
       "episode": 2
     },
-    "skor": 0.034,
+    "skor": 0.039,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       }
@@ -7434,20 +7434,20 @@
       "ahad_libur": 0,
       "episode": 4
     },
-    "skor": 0.114,
+    "skor": 0.105,
     "tinggi": false,
     "alasan": [
       {
         "fitur": "sesi",
         "nilai": 3,
-        "kontribusi": 1.305,
+        "kontribusi": 1.38,
         "persentil_nasional": 52.2,
         "teks": "3 sesi dalam sebulan; lebih tinggi dari 35,3% bulan-pasien fisioterapi nasional"
       },
       {
         "fitur": "episode",
         "nilai": 4,
-        "kontribusi": 0.338,
+        "kontribusi": 0.179,
         "persentil_nasional": 77.1,
         "teks": "4 bulan berturut-turut ada sesi; lebih panjang dari 70% bulan-pasien fisioterapi nasional"
       }

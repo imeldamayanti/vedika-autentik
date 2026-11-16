@@ -197,10 +197,10 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
   "pola": {
     "skor": 1.0,
     "tinggi": true,
-    "ambang": 0.878,
+    "ambang": 0.898,
     "alasan": [
-      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 11.805, "persentil_nasional": 100.0, "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini" },
-      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 9.837, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional" }
+      { "fitur": "maks_minggu", "nilai": 4, "kontribusi": 8.511, "persentil_nasional": 100.0, "teks": "4 sesi dalam satu minggu; lebih tinggi dari 99,9% bulan-pasien fisioterapi nasional" },
+      { "fitur": "ahad_libur", "nilai": 2, "kontribusi": 7.794, "persentil_nasional": 100.0, "teks": "2 sesi di hari Minggu/libur; hanya 0,4% bulan-pasien nasional punya sesi seperti ini" }
     ],
     "kombinasi": { "kunci": "I1+I2+I4", "teks": "Kombinasi I1+I2+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024." },
     "versi": "pola-v1"
@@ -336,7 +336,7 @@ Query opsional: `bulan` (bawaan `2026-08`).
   "bulan": "2026-08",
   "aturan": "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tidak sesuai/terjawab >= 10%",
   "panggilan_selesai": 5,
-  "kinerja_pola": { "n": 5, "skor_rata_tidak_sesuai": 0.921, "skor_rata_sesuai": 0.507, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2 },
+  "kinerja_pola": { "n": 5, "skor_rata_tidak_sesuai": 0.892, "skor_rata_sesuai": 0.468, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2 },
   "rs": [
     {
       "id_rs": "RS01", "nama": "RS Melati Sehat",

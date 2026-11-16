@@ -164,7 +164,7 @@ def test_seed_ulang_mengisi_skor_di_database_lama_tanpa_mengubah_indikator(conn_
         "select count(*) filter (where skor_pola is not null) as berskor, count(*) filter (where pola_tinggi) as tinggi,"
         " count(*) filter (where dipicu) as dipicu, count(*) as n from indikator_bulanan"
     ).fetchone()
-    assert r == {"berskor": 300, "tinggi": 23, "dipicu": 0, "n": 300}  # kolom aturan baris lama tidak ditimpa
+    assert r == {"berskor": 300, "tinggi": 22, "dipicu": 0, "n": 300}  # kolom aturan baris lama tidak ditimpa
 
 
 def test_reset_panggilan_tidak_menghapus_skor(conn_v3):

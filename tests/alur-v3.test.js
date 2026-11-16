@@ -92,7 +92,7 @@ async function tanpaGeserSamping(page, nama) {
   cek(!/fraud|curang/i.test(await page.textContent(".pola-kartu")), "bagian skor pola tanpa kata fraud atau curang");
   await page.goto(TARGET + "#/kartu/R3");
   await page.waitForSelector(".pola-kartu");
-  cek(!(await page.$(".pola-kartu .lencana-pola")) && (await page.textContent(".pola-kartu .chip-pola")).trim() === "Pola 0,14", "kartu berskor rendah (R3) tanpa lencana, chip netral");
+  cek(!(await page.$(".pola-kartu .lencana-pola")) && (await page.textContent(".pola-kartu .chip-pola")).trim() === "Pola 0,12", "kartu berskor rendah (R3) tanpa lencana, chip netral");
   await page.goto(TARGET + "#/ringkasan-rs");
   await page.waitForSelector(".baris-pembanding");
   const pembanding = await page.$$eval(".baris-pembanding", (el) => el.map((x) => x.textContent.trim()));
