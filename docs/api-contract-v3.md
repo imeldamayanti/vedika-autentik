@@ -168,7 +168,7 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
 - Hanya pasien dengan ≥2 indikator (R1.2). S7 tidak pernah muncul.
 - `penerima` mengikuti R1.3: keluarga bila `hubungi_keluarga`, selain itu peserta.
 - `angka` dihitung dari seluruh antrean bulan itu, tidak terpengaruh query. `sudah_ditelepon` = jumlah panggilan berstatus `selesai` atau `tidak_terhubung`. `tidak_sesuai` = jumlah berlabel `tidak_sesuai`. `antre` = jumlah berstatus `antre`. `menunggu_keputusan` = berlabel `tidak_sesuai` dan belum punya keputusan (lencana di menu).
-- `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server; FE memakainya untuk tanggal di Beranda).
+- `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server).
 - `daftar_rs` = semua RS (termasuk yang tidak punya pasien terpicu), untuk pilihan filter.
 - `label` terisi bila status `selesai` atau `tidak_terhubung`. `keputusan_tindakan` = `tindakan` keputusan terkini (enum `tindakan`) atau `null` bila belum diputuskan.
 - `pengaturan.stasiun` = detak terakhir stasiun saluran (`POST /agen/detak`), atau `null` bila belum pernah terlihat. `aktif` = `terakhir_terlihat` paling lama 30 detik sebelum `waktu_server`. `siap: false` disertai `alasan` (mis. `"SIM tidak siap"`). FE menampilkan "Saluran telepon terputus sejak HH.MM" bila `null` atau tidak aktif.
@@ -408,7 +408,7 @@ Hasil review KT-06 terhadap `app-v3.js` dan isi `DATA3` di `data-v3.js`. Aturan:
 | `RS` (`id`, `nama`) | `antrean.daftar_rs` |
 | `RS` (`aktif`, `terpicu`, `persen`) | `ringkasan-rs.rs[]` |
 | `PASIEN_AKTIF`, `PASIEN_TERPICU` | `antrean.angka.pasien_aktif`, `antrean.angka.terpicu` |
-| kartu angka, lencana menu, jumlah menunggu di Beranda | `antrean.angka` (`sudah_ditelepon`, `tidak_sesuai`, `rs_perlu_klarifikasi`, `menunggu_keputusan`, `antre`) |
+| kartu angka di Antrean, lencana menu | `antrean.angka` (`sudah_ditelepon`, `tidak_sesuai`, `rs_perlu_klarifikasi`, `menunggu_keputusan`, `antre`) |
 | `SKENARIO`/`LATAR`/`MENGANTRE`/`SEMUA` (per pasien) | `antrean.baris[]` dan `panggilan/{id}`: `tanggal` ISO (FE mengambil tanggalnya), `tanda_tanggal` berkunci ISO, `penerima`, `durasi`, `rekaman`, `jawaban`, `label`, `alasan` |
 | `URUTAN_ANTREAN` | urutan `baris[]` |
 | `waktu` (`LATAR`), waktu kartu dan cap waktu progres | `panggilan.waktu` dan `log[].waktu` |

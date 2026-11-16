@@ -44,8 +44,8 @@ indikator_bulanan.skor_pola → antrean, kartu bukti, Ringkasan RS
 ## Membaca layar
 
 - **Antrean.** Chip `Pola 0,93` dengan batang tipis. Chip berwarna merah bila skor ≥ ambang. Urutan antre: Dahulukan, lalu skor tertinggi menurut logitnya, lalu id. Agen mengambil tugas dengan urutan yang sama. Logit dipakai karena skor di atas 0,999 tampil sama (1,00) padahal modelnya masih membedakan; di demo antrean dibuka S6 (Slamet, logit 14,7), P0037 (14,3), lalu S1 (Andi, 13,7). Untuk demo S1, tekan Dahulukan pada Andi Pratama.
-- **Kartu bukti, "Mengapa diprioritaskan".** Dua alasan, lalu satu kalimat tentang seberapa jarang kombinasi indikatornya di data nasional. Kombinasi yang muncul kurang dari 10 kali di data sampel hanya punya batas atas ("kurang dari 0,03%").
-- **Ringkasan RS.** Satu baris per RS: persen terpicu RS ini, rata-rata RS sejenis nasional, dan batas 95% kelompok RS sejenis. Lencana "Di atas 95% RS sejenis" bila RS melewati batas itu. Kartu "Skor pola vs hasil panggilan" membandingkan skor dengan label Sesuai dan Tidak sesuai.
+- **Kartu bukti, "Alasan prioritas".** Dua alasan, lalu satu kalimat tentang seberapa jarang gabungan indikatornya di data nasional. Persentase disebut per "tagihan bulanan" (tagihan satu pasien dalam satu bulan). Kombinasi yang muncul kurang dari 10 kali di data sampel hanya punya batas atas ("kurang dari 0,03%").
+- **Ringkasan RS.** Satu baris per RS: persen terpicu RS ini, rata-rata RS sejenis nasional, dan batas 95% kelompok RS sejenis. Lencana "Di atas 95% RS sejenis" bila RS melewati batas itu. Kartu "Skor pola dan hasil panggilan" membandingkan skor dengan label Sesuai dan Tidak sesuai.
 
 Di data demo, RS Melati Sehat (39,7% terpicu) berada di atas 95% RS Swasta Setara Type C (batas 8,2%). Empat RS lain berposisi wajar.
 

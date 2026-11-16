@@ -137,7 +137,7 @@ Tujuan: memilih sedikit pasien yang paling perlu ditanya, dengan aturan yang bis
 
 ### **Skor pola (prioritas, bukan pemicu)**
 
-Aturan I1–I4 tetap satu-satunya pemicu panggilan. Di atasnya ada skor pola (0–1) yang dipelajari dari agregat Data Sampel BPJS 2024: seberapa mirip pola tagihan satu bulan-pasien dengan pola manipulasi yang dikenal, dibanding pola nasional. Skor hanya dipakai untuk tiga hal: mengurutkan antrean (Dahulukan, lalu skor tertinggi menurut logitnya, lalu id), menjelaskan alasannya di kartu bukti ("Mengapa diprioritaskan"), dan memberi pembanding nasional per tipe RS di Ringkasan RS. Skor tidak membuat panggilan, tidak memberi label, dan tidak mengubah saran atau status RS. Hasil panggilan (Sesuai dan Tidak sesuai) diekspor sebagai label untuk melatih ulang model. Rincian, tingkat bukti, dan batasannya: `docs/rencana-v3-skor-pola/SKOR-POLA.md`.
+Aturan I1–I4 tetap satu-satunya pemicu panggilan. Di atasnya ada skor pola (0–1) yang dipelajari dari agregat Data Sampel BPJS 2024: seberapa mirip pola tagihan satu bulan-pasien dengan pola manipulasi yang dikenal, dibanding pola nasional. Skor hanya dipakai untuk tiga hal: mengurutkan antrean (Dahulukan, lalu skor tertinggi menurut logitnya, lalu id), menjelaskan alasannya di kartu bukti ("Alasan prioritas"), dan memberi pembanding nasional per tipe RS di Ringkasan RS. Skor tidak membuat panggilan, tidak memberi label, dan tidak mengubah saran atau status RS. Hasil panggilan (Sesuai dan Tidak sesuai) diekspor sebagai label untuk melatih ulang model. Rincian, tingkat bukti, dan batasannya: `docs/rencana-v3-skor-pola/SKOR-POLA.md`.
 
 ## **F2. Pesan WA pemberitahuan**
 
