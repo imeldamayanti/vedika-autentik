@@ -4,6 +4,13 @@ Acuan: `docs/prd-v3-konfirmasi-suara.md` (PRD v3.0) dan `docs/rencana-v3.md` bag
 
 ## Perubahan
 
+**2026-11-17, model anomali `anomali-v2` (`docs/rencana-v3-skor-pola/MODEL-ANOMALI.md`).** Pasien ditelepon bila aturan (≥ 2 indikator) **ATAU** model anomali menandainya. Model menilai seberapa jarang pola tagihan bulanan di antara pasien seusia. Label, saran, dan status RS tidak berubah.
+
+- **A.** `GET /antrean`: tiap baris menambah `dipilih` (`"aturan"`, `"model"`, `"keduanya"`); `angka` menambah `dipilih` dan `hanya_model`. `GET /panggilan/{id}` menambah `dipilih` dan objek `anomali`. `GET /ringkasan-rs` menambah `kinerja_model` di tingkat atas dan `funnel` per RS.
+- **Antrean.** Baris kini juga memuat pasien yang hanya dipilih model (di data demo M1 dan M2, jadi 28 antre, bukan 26). Urutan tetap: Dahulukan, logit skor pola, `id`.
+- **DB.** `indikator_bulanan` menambah `skor_anomali real`, `anomali_ditandai boolean`, `anomali_langka boolean`, `alasan_anomali jsonb`; `klaim_sesi` menambah `rujukan_fktp boolean` (bawaan `true`) dan `perujuk_luar_wilayah boolean` (bawaan `false`). Database yang sudah berjalan perlu `scripts.terapkan_v3` sekali, tanpa `--reset`: skor terisi, dan panggilan Antre ditambahkan untuk pasien yang baru dipilih model.
+- **Data uji.** 410 peserta (ditambah P-M1, P-M2), 4.938 klaim, 302 pasien aktif Agustus.
+
 **2026-11-16, skor pola (`docs/rencana-v3-skor-pola/SKOR-POLA.md`).** Skor 0–1 dari pola nasional data sampel BPJS 2024 yang hanya mengurutkan antrean dan menjelaskan alasannya. Pemicu, label, saran, dan status RS tidak berubah.
 
 - **A.** Baris `GET /antrean` menambah `skor_pola` (angka atau `null`) dan `pola_tinggi`. `GET /panggilan/{id}` menambah objek `pola`. `GET /ringkasan-rs` menambah `kinerja_pola` di tingkat atas serta `pembanding` dan `pola_tinggi_tidak_terpicu` per RS.
@@ -159,13 +166,15 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
       "percobaan": 0,
       "coba_lagi_setelah": null,
       "skor_pola": 1.0,
-      "pola_tinggi": true
+      "pola_tinggi": true,
+      "dipilih": "keduanya"
     }
   ]
 }
 ```
 
-- Hanya pasien dengan ≥2 indikator (R1.2). S7 tidak pernah muncul.
+- Hanya pasien yang dipilih aturan (≥2 indikator, R1.2) atau model anomali. S7 (I3 saja, tidak ditandai model) tidak pernah muncul.
+- `dipilih` = sumber pemilihan: `"aturan"`, `"model"` (tidak terpicu aturan, ditandai model anomali), atau `"keduanya"`. `angka.dipilih` = pasien aktif yang dipilih aturan ATAU model; `angka.hanya_model` = yang hanya dipilih model.
 - `penerima` mengikuti R1.3: keluarga bila `hubungi_keluarga`, selain itu peserta.
 - `angka` dihitung dari seluruh antrean bulan itu, tidak terpengaruh query. `sudah_ditelepon` = jumlah panggilan berstatus `selesai` atau `tidak_terhubung`. `tidak_sesuai` = jumlah berlabel `tidak_sesuai`. `antre` = jumlah berstatus `antre`. `menunggu_keputusan` = berlabel `tidak_sesuai` dan belum punya keputusan (lencana di menu).
 - `pengaturan` = isi `GET /pengaturan` ditambah `dalam_jam` dan `waktu_server` (jam server).
@@ -174,7 +183,7 @@ Query opsional: `bulan` (bawaan `2026-08`), `id_rs` (mis. `RS01`), `status` (nil
 - `pengaturan.stasiun` = detak terakhir stasiun saluran (`POST /agen/detak`), atau `null` bila belum pernah terlihat. `aktif` = `terakhir_terlihat` paling lama 30 detik sebelum `waktu_server`. `siap: false` disertai `alasan` (mis. `"SIM tidak siap"`). FE menampilkan "Saluran telepon terputus sejak HH.MM" bila `null` atau tidak aktif.
 - Tiap baris memuat `coba_lagi_setelah` (ISO atau `null`): terisi selama percobaan ke-2 menunggu jeda. FE menghitung mundur terhadap `waktu_server`.
 - Sebelum menjawab, API melepas panggilan macet (lihat Kontrak B1), jadi FE pulih walau stasiun tidak menarik tugas.
-- `skor_pola` = skor pola bulan-pasien itu (0–1, tiga desimal) atau `null` bila belum dihitung. `pola_tinggi` = skor ≥ ambang model ("Pola tidak biasa"). Keduanya sinyal prioritas panggilan, bukan putusan: tidak memengaruhi siapa yang ditelepon, label, saran, atau status RS. Baris tetap hanya pasien terpicu aturan.
+- `skor_pola` = skor pola bulan-pasien itu (0–1, tiga desimal) atau `null` bila belum dihitung. `pola_tinggi` = skor ≥ ambang model ("Pola tidak biasa"). Keduanya sinyal prioritas panggilan, bukan putusan: tidak memengaruhi siapa yang ditelepon, label, saran, atau status RS. Yang menentukan siapa ditelepon adalah aturan dan model anomali (`dipilih`).
 - Urutan: sedang berjalan (`wa_terkirim` … `membaca_jawaban`), lalu `antre`, lalu `selesai`/`tidak_terhubung` (terbaru dulu). Di dalam `antre`: `prioritas` (Dahulukan) dulu, lalu skor pola tertinggi menurut logitnya (`indikator_bulanan.logit_pola`; tanpa skor di akhir), lalu `id` dengan collation biner. Logit membedakan baris yang skornya sama-sama tampil 1,00 (di demo: S6 14,7, P0037 14,3, S1 13,7). Agen mengambil tugas dengan urutan yang sama.
 
 ## `GET /api/v1/panggilan/{id}`
@@ -204,6 +213,15 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
     ],
     "kombinasi": { "kunci": "I1+I2+I4", "teks": "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024." },
     "versi": "pola-v1"
+  },
+  "dipilih": "keduanya",
+  "anomali": {
+    "skor": null,
+    "ditandai": true,
+    "langka": true,
+    "alasan": ["2 sesi atau lebih hari Minggu: hanya 0,2% tagihan bulanan pasien 40–59 tahun.", "4 sesi atau lebih dalam satu minggu: hanya 0,3% tagihan bulanan pasien 40–59 tahun."],
+    "gabungan": "Gabungan 9–12 sesi sebulan, 4 sesi atau lebih dalam satu minggu, 2 sesi atau lebih hari Minggu, dan 3–5 bulan berturut-turut muncul pada kurang dari 10 tagihan bulanan di data sampel BPJS 2023–2024.",
+    "versi": "anomali-v2"
   },
   "tanggal_libur": ["2026-08-16", "2026-08-17"],
   "penerima": { "nama": "Andi Pratama", "hubungan": "peserta" },
@@ -259,6 +277,7 @@ Dipakai layar Panggilan berlangsung (polling 1 detik) dan Kartu bukti. Contoh S1
 - `alasan` dari `aturan.py` apa adanya, untuk S2: `Ada pernyataan berisiko: tanda_tangan_tanpa_layanan.` FE menampilkan nama tanda bahaya dengan mengganti kode di teks itu; isi di API tidak diubah (uji E membandingkan dengan `expected_alasan`).
 - `konteks_rs` = ringkasan RS terkini untuk RS panggilan ini (dipakai teks saran di kartu bukti).
 - `pola` = alasan prioritas (bagian "Alasan prioritas" di kartu bukti), atau `null` bila bulan-pasien belum punya skor. `skor` dan `tinggi` sama dengan baris antrean; `ambang` = `ambang_tinggi` model; `versi` = `pengaturan.versi_pola` (bawaan `pola-v1`). `alasan` = paling banyak dua fitur dengan sumbangan positif terbesar (`fitur`: `sesi`, `maks_minggu`, `ahad_libur`, `episode`); `persentil_nasional` = persen bulan-pasien nasional dengan nilai ≤ nilai ini; `teks` siap tampil. `kombinasi.teks` memakai prevalensi nasional kombinasi indikator; kombinasi di bawah 10 baris pada data sampel hanya punya batas atas ("kurang dari 0,03%"). `pola` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
+- `dipilih` sama dengan baris antrean. `anomali` = alasan model anomali (bagian "Mengapa dipilih"), atau `null` bila bulan-pasien belum dinilai. `skor` = −ln peluang pola di kelompok umur pasien (makin tinggi makin jarang), `null` bila `langka` (pola muncul kurang dari 10 kali di data sampel; selalu ditandai). `ditandai` = skor ≥ ambang model. `alasan` = paling banyak dua bin yang dimiliki kurang dari 10% tagihan pasien seusia; `gabungan` = satu kalimat tentang seluruh pola. Teks siap tampil, tanpa kata "fraud" atau "curang". `anomali` tidak pernah mengubah `label`, `saran`, atau `konteks_rs`.
 - `pesan_wa.pemberitahuan` = Lampiran B persis (sumber yang sama dengan `wa.teks` di `agen/ambil`), `pesan_wa.cadangan` = teks chat cadangan, hanya terisi untuk label `tidak_terhubung`; `dari` = nomor penelepon di konfigurasi API (`NOMOR_PENELEPON`). FE memakainya untuk mockup WA.
 - `keputusan` berisi objek seperti di `GET /keputusan` (tanpa field gabungan) bila sudah diputuskan.
 - Identitas penerima tidak ikut dalam data apa pun yang dibagikan ke RS (R5.6); endpoint ini hanya untuk verifikator.
@@ -337,6 +356,7 @@ Query opsional: `bulan` (bawaan `2026-08`).
   "aturan": "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tidak sesuai/terjawab >= 10%",
   "panggilan_selesai": 5,
   "kinerja_pola": { "n": 5, "skor_rata_tidak_sesuai": 0.892, "skor_rata_sesuai": 0.468, "tinggi_dan_tidak_sesuai": 2, "tinggi": 2 },
+  "kinerja_model": { "n": 5, "model": 2, "model_tidak_sesuai": 2, "aturan": 3, "aturan_tidak_sesuai": 1 },
   "rs": [
     {
       "id_rs": "RS01", "nama": "RS Melati Sehat",
@@ -346,6 +366,7 @@ Query opsional: `bulan` (bawaan `2026-08`).
         "terpicu_p95_kelompok": 8.2, "posisi": "di_atas_p95"
       },
       "pola_tinggi_tidak_terpicu": 0,
+      "funnel": { "patient_months": 68, "selected": 27, "expected": 2.3, "z": 10.34, "position": "above_99_8" },
       "sesuai": 2, "tidak_sesuai": 3, "tidak_yakin": 0, "tidak_terhubung": 0, "menolak": 0,
       "terjawab": 5, "rasio": 0.6, "status": "Perlu klarifikasi RS",
       "panggilan": [
@@ -359,7 +380,9 @@ Query opsional: `bulan` (bawaan `2026-08`).
 
 - `terjawab` = `sesuai + tidak_sesuai`. `panggilan_selesai` = jumlah panggilan `selesai` atau `tidak_terhubung` bulan itu. Contoh di atas adalah keadaan setelah S1; sebelum S1, RS01 `tidak_sesuai: 2, terjawab: 4, status: "Normal"` (`expected_ringkasan_rs.json`). `rs` memuat kelima RS, yang belum punya panggilan bernilai nol.
 - `pembanding` = pembanding nasional menurut tipe RS (Tier A, agregat data sampel BPJS 2024). `tipe` = label tipe FKRTL hasil pemetaan `rumah_sakit.tipe` (tipe tak dikenal → `"Nasional"`). `persen_terpicu_nasional` dan `sesi_rata_nasional` = rata-rata berbobot tipe itu. `terpicu_p95_kelompok` = persentil 95 persen terpicu antar kelompok RS sejenis (kab/kota + kepemilikan + jenis + tipe, minimal 30 bulan-pasien), `null` bila tipe itu punya kurang dari 20 kelompok. `posisi` membandingkan `persen` RS ini: `di_atas_p95`, `di_atas_p90`, `wajar`, atau `tidak_ada_pembanding` (tanpa pasien aktif atau tanpa persentil). Hanya informasi: `status` tetap dari aturan.
-- `pola_tinggi_tidak_terpicu` = jumlah bulan-pasien RS itu yang berpola tidak biasa tetapi tidak terpicu aturan. Hanya informasi; pasien itu tidak ditelepon.
+- `pola_tinggi_tidak_terpicu` = jumlah bulan-pasien RS itu yang berpola tidak biasa (skor pola) tetapi tidak terpicu aturan. Hanya informasi; skor pola sendiri tidak membuat pasien ditelepon (model anomali bisa).
+- `funnel` = corong RS: `selected` = bulan-pasien RS ini yang dipilih aturan ATAU model, `expected` = jumlah yang diharapkan menurut umur pasiennya (laju nasional per kelompok umur), `z` = simpangan yang sudah dilebarkan dengan faktor sebaran antar-RS (overdispersi) dari data nasional, `position` = `above_99_8` (z > 3,09), `above_95` (z > 1,96), atau `within`. `null` bila RS tidak punya pasien aktif bulan itu. Hanya informasi: `status` tetap dari aturan.
+- `kinerja_model` = berapa panggilan per sumber pemilihan berakhir `tidak_sesuai`, hanya atas `sesuai` dan `tidak_sesuai`. `model` = yang ditandai model (termasuk yang juga terpicu aturan); `aturan` = yang hanya dipilih aturan. Ini ukuran ketepatan model yang tidak bisa dihitung dari data klaim saja.
 - `kinerja_pola` = skor pola dibanding hasil panggilan, hanya atas panggilan berlabel `sesuai` atau `tidak_sesuai` yang punya skor: `n`, rata-rata skor per label (`null` bila kosong), `tinggi` = jumlah berpola tidak biasa, `tinggi_dan_tidak_sesuai` = di antaranya yang berlabel `tidak_sesuai`.
 - `panggilan` = daftar panggilan selesai RS itu (terbaru dulu, dipotong di contoh), untuk rincian "Lihat kartu". `jumlah_min`, `jumlah_maks`, `selisih` bernilai `null` untuk label `menolak` dan `tidak_terhubung`. Nama pasien hanya untuk verifikator (R5.6).
 
@@ -381,7 +404,7 @@ Galat: `422 pengaturan_tidak_valid`.
 
 ## `POST /api/v1/demo/reset`
 
-Mengembalikan panggilan, log, dan keputusan ke keadaan awal demo (4 riwayat selesai, 26 antre, mode otomatis mati, `jeda` mati). Data master (RS, peserta, klaim, indikator) tidak disentuh. Rekaman hasil panggilan baru ikut dihapus. Balasan `200 {"ok": true}`.
+Mengembalikan panggilan, log, dan keputusan ke keadaan awal demo (4 riwayat selesai, 28 antre, mode otomatis mati, `jeda` mati). Data master (RS, peserta, klaim, indikator) tidak disentuh. Rekaman hasil panggilan baru ikut dihapus. Balasan `200 {"ok": true}`.
 
 ## `GET /api/v1/kesehatan`
 
@@ -717,6 +740,7 @@ Kolom langsung:
 | `ditagih` | `panggilan.sesi_ditagih` |
 | `indikator`, `tanggal_libur` | `indikator_bulanan` (`i1_…`–`i4_…`, `tanggal_libur`) |
 | `skor_pola`, `pola_tinggi`, `pola.skor`, `pola.tinggi`, `pola.alasan` | `indikator_bulanan.skor_pola`, `.pola_tinggi`, `.alasan_pola` (diisi `seed_v3.py` untuk semua pasien aktif); urutan antre memakai `.logit_pola` |
+| `dipilih`, `anomali` | `indikator_bulanan.dipicu`, `.anomali_ditandai`, `.skor_anomali`, `.anomali_langka`, `.alasan_anomali` (diisi `seed_v3.py` dengan `tools/anomali.py` dan `referensi-pola/model-anomali-v2.json`, untuk semua pasien aktif) |
 | `penerima.nama`, `penerima.hubungan` | `panggilan.nama_penerima`, `panggilan.hubungan` (`peserta` bila `panggilan.penerima = 'peserta'`) |
 | `status`, `percobaan`, `prioritas` | `panggilan.status`, `.percobaan`, `.prioritas` |
 | `coba_lagi_setelah` | `panggilan.coba_lagi_setelah` |
@@ -747,6 +771,7 @@ Turunan (tanpa kolom sendiri):
 | `aktif`, `terpicu`, `persen`, `angka.pasien_aktif`, `angka.terpicu` | hitungan `indikator_bulanan` per bulan (`dipicu`) |
 | `pola.ambang`, `pola.versi`, `pola.kombinasi` | `referensi-pola/model-<versi>.json`, `pengaturan.versi_pola`, `referensi-pola/referensi.json` + indikator aktif |
 | `pembanding`, `pola_tinggi_tidak_terpicu`, `kinerja_pola` | `rumah_sakit.tipe` + `referensi-pola/referensi.json`; hitungan `indikator_bulanan`; skor panggilan berlabel |
+| `funnel`, `kinerja_model`, `angka.dipilih`, `angka.hanya_model` | `indikator_bulanan` (`dipicu`, `anomali_ditandai`) + `peserta.umur` + `model-anomali-v2.json` (laju dipilih per kelompok umur, overdispersi); sumber pemilihan panggilan berlabel |
 | `angka.*`, `keputusan_tindakan`, `daftar_rs`, `terkini` | hitungan `panggilan`, `keputusan_panggilan`, `rumah_sakit` |
 | `skrip.*`, `wa.*`, `pesan_wa.*` | `peserta`, `rumah_sakit`, `indikator_bulanan` + template Lampiran B + `NOMOR_PENGUJI`, `NOMOR_PENELEPON` (`.env`) |
 | `batas_detik`, `versi_aturan`, `dalam_jam`, `waktu_server` | konfigurasi dan jam API |

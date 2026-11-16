@@ -69,6 +69,17 @@ alter table public.indikator_bulanan add column if not exists alasan_pola jsonb 
 alter table public.indikator_bulanan add column if not exists pola_tinggi boolean not null default false;
 -- Kunci urutan antrean: skor di atas 0,999 tampil sama (1,00), logitnya masih berbeda.
 alter table public.indikator_bulanan add column if not exists logit_pola real;
+-- Model anomali (tools/anomali.py + referensi-pola/model-anomali-v2.json): ikut memilih siapa ditelepon
+-- (dipicu ATAU anomali_ditandai). Tidak mengubah dipicu, label, saran, atau status RS.
+alter table public.indikator_bulanan add column if not exists skor_anomali real;
+alter table public.indikator_bulanan add column if not exists anomali_ditandai boolean not null default false;
+alter table public.indikator_bulanan add column if not exists anomali_langka boolean not null default false;
+-- {"alasan": [teks], "gabungan": teks}; null bila belum dinilai
+alter table public.indikator_bulanan add column if not exists alasan_anomali jsonb;
+
+-- Rujukan per kunjungan (fitur model anomali). Baris lama tanpa kolom ini dianggap dirujuk FKTP kab/kota yang sama.
+alter table public.klaim_sesi add column if not exists rujukan_fktp boolean not null default true;
+alter table public.klaim_sesi add column if not exists perujuk_luar_wilayah boolean not null default false;
 
 -- F2-F5: satu baris per pasien-RS-bulan yang ditelepon. Antrean = indikator dipicu yang belum punya baris di sini.
 create table if not exists public.panggilan (

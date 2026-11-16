@@ -2,7 +2,7 @@
 from datetime import datetime, time
 
 from . import aturan_v3 as at
-from . import config, jam, pola_v3, repo_v3
+from . import anomali_v3, config, jam, pola_v3, repo_v3
 
 URUT_STATUS = {s: n for n, s in enumerate(at.STATUS_BERJALAN)}
 
@@ -24,13 +24,17 @@ def skor_pola(r: dict) -> float | None:
     return None if r.get("skor_pola") is None else round(r["skor_pola"], 3)
 
 
+def dipilih(r: dict) -> str | None:
+    return anomali_v3.selected_by(bool(r.get("dipicu")), bool(r.get("anomali_ditandai")))
+
+
 def baris_antre(r: dict) -> dict:
     return {
         "id": r["id"], "pasien": r["pasien"], "umur": r["umur"], "rs": r["id_rs"], "nama_rs": r["nama_rs"],
         "ditagih": r["sesi_ditagih"], "indikator": indikator(r), "penerima": penerima(r), "status": r["status"],
         "label": label_api(r), "keputusan_tindakan": at.TINDAKAN_API.get(r["keputusan_tindakan"]),
         "prioritas": r["prioritas"], "percobaan": r["percobaan"], "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),
-        "skor_pola": skor_pola(r), "pola_tinggi": bool(r.get("pola_tinggi")),
+        "skor_pola": skor_pola(r), "pola_tinggi": bool(r.get("pola_tinggi")), "dipilih": dipilih(r),
     }
 
 
@@ -83,11 +87,27 @@ def kinerja_pola(selesai: list[dict]) -> dict:
     }
 
 
+def kinerja_model(selesai: list[dict]) -> dict:
+    """Berapa panggilan per sumber pemilihan berakhir Tidak sesuai, hanya atas Sesuai dan Tidak sesuai.
+    model = dipilih model anomali (termasuk yang juga dipilih aturan); aturan = hanya dipilih aturan."""
+    terjawab = [r for r in selesai if r["label"] in ("Sesuai", "Tidak sesuai")]
+    dari_model = [r for r in terjawab if r.get("anomali_ditandai")]
+    hanya_aturan = [r for r in terjawab if r.get("dipicu") and not r.get("anomali_ditandai")]
+    return {
+        "n": len(terjawab),
+        "model": len(dari_model), "model_tidak_sesuai": sum(r["label"] == "Tidak sesuai" for r in dari_model),
+        "aturan": len(hanya_aturan), "aturan_tidak_sesuai": sum(r["label"] == "Tidak sesuai" for r in hanya_aturan),
+    }
+
+
 def ringkasan_rs(conn, bulan: str) -> dict:
     """Ringkasan per RS dihitung oleh aturan.py atas panggilan berlabel; kelima RS selalu ada."""
     selesai = repo_v3.panggilan_selesai(conn, bulan)
     hitung = at.ringkasan_rs([{"id_rs": r["id_rs"], "label": r["label"]} for r in selesai])
     pemicu = {r["id_rs"]: r for r in repo_v3.hitungan_indikator(conn, bulan)}
+    pemilihan: dict[str, list] = {}
+    for r in repo_v3.pemilihan_per_pasien(conn, bulan):
+        pemilihan.setdefault(r["id_rs"], []).append((r["umur"], r["dipilih"]))
     daftar = []
     for rs in repo_v3.semua_rs(conn):
         c = hitung.get(rs["id_rs"], {})
@@ -98,6 +118,7 @@ def ringkasan_rs(conn, bulan: str) -> dict:
             "persen": persen,
             "pembanding": pola_v3.pembanding(rs["tipe"], aktif, persen),
             "pola_tinggi_tidak_terpicu": pemicu[rs["id_rs"]]["pola_tinggi_tidak_terpicu"] if rs["id_rs"] in pemicu else 0,
+            "funnel": anomali_v3.funnel(pemilihan[rs["id_rs"]]) if rs["id_rs"] in pemilihan else None,
             "sesuai": c.get("sesuai", 0), "tidak_sesuai": c.get("tidak_sesuai", 0),
             "tidak_yakin": c.get("tidak_yakin", 0), "tidak_terhubung": c.get("tidak_terhubung", 0),
             "menolak": c.get("menolak", 0), "terjawab": c.get("terjawab", 0),
@@ -114,7 +135,7 @@ def ringkasan_rs(conn, bulan: str) -> dict:
         })
     return {
         "bulan": bulan, "aturan": at.ATURAN_RS, "panggilan_selesai": len(selesai),
-        "kinerja_pola": kinerja_pola(selesai), "rs": daftar,
+        "kinerja_pola": kinerja_pola(selesai), "kinerja_model": kinerja_model(selesai), "rs": daftar,
     }
 
 
@@ -126,6 +147,7 @@ def antrean(conn, bulan: str, id_rs: str | None = None, status: str | None = Non
     ringkasan = ringkasan_rs(conn, bulan)
     angka = {
         "pasien_aktif": sum(r["aktif"] for r in pemicu), "terpicu": sum(r["terpicu"] for r in pemicu),
+        "dipilih": sum(r["dipilih"] for r in pemicu), "hanya_model": sum(r["hanya_model"] for r in pemicu),
         "sudah_ditelepon": sum(r["status"] in at.STATUS_SELESAI for r in semua),
         "tidak_sesuai": sum(r["label"] == "Tidak sesuai" for r in semua),
         "rs_perlu_klarifikasi": sum(r["status"] == "Perlu klarifikasi RS" for r in ringkasan["rs"]),
@@ -194,6 +216,18 @@ def objek_pola(r: dict, pengaturan: dict) -> dict | None:
     }
 
 
+def objek_anomali(r: dict) -> dict | None:
+    """Mengapa model anomali memilih (atau tidak memilih) bulan-pasien ini. None bila belum dinilai."""
+    if r["alasan_anomali"] is None:
+        return None
+    return {
+        "skor": r["skor_anomali"] if r["skor_anomali"] is None else round(r["skor_anomali"], 4),
+        "ditandai": r["anomali_ditandai"], "langka": r["anomali_langka"],
+        "alasan": r["alasan_anomali"]["alasan"], "gabungan": r["alasan_anomali"]["gabungan"],
+        "versi": anomali_v3.VERSION,
+    }
+
+
 def detail(conn, id_: str) -> dict | None:
     r = repo_v3.satu_baris(conn, id_)
     if r is None:
@@ -214,6 +248,7 @@ def detail(conn, id_: str) -> dict | None:
         "nama_rs": r["nama_rs"], "bulan": r["bulan_layanan"], "ditagih": r["sesi_ditagih"],
         "tanggal": [t["tanggal"].isoformat() for t in sesi], "tanda_tanggal": tanda_tanggal(sesi),
         "indikator": indikator(r), "pola": objek_pola(r, pengaturan),
+        "dipilih": dipilih(r), "anomali": objek_anomali(r),
         "tanggal_libur": [t.isoformat() for t in repo_v3.tanggal_libur(conn, r["id_peserta"], r["id_rs"], r["bulan_layanan"])],
         "penerima": penerima(r), "status": r["status"], "percobaan": r["percobaan"],
         "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),

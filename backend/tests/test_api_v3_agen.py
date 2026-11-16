@@ -169,7 +169,7 @@ def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkey
     klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,124, terendah di antrean
     conn_v3.execute("update indikator_bulanan set skor_pola = null, logit_pola = null where id_peserta = 'P-S2'")
     urutan = []
-    for _ in range(26):
+    for _ in range(28):
         id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
         urutan.append(id_)
         ubah(conn_v3, id_, status="selesai", label="Tidak yakin", diambil_pada=None)
@@ -177,7 +177,7 @@ def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkey
     skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
     sisa = sorted((i for i in urutan[1:-1]), key=lambda i: (-skor[i[5:-8]]["logit"], i))
     assert urutan[0] == id_skenario("S3") and urutan[1:-1] == sisa
-    assert urutan[1:4] == [PERTAMA, KEDUA, S1] and urutan[-2:] == [id_skenario("S8"), id_skenario("S2")]
+    assert urutan[1:4] == [PERTAMA, KEDUA, S1] and urutan[-3:] == [id_skenario("S8"), "CALL-P-M1-2026-08", id_skenario("S2")]
     assert skor["P-S6"]["skor"] == skor["P-S1"]["skor"] == 1.0  # skor tampil sama, logit memisahkan
 
 

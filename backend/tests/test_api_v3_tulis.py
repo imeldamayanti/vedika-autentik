@@ -252,8 +252,8 @@ def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
 
     h = klien_v3.get("/api/v1/antrean").json()
     assert h["angka"] == {
-        "pasien_aktif": 300, "terpicu": 30, "sudah_ditelepon": 4, "tidak_sesuai": 2, "rs_perlu_klarifikasi": 0,
-        "antre": 26, "menunggu_keputusan": 2,
+        "pasien_aktif": 302, "terpicu": 30, "dipilih": 32, "hanya_model": 2, "sudah_ditelepon": 4, "tidak_sesuai": 2,
+        "rs_perlu_klarifikasi": 0, "antre": 28, "menunggu_keputusan": 2,
     }
     assert h["pengaturan"]["mode_otomatis"] is True and h["pengaturan"]["jeda"] is False  # otomatis bawaan menyala
     assert all(not b["prioritas"] and b["percobaan"] == 0 for b in h["baris"] if b["status"] == "antre")
@@ -269,7 +269,7 @@ def test_reset_demo_tidak_menyentuh_data_master(klien_v3, conn_v3):
     sebelum = [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")]
     klien_v3.post("/api/v1/demo/reset")
     assert [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")] == sebelum
-    assert sebelum[:3] == [5, 408, 4913] and sebelum[4] == 300
+    assert sebelum[:3] == [5, 410, 4938] and sebelum[4] == 302
 
 
 def test_reset_demo_mematikan_jeda(klien_v3):
