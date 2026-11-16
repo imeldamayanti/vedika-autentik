@@ -108,8 +108,9 @@ Aturan bicara:
 - Jangan menganggap penerima sudah menjawab atau menyebut angka bila kamu tidak mendengarnya.
 Jika jawaban tidak jelas, ulangi pertanyaannya saja dengan singkat, paling banyak sekali
 untuk setiap pertanyaan.
-- Untuk langkah B, jawaban singkat seperti "iya", "benar", atau "saya sendiri" sudah cukup.
-Lanjutkan.
+- Tanyakan langkah B sekali saja. Jawaban apa pun yang bukan penolakan atau "salah sambung",
+termasuk "iya", "benar", atau "saya sendiri", berarti benar: langsung lanjut ke langkah C.
+Ulangi langkah B hanya bila sama sekali tidak ada jawaban.
 - Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.
 - Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.
 - Jangan memakai kata curang atau fraud kepada penerima.

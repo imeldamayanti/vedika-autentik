@@ -61,6 +61,8 @@ untuk gerbang R3.6 (tiga panggilan berturut-turut, transkrip ≥ 90%).
 | 8 (19:52) | Pendeteksi suara Gemini dibuat peka. Saat HP penguji masih berdering, gumaman di ruangan dianggap jawaban, AI mulai bicara, panggilan putus 5 detik kemudian | Tidak terhubung (salah). Memicu temuan 10 |
 | 9 (19:55) | Mikrofon ditahan sampai jaringan menyatakan diangkat. Semua jawaban tertranskrip benar: "Iya, benar", "tiga kali", "Enggak pernah, hari Minggu kan tutup". Pertanyaan identitas diulang sekali (sesuai aturan), pembuka sekali | **Tidak sesuai, 11 vs 3, selisih 8.** 59 detik, rekaman tersimpan. Lulus |
 
+| 10 (20:13) | Setelah temuan 11 dan 12. Berdering 10 detik setelah ditekan, diangkat, lalu ditutup dari HP penguji 1 detik kemudian (REMOTE, normal call clearing). Penguji sedang tidak bisa; uji dijeda | Tidak diangkat, percobaan 2 dijadwalkan (benar) |
+
 Akurasi field kunci percobaan 9 (UJI-HP bagian E): penerima, hadir, jumlah sesi, keyakinan, tanggal libur, tanda
 bahaya, **6 dari 6 benar**.
 
@@ -82,18 +84,18 @@ benar menurut `aturan.py`, karena jumlah sesi tidak tertangkap; rekaman dan tran
 | 8 | AI menganggap penerima sudah membenarkan padahal jawabannya tidak terdengar, lalu telepon ditutup sebelum penerima menjawab | Naskah: setiap giliran diakhiri satu pertanyaan, dilarang menganggap sudah dijawab. Hening pertama setelah giliran AI memicu pertanyaan ulang (`SILENCE_NUDGE`); telepon ditutup hanya bila hening lagi |
 | 9 | Pembuka diulang; jawaban pendek penerima terlewat atau ditranskrip dalam huruf lain | Naskah: pembuka sekali, ulang hanya pertanyaannya, paling banyak sekali per pertanyaan; "iya/benar/saya sendiri" cukup untuk identitas. Gemini: `startOfSpeechSensitivity` HIGH, `endOfSpeechSensitivity` LOW, `inputAudioTranscription.languageCodes` id-ID |
 | 10 | Dengan pendeteksi peka, bunyi saat masih berdering dianggap jawaban | Halaman agen menahan audio mikrofon (`holdInput`) sampai Phone helper melaporkan `tersambung: true`. HP palsu melaporkan `tersambung: null` dan langsung didengar seperti sebelumnya |
+| 11 | Pertanyaan identitas diulang saat "iya" penerima tertangkap samar | Naskah: langkah B ditanyakan sekali; jawaban apa pun yang bukan penolakan atau "salah sambung" berarti benar. Diulang hanya bila tidak ada jawaban sama sekali. **Belum diuji di HP** |
+| 12 | Di jaringan Tri, HP penerima bisa baru berdering 30 detik setelah ditekan, sementara batas "tidak diangkat" 40 detik dihitung sejak menekan | `/v1/saluran/status` menambah `berdering` (`mForegroundCallState=4`); batas 40 detik dimulai ulang saat penerima mulai berdering |
 
 Uji otomatis setelah perbaikan: ai-service pytest lulus semua (1 dilewati seperti sebelumnya), `node --test
-ai-service/web/voice-agent.test.mjs` 66 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih, backend 296
+ai-service/web/voice-agent.test.mjs` 67 lulus, `cd ai-service/worker && bun test` 47 lulus, ruff bersih, backend 296
 lulus, `node tests/alur-v3.test.js` 19 lulus.
 
 ## Yang masih terbuka
 
 1. **Gerbang R3.6.** Ulangi S1 dua kali lagi berturut-turut, lalu S2–S8. Bila transkrip turun di bawah 90%, pindah ke
    mode kabel (`SALURAN_AUDIO=kabel`, lihat [STASIUN.md](STASIUN.md) bagian 1).
-2. **Jaringan lambat.** Pada percobaan 3, HP penerima baru berdering sekitar 30 detik setelah nomor ditekan, padahal batas
-   "tidak diangkat" 40 detik dihitung sejak menekan. Status `mForegroundCallState=4` (berdering di penerima) sudah terbaca,
-   jadi batas itu bisa dihitung sejak berdering. Belum diubah.
+2. **Temuan 11** (identitas sekali) baru diuji otomatis; perlu satu panggilan S1 untuk memastikan.
 3. **Meta WhatsApp** (dikerjakan Zahra, lihat di bawah).
 4. **B4–B6, A11–A12, bagian D** belum dijalankan.
 5. **Cloudflare Worker** belum di-deploy ulang dengan pengaturan suara baru.

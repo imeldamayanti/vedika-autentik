@@ -1275,3 +1275,19 @@ test("voice session drops microphone audio while input is held", () => {
   assert.equal(session.inputHeld, false);
   assert.equal(new VedikaVoiceSession({}).inputHeld, false);
 });
+
+test("station operator counts the 40 s answer window from the first ring on a slow network", async (t) => {
+  const rig = stationRig(t, { status: [
+    ...Array(30).fill({ panggilan: "offhook", tersambung: false, berdering: false }),
+    { panggilan: "offhook", tersambung: false, berdering: true },
+  ] });
+
+  await rig.tick(ANSWER_TIMEOUT_MS - LINE_POLL_MS); // the far end started ringing at about 30 s
+  assert.deepEqual(rig.stops, []);
+  await rig.tick(ANSWER_TIMEOUT_MS - 10 * LINE_POLL_MS);
+  assert.deepEqual(rig.stops, []); // 70 s after dialing, still inside 40 s of ringing
+  await rig.tick(15 * LINE_POLL_MS);
+
+  assert.deepEqual(rig.stops, ["tidak_diangkat"]);
+  assert.equal((await rig.result).answered, false);
+});

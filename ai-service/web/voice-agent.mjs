@@ -254,13 +254,22 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
       hangUp();
       Promise.resolve(session?.stop(reason)).catch((error) => onError?.(error));
     };
-    const noAnswer = setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
+    const noAnswerAfter = () => setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
+    let noAnswer = noAnswerAfter();
+    let ringingSeen = false;
     const poll = setInterval(async () => {
       const reply = await line.status().catch(() => null);
       const state = reply?.panggilan;
       if (ended || !state) return;
       if (state !== "idle") {
         seenOffhook = true;
+        // Some networks take 30 s before the recipient's phone rings; the 40 s answer window counts
+        // from the first ring, not from dialing.
+        if (reply.berdering && !ringingSeen && !answered) {
+          ringingSeen = true;
+          clearTimeout(noAnswer);
+          noAnswer = noAnswerAfter();
+        }
         // tersambung true: answered. null/absent: this line cannot tell (fake phone), so listen now.
         if (reply.tersambung !== false) session?.releaseInput?.();
         // Carrier announcements play before the call is answered, so a network "answered" here is
