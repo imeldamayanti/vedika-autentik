@@ -49,6 +49,9 @@ HISTOGRAM_MONTHS = tuple(f"2024-{month:02d}" for month in range(7, 13))
 MINIMUM_GROUP_MONTHS = 30
 MINIMUM_GROUPS_FOR_PERCENTILES = 20
 MINIMUM_TYPE_MONTHS = 100
+# Dominance rule: a type whose largest peer group holds more than this share of its patient-months
+# is omitted, because its figures would mostly describe one hospital group.
+MAXIMUM_DOMINANT_GROUP_SHARE = 0.5
 NATIONAL = "Nasional"
 POLA_PATH = Path(__file__).resolve().parents[3] / "data-uji-konfirmasi" / "tools" / "pola.py"
 
@@ -327,9 +330,14 @@ def aggregate(
         by_type[record["tipe"]].append(record)
     benchmark = {NATIONAL: _benchmark(records, minimum_count)} if records else {}
     omitted = 0
+    dominated = 0
     for label, rows in sorted(by_type.items()):
         if len(rows) < MINIMUM_TYPE_MONTHS:
             omitted += 1
+            continue
+        largest = Counter(row["kelompok"] for row in rows).most_common(1)[0][1]
+        if largest / len(rows) > MAXIMUM_DOMINANT_GROUP_SHARE:
+            dominated += 1
             continue
         benchmark[label] = _benchmark(rows, minimum_count)
 
@@ -342,6 +350,7 @@ def aggregate(
         "suppression": {
             "histogram": suppression,
             "types_omitted_under_100_patient_months": omitted,
+            "types_omitted_one_group_over_half": dominated,
         },
         "counts": {
             "outpatient_physiotherapy_rows": len(visits),
@@ -471,6 +480,7 @@ def build_pattern_reference(
             "minimum_group_patient_months": MINIMUM_GROUP_MONTHS,
             "minimum_groups_for_percentiles": MINIMUM_GROUPS_FOR_PERCENTILES,
             "minimum_type_patient_months": MINIMUM_TYPE_MONTHS,
+            "dominant_group_share_limit": MAXIMUM_DOMINANT_GROUP_SHARE,
             "histogram_levels": [
                 {name: list(bands) for name, bands in level.items()} for level in COARSE_LEVELS
             ],

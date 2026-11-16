@@ -1,12 +1,4 @@
 {
-  "Khusus Bedah": {
-    "bulan_pasien": 107,
-    "kelompok": 1,
-    "persen_terpicu": 21.47,
-    "sesi_p90": 11,
-    "sesi_p95": 12,
-    "sesi_rata": 4.99
-  },
   "Khusus Ibu dan Anak": {
     "bulan_pasien": 103,
     "kelompok": 2,
@@ -38,14 +30,6 @@
     "sesi_p90": 9,
     "sesi_p95": 10,
     "sesi_rata": 4.91
-  },
-  "Khusus Tulang": {
-    "bulan_pasien": 126,
-    "kelompok": 1,
-    "persen_terpicu": 0.0,
-    "sesi_p90": 4,
-    "sesi_p95": 5,
-    "sesi_rata": 2.57
   },
   "Missing": {
     "bulan_pasien": 695,

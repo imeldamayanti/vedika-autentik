@@ -162,6 +162,22 @@ def test_benchmark_percentiles_need_enough_groups():
     assert "terpicu_p95" not in fewer["pembanding_tipe"]["RS Swasta Setara Type C"]
 
 
+def test_types_dominated_by_one_peer_group_are_omitted():
+    """Dominance rule: a type is left out when its largest peer group holds more than half of it."""
+    big = frame(range(1000, 1060), ["2024-08-05"], group=(1, 9, 1, 13), kind="Khusus Bedah")
+    small = frame(range(2000, 2050), ["2024-08-05"], group=(2, 9, 1, 13), kind="Khusus Bedah")
+    even = [
+        *frame(range(3000, 3060), ["2024-08-05"], group=(3, 9, 1, 21), kind="Khusus Mata"),
+        *frame(range(4000, 4060), ["2024-08-05"], group=(4, 9, 1, 21), kind="Khusus Mata"),
+    ]
+
+    result = aggregate(big + small + even)
+
+    assert "Khusus Bedah" not in result["pembanding_tipe"]  # 60 of 110 = 55% in one group
+    assert "Khusus Mata" in result["pembanding_tipe"]  # exactly half: kept
+    assert result["suppression"]["types_omitted_one_group_over_half"] == 1
+
+
 def test_aggregate_rejects_a_minimum_below_the_safe_cell_count():
     with pytest.raises(ClaimReferenceError, match="minimum_count"):
         aggregate([visit(1, "2024-08-05")], minimum_count=5)
