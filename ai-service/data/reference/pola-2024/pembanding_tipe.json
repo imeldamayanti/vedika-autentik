@@ -1,0 +1,183 @@
+{
+  "Khusus Bedah": {
+    "bulan_pasien": 107,
+    "kelompok": 1,
+    "persen_terpicu": 21.47,
+    "sesi_p90": 11,
+    "sesi_p95": 12,
+    "sesi_rata": 4.99
+  },
+  "Khusus Ibu dan Anak": {
+    "bulan_pasien": 103,
+    "kelompok": 2,
+    "persen_terpicu": 0.67,
+    "sesi_p90": 7,
+    "sesi_p95": 7,
+    "sesi_rata": 3.41
+  },
+  "Khusus Jantung": {
+    "bulan_pasien": 101,
+    "kelompok": 2,
+    "persen_terpicu": 0.94,
+    "sesi_p90": 6,
+    "sesi_p95": 8,
+    "sesi_rata": 4.08
+  },
+  "Khusus Jiwa": {
+    "bulan_pasien": 201,
+    "kelompok": 3,
+    "persen_terpicu": 0.32,
+    "sesi_p90": 5,
+    "sesi_p95": 6,
+    "sesi_rata": 2.83
+  },
+  "Khusus Paru": {
+    "bulan_pasien": 102,
+    "kelompok": 1,
+    "persen_terpicu": 12.19,
+    "sesi_p90": 9,
+    "sesi_p95": 10,
+    "sesi_rata": 4.91
+  },
+  "Khusus Tulang": {
+    "bulan_pasien": 126,
+    "kelompok": 1,
+    "persen_terpicu": 0.0,
+    "sesi_p90": 4,
+    "sesi_p95": 5,
+    "sesi_rata": 2.57
+  },
+  "Missing": {
+    "bulan_pasien": 695,
+    "kelompok": 8,
+    "persen_terpicu": 10.55,
+    "sesi_p90": 8,
+    "sesi_p95": 10,
+    "sesi_rata": 4.78
+  },
+  "Nasional": {
+    "bulan_pasien": 41905,
+    "kelompok": 426,
+    "persen_terpicu": 1.51,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.57,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 3.8,
+    "terpicu_p95": 9.0
+  },
+  "RS Kelas A": {
+    "bulan_pasien": 1498,
+    "kelompok": 20,
+    "persen_terpicu": 1.82,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.33,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 3.3,
+    "terpicu_p95": 8.3
+  },
+  "RS Kelas B": {
+    "bulan_pasien": 6535,
+    "kelompok": 93,
+    "persen_terpicu": 1.12,
+    "sesi_p90": 6,
+    "sesi_p95": 7,
+    "sesi_rata": 3.27,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 3.6,
+    "terpicu_p95": 14.8
+  },
+  "RS Kelas C": {
+    "bulan_pasien": 6377,
+    "kelompok": 70,
+    "persen_terpicu": 1.06,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.36,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 2.8,
+    "terpicu_p95": 6.7
+  },
+  "RS Kelas D": {
+    "bulan_pasien": 375,
+    "kelompok": 2,
+    "persen_terpicu": 5.48,
+    "sesi_p90": 7,
+    "sesi_p95": 11,
+    "sesi_rata": 3.53
+  },
+  "RS Swasta Setara Type A": {
+    "bulan_pasien": 383,
+    "kelompok": 3,
+    "persen_terpicu": 0.79,
+    "sesi_p90": 6,
+    "sesi_p95": 8,
+    "sesi_rata": 3.5
+  },
+  "RS Swasta Setara Type B": {
+    "bulan_pasien": 4203,
+    "kelompok": 39,
+    "persen_terpicu": 0.94,
+    "sesi_p90": 6,
+    "sesi_p95": 7,
+    "sesi_rata": 3.55,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 2.5,
+    "terpicu_p95": 3.3
+  },
+  "RS Swasta Setara Type C": {
+    "bulan_pasien": 16618,
+    "kelompok": 125,
+    "persen_terpicu": 1.48,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.74,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 4.3,
+    "terpicu_p95": 8.2
+  },
+  "RS Swasta Setara Type D": {
+    "bulan_pasien": 2176,
+    "kelompok": 27,
+    "persen_terpicu": 0.77,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.77,
+    "terpicu_p50": 0.0,
+    "terpicu_p90": 2.5,
+    "terpicu_p95": 3.0
+  },
+  "RS TNI Polri Kelas I": {
+    "bulan_pasien": 229,
+    "kelompok": 3,
+    "persen_terpicu": 0.98,
+    "sesi_p90": 6,
+    "sesi_p95": 7,
+    "sesi_rata": 2.96
+  },
+  "RS TNI Polri Kelas II": {
+    "bulan_pasien": 740,
+    "kelompok": 13,
+    "persen_terpicu": 1.37,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.65
+  },
+  "RS TNI Polri Kelas III": {
+    "bulan_pasien": 1083,
+    "kelompok": 12,
+    "persen_terpicu": 1.91,
+    "sesi_p90": 7,
+    "sesi_p95": 8,
+    "sesi_rata": 3.74
+  },
+  "RS TNI Polri Kelas IV": {
+    "bulan_pasien": 237,
+    "kelompok": 1,
+    "persen_terpicu": 0.48,
+    "sesi_p90": 7,
+    "sesi_p95": 7,
+    "sesi_rata": 3.45
+  }
+}

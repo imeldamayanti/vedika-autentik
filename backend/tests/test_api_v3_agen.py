@@ -13,6 +13,10 @@ DATA = config.AKAR / "data-uji-konfirmasi"
 SKENARIO = {s["id_skenario"]: s for s in json.loads((DATA / "skenario_uji.json").read_text())}
 S1 = "CALL-P-S1-2026-08"
 BASE = "/api/v1"
+# Antrean awal menurut logit skor pola: S6 (14,7), P0037 (14,3), lalu S1 (13,7); ketiganya tampil 1,00.
+# Uji mekanik agen memakai "yang pertama" dan "berikutnya" di antrean, bukan pasien tertentu.
+PERTAMA = "CALL-P-S6-2026-08"
+KEDUA = "CALL-P0037-2026-08"
 
 
 def id_skenario(sid):
@@ -114,7 +118,8 @@ def test_ambil_204_selama_mode_mati(klien_agen, monkeypatch):
 
 def test_ambil_tugas_s1_bentuk_kontrak(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch)
-    r = klien_agen.post(f"{BASE}/agen/ambil")  # mode otomatis bawaan menyala: S1 diambil tanpa klik
+    klien_agen.post(f"{BASE}/panggilan/{S1}/mulai")  # bentuk tugas S1 (libur 16 dan 17 Agustus)
+    r = klien_agen.post(f"{BASE}/agen/ambil")
     assert r.status_code == 200
     t = r.json()
     teks = detail(klien_agen, S1)["pesan_wa"]["pemberitahuan"]
@@ -150,10 +155,43 @@ def test_ambil_tugas_keluarga_dan_tanpa_libur(klien_agen, conn_v3, monkeypatch):
 def test_ambil_mengikuti_urutan_antrean_dan_satu_panggilan_aktif(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch)
     nyalakan(klien_agen)
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == S1
-    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # S1 terkunci, satu panggilan aktif
-    ubah(conn_v3, S1, status="selesai", label="Sesuai", diambil_pada=None)
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S2")
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == PERTAMA
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # PERTAMA terkunci, satu panggilan aktif
+    ubah(conn_v3, PERTAMA, status="selesai", label="Sesuai", diambil_pada=None)
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == KEDUA
+
+
+def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkeypatch):
+    """Dahulukan menang atas skor; sesudahnya logit skor pola tertinggi (skor 1,00 pun tetap berbeda urutannya),
+    logit sama menurut id biner, tanpa logit paling akhir."""
+    jam_palsu(monkeypatch)
+    nyalakan(klien_agen)
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,124, terendah di antrean
+    conn_v3.execute("update indikator_bulanan set skor_pola = null, logit_pola = null where id_peserta = 'P-S2'")
+    urutan = []
+    for _ in range(26):
+        id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
+        urutan.append(id_)
+        ubah(conn_v3, id_, status="selesai", label="Tidak yakin", diambil_pada=None)
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
+    skor = {r["id_peserta"]: r for r in json.loads((DATA / "referensi-pola" / "skor_demo.json").read_text())}
+    sisa = sorted((i for i in urutan[1:-1]), key=lambda i: (-skor[i[5:-8]]["logit"], i))
+    assert urutan[0] == id_skenario("S3") and urutan[1:-1] == sisa
+    assert urutan[1:4] == [PERTAMA, KEDUA, S1] and urutan[-2:] == [id_skenario("S8"), id_skenario("S2")]
+    assert skor["P-S6"]["skor"] == skor["P-S1"]["skor"] == 1.0  # skor tampil sama, logit memisahkan
+
+
+def test_ambil_urutan_sama_dengan_daftar_antrean_situs(klien_agen, conn_v3, monkeypatch):
+    jam_palsu(monkeypatch)
+    nyalakan(klien_agen)
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S8')}/mulai")
+    situs = [r["id"] for r in klien_agen.get(f"{BASE}/antrean").json()["baris"] if r["status"] == "antre"]
+    diambil = []
+    for _ in situs:
+        id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
+        diambil.append(id_)
+        conn_v3.execute("delete from panggilan where id = %s", (id_,))
+    assert diambil == situs and diambil[0] == id_skenario("S8")
 
 
 def test_ambil_menolak_bila_ada_panggilan_berjalan(klien_agen, conn_v3, monkeypatch):
@@ -168,16 +206,16 @@ def test_ambil_menolak_bila_ada_panggilan_berjalan(klien_agen, conn_v3, monkeypa
 
 def test_panggilan_macet_dilepas_setelah_lima_menit_sebagai_percobaan_gagal(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch, menit=0)
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == S1
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == PERTAMA
     jam_palsu(monkeypatch, menit=1)
-    lapor(klien_agen, S1, "menelepon")
+    lapor(klien_agen, PERTAMA, "menelepon")
     jam_palsu(monkeypatch, menit=5, detik=59)
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # belum 5 menit sejak laporan terakhir
     jam_palsu(monkeypatch, menit=6, detik=1)
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S2")  # S1 dilepas, antrean lanjut
-    b = baris_db(conn_v3, S1)
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == KEDUA  # PERTAMA dilepas, antrean lanjut
+    b = baris_db(conn_v3, PERTAMA)
     assert (b["status"], b["percobaan"], b["diambil_pada"], b["coba_lagi_setelah"]) == ("antre", 1, None, wib(2026, 10, 6, 10, 8, 1))
-    assert log_db(conn_v3, S1)[-1] == ("menelepon", 1, "macet")
+    assert log_db(conn_v3, PERTAMA)[-1] == ("menelepon", 1, "macet")
 
 
 def test_jeda_wa_tidak_dihitung_macet(klien_agen, conn_v3, monkeypatch):
@@ -185,10 +223,10 @@ def test_jeda_wa_tidak_dihitung_macet(klien_agen, conn_v3, monkeypatch):
     klien_agen.put(f"{BASE}/pengaturan", json={"jeda_wa_menit": 10})
     klien_agen.post(f"{BASE}/agen/ambil")
     jam_palsu(monkeypatch, menit=14, detik=59)
-    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204 and baris_db(conn_v3, S1)["status"] == "wa_terkirim"
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204 and baris_db(conn_v3, PERTAMA)["status"] == "wa_terkirim"
     jam_palsu(monkeypatch, menit=15, detik=1)  # 5 menit setelah jeda WA habis tanpa laporan
     klien_agen.post(f"{BASE}/agen/ambil")
-    assert baris_db(conn_v3, S1)["status"] == "antre" and log_db(conn_v3, S1)[-1] == ("menelepon", 1, "macet")
+    assert baris_db(conn_v3, PERTAMA)["status"] == "antre" and log_db(conn_v3, PERTAMA)[-1] == ("menelepon", 1, "macet")
 
 
 def test_membaca_jawaban_tidak_pernah_dilepas(klien_agen, conn_v3, monkeypatch):
@@ -200,13 +238,13 @@ def test_membaca_jawaban_tidak_pernah_dilepas(klien_agen, conn_v3, monkeypatch):
 
 def test_kunci_ambil_percobaan_kedua_lepas_setelah_lima_menit(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch, menit=0)
-    ubah(conn_v3, S1, percobaan=1)
+    ubah(conn_v3, PERTAMA, percobaan=1)
     t = klien_agen.post(f"{BASE}/agen/ambil").json()
-    assert t["id"] == S1 and baris_db(conn_v3, S1)["status"] == "antre"
+    assert t["id"] == PERTAMA and baris_db(conn_v3, PERTAMA)["status"] == "antre"
     jam_palsu(monkeypatch, menit=4, detik=59)
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
     jam_palsu(monkeypatch, menit=5, detik=1)
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == S1  # agen tidak melapor: tugas dilepas
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == PERTAMA  # agen tidak melapor: tugas dilepas
 
 
 @pytest.mark.parametrize("jam_,menit,boleh", [(8, 59, False), (9, 0, True), (16, 59, True), (17, 0, False), (23, 0, False)])
@@ -412,13 +450,13 @@ def test_detak_menolak_isi_tidak_valid(klien_agen):
     assert klien_agen.post(f"{BASE}/agen/detak", json={}).status_code == 422
 
 
-def test_reset_demo_menyalakan_mode_otomatis_dan_s1_diambil_tanpa_klik(klien_agen, monkeypatch):
+def test_reset_demo_menyalakan_mode_otomatis_dan_antrean_diambil_tanpa_klik(klien_agen, monkeypatch):
     jam_palsu(monkeypatch)
     matikan(klien_agen)
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
     klien_agen.post(f"{BASE}/demo/reset")
     assert klien_agen.get(f"{BASE}/pengaturan").json()["mode_otomatis"] is True
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == S1
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == PERTAMA  # tanpa klik, pertama di antrean
 
 
 def test_jeda_percobaan_mengikuti_pengaturan(klien_agen, monkeypatch):
@@ -640,12 +678,12 @@ def test_batal_saat_jeda_wa_menolak_laporan_agen_yang_masih_menunggu(klien_agen,
     baru jalan setelah jeda percobaan dan lewat agen/ambil."""
     jam_palsu(monkeypatch, menit=0)
     klien_agen.post(f"{BASE}/agen/ambil")
-    assert klien_agen.post(f"{BASE}/panggilan/{S1}/batal").json()["status"] == "antre"
+    assert klien_agen.post(f"{BASE}/panggilan/{PERTAMA}/batal").json()["status"] == "antre"
     jam_palsu(monkeypatch, menit=1)
-    r = lapor(klien_agen, S1, "menelepon")
+    r = lapor(klien_agen, PERTAMA, "menelepon")
     assert r.status_code == 409 and r.json()["galat"]["kode"] == "urutan_salah"
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S2")  # antrean lanjut
-    b = baris_db(conn_v3, S1)
+    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == KEDUA  # antrean lanjut
+    b = baris_db(conn_v3, PERTAMA)
     assert (b["status"], b["percobaan"], b["coba_lagi_setelah"]) == ("antre", 1, wib(2026, 10, 6, 10, 2))
 
 

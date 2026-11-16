@@ -20,6 +20,7 @@ dev = [
 data = [
     "pandas>=2.2,<3",
     "pyreadstat>=1.2,<2",
+    "scikit-learn>=1.5,<2",
 ]
 
 [build-system]
@@ -45,3 +46,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Generates long Indonesian report lines (EVALUASI.md).
+"scripts/train_pattern_model.py" = ["E501"]

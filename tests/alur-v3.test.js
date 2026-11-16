@@ -51,8 +51,28 @@ async function tanpaGeserSamping(page, nama) {
   cek((await page.getAttribute('[data-aksi="telepon"][data-id="S1"]', "title")) === "Pindahkan ke urutan berikutnya", "tooltip Dahulukan");
   cek(!(await page.content()).includes("masih stub"), "teks 'masih stub' sudah dihapus");
 
+  console.log("\nSkor pola di antrean");
+  /* Skor tiap baris berstatus Antre, dari atas ke bawah. */
+  const skorAntre = () => page.$$eval("tbody tr", (tr) => tr
+    .filter((r) => r.querySelector(".status-chip--antre") && r.querySelector(".chip-pola"))
+    .map((r) => parseFloat(r.querySelector(".chip-pola").textContent.replace("Pola", "").replace(",", "."))));
+  const menurun = (d) => d.every((x, i) => i === 0 || d[i - 1] >= x);
+  cek((await page.$$(".chip-pola")).length === 14, "tiap baris antrean punya chip skor pola", String((await page.$$(".chip-pola")).length));
+  const chipS1 = await page.$eval("tbody tr:nth-child(2) .chip-pola", (el) => ({ teks: el.textContent.trim(), kelas: el.className, judul: el.title, lebar: el.querySelector("i b").style.width }));
+  cek(chipS1.teks === "Pola 1,00" && chipS1.kelas.includes("chip-pola--tinggi") && chipS1.lebar === "100%", "chip S1: Pola 1,00 bergaya tinggi dengan batang penuh", JSON.stringify(chipS1));
+  cek(chipS1.judul === "Skor pola: prioritas panggilan, bukan putusan.", "tooltip chip: prioritas panggilan, bukan putusan", chipS1.judul);
+  const atas = await page.$$eval("tbody tr .nama-berkas b", (el) => el.slice(0, 2).map((x) => x.textContent));
+  cek(atas[0] === "Slamet Riyadi" && atas[1] === "Andi Pratama", "skor 1,00 diurutkan menurut logit: S6 lalu S1", atas.join(", "));
+  const awal = await skorAntre();
+  cek(awal.length === 10 && menurun(awal) && awal[0] === 1 && awal[9] < 0.2, "antrean terurut skor pola menurun", awal.join(" "));
+  cek((await page.$$(".chip-pola:not(.chip-pola--tinggi)")).length >= 2, "skor di bawah ambang memakai chip netral");
+  cek(await page.evaluate(() => window.DATA3.UJI_POLA.length === 0 && window.DATA3.UJI.length === 0), "uji mandiri data simulasi (label dan skor pola) bersih");
+
   console.log("\nS1 sampai kartu bukti");
   await page.click('[data-aksi="telepon"][data-id="S1"]');
+  await page.waitForSelector(".status-chip--wa");
+  const sesudah = await skorAntre();
+  cek(sesudah.length === 9 && menurun(sesudah), "setelah Dahulukan, sisa antrean tetap terurut skor pola", sesudah.join(" "));
   await page.goto(TARGET + "#/panggilan/S1");
   await page.waitForSelector("#panggilan");
   cek(await page.isVisible("text=Pesan WA terkirim"), "tahap Pesan WA terkirim tampil di layar panggilan");
@@ -64,7 +84,23 @@ async function tanpaGeserSamping(page, nama) {
   cek(angka[0] === 11 && angka[1] === 3, "kartu bukti S1: ditagih 11, versi peserta 3", angka.join(" / "));
   cek(angka[2] === 8, "selisih 8 sesi", String(angka[2]));
   cek((await page.textContent(".judul-label .label")).trim() === "Tidak sesuai", "label Tidak sesuai");
+  cek((await page.textContent(".pola-kartu h2")) === "Mengapa diprioritaskan", "kartu bukti punya bagian Mengapa diprioritaskan");
+  const alasan = await page.$$eval(".pola-kartu .pola-alasan li", (el) => el.map((x) => x.textContent));
+  cek(alasan.length === 2 && alasan.some((a) => a.includes("Minggu/libur")) && alasan.every((a) => a.includes("sesi")), "kartu S1 memuat dua alasan: sesi dan Minggu/libur", alasan.join(" | "));
+  cek((await page.textContent(".pola-kartu .pola-kombinasi")) === "Kombinasi I1+I2+I4 terjadi pada kurang dari 0,03% bulan-pasien fisioterapi nasional 2024.", "kalimat kombinasi indikator");
+  cek((await page.textContent(".pola-kartu .pola-catatan")) === "Skor pola dihitung dari pola nasional data sampel BPJS 2024 (agregat). Bukan putusan; label tetap dari jawaban pasien.", "catatan: skor pola bukan putusan");
+  cek(await page.isVisible(".pola-kartu .lencana-pola"), "lencana Pola tidak biasa di kartu S1");
+  cek(!/fraud|curang/i.test(await page.textContent(".pola-kartu")), "bagian skor pola tanpa kata fraud atau curang");
+  await page.goto(TARGET + "#/kartu/R3");
+  await page.waitForSelector(".pola-kartu");
+  cek(!(await page.$(".pola-kartu .lencana-pola")) && (await page.textContent(".pola-kartu .chip-pola")).trim() === "Pola 0,12", "kartu berskor rendah (R3) tanpa lencana, chip netral");
   await page.goto(TARGET + "#/ringkasan-rs");
+  await page.waitForSelector(".baris-pembanding");
+  const pembanding = await page.$$eval(".baris-pembanding", (el) => el.map((x) => x.textContent.trim()));
+  cek(pembanding.length === 5 && pembanding[0].includes("Terpicu 39,7% · RS sejenis nasional 1,5% · 95% kelompok RS sejenis ≤ 8,2%"), "Ringkasan RS: baris pembanding RS sejenis nasional", pembanding[0]);
+  cek((await page.$$(".baris-pembanding .lencana-pola")).length === 1 && pembanding[0].includes("Di atas 95% RS sejenis"), "hanya RS Melati berlencana Di atas 95% RS sejenis");
+  const kinerja = await page.textContent(".kinerja-pola");
+  cek(kinerja.includes("Skor pola vs hasil panggilan") && kinerja.includes("2 dari 2 panggilan berpola tidak biasa berakhir Tidak sesuai") && kinerja.includes("5 panggilan terjawab"), "kartu Skor pola vs hasil panggilan", kinerja);
   cek(await page.isVisible("text=RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab)"), "RS Melati menjadi Perlu klarifikasi RS (3 dari 5)");
 
   console.log("\nLebar 390 px");
