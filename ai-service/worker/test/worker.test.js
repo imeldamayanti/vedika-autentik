@@ -156,6 +156,7 @@ describe("POST /v1/suara/token", () => {
     expect(sent.uses).toBe(1);
     expect(sent.bidiGenerateContentSetup.systemInstruction.parts[0].text).toBe(body.instruksi);
     expect(sent.bidiGenerateContentSetup.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName).toBe("Kore");
+    expect(sent.bidiGenerateContentSetup.generationConfig.speechConfig.languageCode).toBe("id-ID");
     expect(sent.liveConnectConstraints).toBeUndefined();
   });
 

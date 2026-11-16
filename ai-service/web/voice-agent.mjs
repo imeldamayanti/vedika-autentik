@@ -13,6 +13,13 @@ export const DIAL_GRACE_MS = 5000;
 export const LINE_POLL_MS = 1000;
 export const CLOSING_HANGUP_MS = 3000;
 export const SILENCE_HANGUP_MS = 10000;
+// Sent to the model after the first silence following its question: on a phone line the answer is
+// often missed, so the AI asks once more before the call is ended.
+export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Sapa singkat, lalu ulangi pertanyaan terakhir. "
+  + "Jangan menganggap penerima sudah menjawab atau membenarkan.";
+// After the network reports the call as answered, how long the recipient may stay silent before
+// the AI opens the conversation itself.
+export const PICKUP_SILENCE_MS = 3000;
 
 const normalize = (teks) => String(teks || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
 const ANNOUNCEMENTS = [
@@ -228,11 +235,15 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     let aiTurns = 0;
     let closing = null;
     let silence = null;
+    let pickup = null;
+    let heardRecipient = false;
+    let nudged = false;
     let session = null;
     const clearTimers = () => {
       clearTimeout(noAnswer);
       clearTimeout(closing);
       clearTimeout(silence);
+      clearTimeout(pickup);
       clearInterval(poll);
     };
     const end = (reason, note) => {
@@ -245,18 +256,45 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     };
     const noAnswer = setTimeout(() => end("tidak_diangkat", "tidak ada jawaban dalam 40 detik"), ANSWER_TIMEOUT_MS);
     const poll = setInterval(async () => {
-      const state = await line.status().then((reply) => reply.panggilan).catch(() => null);
+      const reply = await line.status().catch(() => null);
+      const state = reply?.panggilan;
       if (ended || !state) return;
-      if (state !== "idle") { seenOffhook = true; return; }
+      if (state !== "idle") {
+        seenOffhook = true;
+        // tersambung true: answered. null/absent: this line cannot tell (fake phone), so listen now.
+        if (reply.tersambung !== false) session?.releaseInput?.();
+        // Carrier announcements play before the call is answered, so a network "answered" here is
+        // a person (or voicemail), never the operator.
+        if (reply.tersambung && !answered && !heardRecipient && !pickup) {
+          pickup = setTimeout(() => {
+            if (!answered && !ended && !heardRecipient && session?.openFirst?.()) {
+              onLog?.(`${task.id}: diangkat tanpa suara; AI membuka lebih dulu`);
+            }
+          }, PICKUP_SILENCE_MS);
+        }
+        return;
+      }
       if (answered) end("selesai", "penerima menutup telepon");
       else if (seenOffhook || Date.now() - dialedAt > DIAL_GRACE_MS) end("tidak_diangkat", "panggilan berakhir sebelum dijawab");
     }, LINE_POLL_MS);
     const afterPlayback = (ms) => ms + (session?.playbackRemainingMs?.() || 0);
+    // First silence after an AI turn: the AI asks again. Second silence in a row: end the call.
+    const onSilence = () => {
+      if (ended) return;
+      if (!nudged && session?.nudge?.(SILENCE_NUDGE)) {
+        nudged = true;
+        onLog?.(`${task.id}: hening 10 detik; AI mengulang pertanyaan`);
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
+        return;
+      }
+      end("selesai", "hening 10 detik setelah giliran AI");
+    };
 
     current = { stop: (reason) => end(reason) };
     onPhase?.("menelepon");
     session = startSession({
       greetFirst: false,
+      holdInput: true,
       context: task.skrip,
       acceptAnswer: (teks) => !isOperatorAnnouncement(teks),
       onRejectedAnswer: () => end("tidak_diangkat", "pengumuman operator, bukan jawaban"),
@@ -266,13 +304,16 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
         onPhase?.("tersambung");
         Promise.resolve(onAnswered()).catch((error) => onError?.(error));
       },
-      onSpeech: () => clearTimeout(silence),
+      onSpeech: (pembicara) => {
+        clearTimeout(silence);
+        if (pembicara === "penerima") { heardRecipient = true; nudged = false; clearTimeout(pickup); }
+      },
       onTranscript: (turn) => {
         onTurn(turn);
         if (!answered || ended || turn.pembicara !== "ai") return;
         aiTurns += 1;
         clearTimeout(silence);
-        silence = setTimeout(() => end("selesai", "hening 10 detik setelah giliran AI"), afterPlayback(SILENCE_HANGUP_MS));
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
         // The opener can start with "Selamat siang"; only a later turn can close the call.
         if (aiTurns > 1 && isClosingLine(turn.teks) && !closing) {
           closing = setTimeout(() => end("selesai", "AI menutup panggilan"), afterPlayback(CLOSING_HANGUP_MS));
@@ -350,9 +391,17 @@ export function buildSetupMessage(model, instruction) {
       model: `models/${model.replace(/^models\//, "")}`,
       generationConfig: {
         responseModalities: ["AUDIO"],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }, languageCode: "id-ID" },
       },
-      inputAudioTranscription: {},
+      inputAudioTranscription: { languageCodes: ["id-ID"] },
+      realtimeInputConfig: {
+        automaticActivityDetection: {
+          startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
+          endOfSpeechSensitivity: "END_SENSITIVITY_LOW",
+          prefixPaddingMs: 200,
+          silenceDurationMs: 800,
+        },
+      },
       outputAudioTranscription: {},
       systemInstruction: { parts: [{ text: instruction }] },
     },
@@ -442,6 +491,13 @@ export class VedikaVoiceSession {
     this.cleanupPromise = null;
     this.messageQueue = Promise.resolve();
     this.stoppedTracks = new Set();
+    // Station calls hold the microphone until the phone network reports the call as answered, so
+    // ringback, room noise or a carrier recording never reach Gemini as the recipient's words.
+    this.inputHeld = Boolean(options.holdInput);
+  }
+
+  releaseInput() {
+    this.inputHeld = false;
   }
 
   emitStatus(status) {
@@ -542,6 +598,7 @@ export class VedikaVoiceSession {
         if (
           this.stopping
           || !this.ready
+          || this.inputHeld
           || this.socket?.readyState !== this.WebSocketImpl.OPEN
         ) return;
         const downsampled = resample(
@@ -592,10 +649,8 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
-    if (event.setupComplete && !this.ready && this.options.greetFirst !== false) {
-      this.socket?.send(JSON.stringify({
-        clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
-      }));
+    if (event.setupComplete && !this.ready && (this.options.greetFirst !== false || this.openWhenReady)) {
+      this.sendOpeningCue();
     }
     this.ready ||= event.setupComplete;
     if (action.clearPlayback) this.clearPlayback();
@@ -603,6 +658,34 @@ export class VedikaVoiceSession {
     for (const turn of event.turns) this.appendFragment(turn);
     if (event.turnComplete || event.interrupted) this.flushTurn();
     for (const chunk of event.audioChunks) this.playPcm(chunk);
+  }
+
+  // Ask the model to speak again (for example after the recipient stayed silent).
+  nudge(text) {
+    if (this.stopping || !this.ready || !this.socket) return false;
+    this.socket.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text }] }], turnComplete: true },
+    }));
+    return true;
+  }
+
+  sendOpeningCue() {
+    this.openWhenReady = false;
+    this.socket?.send(JSON.stringify({
+      clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
+    }));
+  }
+
+  // The phone network says the call is up but the recipient has not said anything: many people
+  // answer an unknown number and wait. Count the call as answered and let the AI open first.
+  openFirst() {
+    if (this.answered || this.stopping) return false;
+    this.answered = true;
+    this.startedAt = performance.now();
+    this.options.onAnswer?.();
+    if (this.ready) this.sendOpeningCue();
+    else this.openWhenReady = true;
+    return true;
   }
 
   // Gemini streams transcription in fragments; the backend wants one line per speaking turn.

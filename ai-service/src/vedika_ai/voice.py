@@ -17,6 +17,15 @@ LIVE_WEBSOCKET_URL = (
     "BidiGenerateContentConstrained"
 )
 VOICE = "Kore"
+LANGUAGE = "id-ID"
+REALTIME_INPUT = {
+    "automaticActivityDetection": {
+        "startOfSpeechSensitivity": "START_SENSITIVITY_HIGH",
+        "endOfSpeechSensitivity": "END_SENSITIVITY_LOW",
+        "prefixPaddingMs": 200,
+        "silenceDurationMs": 800,
+    }
+}
 
 
 class VoiceContext(BaseModel):
@@ -94,6 +103,13 @@ layanan atau iuran.
 
 Aturan bicara:
 - Ajukan satu pertanyaan per giliran. Setiap kalimat maksimal 20 kata.
+- Akhiri setiap giliran dengan satu pertanyaan sampai langkah F, lalu berhenti dan tunggu jawaban.
+- Ucapkan pembuka (langkah A) hanya sekali. Jangan mengulang pembuka.
+- Jangan menganggap penerima sudah menjawab atau menyebut angka bila kamu tidak mendengarnya.
+Jika jawaban tidak jelas, ulangi pertanyaannya saja dengan singkat, paling banyak sekali
+untuk setiap pertanyaan.
+- Untuk langkah B, jawaban singkat seperti "iya", "benar", atau "saya sendiri" sudah cukup.
+Lanjutkan.
 - Maksimal tiga pertanyaan inti. Selesaikan seluruh panggilan dalam 150 detik.
 - Jangan meminta data pribadi, NIK, OTP, rekening, pembayaran, atau uang.
 - Jangan memakai kata curang atau fraud kepada penerima.
@@ -145,10 +161,18 @@ class GeminiTokenIssuer:
                 "model": f"models/{self.model}",
                 "generationConfig": {
                     "responseModalities": ["AUDIO"],
-                    "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}}},
+                    "speechConfig": {
+                        "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": VOICE}},
+                        # Pin Indonesian: on a phone line Gemini otherwise guesses the language of
+                        # faint speech and transcribes Indonesian as Spanish or German words.
+                        "languageCode": LANGUAGE,
+                    },
                 },
                 "systemInstruction": {"parts": [{"text": instruction}]},
-                "inputAudioTranscription": {},
+                "inputAudioTranscription": {"languageCodes": [LANGUAGE]},
+                # Speech from the phone loudspeaker is quiet; a sensitive start keeps short
+                # answers ("iya", "tiga kali") from being missed.
+                "realtimeInputConfig": REALTIME_INPUT,
                 "outputAudioTranscription": {},
             },
         }
@@ -177,4 +201,3 @@ class GeminiTokenIssuer:
             instruksi=instruction,
             kedaluwarsa=expire_time,
         )
-
