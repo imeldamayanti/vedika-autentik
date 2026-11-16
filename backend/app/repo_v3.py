@@ -200,7 +200,7 @@ def panggilan_macet(conn, batas) -> list[str]:
 
 
 def kunci_tugas(conn, sekarang, batas_kunci, boleh_otomatis: bool) -> str | None:
-    """Ambil dan kunci satu panggilan antre: prioritas (Dahulukan) dulu, lalu skor pola tertinggi, lalu id biner.
+    """Ambil dan kunci satu panggilan antre: prioritas (Dahulukan) dulu, lalu logit skor pola tertinggi, lalu id biner.
     Kunci yang lewat batas boleh diambil lagi."""
     r = conn.execute(
         "update panggilan set diambil_pada = %s where id = ("

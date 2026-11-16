@@ -3,7 +3,6 @@
   python3 tools/uji_pola.py
 """
 import csv, math, sys
-from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
@@ -18,15 +17,8 @@ BULAN = "2026-08"
 def fitur_demo():
     """(id_peserta, id_rs) -> fitur mentah Agustus 2026 dari klaim_sesi.csv."""
     libur = {date.fromisoformat(r["tanggal"]) for r in csv.DictReader(open(ROOT / "libur_nasional_2026.csv"))}
-    tanggal = defaultdict(list)
-    for r in csv.DictReader(open(ROOT / "klaim_sesi.csv")):
-        tanggal[(r["id_peserta"], r["id_rs"])].append(date.fromisoformat(r["tanggal"]))
-    hasil = {}
-    for kunci, tgl in tanggal.items():
-        bulan_ini = [t for t in tgl if t.strftime("%Y-%m") == BULAN]
-        if bulan_ini:
-            hasil[kunci] = pola.fitur_bulan(bulan_ini, {t.strftime("%Y-%m") for t in tgl}, BULAN, libur)
-    return hasil, libur
+    sesi = [((r["id_peserta"], r["id_rs"]), date.fromisoformat(r["tanggal"])) for r in csv.DictReader(open(ROOT / "klaim_sesi.csv"))]
+    return pola.fitur_per_pasien(sesi, BULAN, libur), libur
 
 
 def uji_paritas_dengan_aturan():
@@ -55,6 +47,12 @@ def uji_fitur_bulan():
     assert pola.fitur_bulan(tgl, lama, "2026-08", set())["episode"] == 7
     assert pola.fitur_bulan(tgl, {"2026-08"}, "2026-08", set())["ahad_libur"] == 1
     assert pola.bulan_sebelumnya("2026-02", 3) == "2025-11"
+
+
+def uji_fitur_per_pasien():
+    sesi = [("A", date(2026, 7, 6)), ("A", date(2026, 8, 3)), ("A", date(2026, 8, 9)), ("B", date(2026, 7, 6))]
+    hasil = pola.fitur_per_pasien(sesi, "2026-08", set())
+    assert hasil == {"A": {"sesi": 2, "maks_minggu": 2, "ahad_libur": 1, "episode": 2}}, hasil  # B tidak aktif Agustus
 
 
 def uji_bin():

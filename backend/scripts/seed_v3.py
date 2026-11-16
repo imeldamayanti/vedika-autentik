@@ -89,15 +89,7 @@ def baris_indikator(h, pola):
 
 def fitur_pola(sesi, libur, bulan):
     """(id_peserta, id_rs) -> fitur mentah tools/pola.py untuk setiap pasien aktif di bulan itu (semua, bukan hanya terpicu)."""
-    tanggal = {}
-    for s in sesi:
-        tanggal.setdefault((s["id_peserta"], s["id_rs"]), []).append(s["tanggal"])
-    hasil = {}
-    for kunci, tgl in tanggal.items():
-        bulan_ini = [t for t in tgl if t.strftime("%Y-%m") == bulan]
-        if bulan_ini:
-            hasil[kunci] = pola_v3.pola().fitur_bulan(bulan_ini, {t.strftime("%Y-%m") for t in tgl}, bulan, libur)
-    return hasil
+    return pola_v3.pola().fitur_per_pasien([((s["id_peserta"], s["id_rs"]), s["tanggal"]) for s in sesi], bulan, libur)
 
 
 def versi_pola(conn):
