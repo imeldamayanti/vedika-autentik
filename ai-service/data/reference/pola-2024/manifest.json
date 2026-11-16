@@ -28,12 +28,13 @@
     },
     {
       "filename": "pembanding_tipe.json",
-      "sha256": "f5f7902904ba3e3ba742368e428096cd1579c1b7a0007f553d349ed399661c8a",
-      "size_bytes": 3746
+      "sha256": "a0cd10ad5af6e417f15f96ee6a94c63edb92e5f9fafa3e0f6cc107bba2723154",
+      "size_bytes": 3429
     }
   ],
   "parameters": {
     "chunk_size": 200000,
+    "dominant_group_share_limit": 0.5,
     "episode_note": "Months before 2024-01 are not in the source, so I3 is undercounted in the all-month prevalence; the histogram uses 2024-07 to 2024-12 only.",
     "histogram_levels": [
       {
@@ -122,6 +123,7 @@
       "rows_suppressed": 30,
       "weight_share_suppressed": 0.001
     },
+    "types_omitted_one_group_over_half": 2,
     "types_omitted_under_100_patient_months": 1
   }
 }

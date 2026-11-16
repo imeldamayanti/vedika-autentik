@@ -25,7 +25,9 @@ outpatient physiotherapy cohort, with features defined in `data-uji-konfirmasi/t
   rows carry only an upper bound (`prevalensi_maks`);
 - `pembanding_tipe.json`: per hospital type and nationally, trigger rate, session mean and
   percentiles, and peer-group trigger-rate percentiles (types below 100 participant-months omitted,
-  group percentiles only with at least 20 groups, no minimum or maximum values);
+  types whose largest peer group holds more than half of their participant-months omitted so no
+  figure mostly describes one hospital group, group percentiles only with at least 20 groups, no
+  minimum or maximum values);
 - `manifest.json`: source and output checksums, parameters, cohort counts, suppression statistics.
 
 There is no 2024 holiday list, so `ahad_libur` and I4 count Sundays only. The sample has no
