@@ -30,6 +30,10 @@
 .label--tidak_yakin { background: var(--cek-bg); color: var(--cek-fg); }
 .label--tidak_terhubung { background: var(--ulang-bg); color: var(--ulang-fg); }
 .label--menolak { background: var(--muted); color: var(--fg-2); border: 1px solid var(--border-strong); }
+.label--belum { background: var(--muted); color: var(--fg-2); border: 1px dashed var(--border-strong); }
+.sel-status { white-space: nowrap; }
+.sel-status .progres-rs { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }
+.konteks span + span { display: block; margin-top: 4px; color: var(--fg-2); }
 
 /* ---------- status panggilan di antrean ---------- */
 
@@ -51,12 +55,7 @@
 /* ---------- kartu angka ---------- */
 
 .kartu-angka { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
-.kartu-angka > div { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 14px 18px 15px; }
-.kartu-angka b { display: block; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.kartu-angka span { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }
 /* Kartu netral. Warna hanya pada angka yang butuh tindakan dan bukan nol, supaya mata langsung ke sana. */
-.kartu-angka .angka-tidak-sesuai b { color: var(--prioritas-fg); }
-.kartu-angka .angka-klarifikasi b { color: var(--cek-fg); }
 
 /* ---------- antrean konfirmasi ---------- */
 
@@ -64,9 +63,6 @@
 /* Angka dan kontrol tetap terlihat saat tabel digulir (hanya layar lebar; di ponsel terlalu memakan tempat). */
 .antrean-atas { position: sticky; top: var(--atas); z-index: 15; margin: 0 -28px 12px; padding: 12px 28px 0; background: var(--bg); }
 .antrean-atas .kartu-angka { gap: 10px; margin-bottom: 10px; }
-.antrean-atas .kartu-angka > div { display: flex; align-items: center; gap: 12px; padding: 14px 18px; }
-.antrean-atas .kartu-angka b { font-size: 30px; }
-.antrean-atas .kartu-angka span { margin-top: 0; font-size: 13.5px; font-weight: 500; line-height: 1.3; }
 .antrean-atas .bar-antrean { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--bg); box-shadow: var(--shadow); padding: 8px 14px; }
 .bar-antrean { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .bar-antrean .kapital { margin-right: 2px; }
@@ -369,7 +365,389 @@
 .modal-wa .ponsel-kepala .foto svg { width: 18px; height: 18px; }
 .gelembung.sistem { align-self: center; max-width: 100%; padding: 4px 10px; background: oklch(98% .01 110 / .9); font-size: 11.5px; color: var(--fg-2); box-shadow: none; }
 
+/* ---------- sub-menu Autentik ---------- */
+
+.nav .nav-autentik.induk { color: var(--fg); }
+.nav-sub { display: flex; flex-direction: column; gap: 2px; margin: 0 0 2px 20px; padding-left: 10px; border-left: 2px solid var(--border); }
+.nav-sub a { height: 34px; font-size: 13px; }
+.nav-sub a .lencana { margin-left: auto; }
+
+/* ================================================================
+   GAYA V3 (restyle): kanvas abu-abu, kartu putih radius 16px, nav pill, Inter.
+   Warna tetap memakai token app.css; satu token baru: --canvas (netral).
+   Skala huruf dinaikkan untuk pengguna 30+: isi 16px, tabel 15px, tidak ada teks < 13px.
+   ================================================================ */
+
+:root {
+  --font: "Inter", system-ui, sans-serif;
+  --canvas: oklch(96.6% .004 205);
+  --radius: 999px;
+  --radius-panel: 16px;
+  --shadow: none;
+}
+
+body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-settings: "cv11", "ss01"; }
+
+/* Skala 90%: sama dengan zoom Chrome 90% yang dinilai paling nyaman oleh tim.
+   Semua ukuran di file ini ditulis pada skala 100% lalu diperkecil serentak, jadi proporsinya tetap.
+   Ukuran tampil efektif: isi ~14,4px, tabel ~13,5px, teks terkecil ~11,7px, tombol ~40px.
+   Tinggi berbasis 100vh dibagi skala supaya tetap penuh satu layar. */
+/* Skala 90%: tampilan yang disetujui tim adalah halaman ini dilihat dengan zoom Chrome 90%.
+   Dipasang di CSS supaya semua domain (lokal, Vercel) tampil sama tanpa mengatur zoom browser.
+   Lihat di zoom browser 100%; kalau browser juga 90%, hasilnya jadi 81%. */
+:root { --skala: .9; }
+body { zoom: var(--skala); }
+.sisi { height: calc(100vh / var(--skala)); }
+.kolom { min-height: calc(100vh / var(--skala) - 24px); }
+.masuk { min-height: calc(100vh / var(--skala)); }
+.angka, .kartu-angka b, .tabel td { font-variant-numeric: tabular-nums; }
+.kapital, .nav-judul { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
+.redup-kecil { font-size: 13px; }
+
+/* ---------- kerangka ---------- */
+
+.sisi { background: var(--bg); border-right: 0; padding: 20px 16px; }
+.merek b { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+.merek span { font-size: 13px; }
+.merek .merek-ikon, .merek-ikon { border-radius: 12px; }
+.nav { gap: 4px; }
+.nav-judul { padding: 18px 14px 8px; }
+.nav a, .nav button { height: 44px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--fg-2); }
+.nav a:hover, .nav button:hover { background: var(--canvas); color: var(--fg); }
+.nav a[aria-current="page"] { background: var(--fg); color: var(--bg); box-shadow: none; }
+.nav a[aria-current="page"] svg { color: var(--bg); }
+.nav .mati small { font-size: 13px; font-weight: 500; }
+.nav-sub { margin: 2px 0 4px 26px; padding-left: 10px; }
+.nav-sub a { height: 40px; font-size: 15px; }
+.sisi-kaki { border-top: 0; }
+.catatan-prototipe { border-radius: 16px; font-size: 13px; padding: 12px 14px; background: var(--canvas); border: 0; }
+
+.kolom { background: var(--canvas); border-radius: 24px; margin: 12px 12px 12px 0; min-height: calc(100vh - 24px); }
+.atas { background: oklch(96.6% .004 205 / .92); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 0 32px; height: 68px; }
+.jejak-rute { font-size: 15px; }
+.jejak-rute b { font-weight: 600; }
+.pengguna b { font-size: 15px; font-weight: 600; }
+.pengguna span { font-size: 13px; }
+.pengguna .avatar { width: 40px; height: 40px; }
+.pengguna .avatar img { width: 40px; height: 40px; }
+.lencana-simulasi { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; }
+.lencana { height: 24px; padding: 0 9px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+main.isi { padding: 8px 32px 64px; }
+
+/* ---------- judul halaman ---------- */
+
+.kepala { margin-bottom: 24px; }
+.kepala h1 { font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+.kepala p, .keterangan-pemicu, .sub-judul { font-size: 16px; color: var(--fg-2); }
+
+/* ---------- kartu (panel) ---------- */
+
+.panel { border: 0; border-radius: 16px; background: var(--bg); box-shadow: none; }
+.panel-kepala { padding: 20px 24px 12px; border-bottom: 0; }
+.panel-kepala h2, .panel-kepala h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.panel-isi { padding: 12px 24px 24px; }
+.catatan-kaki { font-size: 13px; }
+
+/* ---------- kartu angka ---------- */
+
+
+/* ---------- tombol, label, chip ---------- */
+
+.btn { height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.btn--kecil { height: 40px; padding: 0 16px; font-size: 15px; }
+.btn svg { width: 18px; height: 18px; }
+.label { height: 28px; padding: 0 11px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.label--besar { height: 32px; padding: 0 14px; font-size: 14px; }
+.status-chip { height: 28px; padding: 0 11px; font-size: 13px; font-weight: 600; }
+.sel-status small { font-size: 13px; }
+input, select, textarea { font-size: 16px; }
+
+/* ---------- tabel ---------- */
+
+table.tabel { font-size: 15px; }
+.tabel th { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); background: transparent; padding: 12px 16px; }
+.tabel td { padding: 14px 16px; }
+.tabel .nama-berkas b { font-weight: 600; }
+.tabel .nama-berkas span { font-size: 13px; }
+
+/* ---------- banner keterangan ---------- */
+
+.keterangan-aturan, .perubahan-rs, .pengumuman { border-radius: 16px; font-size: 15px; }
+
+/* ---------- ukuran minimum 13px (audit S-03) ----------
+   Selektor disamakan dengan aslinya supaya menang. Isi mockup ponsel (.ponsel, .gelembung,
+   .tombol-telp) sengaja tidak diubah: meniru layar HP penerima. */
+
+.chip-ind { height: 26px; padding: 0 10px; font-size: 13px; font-weight: 600; }
+.panggilan-grid .panel-kepala .kanan { font-size: 13px; }
+.ponsel-ket { font-size: 13px; }
+.progres small, .progres time { font-size: 13px; }
+.catatan-simulasi { font-size: 13px; padding: 0 24px 16px; }
+.baris-trans .peran { font-size: 13px; font-weight: 600; }
+.baris-trans--sistem { font-size: 13px; }
+.ket-angka { font-size: 14px; }
+.tgl { font-size: 14px; font-weight: 600; border-radius: 10px; }
+.tgl small { font-size: 13px; font-weight: 600; letter-spacing: 0; }
+.pemutar small, .tanpa-rekaman { font-size: 13px; }
+.catatan-bukti { font-size: 14px; padding: 14px 24px 16px; }
+.saran-kartu .konteks { font-size: 14px; border-radius: 12px; }
+.saran-kartu .catatan-saran { font-size: 13px; }
+.pilihan-lain label.catatan-medan > .kapital { font-size: 13px; }
+.pilihan-lain label.catatan-medan > .petunjuk-alasan, .petunjuk-alasan { font-size: 13px; }
+/* Persen yang menentukan status tidak boleh jadi teks terkecil dan terabu (audit S-04). */
+.tabel .redup-kecil { font-size: 15px; color: var(--fg-2); }
+/* Menu "Sudah ada" tetap terbaca: tanpa opacity, warna muted-fg lulus 4,5:1 (audit S-07). */
+.nav .mati { opacity: 1; color: var(--muted-fg); }
+.nav .mati svg { color: var(--muted-fg); }
+.nav .mati small { color: var(--muted-fg); }
+.tautan-kecil { font-size: 14px; font-weight: 600; }
+.masuk-bungkus > p, .masuk-kartu > p { font-size: 14px; }
+.masuk-catatan, .masuk-versi { font-size: 13px; }
+.masuk-kartu { border: 0; border-radius: 16px; }
+.status-keputusan { font-size: 13px; }
+.tanda-baru { font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.saklar { font-size: 14px; }
+.pilihan-lain label span { font-size: 13px; }
+.catatan-medan .galat { font-size: 13px; }
+.putusan p, .putusan blockquote { font-size: 14px; }
+.linimasa time { font-size: 13px; }
+.ringkas div span { font-size: 13px; }
+.kekuatan { font-size: 13px; font-weight: 700; }
+.tur-kartu .hitung, .tur-lewati { font-size: 13px; }
+
+/* ---------- penyesuaian tata letak untuk skala baru ---------- */
+
+:root { --sisi: 268px; --atas: 68px; }
+.nav .mati { white-space: nowrap; }
+.antrean-atas { margin: 0 -32px 16px; padding: 12px 32px 0; background: var(--canvas); }
+.antrean-atas .bar-antrean { border: 0; border-radius: 16px; box-shadow: none; padding: 10px 16px; }
+.bar-antrean { border-bottom: 0; }
+.tabel .nama-berkas b { white-space: nowrap; }
+.tabel td, .tabel th { padding-left: 12px; padding-right: 12px; }
+.tabel td:first-child, .tabel th:first-child { padding-left: 24px; }
+.tabel td:last-child, .tabel th:last-child { padding-right: 24px; }
+.chip-ind-wadah { gap: 6px; max-width: 260px; }
+
+/* Chip indikator berisi arti singkat, boleh dua baris (audit S-11). */
+.chip-ind { height: auto; min-height: 26px; padding: 3px 10px; white-space: normal; line-height: 1.25; border-radius: 13px; }
+.chip-ind-wadah { max-width: 220px; }
+
+/* Status antrean: hasil + keputusan dengan ukuran yang sama (audit S-10). */
+.putusan-baris { font-size: 14px; font-weight: 500; color: var(--fg-2); }
+.putusan-baris--perlu { font-weight: 600; color: var(--cek-fg); }
+
+/* Target klik minimal 40px (audit S-06). */
+.jejak-rute a { display: inline-flex; align-items: center; min-height: 40px; }
+.pilih, select { min-height: 44px; border-radius: 999px; }
+
 /* ---------- layar sedang dan kecil ---------- */
+
+/* ---------- kepadatan dan hierarki huruf ----------
+   Isi mengisi lebar layar (tanpa batas 1440px), jarak dirapatkan, dan huruf mengikuti hierarki:
+   judul halaman 26 · judul kartu 17 · angka KPI 32 · isi & tabel 15 · keterangan 14 · label kecil 13. */
+
+:root { --atas: 60px; }
+body { font-size: 15px; }
+main.isi { max-width: none; padding: 4px 28px 48px; }
+.atas { height: 60px; padding: 0 28px; }
+.kepala { margin-bottom: 16px; }
+.kepala h1 { font-size: 26px; }
+.kepala p, .keterangan-pemicu, .sub-judul { font-size: 15px; max-width: 100ch; }
+
+.panel-kepala { padding: 16px 20px 8px; }
+.panel-kepala h2, .panel-kepala h3 { font-size: 17px; }
+.panel-isi { padding: 8px 20px 20px; }
+
+.nav a, .nav button { height: 40px; }
+.nav-sub a { height: 40px; }
+.btn { height: 40px; padding: 0 18px; font-size: 15px; }
+.btn--kecil { height: 40px; padding: 0 14px; font-size: 14px; }
+
+.kartu-angka { gap: 12px; margin-bottom: 16px; }
+
+table.tabel { font-size: 15px; }
+.tabel th { padding-top: 10px; padding-bottom: 10px; }
+.tabel td { padding-top: 10px; padding-bottom: 10px; }
+.tabel .nama-berkas span, .sel-status .progres-rs { font-size: 13px; }
+.sel-status { gap: 4px; }
+.putusan-baris { font-size: 14px; }
+
+/* Chip indikator mengalir menyamping, baru turun baris bila kolom penuh: baris tabel tidak lagi tinggi. */
+.chip-ind-wadah { max-width: none; gap: 4px 6px; }
+.chip-ind { white-space: nowrap; min-height: 24px; padding: 2px 9px; }
+
+/* ================================================================
+   GAYA OPSI 3: latar putih/abu sangat terang yang rata (tanpa panel besar membulat), sidebar putih
+   bergaris tipis, menu aktif teal muda, kartu KPI dengan ikon di kanan atas dan pill, saringan satu baris,
+   tabel di dalam kartu putih dengan baris header abu lembut. Semua warna dari token yang ada;
+   token baru hanya netral (--latar, --bayangan-kartu).
+   ================================================================ */
+
+:root {
+  --latar: oklch(98.5% .003 205);
+  /* Bayangan lembut berlapis seperti referensi: tepi tipis + sebaran lebar berintensitas rendah. */
+  --bayangan-kartu: 0 1px 3px oklch(20% .01 205 / .09), 0 10px 28px oklch(20% .02 205 / .11);
+  --bayangan-kecil: 0 1px 2px oklch(20% .01 205 / .08), 0 3px 10px oklch(20% .02 205 / .08);
+}
+body { background: var(--latar); }
+
+/* ---------- kerangka: sidebar putih, kolom isi rata ---------- */
+
+.sisi { background: var(--bg); border-right: 1px solid var(--border); padding: 20px 14px; }
+.merek { padding: 0 8px 14px; }
+.merek .merek-ikon, .merek-ikon { border-radius: 10px; }
+.nav-judul { padding: 18px 12px 6px; }
+.nav a, .nav button { border-radius: 12px; font-weight: 500; }
+.nav a:hover, .nav button:hover { background: var(--canvas); color: var(--fg); }
+.nav a[aria-current="page"] { background: var(--primary-subtle); color: var(--primary); font-weight: 600; }
+.nav a[aria-current="page"] svg { color: var(--primary); }
+.nav-sub { margin: 2px 0 4px 22px; padding-left: 8px; border-left: 1px solid var(--border); }
+.sisi-kaki { border-top: 1px solid var(--border); padding-top: 12px; }
+.catatan-prototipe { border: 1px solid var(--border); border-radius: 12px; background: var(--latar); }
+
+.kolom { background: transparent; border-radius: 0; margin: 0; min-height: calc(100vh / var(--skala)); }
+.atas { background: var(--latar); backdrop-filter: none; border-radius: 0; border-bottom: 0; }
+
+/* ---------- kepala halaman dan pengumuman ---------- */
+
+.kepala h1 { font-weight: 700; }
+.kepala p, .keterangan-pemicu, .sub-judul { color: var(--muted-fg); }
+.pengumuman {
+  min-height: 0; gap: 16px; padding: 16px 20px; margin-bottom: 20px; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--bayangan-kartu);
+}
+.pengumuman .merek-ikon, .pengumuman .merek-ikon--veritas { width: 56px; height: 56px; border-radius: 14px; background: var(--primary-subtle); border: 0; }
+.pengumuman .merek-ikon--veritas img { width: 34px; height: 34px; }
+.pengumuman b { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.pengumuman p { margin-top: 2px; max-width: none; color: var(--fg-2); font-size: 15px; }
+.pengumuman .btn { padding: 0 18px; font-size: 15px; }
+
+/* ---------- kartu ---------- */
+
+.panel { border: 1px solid var(--border); border-radius: 16px; background: var(--bg); box-shadow: var(--bayangan-kartu); }
+.panel-kepala { padding: 18px 20px 12px; }
+.panel-kepala .kanan { font-size: 14px; font-weight: 500; color: var(--muted-fg); }
+.tautan-kartu a, .ringkasan-tagihan { box-shadow: var(--bayangan-kartu); }
+.masuk-kartu { border: 1px solid var(--border); box-shadow: var(--bayangan-kartu); }
+.tautan-kartu a:hover { box-shadow: 0 2px 4px oklch(20% .01 205 / .10), 0 14px 32px oklch(20% .02 205 / .14); }
+
+/* ---------- kartu KPI: label kiri atas, ikon kanan atas, angka, pill + keterangan ---------- */
+
+.kartu-angka { gap: 14px; margin-bottom: 16px; }
+.kartu-angka > .kpi {
+  display: flex; flex-direction: column; min-width: 0; padding: 16px 18px;
+  border: 1px solid var(--border); border-radius: 16px; background: var(--bg); box-shadow: var(--bayangan-kartu);
+}
+.kpi-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.kartu-angka .kpi-nama { margin: 0; min-width: 0; font-size: 14px; font-weight: 500; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kartu-angka .kpi-ikon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; margin: 0; border-radius: 50%; }
+.kpi-ikon svg { width: 18px; height: 18px; }
+.kpi-ikon--primer { background: var(--primary-subtle); color: var(--primary); }
+.kpi-ikon--biru { background: var(--ulang-bg); color: var(--ulang-fg); }
+.kpi-ikon--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.kpi-ikon--kuning { background: var(--cek-bg); color: var(--cek-fg); }
+.kartu-angka .kpi > b { display: block; margin-top: 2px; font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.kartu-angka .kpi.angka-tidak-sesuai > b { color: var(--prioritas-fg); }
+.kartu-angka .kpi.angka-klarifikasi > b { color: var(--cek-fg); }
+.kpi-bawah { display: flex; align-items: center; gap: 8px; min-height: 26px; margin-top: 8px; min-width: 0; }
+.kartu-angka .kpi-pill {
+  flex: none; display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 10px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; background: var(--primary-subtle); color: var(--primary);
+}
+.kartu-angka .kpi-pill--merah { background: var(--prioritas-bg); color: var(--prioritas-fg); }
+.kartu-angka .kpi-pill--kuning { background: var(--cek-bg); color: var(--cek-fg); }
+.kartu-angka .kpi-ket { margin: 0; min-width: 0; font-size: 14px; color: var(--muted-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- antrean: angka menempel, saringan satu baris di luar kartu ---------- */
+
+.antrean-atas { margin: 0 -28px; padding: 12px 28px; background: var(--latar); }
+.antrean-atas .kartu-angka { gap: 12px; margin-bottom: 12px; }
+.antrean-atas .kartu-angka > .kpi { padding: 12px 16px; }
+.antrean-atas .kpi-bawah { margin-top: 4px; }
+.antrean-atas .bar-antrean, .bar-antrean { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; gap: 10px; }
+.bar-antrean .pilih {
+  height: 40px; min-height: 40px; min-width: 160px; border-radius: 12px; border: 1px solid var(--border-strong);
+  background-color: var(--bg); box-shadow: var(--bayangan-kecil); font-size: 15px; font-weight: 500;
+}
+.btn { border-radius: 12px; }
+.bar-antrean .btn { box-shadow: var(--bayangan-kecil); }
+.bar-antrean .btn:disabled { box-shadow: none; }
+
+/* ---------- tabel: header abu lembut membulat, baris lega, status pill lembut, titik kategori ---------- */
+
+.tabel-bungkus { padding: 0 16px 8px; }
+table.tabel { border-collapse: separate; border-spacing: 0; }
+.tabel th { background: var(--canvas); color: var(--fg-2); font-size: 15px; font-weight: 600; letter-spacing: 0; text-transform: none; border-bottom: 0; padding-top: 12px; padding-bottom: 12px; }
+.tabel th:first-child { padding-left: 16px; border-radius: 12px 0 0 12px; }
+.tabel th:last-child { padding-right: 16px; border-radius: 0 12px 12px 0; }
+.tabel td { padding-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.tabel td:first-child { padding-left: 16px; }
+.tabel td:last-child { padding-right: 16px; }
+.tabel tbody tr:last-child td { border-bottom: 0; }
+.tabel tbody tr.bisa-klik:hover { background: var(--latar); }
+.tabel .nama-berkas span { font-size: 14px; color: var(--muted-fg); }
+.catatan-kaki { padding: 12px 20px 16px; border-top: 0; }
+
+.status-chip, .status-chip--wa, .status-chip--menelepon, .status-chip--selesai, .status-chip--tidak_terhubung { border-color: transparent; }
+.chip-ind-wadah { gap: 4px 16px; }
+.chip-ind { display: inline-flex; align-items: center; gap: 7px; height: auto; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--fg-2); font-size: 14px; font-weight: 500; }
+.chip-ind::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--titik, var(--muted-fg)); }
+.chip-ind--I1 { --titik: var(--prioritas); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I2 { --titik: var(--cek); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I3 { --titik: var(--ulang); background: transparent; color: var(--fg-2); border: 0; }
+.chip-ind--I4 { --titik: var(--primary); background: transparent; color: var(--fg-2); border: 0; }
+
+/* Zoom 125% di monitor 1366 (lebar efektif ~1093px): tabel antrean harus muat tanpa gulir,
+   dan blok angka tidak menempel supaya tidak memakan sepertiga layar (audit S-08). */
+@media (max-width: 1279px) {
+  :root { --sisi: 240px; }
+  .nav .mati { white-space: normal; height: auto; min-height: 44px; padding-top: 6px; padding-bottom: 6px; line-height: 1.25; }
+  main.isi { padding: 8px 20px 56px; }
+  .antrean-atas { position: static; margin: 0 0 16px; padding: 0; }
+  .tabel td, .tabel th { padding-left: 8px; padding-right: 8px; }
+  .tabel td:first-child, .tabel th:first-child { padding-left: 16px; }
+  .tabel td:last-child, .tabel th:last-child { padding-right: 16px; }
+  .tabel .nama-berkas b { white-space: normal; }
+  /* Empat kartu di lebar sempit membuat judul kartu turun baris; jadikan 2×2 supaya tetap seragam. */
+  .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chip-ind-wadah { max-width: 150px; }
+  .chip-ind { white-space: normal; }
+  .tabel td.aksi .btn { white-space: normal; height: auto; min-height: 44px; padding: 6px 14px; line-height: 1.25; text-align: left; }
+}
+
+/* Monitor 1280–1365px: empat kartu masih sejajar, jadi pill dan jarak dirapatkan supaya keterangan tidak terpotong. */
+@media (max-width: 1365px) {
+  .kartu-angka > .kpi, .antrean-atas .kartu-angka > .kpi { padding-left: 14px; padding-right: 14px; }
+  .kpi-bawah { gap: 6px; }
+  .kartu-angka .kpi-pill { padding: 0 8px; }
+}
+
+/* Zoom 150% di monitor 1366 (~911px) dan tablet: menu tetap terlihat sebagai baris pill di atas,
+   bukan disembunyikan di balik tombol menu (audit S-09). Ponsel (≤640px) tetap pakai menu geser. */
+@media (min-width: 641px) and (max-width: 960px) {
+  .sisi {
+    position: static; transform: none; width: auto; height: auto; z-index: auto; box-shadow: none; transition: none;
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px;
+    border-right: 0; border-bottom: 1px solid var(--border);
+  }
+  .merek { padding: 0; min-height: 44px; }
+  .merek > span:last-child > span { display: none; }
+  /* Baris 1: merek + Mulai ulang demo. Baris 2: semua menu dalam satu deret pill. */
+  .merek { order: 1; }
+  .sisi-kaki { order: 2; margin: 0 0 0 auto; padding-top: 0; flex-direction: row; }
+  .nav:not(.sisi-kaki) { order: 3; flex-basis: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .nav-judul, .nav .mati, .catatan-prototipe { display: none; }
+  .nav a, .nav button { width: auto; height: 40px; padding: 0 14px; }
+  .nav-sub { display: contents; }
+  .tombol-menu { display: none; }
+}
+
+@media (max-width: 960px) {
+  .kolom { margin: 0; border-radius: 0; min-height: calc(100vh / var(--skala)); }
+  .atas { border-radius: 0; padding: 0 16px; }
+  main.isi { padding: 8px 16px 56px; }
+  .tombol-menu { width: 44px; height: 44px; border-radius: 999px; }
+}
 
 @media (max-width: 1339px) {
   .panggilan-grid { grid-template-columns: 306px minmax(0, 1fr); }
@@ -386,9 +764,6 @@
 @media (max-width: 960px) {
   .kartu-angka { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .antrean-atas { position: static; margin: 0 0 12px; padding: 0; }
-  .antrean-atas .kartu-angka > div { display: block; padding: 12px 14px; }
-  .antrean-atas .kartu-angka b { font-size: 24px; }
-  .antrean-atas .kartu-angka span { margin-top: 4px; }
   .panggilan-grid, .kartu-grid { grid-template-columns: minmax(0, 1fr); }
   .panggilan-grid > .kol-ponsel, .panggilan-grid > .kol-trans, .panggilan-grid > .kol-kiri { grid-column: auto; grid-row: auto; }
   .panggilan-grid .transkrip { height: 380px; }
@@ -403,9 +778,8 @@
 }
 
 @media (max-width: 640px) {
+  .sisi { height: auto; }
   .kartu-angka { gap: 10px; }
-  .kartu-angka > div { padding: 12px 14px; }
-  .kartu-angka b { font-size: 24px; }
   .bar-antrean .kanan { margin-left: 0; width: 100%; }
   .bar-antrean .kanan .btn { flex: 1; }
   .bar-antrean .pilih { flex: 1; min-width: 0; }
@@ -421,3 +795,112 @@
   .tabel--kartu tr:has(+ tr.baris-pembanding) { border-bottom: 0; padding-bottom: 6px; }
   .tabel--kartu tr.baris-pembanding { padding-top: 0; }
 }
+
+/* Tablet (≤960px): bingkai tabel dirapatkan supaya tabel tujuh kolom muat tanpa gulir. */
+@media (max-width: 960px) {
+  .tabel-bungkus { padding: 0 8px 8px; }
+  .sel-status .progres-rs { white-space: normal; max-width: 150px; }
+}
+
+/* ================================================================
+   OPSI 3 di ponsel (≤640px): tanpa zoom 90% (teks sudah kecil di layar HP), breadcrumb ringkas,
+   kartu angka tidak terpotong, tabel menjadi daftar kartu berlabel, kepala Panggilan ditumpuk.
+   ================================================================ */
+
+@media (max-width: 640px) {
+  :root { --skala: 1; }
+  body { font-size: 16px; }
+  main.isi { padding: 8px 16px 48px; }
+  .atas { gap: 10px; }
+  .jejak-rute a, .jejak-rute > span { display: none; }
+  .jejak-rute b { font-size: 16px; }
+  .kepala h1 { font-size: 24px; }
+  .kepala-aksi { margin-left: 0; width: 100%; }
+
+  /* Kartu angka: dua kolom, nama dan keterangan boleh dua baris, pill di atas keterangan. */
+  .kartu-angka > .kpi, .antrean-atas .kartu-angka > .kpi { padding: 14px; }
+  .kartu-angka .kpi-nama, .kartu-angka .kpi-ket { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+  .kartu-angka .kpi-ikon { width: 32px; height: 32px; }
+  .kpi-ikon svg { width: 16px; height: 16px; }
+  .kpi-bawah { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 0; }
+  .kpi-kepala { min-height: 38px; }
+  .kartu-angka { grid-auto-rows: 1fr; }
+  .chip-ind-wadah { max-width: none; }
+  .chip-ind { white-space: normal; }
+  .kartu-angka .kpi > b { font-size: 30px; }
+  .tautan-kartu a { padding: 14px 16px; }
+
+  /* Saringan antrean: tiap kontrol selebar layar. */
+  .antrean-atas { margin: 0 0 12px; padding: 0; }
+  .bar-antrean { gap: 8px; }
+  .bar-antrean .pilih { flex: 1 1 100%; min-width: 0; }
+  .bar-antrean .kanan { margin-left: 0; width: 100%; }
+  .bar-antrean .kanan .btn { flex: 1 1 0; }
+  .keadaan-otomatis { width: 100%; }
+
+  /* Tabel menjadi daftar kartu: nama di atas, tiap kolom satu baris "label  nilai", aksi selebar kartu. */
+  .tabel-bungkus { padding: 0 12px 8px; overflow-x: visible; }
+  .tabel--kartu, .tabel--kartu tbody { display: block; }
+  .tabel--kartu tr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 14px 4px; border-bottom: 1px solid var(--border); }
+  .tabel--kartu tbody tr:last-child { border-bottom: 0; }
+  .tabel--kartu td, .tabel--kartu td:first-child, .tabel--kartu td:last-child, .tabel--kartu td.sembunyi-hp {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0; border: 0; text-align: right;
+  }
+  .tabel--kartu td[data-label]::before { content: attr(data-label); flex: none; font-size: 14px; color: var(--muted-fg); text-align: left; }
+  .tabel--kartu td.nama-berkas { display: block; text-align: left; font-size: 17px; }
+  .tabel--kartu td.nama-berkas span { display: inline; margin-left: 8px; }
+  .tabel--kartu td.nama-berkas b { display: inline; white-space: normal; }
+  .tabel--kartu td.lebar-penuh[data-label="Indikator aktif"], .tabel--kartu td.alasan { flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; max-width: none; }
+  .tabel--kartu td .sel-status { align-items: flex-end; text-align: right; }
+  .tabel--kartu td.aksi { display: block; text-align: left; margin-top: 4px; }
+  .tabel--kartu td.aksi .btn { width: 100%; height: 44px; min-height: 44px; }
+  .tabel--kartu td.aksi > .redup { display: block; text-align: center; }
+  .tabel--kartu tr.rinci td { display: block; padding: 0; }
+  .daftar-rinci { padding: 6px 4px 10px; }
+  .daftar-rinci li > b { min-width: 0; width: 100%; }
+  .daftar-rinci li .btn { margin-left: 0; width: 100%; }
+  .daftar-rinci.kosong-rinci { padding: 12px 4px; }
+  .catatan-kaki { padding: 12px 16px 16px; }
+
+  /* Kartu bukti dan Panggilan. */
+  .angka-tiga > div { padding: 0 8px; }
+  .angka-tiga .kapital { white-space: normal; line-height: 1.25; }
+  .angka-tiga .besar { font-size: 26px; }
+  .ringkasan-tagihan { padding: 14px; }
+  .kepala-panggilan { display: block; }
+  .kepala-panggilan .kepala-aksi { width: 100%; margin: 14px 0 0; }
+  .kepala-panggilan .kepala-aksi .btn { width: 100%; }
+  .meta-panggilan { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .meta-panggilan > span { display: flex; align-items: flex-start; gap: 8px; }
+  .meta-panggilan .chip-ind-wadah { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .judul-label { gap: 8px; }
+  .kutipan { font-size: 17px; }
+  .transkrip, .panggilan-grid .transkrip { height: 360px; }
+  .ponsel--telp { width: min(300px, 100%); }
+}
+
+/* ---------- mode presentasi (?presentasi=1): hanya untuk rekaman video demo ---------- */
+.presentasi .lencana-simulasi, .presentasi .catatan-prototipe, .presentasi .catatan-simulasi, .presentasi .masuk-catatan,
+.presentasi .masuk-versi, .presentasi [data-aksi="ulang-demo"] { display: none !important; }
+
+/* ---------- dipulihkan dari opsi 3 (hilang saat merge dengan main) ---------- */
+.keadaan-otomatis { font-size: 13px; color: var(--muted-fg); }
+.chip-ind-wadah { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip-ind {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 11.5px; font-weight: 700;
+  white-space: nowrap; border: 1px solid transparent;
+}
+/* Warna menurut arti: melebihi batas = merah, beban mingguan = kuning, episode panjang = biru, hari tutup = teal. */
+.chip-ind--I1 { background: var(--prioritas-bg); color: var(--prioritas-fg); border-color: oklch(88% .05 27); }
+.chip-ind--I2 { background: var(--cek-bg); color: var(--cek-fg); border-color: oklch(88% .06 85); }
+.chip-ind--I3 { background: var(--ulang-bg); color: var(--ulang-fg); border-color: oklch(88% .04 261); }
+.chip-ind--I4 { background: var(--primary-subtle); color: var(--primary); border-color: oklch(88% .04 205); }
+.meta-panggilan .chip-ind-wadah { display: inline-flex; vertical-align: middle; }
+.keterangan-aturan { margin-bottom: 16px; padding: 12px 16px; border-radius: var(--radius-panel); background: var(--primary-subtle); border: 1px solid oklch(90% .03 205); font-size: 13px; color: var(--fg-2); line-height: 1.55; }
+.keterangan-aturan b { color: var(--fg); }
+
+/* ---------- sumber pemilihan (aturan / model anomali) ---------- */
+.chip-dipilih { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 10px; border-radius: 13px; font-size: 13px; font-weight: 600; white-space: nowrap;
+  background: var(--muted); color: var(--fg-2); border: 1px solid var(--border); }
+.chip-dipilih--model, .chip-dipilih--keduanya { background: var(--primary-subtle); color: var(--primary); border-color: oklch(86% .04 205); }
+.pola-alasan .pola-alasan { padding: 6px 0 0 18px; }

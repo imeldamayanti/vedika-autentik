@@ -52,31 +52,40 @@ async function tanpaGeserSamping(page, nama) {
   cek((await page.getAttribute('[data-aksi="telepon"][data-id="S1"]', "title")) === "Pindahkan ke urutan berikutnya", "tooltip Dahulukan");
   cek(!(await page.content()).includes("masih stub"), "teks 'masih stub' sudah dihapus");
 
-  console.log("\nSkor pola di antrean");
-  /* Skor tiap baris berstatus Antre, dari atas ke bawah. */
-  const skorAntre = () => page.$$eval("tbody tr", (tr) => tr
-    .filter((r) => r.querySelector(".status-chip--antre") && r.querySelector(".chip-pola"))
-    .map((r) => parseFloat(r.querySelector(".chip-pola").textContent.replace("Pola", "").replace(",", "."))));
-  const menurun = (d) => d.every((x, i) => i === 0 || d[i - 1] >= x);
-  cek((await page.$$(".chip-pola")).length === 14, "tiap baris antrean punya chip skor pola", String((await page.$$(".chip-pola")).length));
-  const chipS1 = await page.$eval("tbody tr:nth-child(2) .chip-pola", (el) => ({ teks: el.textContent.trim(), kelas: el.className, judul: el.title, lebar: el.querySelector("i b").style.width }));
-  cek(chipS1.teks === "Pola 1,00" && chipS1.kelas.includes("chip-pola--tinggi") && chipS1.lebar === "100%", "chip S1: Pola 1,00 bergaya tinggi dengan batang penuh", JSON.stringify(chipS1));
-  cek(chipS1.judul === "Skor pola 1,00, pola tidak biasa", "tooltip chip menyebut skor dan pola tidak biasa", chipS1.judul);
-  cek((await page.$$(".chip-ind")).length === 0 && (await page.textContent("tbody tr:nth-child(2) .ind-teks")) === "Melebihi 8 · 3x seminggu · Libur", "indikator sebagai teks biasa, bukan chip berwarna");
+  console.log("\nSumber pemilihan di antrean (aturan ATAU model anomali)");
+  const namaAntre = () => page.$$eval("tbody tr", (tr) => tr.filter((r) => r.querySelector(".status-chip--antre")).map((r) => r.querySelector(".nama-berkas b").textContent));
+  const chipBaris = (nama) => page.$$eval("tbody tr", (tr, n) => { const r = tr.find((x) => x.querySelector(".nama-berkas b").textContent === n); const c = r && r.querySelector(".chip-dipilih"); return c ? { teks: c.textContent, kelas: c.className, judul: c.title } : null; }, nama);
+  cek((await page.$$(".chip-dipilih")).length === 16 && (await page.$$(".chip-pola")).length === 0, "tiap baris punya chip sumber pemilihan, tanpa chip skor pola", String((await page.$$(".chip-dipilih")).length));
+  const s1 = await chipBaris("Andi Pratama"), m1 = await chipBaris("Sari Wulandari"), s3 = await chipBaris("Budi Santoso");
+  cek(s1 && s1.teks === "Aturan + model", "S1 dipilih aturan dan model", JSON.stringify(s1));
+  cek(m1 && m1.teks === "Model" && m1.kelas.includes("chip-dipilih--model") && m1.judul.includes("tidak terkena aturan"), "M1 hanya dipilih model, dengan keterangan", JSON.stringify(m1));
+  cek(s3 && s3.teks === "Aturan", "S3 hanya dipilih aturan", JSON.stringify(s3));
+  cek((await page.textContent("tbody tr:nth-child(2) .chip-ind-wadah")).includes("Lebih dari 8 sesi/bulan"), "indikator tampil sebagai chip berarti (gaya opsi 3)");
   cek((await page.$$("tbody .label + .status-chip, tbody .status-chip + .label")).length === 0, "baris selesai hanya menampilkan label hasil");
-  cek((await page.textContent(".catatan-kaki")).includes("Skor pola hanya menentukan urutan panggilan."), "catatan skor pola cukup sekali, di bawah tabel");
+  const kaki = await page.textContent(".catatan-kaki");
+  cek(kaki.includes("Model anomali menandai") && !kaki.includes("Skor pola"), "catatan kaki menjelaskan model anomali, bukan skor pola", kaki);
+  cek((await page.textContent(".keterangan-pemicu")).includes("aturan (dua indikator atau lebih) atau model anomali"), "keterangan antrean menyebut aturan ATAU model");
   const atas = await page.$$eval("tbody tr .nama-berkas b", (el) => el.slice(0, 2).map((x) => x.textContent));
-  cek(atas[0] === "Slamet Riyadi" && atas[1] === "Andi Pratama", "skor 1,00 diurutkan menurut logit: S6 lalu S1", atas.join(", "));
-  const awal = await skorAntre();
-  cek(awal.length === 10 && menurun(awal) && awal[0] === 1 && awal[9] < 0.2, "antrean terurut skor pola menurun", awal.join(" "));
-  cek((await page.$$(".chip-pola:not(.chip-pola--tinggi)")).length >= 2, "skor di bawah ambang memakai chip netral");
-  cek(await page.evaluate(() => window.DATA3.UJI_POLA.length === 0 && window.DATA3.UJI.length === 0), "uji mandiri data simulasi (label dan skor pola) bersih");
+  cek(atas[0] === "Slamet Riyadi" && atas[1] === "Andi Pratama", "urutan antrean tetap: S6 lalu S1", atas.join(", "));
+  cek((await namaAntre()).length === 12, "12 pasien antre, termasuk dua yang hanya dipilih model", (await namaAntre()).join(", "));
+  const kpi = await page.textContent(".kartu-angka .kpi:first-child");
+  cek(kpi.includes("Pasien dipilih") && kpi.includes("32") && kpi.includes("30 aturan + 2 model"), "kartu angka: 32 dipilih (30 aturan + 2 model)", kpi.replace(/\s+/g, " "));
+  cek(await page.evaluate(() => window.DATA3.UJI.length === 0 && window.DATA3.UJI_POLA.length === 0 && window.DATA3.UJI_ANOMALI.length === 0), "uji mandiri data simulasi (label, pola, model anomali) bersih");
+
+  console.log("\nPasien yang hanya dipilih model");
+  await page.click('tbody tr:has(b:text-is("Sari Wulandari")) a');
+  await page.waitForSelector(".pola-kartu");
+  const m1kartu = await page.textContent(".pola-kartu");
+  cek(m1kartu.includes("Mengapa dipilih") && m1kartu.includes("hanya 1 indikator aktif") && m1kartu.includes("tanpa rujukan FKTP") && m1kartu.includes("kab/kota lain"), "kartu M1 menjelaskan alasan model: tanpa rujukan dan lintas kab/kota", m1kartu.replace(/\s+/g, " ").slice(0, 260));
+  cek(await page.isVisible("text=Sari Wulandari belum ditelepon"), "kartu M1 menyatakan belum ditelepon");
+  cek(!/fraud|curang/i.test(m1kartu), "alasan model tanpa kata fraud atau curang");
+  await page.goto(TARGET + "#/autentik");
+  await page.waitForSelector("#stripStatus");
 
   console.log("\nS1 sampai kartu bukti");
   await page.click('[data-aksi="telepon"][data-id="S1"]');
   await page.waitForSelector(".status-chip--wa");
-  const sesudah = await skorAntre();
-  cek(sesudah.length === 9 && menurun(sesudah), "setelah Dahulukan, sisa antrean tetap terurut skor pola", sesudah.join(" "));
+  cek((await namaAntre()).length === 11, "setelah Dahulukan, S1 keluar dari antre", (await namaAntre()).join(", "));
   await page.goto(TARGET + "#/panggilan/S1");
   await page.waitForSelector("#panggilan");
   cek(await page.isVisible("text=Pesan WA terkirim"), "tahap Pesan WA terkirim tampil di layar panggilan");
@@ -88,23 +97,20 @@ async function tanpaGeserSamping(page, nama) {
   cek(angka[0] === 11 && angka[1] === 3, "kartu bukti S1: ditagih 11, versi peserta 3", angka.join(" / "));
   cek(angka[2] === 8, "selisih 8 sesi", String(angka[2]));
   cek((await page.textContent(".judul-label .label")).trim() === "Tidak sesuai", "label Tidak sesuai");
-  cek((await page.textContent(".pola-kartu h2")) === "Alasan prioritas", "kartu bukti punya bagian Alasan prioritas");
-  const alasan = await page.$$eval(".pola-kartu .pola-alasan li", (el) => el.map((x) => x.textContent));
-  cek(alasan.length === 2 && alasan.some((a) => a.includes("hari Minggu atau libur")) && alasan.every((a) => a.includes("sesi")), "kartu S1 memuat dua alasan: sesi dan hari Minggu atau libur", alasan.join(" | "));
-  cek((await page.textContent(".pola-kartu .pola-kombinasi")) === "Gabungan indikator ini muncul pada kurang dari 0,03% tagihan bulanan fisioterapi nasional 2024.", "kalimat gabungan indikator");
-  cek((await page.textContent(".pola-kartu .pola-catatan")) === "Dibandingkan dengan data sampel BPJS 2024.", "catatan sumber data singkat");
-  cek(await page.isVisible(".pola-kartu .lencana-pola"), "lencana Pola tidak biasa di kartu S1");
-  cek(!/fraud|curang/i.test(await page.textContent(".pola-kartu")), "bagian skor pola tanpa kata fraud atau curang");
+  const kartuS1 = await page.textContent(".pola-kartu");
+  cek((await page.textContent(".pola-kartu h2")) === "Mengapa dipilih" && (await page.textContent(".pola-kartu .chip-dipilih")) === "Aturan + model", "kartu bukti S1: Mengapa dipilih, aturan + model");
+  cek(kartuS1.includes("3 indikator aktif") && kartuS1.includes("Model anomali:") && kartuS1.includes("hari Minggu"), "kartu S1 memuat alasan aturan dan model", kartuS1.replace(/\s+/g, " ").slice(0, 260));
+  cek(!/fraud|curang/i.test(kartuS1), "bagian Mengapa dipilih tanpa kata fraud atau curang");
   await page.goto(TARGET + "#/kartu/R3");
   await page.waitForSelector(".pola-kartu");
-  cek(!(await page.$(".pola-kartu .lencana-pola")) && (await page.textContent(".pola-kartu .chip-pola")).trim() === "Pola 0,12", "kartu berskor rendah (R3) tanpa lencana, chip netral");
+  cek((await page.textContent(".pola-kartu .chip-dipilih")) === "Aturan" && (await page.textContent(".pola-kartu")).includes("model tidak menandainya"), "kartu R3: hanya aturan, model tidak menandai");
   await page.goto(TARGET + "#/ringkasan-rs");
   await page.waitForSelector(".baris-pembanding");
   const pembanding = await page.$$eval(".baris-pembanding", (el) => el.map((x) => x.textContent.trim()));
   cek(pembanding.length === 5 && pembanding[0].includes("Terpicu 39,7% · rata-rata RS sejenis 1,5% · batas 95% RS sejenis 8,2%"), "Ringkasan RS: baris pembanding RS sejenis nasional", pembanding[0]);
   cek((await page.$$(".baris-pembanding .lencana-pola")).length === 1 && pembanding[0].includes("Di atas 95% RS sejenis"), "hanya RS Melati berlencana Di atas 95% RS sejenis");
   const kinerja = await page.textContent(".kinerja-pola");
-  cek(kinerja.includes("Skor pola dan hasil panggilan") && kinerja.includes("2 dari 2 panggilan berpola tidak biasa berakhir Tidak sesuai") && kinerja.includes("5 panggilan terjawab"), "kartu Skor pola dan hasil panggilan", kinerja);
+  cek(kinerja.includes("Sumber pemilihan dan hasil panggilan") && kinerja.includes("2 dari 2 panggilan yang ditandai model berakhir Tidak sesuai") && kinerja.includes("1 dari 3 panggilan yang hanya dipilih aturan") && kinerja.includes("5 panggilan terjawab"), "kartu sumber pemilihan dan hasil panggilan", kinerja);
   cek(await page.isVisible("text=RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab)"), "RS Melati menjadi Perlu klarifikasi RS (3 dari 5)");
 
   console.log("\nBahasa");

@@ -50,3 +50,5 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 [tool.ruff.lint.per-file-ignores]
 # Generates long Indonesian report lines (EVALUASI.md).
 "scripts/train_pattern_model.py" = ["E501"]
+"scripts/train_anomaly_model.py" = ["E501", "RUF001"]
+"scripts/compare_anomaly_methods.py" = ["E501", "RUF001"]

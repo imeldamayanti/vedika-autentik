@@ -35,6 +35,7 @@ SCHEMA_VERSION = "1.0"
 SOURCE_COLUMNS = (
     "PSTV01",
     "PSTV15",
+    "FKP02",
     "FKL03",
     "FKL06",
     "FKL07",
@@ -42,7 +43,10 @@ SOURCE_COLUMNS = (
     "FKL09",
     "FKL10",
     "FKL11",
+    "FKL17A",
     "FKL18A",
+    "FKL19",
+    "FKL26",
     "FKL30",
 )
 HISTOGRAM_MONTHS = tuple(f"2024-{month:02d}" for month in range(7, 13))
@@ -53,17 +57,30 @@ MINIMUM_TYPE_MONTHS = 100
 # is omitted, because its figures would mostly describe one hospital group.
 MAXIMUM_DOMINANT_GROUP_SHARE = 0.5
 NATIONAL = "Nasional"
-POLA_PATH = Path(__file__).resolve().parents[3] / "data-uji-konfirmasi" / "tools" / "pola.py"
+TOOLS = Path(__file__).resolve().parents[3] / "data-uji-konfirmasi" / "tools"
+POLA_PATH = TOOLS / "pola.py"
+ANOMALI_PATH = TOOLS / "anomali.py"
+
+
+def _load_tool(name: str, path: Path) -> Any:
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 @lru_cache
 def load_pola(path: Path = POLA_PATH) -> Any:
     """Load the shared stdlib-only feature module by path."""
 
-    spec = importlib.util.spec_from_file_location("pola", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return _load_tool("pola", path)
+
+
+@lru_cache
+def load_anomali(path: Path = ANOMALI_PATH) -> Any:
+    """Load the shared stdlib-only anomaly module by path."""
+
+    return _load_tool("anomali", path)
 
 
 def percentile(values: list[float], q: float) -> float:
@@ -91,11 +108,13 @@ def weighted_percentile(pairs: list[tuple[float, float]], q: float) -> float:
 def patient_months(visits: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """One record per participant-month: shared features, rule indicators, weight, peer group.
 
-    visits: dicts with peserta, tanggal (date), bobot, kelompok (hashable), tipe (label).
+    visits: dicts with peserta, tanggal (date), bobot, kelompok (hashable), tipe (label), and
+    optionally rujukan (has an FKTP referral), lintas (referred from another district), dx and cbg.
     There is no 2024 holiday list, so `ahad_libur` counts Sundays only.
     """
 
     pola = load_pola()
+    anomali = load_anomali()
     per_participant: dict[Any, list[dict[str, Any]]] = defaultdict(list)
     for visit in visits:
         per_participant[visit["peserta"]].append(visit)
@@ -110,10 +129,16 @@ def patient_months(visits: list[dict[str, Any]]) -> list[dict[str, Any]]:
             features = pola.fitur_bulan([r["tanggal"] for r in month_rows], active, month, set())
             flags = pola.indikator(features)
             group, _ = Counter((r["kelompok"], r["tipe"]) for r in month_rows).most_common(1)[0]
+            referral = [
+                {"rujukan": r.get("rujukan", True), "lintas": r.get("lintas", False)}
+                for r in month_rows
+            ]
             records.append(
                 {
                     "bulan": month,
                     "fitur": features,
+                    "fitur_anomali": anomali.fitur(features, referral),
+                    "kode": [(r.get("dx"), r.get("cbg")) for r in month_rows],
                     "bin": pola.bin_fitur(features),
                     "kombinasi": pola.kombinasi(*flags),
                     "indikator": flags,
@@ -404,11 +429,19 @@ def read_visits(source: Path, chunk_size: int) -> list[dict[str, Any]]:
         subset = frame.loc[is_physiotherapy]
         dates = pandas.to_datetime(subset["FKL03"], errors="coerce")
         codes = subset[["FKL06", "FKL07", "FKL08", "FKL09"]].fillna(-1).astype(int)
-        for participant, day, weight, group in zip(
+        has_referral = subset["FKP02"].fillna("").astype(str).str.strip().ne("")
+        referrer_district = pandas.to_numeric(subset["FKL26"], errors="coerce")
+        hospital_district = pandas.to_numeric(subset["FKL06"], errors="coerce")
+        other_district = referrer_district.ne(hospital_district)
+        for participant, day, weight, group, referral, other, dx, cbg in zip(
             subset["PSTV01"],
             dates,
             subset["PSTV15"],
             codes.itertuples(index=False, name=None),
+            has_referral,
+            other_district,
+            subset["FKL17A"].astype(str),
+            subset["FKL19"].astype(str),
             strict=True,
         ):
             if pandas.isna(participant) or pandas.isna(day):
@@ -420,6 +453,10 @@ def read_visits(source: Path, chunk_size: int) -> list[dict[str, Any]]:
                     "bobot": float(weight),
                     "kelompok": group,
                     "tipe": str(type_labels.get(group[3], f"Tipe {group[3]}")),
+                    "rujukan": bool(referral),
+                    "lintas": bool(other),
+                    "dx": dx,
+                    "cbg": cbg,
                 }
             )
     return visits

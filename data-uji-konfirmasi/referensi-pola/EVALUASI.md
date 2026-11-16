@@ -1,6 +1,6 @@
 # Evaluasi skor pola (`pola-v1`)
 
-Dibuat otomatis oleh `ai-service/scripts/train_pattern_model.py` pada 2026-11-16. Jangan disunting tangan.
+Dibuat otomatis oleh `ai-service/scripts/train_pattern_model.py` pada 2026-11-17. Jangan disunting tangan.
 
 Angka di bawah dilaporkan per tingkat bukti dan tidak digabung. Tier A = agregat data sampel BPJS 2024 (nyata). Tier B = data sintetis (metode dan demo), bukan bukti kinerja di lapangan.
 
@@ -45,14 +45,14 @@ Rata-rata skor per kombinasi aturan (sel histogram yang tidak tersembunyi):
 
 ### Perilaku pada data nyata
 
-Model diterapkan ke semua 41.905 bulan-pasien nyata 2024 di laptop (data mentah tidak di-commit; hanya agregat di `ai-service/data/reference/pola-2024/perilaku-nyata.json`). Ini perilaku, bukan akurasi: data sampel tidak punya label kecurangan, dan kelas normal model berasal dari data yang sama.
+Model diterapkan ke semua 22.457 bulan-pasien nyata 2024 di laptop (data mentah tidak di-commit; hanya agregat di `ai-service/data/reference/pola-2024/perilaku-nyata.json`). Ini perilaku, bukan akurasi: data sampel tidak punya label kecurangan, dan kelas normal model berasal dari data yang sama.
 
-- Pola tidak biasa: **1,81%** bulan-pasien (berbobot); pemicu aturan 1,51%.
-- Per bulan (tak berbobot): 1,6% sampai 2,8%.
-- Terpicu aturan dan pola tidak biasa: 236 (0,46%). Terpicu tetapi skor di bawah ambang: 470 (1,05%).
-- Pola tidak biasa tanpa pemicu aturan: 602 (1,35%), yaitu I2 saja 446, I4 saja 156.
-- Dari 706 bulan-pasien terpicu, 21 tampil dengan skor 1,00.
-- 426 kelompok RS sejenis (≥ 30 bulan-pasien): 284 tanpa satu pun pola tidak biasa; 10% kelompok teratas memuat 74% bulan-pasien berpola tidak biasa.
+- Pola tidak biasa: **1,82%** bulan-pasien (berbobot); pemicu aturan 1,88%.
+- Per bulan (tak berbobot): 1,6% sampai 2,3%.
+- Terpicu aturan dan pola tidak biasa: 168 (0,59%). Terpicu tetapi skor di bawah ambang: 278 (1,29%).
+- Pola tidak biasa tanpa pemicu aturan: 270 (1,23%), yaitu I2 saja 200, I4 saja 70.
+- Dari 446 bulan-pasien terpicu, 11 tampil dengan skor 1,00.
+- 216 kelompok RS sejenis (≥ 30 bulan-pasien): 143 tanpa satu pun pola tidak biasa; 10% kelompok teratas memuat 66% bulan-pasien berpola tidak biasa.
 
 ## Tier B (data demo vs `kunci_kebenaran_2026-08.csv`)
 
