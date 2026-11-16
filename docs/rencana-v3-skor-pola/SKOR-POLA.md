@@ -93,4 +93,5 @@ Ekspor hanya berisi fitur yang sudah dibin dan label (1 = Tidak sesuai) dari pan
 - Pangsa nasional di atas ambang (1,61%) dihitung dari sel yang tidak disembunyikan. Dengan sisa yang tersembunyi, nilainya antara kira-kira 1,6% dan 1,7%.
 - Data 2024 tidak punya daftar libur, jadi `ahad_libur` dan I4 di data nyata hanya hari Minggu. Bulan sebelum Januari 2024 tidak ada, jadi I3 di prevalensi semua bulan terhitung lebih rendah; histogram hanya memakai Juli–Desember.
 - Kelas normal adalah data nyata apa adanya dan bisa memuat manipulasi yang tidak terdeteksi.
-- Pembanding per tipe wajib dibaca dalam tipenya. Contoh: RS Khusus Bedah punya tingkat terpicu jauh lebih tinggi, kemungkinan karena rehabilitasi pascabedah yang sah.
+- Pembanding per tipe wajib dibaca dalam tipenya. Beberapa tipe RS khusus punya tingkat terpicu jauh lebih tinggi, kemungkinan karena rehabilitasi pascabedah yang sah.
+- Tipe RS yang lebih dari separuh bulan-pasiennya berasal dari satu kelompok RS sejenis tidak diterbitkan, supaya angkanya tidak menggambarkan satu RS tertentu.
