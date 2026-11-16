@@ -156,6 +156,37 @@ def test_ambil_mengikuti_urutan_antrean_dan_satu_panggilan_aktif(klien_agen, con
     assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == id_skenario("S2")
 
 
+def test_ambil_urut_dahulukan_lalu_skor_pola_lalu_id(klien_agen, conn_v3, monkeypatch):
+    """Dahulukan menang atas skor; sesudahnya skor tertinggi, dan skor sama diurutkan menurut id biner."""
+    jam_palsu(monkeypatch)
+    nyalakan(klien_agen)
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")  # skor 0,141, terendah di antrean
+    conn_v3.execute("update indikator_bulanan set skor_pola = 0.999 where id_peserta = 'P-S1'")
+    conn_v3.execute("update indikator_bulanan set skor_pola = null where id_peserta = 'P-S2'")
+    urutan = []
+    for _ in range(26):
+        id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
+        urutan.append(id_)
+        ubah(conn_v3, id_, status="selesai", label="Tidak yakin", diambil_pada=None)
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
+    assert urutan[:4] == [id_skenario("S3"), id_skenario("S4"), id_skenario("S5"), id_skenario("S6")]
+    assert urutan[17:19] == ["CALL-P0078-2026-08", S1]  # 0,999 tepat di bawah semua yang berskor 1,0
+    assert urutan[-2:] == [id_skenario("S8"), id_skenario("S2")]  # tanpa skor = paling akhir
+
+
+def test_ambil_urutan_sama_dengan_daftar_antrean_situs(klien_agen, conn_v3, monkeypatch):
+    jam_palsu(monkeypatch)
+    nyalakan(klien_agen)
+    klien_agen.post(f"{BASE}/panggilan/{id_skenario('S8')}/mulai")
+    situs = [r["id"] for r in klien_agen.get(f"{BASE}/antrean").json()["baris"] if r["status"] == "antre"]
+    diambil = []
+    for _ in situs:
+        id_ = klien_agen.post(f"{BASE}/agen/ambil").json()["id"]
+        diambil.append(id_)
+        conn_v3.execute("delete from panggilan where id = %s", (id_,))
+    assert diambil == situs and diambil[0] == id_skenario("S8")
+
+
 def test_ambil_menolak_bila_ada_panggilan_berjalan(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch)
     nyalakan(klien_agen)

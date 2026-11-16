@@ -2,7 +2,7 @@
 from datetime import datetime, time
 
 from . import aturan_v3 as at
-from . import config, jam, repo_v3
+from . import config, jam, pola_v3, repo_v3
 
 URUT_STATUS = {s: n for n, s in enumerate(at.STATUS_BERJALAN)}
 
@@ -19,23 +19,31 @@ def label_api(r: dict) -> str | None:
     return at.LABEL_API.get(r["label"]) if r["label"] and r["status"] in at.STATUS_SELESAI else None
 
 
+def skor_pola(r: dict) -> float | None:
+    """Kolom real (float4) dibulatkan kembali ke 3 desimal seperti keluaran pola.skor."""
+    return None if r.get("skor_pola") is None else round(r["skor_pola"], 3)
+
+
 def baris_antre(r: dict) -> dict:
     return {
         "id": r["id"], "pasien": r["pasien"], "umur": r["umur"], "rs": r["id_rs"], "nama_rs": r["nama_rs"],
         "ditagih": r["sesi_ditagih"], "indikator": indikator(r), "penerima": penerima(r), "status": r["status"],
         "label": label_api(r), "keputusan_tindakan": at.TINDAKAN_API.get(r["keputusan_tindakan"]),
         "prioritas": r["prioritas"], "percobaan": r["percobaan"], "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),
+        "skor_pola": skor_pola(r), "pola_tinggi": bool(r.get("pola_tinggi")),
     }
 
 
 def urutan_antrean(r: dict) -> tuple:
-    """Sedang berjalan, lalu prioritas, lalu antre (id biner), lalu selesai (terbaru dulu)."""
+    """Sedang berjalan, lalu antre (prioritas, skor pola tertinggi, id biner), lalu selesai (terbaru dulu).
+    Urutan antre sama dengan repo_v3.kunci_tugas."""
     if r["status"] in URUT_STATUS:
-        return (0, URUT_STATUS[r["status"]], r["id"])
+        return (0, URUT_STATUS[r["status"]], 0, r["id"])
     if r["status"] == "antre":
-        return (1, 0 if r["prioritas"] else 1, r["id"])
+        skor = r.get("skor_pola")
+        return (1, 0 if r["prioritas"] else 1, 1 if skor is None else -skor, r["id"])
     selesai = r["waktu_selesai"] or r["waktu_mulai"]
-    return (2, -(selesai.timestamp() if selesai else 0), r["id"])
+    return (2, -(selesai.timestamp() if selesai else 0), 0, r["id"])
 
 
 def dalam_jam(pengaturan: dict, sekarang) -> bool:
@@ -60,6 +68,21 @@ def stasiun_publik(pengaturan: dict, sekarang) -> dict | None:
     }
 
 
+def kinerja_pola(selesai: list[dict]) -> dict:
+    """Skor pola dibanding hasil panggilan, hanya atas panggilan berlabel Sesuai atau Tidak sesuai."""
+    def rata(baris):
+        return round(sum(r["skor_pola"] for r in baris) / len(baris), 3) if baris else None
+
+    terjawab = [r for r in selesai if r["label"] in ("Sesuai", "Tidak sesuai") and r["skor_pola"] is not None]
+    tidak_sesuai = [r for r in terjawab if r["label"] == "Tidak sesuai"]
+    return {
+        "n": len(terjawab), "skor_rata_tidak_sesuai": rata(tidak_sesuai),
+        "skor_rata_sesuai": rata([r for r in terjawab if r["label"] == "Sesuai"]),
+        "tinggi_dan_tidak_sesuai": sum(r["pola_tinggi"] for r in tidak_sesuai),
+        "tinggi": sum(r["pola_tinggi"] for r in terjawab),
+    }
+
+
 def ringkasan_rs(conn, bulan: str) -> dict:
     """Ringkasan per RS dihitung oleh aturan.py atas panggilan berlabel; kelima RS selalu ada."""
     selesai = repo_v3.panggilan_selesai(conn, bulan)
@@ -69,9 +92,12 @@ def ringkasan_rs(conn, bulan: str) -> dict:
     for rs in repo_v3.semua_rs(conn):
         c = hitung.get(rs["id_rs"], {})
         aktif, terpicu = (pemicu[rs["id_rs"]]["aktif"], pemicu[rs["id_rs"]]["terpicu"]) if rs["id_rs"] in pemicu else (0, 0)
+        persen = round(100 * terpicu / aktif, 1) if aktif else 0.0
         daftar.append({
             "id_rs": rs["id_rs"], "nama": rs["nama_rs"], "aktif": aktif, "terpicu": terpicu,
-            "persen": round(100 * terpicu / aktif, 1) if aktif else 0.0,
+            "persen": persen,
+            "pembanding": pola_v3.pembanding(rs["tipe"], aktif, persen),
+            "pola_tinggi_tidak_terpicu": pemicu[rs["id_rs"]]["pola_tinggi_tidak_terpicu"] if rs["id_rs"] in pemicu else 0,
             "sesuai": c.get("sesuai", 0), "tidak_sesuai": c.get("tidak_sesuai", 0),
             "tidak_yakin": c.get("tidak_yakin", 0), "tidak_terhubung": c.get("tidak_terhubung", 0),
             "menolak": c.get("menolak", 0), "terjawab": c.get("terjawab", 0),
@@ -86,7 +112,10 @@ def ringkasan_rs(conn, bulan: str) -> dict:
                 for r in selesai if r["id_rs"] == rs["id_rs"]
             ],
         })
-    return {"bulan": bulan, "aturan": at.ATURAN_RS, "panggilan_selesai": len(selesai), "rs": daftar}
+    return {
+        "bulan": bulan, "aturan": at.ATURAN_RS, "panggilan_selesai": len(selesai),
+        "kinerja_pola": kinerja_pola(selesai), "rs": daftar,
+    }
 
 
 def antrean(conn, bulan: str, id_rs: str | None = None, status: str | None = None) -> dict:
@@ -154,6 +183,17 @@ def konteks_rs(conn, r: dict) -> dict:
     }
 
 
+def objek_pola(r: dict, pengaturan: dict) -> dict | None:
+    """Mengapa panggilan ini diprioritaskan. None bila bulan-pasien belum punya skor."""
+    if r["skor_pola"] is None:
+        return None
+    versi = pengaturan.get("versi_pola", pola_v3.VERSI_BAWAAN)
+    return {
+        "skor": skor_pola(r), "tinggi": r["pola_tinggi"], "ambang": pola_v3.model(versi)["ambang_tinggi"],
+        "alasan": r["alasan_pola"], "kombinasi": pola_v3.kombinasi(r["i1"], r["i2"], r["i3"], r["i4"]), "versi": versi,
+    }
+
+
 def detail(conn, id_: str) -> dict | None:
     r = repo_v3.satu_baris(conn, id_)
     if r is None:
@@ -173,7 +213,7 @@ def detail(conn, id_: str) -> dict | None:
         "id": r["id"], "sumber": r["sumber"], "pasien": r["pasien"], "umur": r["umur"], "rs": r["id_rs"],
         "nama_rs": r["nama_rs"], "bulan": r["bulan_layanan"], "ditagih": r["sesi_ditagih"],
         "tanggal": [t["tanggal"].isoformat() for t in sesi], "tanda_tanggal": tanda_tanggal(sesi),
-        "indikator": indikator(r),
+        "indikator": indikator(r), "pola": objek_pola(r, pengaturan),
         "tanggal_libur": [t.isoformat() for t in repo_v3.tanggal_libur(conn, r["id_peserta"], r["id_rs"], r["bulan_layanan"])],
         "penerima": penerima(r), "status": r["status"], "percobaan": r["percobaan"],
         "coba_lagi_setelah": jam.iso(r["coba_lagi_setelah"]),
