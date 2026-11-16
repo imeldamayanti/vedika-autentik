@@ -35,10 +35,10 @@ def test_baris_peserta_kosong_jadi_none_dan_ya_jadi_bool():
     assert b[9] is True and b[10] is None
 
 
-def test_baris_klaim_tarif_jadi_int():
+def test_baris_klaim_tarif_jadi_int_dan_rujukan_jadi_bool():
     r = {"id_klaim": "K1", "id_peserta": "P-X", "id_rs": "RS01", "tanggal": "2026-08-03", "kode_cbg": "A",
-         "kode_icd10": "M54", "diagnosis": "Uji", "tarif": "250000"}
-    assert seed_v3.baris_klaim(r) == ("K1", "P-X", "RS01", "2026-08-03", "A", "M54", "Uji", 250000)
+         "kode_icd10": "M54", "diagnosis": "Uji", "tarif": "250000", "rujukan_fktp": "tidak", "perujuk_luar_wilayah": "ya"}
+    assert seed_v3.baris_klaim(r) == ("K1", "P-X", "RS01", "2026-08-03", "A", "M54", "Uji", 250000, False, True)
 
 
 def test_penerima_keluarga_jika_hubungi_keluarga_ya():
@@ -104,18 +104,18 @@ def test_riwayat_penerima_keluarga_untuk_anak_mengikuti_r13(data):
         assert per_id[id_][5] == "peserta" and per_id[id_][10].obj["hubungan"] is None
 
 
-def test_data_sesuai_prd(data):
+def test_data_sesuai_data_uji(data):
     assert len(data["rs"]) == 5
-    assert len(data["peserta"]) == 408
-    assert len(data["klaim"]) == 4913
-    assert len(data["indikator"]) == 300
+    assert len(data["peserta"]) == seed_v3.PESERTA == 410
+    assert len(data["klaim"]) == 4938
+    assert len(data["indikator"]) == seed_v3.PASIEN_AKTIF == 302
     assert sum(h["dipicu"] for h in data["indikator"].values()) == 30
 
 
-def test_antre_26_baris_tanpa_duplikat_riwayat(data):
+def test_antre_28_baris_tanpa_duplikat_riwayat(data):
     antre = data["antre"]
-    assert len(antre) == 26
-    assert len({b[0] for b in antre}) == 26
+    assert len(antre) == 28
+    assert len({b[0] for b in antre}) == 28
     riwayat = {(p["id_peserta"], p["id_rs"]) for p in data["riwayat"]}
     assert not riwayat & {(b[1], b[2]) for b in antre}
     assert all(b[8] == "antre" for b in antre)
@@ -136,17 +136,19 @@ def test_skenario_antre_dengan_penerima_benar(data):
 
 # ---- skor pola ----
 
-def test_fitur_pola_untuk_300_bulan_pasien_sama_dengan_skor_demo(data):
-    assert len(data["fitur_pola"]) == 300 and data["fitur_pola"].keys() == data["indikator"].keys()
+def test_fitur_pola_untuk_302_bulan_pasien_sama_dengan_skor_demo(data):
+    assert len(data["fitur_pola"]) == 302 and data["fitur_pola"].keys() == data["indikator"].keys()
     assert {(r["id_peserta"], r["id_rs"]): r["fitur"] for r in SKOR_DEMO} == data["fitur_pola"]
 
 
 def test_skor_tidak_mengubah_indikator_dan_pemicu(data):
     """baris_indikator hanya menambah empat kolom skor di belakang; 12 kolom aturan tetap dari aturan.py."""
     h = data["indikator"][("P-S7", "RS04")]
-    b = seed_v3.baris_indikator(h, {"skor": 0.999, "logit": 7.5, "tinggi": True, "alasan": []})
+    anomali = {"skor": 9.1, "ditandai": True, "langka": False, "alasan": {"alasan": [], "gabungan": "x"}}
+    b = seed_v3.baris_indikator(h, {"skor": 0.999, "logit": 7.5, "tinggi": True, "alasan": []}, anomali)
     assert b[3:9] == (4, 1, False, False, True, False) and b[10:12] == (1, False)
     assert (b[12], b[13].obj, b[14], b[15]) == (0.999, [], True, 7.5)
+    assert (b[16], b[17], b[18], b[19].obj) == (9.1, True, False, {"alasan": [], "gabungan": "x"})
 
 
 def test_seed_menyimpan_skor_semua_bulan_pasien_sama_dengan_skor_demo(conn_v3):
@@ -156,7 +158,7 @@ def test_seed_menyimpan_skor_semua_bulan_pasien_sama_dengan_skor_demo(conn_v3):
     logit = {(b["id_peserta"], b["id_rs"]): b["logit_pola"] for b in baris}
     assert all(abs(logit[(r["id_peserta"], r["id_rs"])] - r["logit"]) < 1e-3 for r in SKOR_DEMO)
     ada = {(b["id_peserta"], b["id_rs"]): (round(b["skor_pola"], 3), b["alasan_pola"], b["pola_tinggi"]) for b in baris}
-    assert len(ada) == 300
+    assert len(ada) == 302
     assert ada == {(r["id_peserta"], r["id_rs"]): (r["skor"], r["alasan"], r["tinggi"]) for r in SKOR_DEMO}
     assert repr(conn_v3.execute("select nilai from pengaturan where kunci = 'versi_pola'").fetchone()["nilai"]) == "'pola-v1'"
 
@@ -168,13 +170,15 @@ def test_seed_ulang_mengisi_skor_di_database_lama_tanpa_mengubah_indikator(conn_
         "select count(*) filter (where skor_pola is not null) as berskor, count(*) filter (where pola_tinggi) as tinggi,"
         " count(*) filter (where dipicu) as dipicu, count(*) as n from indikator_bulanan"
     ).fetchone()
-    assert r == {"berskor": 300, "tinggi": 22, "dipicu": 0, "n": 300}  # kolom aturan baris lama tidak ditimpa
+    assert r == {"berskor": 302, "tinggi": 23, "dipicu": 0, "n": 302}  # kolom aturan baris lama tidak ditimpa
 
 
 def test_reset_panggilan_tidak_menghapus_skor(conn_v3):
     seed_v3.reset_panggilan(conn_v3, seed_v3.muat_data())
-    n = conn_v3.execute("select count(*) as n from indikator_bulanan where skor_pola is not null").fetchone()["n"]
-    assert n == 300
+    n = conn_v3.execute(
+        "select count(*) as n from indikator_bulanan where skor_pola is not null and alasan_anomali is not null"
+    ).fetchone()["n"]
+    assert n == 302
 
 
 def test_seed_memakai_versi_model_di_pengaturan(conn_v3, monkeypatch):
@@ -184,4 +188,41 @@ def test_seed_memakai_versi_model_di_pengaturan(conn_v3, monkeypatch):
     monkeypatch.setattr(pola_v3, "nilai", lambda fitur, versi: dipakai.append(versi) or asli(fitur))
     conn_v3.execute("update pengaturan set nilai = '\"pola-v2\"' where kunci = 'versi_pola'")
     seed_v3.isi_ke(conn_v3, seed_v3.muat_data())
-    assert set(dipakai) == {"pola-v2"} and len(dipakai) == 300
+    assert set(dipakai) == {"pola-v2"} and len(dipakai) == 302
+
+
+# ---- model anomali ----
+
+ANOMALI_DEMO = json.loads((seed_v3.DATA / "referensi-pola" / "anomali_demo.json").read_text(encoding="utf-8"))
+
+
+def test_model_anomali_sama_dengan_anomali_demo(data):
+    """Seed dan data simulasi web (anomali_demo.json) menilai 302 bulan-pasien dengan hasil yang sama."""
+    assert len(data["anomali"]) == 302
+    for (pid, _), a in data["anomali"].items():
+        demo = ANOMALI_DEMO["pasien"][pid]
+        assert (a["skor"], a["ditandai"], a["langka"]) == (demo["skor"], demo["ditandai"], demo["langka"]), pid
+        assert a["alasan"] == {"alasan": demo["alasan"], "gabungan": demo["gabungan"]}, pid
+
+
+def test_antre_memuat_pasien_yang_hanya_dipilih_model(data):
+    """M1 (tanpa indikator) dan M2 (I4 saja) tidak terpicu aturan, tetapi ditandai model, jadi ikut antre."""
+    antre = {b[1] for b in data["antre"]}
+    for pid, rs in (("P-M1", "RS03"), ("P-M2", "RS05")):
+        assert not data["indikator"][(pid, rs)]["dipicu"] and data["anomali"][(pid, rs)]["ditandai"]
+        assert pid in antre
+    hanya_model = {k for k, a in data["anomali"].items() if a["ditandai"] and not data["indikator"][k]["dipicu"]}
+    assert hanya_model == {("P-M1", "RS03"), ("P-M2", "RS05")}
+
+
+def test_seed_menyimpan_model_anomali_dan_rujukan(conn_v3):
+    r = conn_v3.execute(
+        "select count(*) filter (where anomali_ditandai) as ditandai, count(*) filter (where alasan_anomali is not null)"
+        " as dinilai, count(*) filter (where anomali_ditandai and not dipicu) as hanya_model from indikator_bulanan"
+    ).fetchone()
+    assert r == {"ditandai": 23, "dinilai": 302, "hanya_model": 2}
+    rujukan = conn_v3.execute(
+        "select count(*) filter (where not rujukan_fktp) as tanpa, count(*) filter (where perujuk_luar_wilayah) as luar"
+        " from klaim_sesi"
+    ).fetchone()
+    assert rujukan == {"tanpa": 3, "luar": 3}
