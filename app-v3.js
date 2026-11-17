@@ -59,7 +59,13 @@
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
   const logoVeritas = '<img src="assets/veritas-mark.svg" alt="" aria-hidden="true">';
 
-  const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
+  /* Tiga label di layar: Sesuai, Tidak sesuai, Tidak ada jawaban (dengan alasan kecil). */
+  const labelChip = (kunci, besar) => {
+    const l = D.LABEL[kunci];
+    return '<span class="label label--' + (l.alasan ? "tanpa_jawaban" : kunci) + (besar ? " label--besar" : "") + '">' + l.nama +
+      (l.alasan ? '<small class="label-alasan">' + l.alasan + "</small>" : "") + "</span>";
+  };
+  const namaLabel = (kunci) => D.LABEL[kunci].nama + (D.LABEL[kunci].alasan ? " (" + D.LABEL[kunci].alasan + ")" : "");
   const koma = (n) => String(n).replace(".", ",");
 
   const persenSatu = (x) => koma(x.toFixed(1)) + "%";
@@ -275,7 +281,7 @@
     /* Bila verifikator sedang menonton panggilan ini, pindah sendiri ke kartu bukti. */
     const r = rute();
     if (r.nama === "panggilan" && r.id === id) ke("#/kartu/" + id); else gambar(true);
-    toast("Panggilan selesai: " + p.pasien + " · " + D.LABEL[p.label].nama + ".", "#/kartu/" + id, "Buka kartu bukti");
+    toast("Panggilan selesai: " + p.pasien + " · " + namaLabel(p.label) + ".", "#/kartu/" + id, "Buka kartu bukti");
     if (ui.otomatis && !ui.jeda) ui.timerBerikut = setTimeout(lanjutOtomatis, SIM.jedaBerikut);
   }
 
@@ -1074,7 +1080,7 @@
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
     else if (p.rekaman) { bukti = ""; pemutar = '<div class="pemutar pemutar--ponsel"><audio controls preload="metadata" src="' + p.rekaman + '">Peramban tidak mendukung pemutar audio.</audio><small class="catatan-simulasi">' + (M.hidup ? "Rekaman panggilan uji." : "Suara buatan (ElevenLabs).") + "</small></div>"; }
-    else bukti = '<p class="tanpa-rekaman">Rekaman dan transkrip tidak disimpan untuk hasil ' + D.LABEL[p.label].nama + ".</p>";
+    else bukti = '<p class="tanpa-rekaman">Rekaman dan transkrip tidak disimpan untuk hasil ' + namaLabel(p.label) + ".</p>";
     /* Transkrip menyatu di kartu Kutipan kunci: tombol membuka daftar, baris yang sedang diucapkan disorot saat rekaman
        diputar (lihat sorotTranskrip), klik baris untuk melompat. */
     const adaTranskrip = simpanTeks && !latar && p.rekaman;
@@ -1214,7 +1220,7 @@
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Belum perlu klarifikasi (2 dari 4).</div>' : "") +
       kartuKinerjaModel(data.kinerjaModel) +
-      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
+      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak ada jawaban (tidak diangkat, menolak, atau tidak yakin jumlahnya) tidak dihitung.</div>' +
       '<section class="panel"><div class="panel-kepala"><h2>Status rumah sakit</h2><span class="kanan">' + data.rs.length + ' rumah sakit</span></div><div class="tabel-bungkus"><table class="tabel tabel--kartu tabel-rs"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
         '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
   }
@@ -1311,7 +1317,7 @@
       if (lama !== undefined && lama === "antre" && b.status === "wa_terkirim") {
         toast("Pesan WA terkirim ke " + b.penerima.nama + ". Panggilan untuk " + b.pasien + " dimulai.", "#/panggilan/" + b.id, "Buka panggilan");
       } else if (lama !== undefined && !selesaiSt(lama) && selesaiSt(b.status)) {
-        toast("Panggilan selesai: " + b.pasien + (b.label ? " · " + D.LABEL[b.label].nama : "") + ".", "#/kartu/" + b.id, "Buka kartu bukti");
+        toast("Panggilan selesai: " + b.pasien + (b.label ? " · " + namaLabel(b.label) : "") + ".", "#/kartu/" + b.id, "Buka kartu bukti");
       }
       M.lalu[b.id] = b.status;
     });
@@ -1462,7 +1468,7 @@
       const id = el.dataset.id, b = barisApi(id), nama = b ? b.pasien : id;
       if (!window.confirm("Batalkan panggilan " + nama + "?\n\nDihitung sebagai satu percobaan gagal. Antrean berlanjut ke pasien berikutnya.")) return;
       A3.batal(id).then((baris) => {
-        toast(baris.status === "antre" ? "Panggilan " + nama + " dibatalkan. Dicoba lagi otomatis setelah jeda." : "Panggilan " + nama + " dibatalkan. Hasil: Tidak terhubung.");
+        toast(baris.status === "antre" ? "Panggilan " + nama + " dibatalkan. Dicoba lagi otomatis setelah jeda." : "Panggilan " + nama + " dibatalkan. Hasil: " + namaLabel("tidak_terhubung") + ".");
         return segarkan();
       }).catch(galatToast("Gagal membatalkan panggilan"));
     },
