@@ -5,7 +5,7 @@ Deterministik (seed tetap). Tidak memakai data peserta JKN riil: jumlah sesi per
 bulan hanya diambil dari distribusi agregat data panitia (distribusi_sesi_panitia.csv).
 """
 import csv, json, random, sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -246,6 +246,60 @@ for sid, nama, umur, jk, rs, kel, hub, dx, tagih, benar, sebelum in SK:
                       "expected_alasan": "Tidak dipicu: indikator aktif kurang dari 2. Tidak ada panggilan."})
     skenario.append(entry)
 
+# ---------- keadaan demo (demo_2026-08.json, dipakai POST /demo/reset) ----------
+# Dua pasien demo yang ditelepon langsung saat presentasi, berurutan D1 lalu D2. Polanya sama dengan S1
+# (I1, I2, I4) supaya skor anomalinya sama dan urutan ditentukan id. Tanggal tetap, tanpa rng, dan tidak masuk
+# peserta.csv/klaim_sesi.csv, jadi data uji lain tidak berubah. no_hp berisi placeholder; nomor asli hanya diisi
+# langsung di database, tidak pernah di repo. Pasien terpilih lain sudah punya hasil, jadi hanya D1 dan D2 yang antre.
+DEMO = [  # id, nama, umur, jk, rs, dx, tanggal Agustus
+    ("D1", "Imelda", 46, "P", "RS01", DX[0],
+     ["2026-08-03", "2026-08-04", "2026-08-06", "2026-08-10", "2026-08-11", "2026-08-13", "2026-08-16", "2026-08-17",
+      "2026-08-20", "2026-08-24", "2026-08-27"]),
+    ("D2", "Zahra", 44, "P", "RS01", DX[1],
+     ["2026-08-04", "2026-08-05", "2026-08-07", "2026-08-11", "2026-08-12", "2026-08-14", "2026-08-16", "2026-08-17",
+      "2026-08-21", "2026-08-25", "2026-08-28"]),
+]
+demo_peserta, demo_klaim = [], []
+for did, nama, umur, jk, rs, dx, tgl in DEMO:
+    pid = f"P-{did}"
+    demo_peserta.append({"id_peserta": pid, "nama": nama, "tanggal_lahir": "", "umur": umur, "jenis_kelamin": jk,
+                         "no_hp": f"0800-0000-9{did[1]:0>3}", "kontak_keluarga": "", "hubungan_keluarga": "",
+                         "no_hp_keluarga": "", "hubungi_keluarga": "tidak", "catatan": f"pasien demo {did}"})
+    for t in tgl:
+        demo_klaim.append({"id_klaim": f"SEP-DEMO-{len(demo_klaim)+1:06d}", "id_peserta": pid, "id_rs": rs, "tanggal": t,
+                           "kode_cbg": dx[2], "kode_icd10": dx[0], "diagnosis": dx[1], "tarif": dx[3],
+                           "rujukan_fktp": "ya", "perujuk_luar_wilayah": "tidak"})
+
+def jawaban_latar(t):
+    n = t["sesi_sebenarnya"]
+    if t["sesi_ditagih"] - n > 2:
+        return {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": None, "hadir": True,
+                "jumlah_min": n, "jumlah_maks": n, "keyakinan": "tinggi", "tanda_bahaya": [],
+                "kutipan_kunci": f"Seingat saya cuma {n} kali.", "ringkasan": "Jumlah sesi versi peserta jauh di bawah tagihan."}
+    return {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": None, "hadir": True,
+            "jumlah_min": max(1, n - 1), "jumlah_maks": n + 1, "keyakinan": "tinggi", "tanda_bahaya": [],
+            "kutipan_kunci": f"Kurang lebih {n} kali.", "ringkasan": "Jumlah sesi sesuai tagihan."}
+
+sudah_riwayat = {(r["id_peserta"], r["id_rs"]) for r in riwayat}
+jawaban_skenario = {f"P-{s['id_skenario']}": s["expected_jawaban"] for s in skenario if s["expected_jawaban"]}
+terpilih = [(v["id_peserta"], v["id_rs"], v["sesi_ditagih"]) for _, v in sorted(ind.items()) if v["dipicu"]]
+terpilih += [(f"P-{mid}", rs, len(per_bulan[BULAN_UJI])) for mid, _, _, _, rs, _, per_bulan, _, _ in HM]
+demo_selesai = []
+mulai_demo = datetime(2026, 10, 2, 8, 30)
+for pid, rs, ditagih in terpilih:
+    if (pid, rs) in sudah_riwayat:
+        continue
+    j = jawaban_skenario.get(pid) or jawaban_latar(kb[(pid, rs)])
+    lab, alasan = label_jawaban(j, ditagih)
+    terhubung = j["status_panggilan"] != "tidak_terhubung"
+    mulai = mulai_demo + timedelta(minutes=17 * len(demo_selesai))
+    demo_selesai.append({"id_panggilan": f"CALL-{pid}-{BULAN_UJI}", "id_peserta": pid, "id_rs": rs, "bulan_layanan": BULAN_UJI,
+                         "sesi_ditagih": ditagih, "jawaban": j, "label": lab, "alasan": alasan,
+                         "status": "selesai" if terhubung else "tidak_terhubung", "percobaan": 1 if terhubung else 2,
+                         "waktu_mulai": mulai.isoformat() + "+07:00",
+                         "durasi_detik": 55 + (len(demo_selesai) * 13) % 40 if terhubung else None,
+                         "sumber": "sintetis-demo (bukan panggilan nyata)"})
+
 # ---------- tulis berkas ----------
 def tulis_csv(nama, baris, kolom):
     with open(ROOT / nama, "w", newline="") as f:
@@ -277,6 +331,9 @@ json.dump({"aturan": "Perlu klarifikasi RS jika tidak sesuai >= 3 DAN rasio tida
            "sebelum_skenario": ringkasan_rs([{"id_rs": r["id_rs"], "label": r["label"]} for r in riwayat]),
            "langkah": langkah_rs}, open(ROOT / "expected_ringkasan_rs.json", "w"), ensure_ascii=False, indent=2)
 json.dump(skenario, open(ROOT / "skenario_uji.json", "w"), ensure_ascii=False, indent=2)
+json.dump({"keterangan": "Keadaan demo: hanya pasien di urutan yang antre. Dipakai POST /demo/reset.",
+           "urutan": [f"P-{x[0]}" for x in DEMO], "peserta": demo_peserta, "klaim": demo_klaim, "selesai": demo_selesai},
+          open(ROOT / "demo_2026-08.json", "w"), ensure_ascii=False, indent=1)
 
 # ---------- laporan singkat ----------
 n_dipicu = sum(v["dipicu"] for v in ind.values())
