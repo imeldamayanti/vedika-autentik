@@ -61,6 +61,9 @@ KUNCI_MACET_MENIT = 5  # panggilan berjalan tanpa laporan selama ini dilepas seb
 STASIUN_AKTIF_DETIK = 30  # stasiun dianggap aktif bila detaknya lebih baru dari ini
 BATAS_PANGGILAN_DETIK = 150  # R3.3: panggilan paling lama 2,5 menit
 WAKTU_PEMBACA_DETIK = 30
+# Jeda (detik) sebelum mengulang pembaca setelah galat penyedia (Gemini 503/429, batas waktu, tak terhubung).
+# Gangguan Gemini biasanya hilang dalam hitungan detik; ulang langsung hanya menabrak dinding yang sama.
+JEDA_ULANG_PEMBACA = (3, 10, 20, 40)
 BULAN_NAMA = {
     "01": "Januari", "02": "Februari", "03": "Maret", "04": "April", "05": "Mei", "06": "Juni",
     "07": "Juli", "08": "Agustus", "09": "September", "10": "Oktober", "11": "November", "12": "Desember",

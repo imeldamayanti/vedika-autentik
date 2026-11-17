@@ -139,3 +139,38 @@ def test_transport_marks_transient_error_exhausted_after_retry_schedule():
     assert captured.value.retryable is True
     assert captured.value.retry_exhausted is True
 
+
+
+def test_fallback_transport_switches_model_only_when_gemini_is_busy():
+    from vedika_ai.gemini import FallbackTransport
+
+    class Fake:
+        def __init__(self, model, outcome):
+            self.model, self.outcome, self.calls = model, outcome, 0
+
+        def generate_json(self, prompt, schema):
+            self.calls += 1
+            if isinstance(self.outcome, Exception):
+                raise self.outcome
+            return self.outcome
+
+    busy = Fake("lite", GeminiError("penyedia_tidak_tersedia", status_code=429))
+    backup = Fake("flash", '{"ok": true}')
+    assert FallbackTransport([busy, backup]).generate_json("x", {}) == '{"ok": true}'
+    assert (busy.calls, backup.calls) == (1, 1)
+
+    down = Fake("lite", GeminiError("penyedia_tidak_tersedia", status_code=503))
+    also_down = Fake("flash", GeminiError("penyedia_tidak_tersedia", status_code=503))
+    with pytest.raises(GeminiError):
+        FallbackTransport([down, also_down]).generate_json("x", {})
+    assert also_down.calls == 1
+
+    slow = Fake("lite", GeminiError("batas_waktu"))
+    unused = Fake("flash", "{}")
+    with pytest.raises(GeminiError, match="batas_waktu"):
+        FallbackTransport([slow, unused]).generate_json("x", {})
+    assert unused.calls == 0
+
+    refused = Fake("lite", GeminiError("penyedia_tidak_tersedia", retryable=False, status_code=400))
+    with pytest.raises(GeminiError):
+        FallbackTransport([refused, Fake("flash", "{}")]).generate_json("x", {})

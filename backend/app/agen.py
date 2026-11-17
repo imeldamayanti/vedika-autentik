@@ -2,6 +2,7 @@
 bukan di agen: agen hanya menarik tugas dan melapor (docs/api-contract-v3.md)."""
 import logging
 import re
+import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -268,22 +269,31 @@ def lolos_skema(j) -> str | None:
     return None
 
 
-def baca_dengan_ulang(mesin, permintaan: dict) -> tuple[dict | None, str | None]:
-    """Panggil pembaca; gagal (502, 504, timeout, tak terhubung, JSON tak lolos skema) diulang 1 kali.
-    422 transkrip_kosong tidak diulang. Mengembalikan (jawaban, None) atau (None, pesan galat)."""
+def baca_dengan_ulang(mesin, permintaan: dict, tidur=time.sleep) -> tuple[dict | None, str | None]:
+    """Panggil pembaca. Galat penyedia (502, 504, timeout, tak terhubung) diulang dengan jeda
+    config.JEDA_ULANG_PEMBACA; JSON tak lolos skema diulang 1 kali; 422 transkrip_kosong tidak diulang.
+    4xx lain juga tidak diulang. Mengembalikan (jawaban, None) atau (None, pesan galat)."""
     galat = None
-    for _ in range(2):
+    jeda = list(config.JEDA_ULANG_PEMBACA)
+    skema_gagal = 0
+    while True:
         try:
             j = mesin.baca(permintaan, config.WAKTU_PEMBACA_DETIK)
         except MesinGalat as e:
             galat = f"{e.kode}: {e.pesan}"
-            if e.kode == "transkrip_kosong":
+            # 4xx (transkrip kosong, kunci salah, permintaan ditolak) tidak akan berubah bila diulang.
+            if e.kode == "transkrip_kosong" or 400 <= (e.status or 0) < 500 or not jeda:
                 break
+            log.warning("pembaca gagal (%s); ulang dalam %s detik", e.kode, jeda[0])
+            tidur(jeda.pop(0))
             continue
         masalah = lolos_skema(j)
         if masalah is None:
             return j, None
         galat = f"skema_tidak_valid: {masalah}"
+        skema_gagal += 1
+        if skema_gagal >= 2:
+            break
     return None, galat
 
 

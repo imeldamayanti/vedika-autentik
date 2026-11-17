@@ -84,6 +84,7 @@ lebih sederhana dan menjadi target pertama.
 | Variabel | Isi |
 |---|---|
 | `GEMINI_API_KEY`, `GEMINI_LIVE_MODEL`, `GEMINI_TEXT_MODEL` | Seperti sebelumnya |
+| `GEMINI_TEXT_MODEL_CADANGAN` | Model teks kedua untuk pembaca jawaban bila model utama sibuk (429/5xx). Bawaan `gemini-3.5-flash`; kosong = mati |
 | `AI_SERVICE_KEY` | Opsional; bila diisi, sama dengan `KUNCI_MESIN` |
 | `SALURAN_ADB` | `1` = HP nyata lewat adb, `palsu` = HP palsu untuk uji. Kosong = Phone helper tidak ada. `stasiun.sh` mengisinya `1` |
 | `SALURAN_ADB_BIN` | Lokasi `adb` bila tidak ada di PATH |
@@ -204,3 +205,8 @@ Balasan penerima atas chat cadangan belum dibaca sistem (di luar lingkup tiket i
 | Speakerphone mati di setiap panggilan baru | HP tidak mengingat speaker antar panggilan | Sudah ditangani di mode speaker: Phone helper mengetuk tombol "Speaker" dan memeriksa rute audio. Log ai-service: `saluran speaker aktif=True` |
 | Penerima mengangkat tetapi diam, lalu dianggap tidak diangkat | Agen menunggu ucapan pertama penerima | Sudah ditangani: bila jaringan menyatakan diangkat (`tersambung`) dan penerima diam 3 detik, AI membuka lebih dulu |
 | Transkrip penerima berisi kata asing ("hier", "madre") | Suara dari speaker HP sampai ke mikrofon laptop dalam keadaan buram | Volume panggilan HP maksimum, HP 15–20 cm dengan speaker menghadap mikrofon laptop, ruangan sepi. Bila tetap, pakai mode kabel. Hasil uji: [HASIL-UJI-HP.md](HASIL-UJI-HP.md) |
+| Penerima mengangkat, tetapi suara AI tidak terdengar | (1) Keluaran audio Mac pindah ke headset Bluetooth; (2) Gemini tidak menjawab aba-aba pembuka atau mengirim audio kosong | Sudah ditangani: mode speaker selalu memakai mikrofon dan speaker bawaan MacBook, dan aba-aba pembuka dikirim ulang bila 6 detik tanpa suara. Cek baris "Audio" di halaman agen dan catatan `· AI mulai bersuara` di transkripnya. Volume Mac sekitar 70% |
+| Kalimat pembuka AI terpotong, lalu AI langsung berkata "Baik, Ibu…" | Penerima berkata "halo" saat mengangkat; agen dulu mengirim dorongan "tanggapi jawaban" saat suara AI masih diputar | Sudah ditangani: hening baru dihitung setelah suara AI selesai diputar, dan mikrofon dibisukan selama AI bicara (mode speaker) |
+| Durasi di layar panggilan website diam di 0:00 | Penghitung memakai detik baris transkrip terakhir | Sudah ditangani: durasi dihitung sejak log `tersambung`. Muat ulang tab website (Cmd+Shift+R) setelah pembaruan |
+| Hasil "Tidak yakin" dengan `llm_gagal` padahal jawaban jelas | Model teks Gemini sibuk (429/503) | Backend mengulang pembaca dengan jeda 3, 10, 20, 40 detik, dan ai-service pindah ke `GEMINI_TEXT_MODEL_CADANGAN`. Bila tetap gagal: cek kuota kunci di Google AI Studio |
+| Halaman agen: "token endpoint 503" | Google lambat membuat token sesi (lebih dari 15 detik) | Sudah ditangani: token diminta ulang sampai 3 kali selama HP berdering |

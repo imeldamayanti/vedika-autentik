@@ -27,6 +27,26 @@ export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Tanyakan sekali
 export const PICKUP_SILENCE_MS = 3000;
 // Microphone level (RMS, 0..1 after Chrome's gain control) above which the line counts as speech.
 export const VOICE_ACTIVITY_RMS = 0.035;
+// The opening cue does not always produce speech: Gemini can ignore it, or stream empty "AAA=" audio
+// frames while it still writes the transcript. Without audible audio this long after the cue, send it again.
+export const OPENING_RETRY_MS = 6000;
+export const OPENING_RETRIES = 2;
+// Speaker mode: the laptop microphone also hears the AI's own voice (from the laptop speaker and back
+// through the phone line). While the AI is talking, and this long after, Gemini gets silence instead.
+export const HALF_DUPLEX_TAIL_MS = 500;
+// Token requests that fail with a server error or a network error are retried while the phone rings.
+export const TOKEN_ATTEMPTS = 3;
+export const TOKEN_RETRY_MS = 500;
+
+// A model audio frame the recipient can actually hear: not the 1-sample keep-alive frames, not all zeros.
+export const isAudibleChunk = (bytes) => {
+  if (!bytes || bytes.byteLength < 64) return false;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  for (let index = 0; index + 1 < bytes.byteLength; index += 2) {
+    if (Math.abs(view.getInt16(index, true)) > 64) return true;
+  }
+  return false;
+};
 
 const normalize = (teks) => String(teks || "").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
 const ANNOUNCEMENTS = [
@@ -63,6 +83,12 @@ export const isCallGone = (error) => error?.status === 404
 export const pickDevice = (devices, kind, hint) => (hint
   ? devices.find((device) => device.kind === kind && device.label.includes(hint)) || null
   : null);
+
+// Speaker mode without SALURAN_INPUT/OUTPUT: use the laptop's own microphone and speakers, never the system default,
+// which silently becomes a Bluetooth headset when one connects (the phone then hears nothing).
+const BUILT_IN = /built-in|internal|macbook/i;
+export const pickBuiltIn = (devices, kind) => devices.find((device) => device.kind === kind
+  && device.deviceId !== "default" && !/^default\b/i.test(device.label) && BUILT_IN.test(device.label)) || null;
 
 export function createAgentApi({ baseUrl, agentKey, fetchImpl = fetch }) {
   const send = async (path, body) => {
@@ -316,6 +342,13 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
     const onSilence = () => {
       // After the goodbye only hangUpAfterGoodbye ends the call, once its audio has played.
       if (ended || closing) return;
+      // The AI is still talking (its text arrives seconds before its audio finishes): a nudge now would
+      // cut its sentence off. Silence only counts from the end of the AI's audio.
+      const playing = session?.playbackRemainingMs?.() || 0;
+      if (playing > 0) {
+        silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
+        return;
+      }
       // Never ask again once the AI has said goodbye.
       // Recipient spoke last but the AI never answered (Gemini did not hear the end of the turn):
       // ask it to respond. AI spoke last: ask it to repeat the question.
@@ -352,7 +385,7 @@ export function createStationOperator({ line, startSession, onPhase, onLog, onEr
           nudged = false;
           clearTimeout(pickup);
           // The AI normally answers within seconds; this clock only runs out if it never does.
-          if (answered && !closing && !ended) silence = setTimeout(onSilence, SILENCE_HANGUP_MS);
+          if (answered && !closing && !ended) silence = setTimeout(onSilence, afterPlayback(SILENCE_HANGUP_MS));
         }
       },
       onPartial: (turn) => {
@@ -551,6 +584,38 @@ export class VedikaVoiceSession {
     // Station calls hold the microphone until the phone network reports the call as answered, so
     // ringback, room noise or a carrier recording never reach Gemini as the recipient's words.
     this.inputHeld = Boolean(options.holdInput);
+    this.openingTimer = null;
+    this.openingRetries = 0;
+    this.aiAudible = false;
+    this.silentFrames = 0;
+  }
+
+  // Short diagnostic line for the station page: what Gemini did, so a silent call leaves a trace.
+  note(text) {
+    this.options.onEvent?.(text);
+  }
+
+  // Half-duplex for speaker mode: true while the AI's audio is still playing (plus a short tail).
+  micMuted() {
+    if (!this.options.halfDuplex || !this.audioContext) return false;
+    return this.audioContext.currentTime < this.nextPlayTime + HALF_DUPLEX_TAIL_MS / 1000;
+  }
+
+  armOpeningWatchdog() {
+    clearTimeout(this.openingTimer);
+    this.openingTimer = null;
+    if (this.aiAudible || this.stopping) return;
+    this.openingTimer = setTimeout(() => {
+      this.openingTimer = null;
+      if (this.aiAudible || this.stopping) return;
+      if (this.openingRetries >= OPENING_RETRIES) {
+        this.note(`AI tetap tanpa suara setelah ${OPENING_RETRIES + 1} aba-aba pembuka (bingkai kosong: ${this.silentFrames})`);
+        return;
+      }
+      this.openingRetries += 1;
+      this.note(`AI belum bersuara ${OPENING_RETRY_MS / 1000} detik setelah aba-aba (bingkai kosong: ${this.silentFrames}); aba-aba dikirim ulang (${this.openingRetries})`);
+      this.sendOpeningCue();
+    }, OPENING_RETRY_MS);
   }
 
   releaseInput() {
@@ -579,14 +644,32 @@ export class VedikaVoiceSession {
     this.startedAt = performance.now();
     try {
       this.emitStatus("menelepon");
-      const tokenResponse = await this.fetchImpl(
-        this.options.tokenEndpoint || "/v1/suara/token",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...(this.options.headers || {}) },
-          body: JSON.stringify(this.options.context),
-        },
-      );
+      // A single slow answer from Google (503 after the service's 15 s timeout) must not end the call:
+      // the phone is still ringing, so try again. Client errors (4xx) are not retried.
+      let tokenResponse = null;
+      for (let attempt = 1; attempt <= TOKEN_ATTEMPTS; attempt += 1) {
+        let failure;
+        try {
+          tokenResponse = await this.fetchImpl(
+            this.options.tokenEndpoint || "/v1/suara/token",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...(this.options.headers || {}) },
+              body: JSON.stringify(this.options.context),
+            },
+          );
+          if (tokenResponse.ok || tokenResponse.status < 500) break;
+          failure = `token endpoint ${tokenResponse.status}`;
+        } catch (error) {
+          failure = error?.message || String(error);
+          tokenResponse = null;
+        }
+        this.ensureActive();
+        if (attempt === TOKEN_ATTEMPTS) throw new Error(failure.startsWith("token endpoint") ? failure : `token endpoint: ${failure}`);
+        this.note(`token Gemini gagal (${failure}); mencoba lagi ${attempt + 1}/${TOKEN_ATTEMPTS}`);
+        await delay(TOKEN_RETRY_MS);
+        this.ensureActive();
+      }
       this.ensureActive();
       if (!tokenResponse.ok) throw new Error(`token endpoint ${tokenResponse.status}`);
       const credentials = await tokenResponse.json();
@@ -656,7 +739,8 @@ export class VedikaVoiceSession {
         this.options.onError?.(error);
         this.stop("galat_koneksi").catch((stopError) => this.options.onError?.(stopError));
       });
-      this.socket.addEventListener("close", () => {
+      this.socket.addEventListener("close", (event) => {
+        if (!this.stopping) this.note(`koneksi Gemini tertutup (${event?.code ?? "?"} ${event?.reason || ""})`.trim());
         this.handleSocketClose().catch((error) => this.options.onError?.(error));
       });
 
@@ -670,8 +754,9 @@ export class VedikaVoiceSession {
           || this.inputHeld
           || this.socket?.readyState !== this.WebSocketImpl.OPEN
         ) return;
-        const samples = event.inputBuffer.getChannelData(0);
-        this.reportVoiceActivity(samples);
+        let samples = event.inputBuffer.getChannelData(0);
+        if (this.micMuted()) samples = new Float32Array(samples.length);
+        else this.reportVoiceActivity(samples);
         const downsampled = resample(samples, this.audioContext.sampleRate, INPUT_RATE);
         const pcm = float32ToPcm16(downsampled);
         this.socket.send(JSON.stringify({
@@ -716,15 +801,29 @@ export class VedikaVoiceSession {
     const event = await parseServerMessage(raw);
     if (this.stopping) return;
     const action = this.reducer.reduce(event);
+    if (event.setupComplete && !this.ready) this.note("Gemini siap");
     if (event.setupComplete && !this.ready && (this.options.greetFirst !== false || this.openWhenReady)) {
       this.sendOpeningCue();
     }
     this.ready ||= event.setupComplete;
+    if (event.interrupted) this.note("giliran AI terpotong (Gemini mendengar suara di saluran)");
     if (action.clearPlayback) this.clearPlayback();
     this.emitStatus(action.status);
     for (const turn of event.turns) this.appendFragment(turn);
     if (event.turnComplete || event.interrupted) this.flushTurn();
-    for (const chunk of event.audioChunks) this.playPcm(chunk);
+    for (const chunk of event.audioChunks) {
+      if (isAudibleChunk(chunk)) {
+        if (!this.aiAudible) {
+          this.aiAudible = true;
+          clearTimeout(this.openingTimer);
+          this.openingTimer = null;
+          this.note("AI mulai bersuara");
+        }
+      } else {
+        this.silentFrames += 1;
+      }
+      this.playPcm(chunk);
+    }
   }
 
   // Ask the model to speak again (for example after the recipient stayed silent).
@@ -741,6 +840,7 @@ export class VedikaVoiceSession {
     this.socket?.send(JSON.stringify({
       clientContent: { turns: [{ role: "user", parts: [{ text: OPENING_CUE }] }], turnComplete: true },
     }));
+    this.armOpeningWatchdog();
   }
 
   // The phone network says the call is up but the recipient has not said anything: many people
@@ -850,6 +950,8 @@ export class VedikaVoiceSession {
     this.endedAt ||= performance.now();
     this.flushTurn();
     clearTimeout(this.timeoutId);
+    clearTimeout(this.openingTimer);
+    this.openingTimer = null;
     this.timeoutId = null;
     this.ready = false;
     this.clearPlayback();

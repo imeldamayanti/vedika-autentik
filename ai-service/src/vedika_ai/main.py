@@ -17,7 +17,7 @@ from loguru import logger
 from . import config, saluran
 from .answer_reader import AnswerReader, AnswerResponse, ReadAnswerRequest
 from .errors import ServiceError
-from .gemini import GeminiError, GeminiTransport
+from .gemini import FallbackTransport, GeminiError, GeminiTransport
 from .schemas import ErrorResponse, HealthResponse
 from .voice import GeminiTokenIssuer, VoiceContext, VoiceTokenResponse
 
@@ -51,11 +51,13 @@ def get_answer_reader() -> AnswerReader:
             "gemini_tidak_dikonfigurasi",
             "Pembaca jawaban belum dikonfigurasi.",
         )
-    return AnswerReader(
-        GeminiTransport(
-            api_key, config.gemini_text_model(), timeout=config.READER_TIMEOUT_SECONDS
-        )
-    )
+    models = [config.gemini_text_model()]
+    if fallback := config.gemini_text_fallback_model():
+        models.append(fallback)
+    transports = [
+        GeminiTransport(api_key, model, timeout=config.READER_TIMEOUT_SECONDS) for model in models
+    ]
+    return AnswerReader(transports[0] if len(transports) == 1 else FallbackTransport(transports))
 
 
 @lru_cache(maxsize=1)

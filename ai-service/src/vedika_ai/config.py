@@ -34,6 +34,12 @@ def gemini_text_model() -> str:
     return os.environ.get("GEMINI_TEXT_MODEL", "gemini-3.5-flash-lite")
 
 
+def gemini_text_fallback_model() -> str | None:
+    """Second text model for the answer reader when the main one is busy. Empty value turns it off."""
+    model = os.environ.get("GEMINI_TEXT_MODEL_CADANGAN", "gemini-3.5-flash").strip()
+    return model if model and model != gemini_text_model() else None
+
+
 # ---- Phone helper (saluran.py): station laptop only ----
 
 

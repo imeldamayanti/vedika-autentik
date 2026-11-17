@@ -21,7 +21,11 @@ import {
   isCallGone,
   isClosingLine,
   isGoodbyePhrase,
+  isAudibleChunk,
   isOperatorAnnouncement,
+  OPENING_RETRIES,
+  OPENING_RETRY_MS,
+  pickBuiltIn,
   pickDevice,
   stationTick,
   float32ToPcm16,
@@ -817,8 +821,9 @@ test("session calls the global fetch without rebinding it to the session", async
 
   await assert.rejects(session.start(), /token endpoint 503/);
 
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0][0], "/v1/suara/token");
+  // A 503 is retried (TOKEN_ATTEMPTS), each time through the unbound global fetch.
+  assert.equal(calls.length, 3);
+  assert.ok(calls.every((call) => call[0] === "/v1/suara/token"));
 });
 
 test("createAgentApi calls the global fetch without rebinding it", async (t) => {
@@ -1417,4 +1422,137 @@ test("voice session reports each fragment of the turn in progress", () => {
   session.appendFragment({ pembicara: "ai", teks: "Terima kasih " });
   session.appendFragment({ pembicara: "ai", teks: "atas waktunya." });
   assert.deepEqual(partial, ["Terima kasih ", "Terima kasih atas waktunya."]);
+});
+
+test("pickBuiltIn chooses the laptop's own devices over a Bluetooth default", () => {
+  const devices = [
+    { kind: "audioinput", deviceId: "default", label: "Default - Baseus Bass BH1 Lite (Bluetooth)" },
+    { kind: "audioinput", deviceId: "bt", label: "Baseus Bass BH1 Lite (Bluetooth)" },
+    { kind: "audioinput", deviceId: "mic", label: "MacBook Pro Microphone (Built-in)" },
+    { kind: "audiooutput", deviceId: "default", label: "Default - MacBook Pro Speakers (Built-in)" },
+    { kind: "audiooutput", deviceId: "spk", label: "MacBook Pro Speakers (Built-in)" },
+  ];
+  assert.equal(pickBuiltIn(devices, "audioinput").deviceId, "mic");
+  assert.equal(pickBuiltIn(devices, "audiooutput").deviceId, "spk");
+  assert.equal(pickBuiltIn([{ kind: "audioinput", deviceId: "x", label: "USB Audio Device" }], "audioinput"), null);
+});
+
+test("isAudibleChunk ignores Gemini's empty keep-alive frames and all-zero audio", () => {
+  assert.equal(isAudibleChunk(new Uint8Array([0, 0])), false);
+  assert.equal(isAudibleChunk(new Uint8Array(960)), false);
+  const voice = new Uint8Array(960);
+  new DataView(voice.buffer).setInt16(400, 3000, true);
+  assert.equal(isAudibleChunk(voice), true);
+});
+
+test("session resends the opening cue while the AI stays silent, then gives up", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const sent = [];
+  const notes = [];
+  const session = new VedikaVoiceSession({ greetFirst: false, onEvent: (text) => notes.push(text) });
+  session.socket = { send: (message) => sent.push(JSON.parse(message)) };
+  session.audioContext = { currentTime: 0, createBuffer: () => ({ getChannelData: () => new Float32Array(1), duration: 0 }), createBufferSource: () => ({ connect() {}, addEventListener() {}, start() {} }) };
+  await session.handleMessage(JSON.stringify({ setupComplete: {} }));
+  assert.equal(session.openFirst(), true);
+  assert.equal(sent.length, 1);
+
+  // Only empty frames arrive: the recipient hears nothing.
+  await session.handleMessage(JSON.stringify({ serverContent: { modelTurn: { parts: [{ inlineData: { data: "AAA=" } }] } } }));
+  for (let retry = 1; retry <= OPENING_RETRIES; retry += 1) {
+    t.mock.timers.tick(OPENING_RETRY_MS);
+    assert.equal(sent.length, 1 + retry);
+    assert.match(sent.at(-1).clientContent.turns[0].parts[0].text, /pembuka/);
+  }
+  t.mock.timers.tick(OPENING_RETRY_MS);
+  assert.equal(sent.length, 1 + OPENING_RETRIES);
+  assert.match(notes.at(-1), /tetap tanpa suara/);
+});
+
+test("session stops resending the opening cue once audible audio arrives", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const sent = [];
+  const session = new VedikaVoiceSession({ greetFirst: false });
+  session.socket = { send: (message) => sent.push(JSON.parse(message)) };
+  session.audioContext = { currentTime: 0, createBuffer: (_, n) => ({ getChannelData: () => new Float32Array(n), duration: n / 24000 }), createBufferSource: () => ({ connect() {}, addEventListener() {}, start() {} }) };
+  session.playDestination = {};
+  session.recordDestination = {};
+  await session.handleMessage(JSON.stringify({ setupComplete: {} }));
+  session.openFirst();
+  const voice = new Uint8Array(960);
+  new DataView(voice.buffer).setInt16(10, 4000, true);
+  const data = Buffer.from(voice).toString("base64");
+  await session.handleMessage(JSON.stringify({ serverContent: { modelTurn: { parts: [{ inlineData: { data } }] } } }));
+  t.mock.timers.tick(OPENING_RETRY_MS * 3);
+  assert.equal(sent.length, 1);
+  assert.equal(session.aiAudible, true);
+});
+
+test("half-duplex mutes the microphone only while the AI's audio plays, plus a short tail", () => {
+  const session = new VedikaVoiceSession({ halfDuplex: true });
+  session.audioContext = { currentTime: 10 };
+  session.nextPlayTime = 12;
+  assert.equal(session.micMuted(), true);
+  session.audioContext.currentTime = 12.3;
+  assert.equal(session.micMuted(), true);
+  session.audioContext.currentTime = 12.6;
+  assert.equal(session.micMuted(), false);
+  assert.equal(new VedikaVoiceSession({}).micMuted(), false);
+});
+
+test("session retries the Gemini token after a 503 and gives up only after three failures", async () => {
+  let calls = 0;
+  const notes = [];
+  const session = new VedikaVoiceSession({
+    audioContext: { state: "running", close: async () => {} },
+    fetchImpl: async () => {
+      calls += 1;
+      return calls < 3
+        ? { ok: false, status: 503, json: async () => ({}) }
+        : { ok: true, status: 200, json: async () => ({ token: "t", websocket_url: "wss://example", model: "live" }) };
+    },
+    mediaDevices: { getUserMedia: async () => { throw new Error("stop after token"); } },
+    onEvent: (text) => notes.push(text),
+  });
+  await assert.rejects(session.start(), /stop after token/);
+  assert.equal(calls, 3);
+  assert.equal(notes.filter((text) => /token Gemini gagal/.test(text)).length, 2);
+
+  let refused = 0;
+  const failing = new VedikaVoiceSession({
+    audioContext: { state: "running", close: async () => {} },
+    fetchImpl: async () => { refused += 1; return { ok: false, status: 503, json: async () => ({}) }; },
+  });
+  await assert.rejects(failing.start(), /token endpoint 503/);
+  assert.equal(refused, 3);
+
+  let bad = 0;
+  const badRequest = new VedikaVoiceSession({
+    audioContext: { state: "running", close: async () => {} },
+    fetchImpl: async () => { bad += 1; return { ok: false, status: 422, json: async () => ({}) }; },
+  });
+  await assert.rejects(badRequest.start(), /token endpoint 422/);
+  assert.equal(bad, 1);
+});
+
+test("station operator never nudges while the AI's opener is still playing (Zahra, 17 Nov)", async (t) => {
+  const rig = stationRig(t, { playbackMs: 15000 });
+
+  // The AI starts its opener; its whole text arrives at once, its audio plays for 15 s more.
+  rig.options.onAnswer();
+  rig.options.onSpeech("ai");
+  // The recipient's "Halo." said at pickup is transcribed just after the AI started.
+  rig.options.onSpeech("penerima");
+  rig.options.onTranscript({ detik: 1, pembicara: "penerima", teks: "Halo." });
+  await rig.tick(SILENCE_HANGUP_MS);
+  assert.deepEqual(rig.nudges, [], "a nudge here cut the opener off mid-sentence");
+
+  rig.playbackMs = 5000;
+  await rig.tick(SILENCE_HANGUP_MS);
+  assert.deepEqual(rig.nudges, []);
+
+  // Opener finished; the recipient stays silent for the full window: now the AI may be nudged.
+  rig.playbackMs = 0;
+  await rig.tick(SILENCE_HANGUP_MS * 2);
+  assert.deepEqual(rig.nudges, [REPLY_NUDGE]);
+  assert.deepEqual(rig.stops, []);
 });

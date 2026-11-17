@@ -611,9 +611,11 @@ def test_ekstensi_rekaman_mp3_dari_stub_agen_dipertahankan(klien_agen, conn_v3, 
     assert baris_db(conn_v3, S1)["rekaman_path"] == f"rekaman/{S1}.mp3" and (tmp_path / f"rekaman/{S1}.mp3").exists()
 
 
-# ---- pembaca gagal: ulang 1 kali, lalu Tidak yakin ----
+# ---- pembaca gagal: galat penyedia diulang dengan jeda, lalu Tidak yakin ----
 
 def hasil_gagal(klien_agen, conn_v3, pembaca, monkeypatch, *balasan):
+    from app import config
+    monkeypatch.setattr(config, "JEDA_ULANG_PEMBACA", (0, 0, 0, 0))
     pembaca.balasan = list(balasan)
     sampai_merekam(klien_agen, monkeypatch)
     assert kirim_hasil(klien_agen, transkrip=TRANSKRIP).status_code == 202
@@ -626,7 +628,7 @@ def hasil_gagal(klien_agen, conn_v3, pembaca, monkeypatch, *balasan):
 ])
 def test_pembaca_gagal_dua_kali_label_tidak_yakin(klien_agen, conn_v3, pembaca, tmp_path, monkeypatch, galat):
     b = hasil_gagal(klien_agen, conn_v3, pembaca, monkeypatch, galat)
-    assert len(pembaca.permintaan) == 2  # diulang 1 kali
+    assert len(pembaca.permintaan) == 5  # 1 + 4 ulangan berjeda
     assert (b["status"], b["label"]) == ("selesai", "Tidak yakin") and b["alasan"].startswith("Jawaban belum bisa dibaca otomatis")
     assert galat.kode in b["galat_pembaca"]
     assert b["jawaban"]["status_panggilan"] == "terjawab" and b["jawaban"]["jumlah_maks"] is None
@@ -726,3 +728,38 @@ def test_batal_saat_merekam_menolak_transkrip_dan_hasil(klien_agen, conn_v3, mon
     d = detail(klien_agen, S1)
     assert (d["status"], d["transkrip"], d["coba_lagi_setelah"]) == ("antre", [], "2026-10-06T10:03:05+07:00")
     assert d["log"][-1]["catatan"] == "dibatalkan_verifikator"
+
+
+def test_pembaca_ulang_berjeda_setelah_503_lalu_429():
+    """Gemini sibuk (503) lalu kena batas (429) dalam satu detik: ulangan menunggu, tidak menabrak dinding yang sama."""
+    from app import agen
+
+    class Pembaca:
+        def __init__(self):
+            self.n = 0
+
+        def baca(self, permintaan, batas):
+            self.n += 1
+            if self.n <= 2:
+                raise MesinGalat("llm_gagal", "Pembaca jawaban gagal.", 502)
+            return SKENARIO["S1"]["expected_jawaban"]
+
+    tidur = []
+    j, galat = agen.baca_dengan_ulang(Pembaca(), {}, tidur=tidur.append)
+    assert galat is None and j == SKENARIO["S1"]["expected_jawaban"]
+    assert tidur == [3, 10]
+
+
+def test_pembaca_tidak_mengulang_galat_klien():
+    from app import agen
+
+    class Pembaca:
+        n = 0
+
+        def baca(self, permintaan, batas):
+            Pembaca.n += 1
+            raise MesinGalat("kunci_salah", "Kunci layanan salah.", 401)
+
+    tidur = []
+    j, galat = agen.baca_dengan_ulang(Pembaca(), {}, tidur=tidur.append)
+    assert j is None and galat.startswith("kunci_salah") and Pembaca.n == 1 and tidur == []

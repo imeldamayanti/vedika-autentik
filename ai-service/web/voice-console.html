@@ -31,7 +31,7 @@
 
 <script type="module">
   import {
-    AUDIO_BLOCKED, VedikaVoiceSession, createAgentApi, createLineApi, createStationOperator, pickDevice, runTask, stationTick,
+    AUDIO_BLOCKED, VedikaVoiceSession, createAgentApi, createLineApi, createStationOperator, pickBuiltIn, pickDevice, runTask, stationTick,
   } from "./voice-agent.mjs";
 
   const $ = (id) => document.getElementById(id);
@@ -56,7 +56,7 @@
     const all = await navigator.mediaDevices.enumerateDevices();
     const chosen = {};
     for (const [key, kind, hint] of [["input", "audioinput", konfigurasi.input], ["output", "audiooutput", konfigurasi.output]]) {
-      chosen[key] = pickDevice(all, kind, hint);
+      chosen[key] = pickDevice(all, kind, hint) || (!hint && konfigurasi.audio === "speaker" ? pickBuiltIn(all, kind) : null);
       if (hint && !chosen[key]) throw new Error(`Perangkat audio "${hint}" tidak ditemukan`);
     }
     $("audio").textContent = `mode ${konfigurasi.audio} · masuk: ${chosen.input?.label || "bawaan"} · keluar: ${chosen.output?.label || "bawaan"}`;
@@ -78,6 +78,12 @@
           inputDeviceId: devices.input?.deviceId,
           outputDeviceId: devices.output?.deviceId,
           lineConstraints: PROCESSING[konfigurasi.audio],
+          // Speaker mode: the microphone hears the AI's own voice, so Gemini gets silence while the AI talks.
+          halfDuplex: konfigurasi.audio !== "kabel",
+          onEvent: (text) => {
+            console.log("[agen]", text);
+            $("transkrip").textContent += `· ${jam()} ${text}\n`;
+          },
           onTranscript: (turn, all) => {
             $("transkrip").textContent += `[${turn.detik}] ${turn.pembicara}: ${turn.teks}\n`;
             options.onTranscript(turn, all);

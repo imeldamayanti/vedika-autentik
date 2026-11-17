@@ -97,3 +97,30 @@ class GeminiTransport:
 
         raise AssertionError("Gemini retry loop exhausted without a result")
 
+
+class FallbackTransport:
+    """Try the main text model, then the next one when Gemini answers busy (429) or failing (5xx).
+
+    Demand spikes hit one model at a time ("This model is currently experiencing high demand"), and these
+    answers come back in under a second, so switching costs little. A timeout is not switched: the caller's
+    own time budget is already spent; the backend retries the whole read later.
+    """
+
+    def __init__(self, transports: list):
+        if not transports:
+            raise ValueError("at least one transport is required")
+        self.transports = transports
+        self.model = transports[0].model
+
+    def generate_json(self, prompt: str, schema: dict) -> str:
+        last: GeminiError | None = None
+        for transport in self.transports:
+            try:
+                return transport.generate_json(prompt, schema)
+            except GeminiError as error:
+                busy = error.status_code is not None and (error.status_code == 429 or error.status_code >= 500)
+                if not busy:
+                    raise
+                last = error
+        assert last is not None
+        raise last

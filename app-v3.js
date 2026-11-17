@@ -208,11 +208,20 @@
 
   /* ---------- waktu server, hitung mundur, pemulihan ---------- */
 
-  const kiniServer = () => (M.waktuServer ? Date.parse(M.waktuServer) : Date.now());
+  /* Jam server berjalan terus di antara putaran: selisih jam server dan jam peramban dicatat saat data tiba. */
+  const kiniServer = () => (M.waktuServer ? Date.now() + (M.selisihJam || 0) : Date.now());
   const sisaDetik = (iso) => Math.ceil((Date.parse(iso) - kiniServer()) / 1000);
   const mmssSisa = (d) => (d <= 0 ? "segera" : Math.floor(d / 60) + ":" + String(d % 60).padStart(2, "0"));
   const hitung = (iso) => '<span class="hitung" data-hitung="' + iso + '">' + mmssSisa(sisaDetik(iso)) + "</span>";
-  const perbaruiHitung = () => document.querySelectorAll("[data-hitung]").forEach((el) => { el.textContent = mmssSisa(sisaDetik(el.dataset.hitung)); });
+  const perbaruiHitung = () => {
+    document.querySelectorAll("[data-hitung]").forEach((el) => { el.textContent = mmssSisa(sisaDetik(el.dataset.hitung)); });
+    /* Durasi panggilan yang sedang ditonton ikut berdetak walau tidak ada data baru dari API. */
+    const r = rute(), d = M.hidup && r.nama === "panggilan" && r.id ? M.detail[r.id] : null;
+    if (!d) return;
+    const dt = detikLive(d);
+    document.querySelectorAll("#durasiLive").forEach((el) => { el.textContent = mmss(dt); });
+    document.querySelectorAll(".durasi-ponsel").forEach((el) => { el.textContent = sisaTeks(d, dt); });
+  };
   const menungguCoba = (b) => b.status === "antre" && !!b.cobaLagi && sisaDetik(b.cobaLagi) > 0;
 
   const stasiun = () => (M.hidup ? M.antrean.pengaturan.stasiun : null);
@@ -618,6 +627,15 @@
   const URUT_STATUS = ["antre", "wa_terkirim", "menelepon", "tersambung", "merekam", "membaca_jawaban", "selesai"];
   const idxStatus = (st) => (st === "tidak_terhubung" ? 6 : URUT_STATUS.indexOf(st));
   const detikTerakhir = (p) => (p.transkrip.length ? p.transkrip[p.transkrip.length - 1][1] : 0);
+  /* Durasi panggilan yang sedang berjalan: detik sejak log "tersambung" menurut jam server, supaya berdetak tiap
+     putaran walau baris transkrip belum datang. Baris transkrip yang lebih maju tetap dipakai. */
+  const detikLive = (p) => {
+    const akhir = detikTerakhir(p);
+    if (["tersambung", "merekam"].indexOf(p.status) < 0) return akhir;
+    const l = (p.log || []).filter((x) => x.status === "tersambung").pop();
+    const mulai = l ? Date.parse(l.waktu) : NaN;
+    return isNaN(mulai) ? akhir : Math.max(akhir, Math.floor((kiniServer() - mulai) / 1000));
+  };
 
   /* Tahap progres dari status dan log panggilan. Percobaan yang tidak diangkat mengganti tahap tersambung/merekam
      dengan Percobaan 1, Percobaan 2, dan Chat cadangan. */
@@ -646,7 +664,7 @@
       wa,
       { nama: "Panggilan tersambung", state: i >= 3 ? "selesai" : i === 2 ? "jalan" : "menunggu", jam: jamLog(p, "tersambung"), ket: i === 1 ? "Menunggu jeda pesan" : i === 2 ? "Memanggil…" : "" },
       { nama: "Merekam", state: i >= 5 ? "selesai" : i >= 3 ? "jalan" : "menunggu", jam: jamLog(p, "tersambung"),
-        ket: i >= 3 && i < 5 ? '<span id="durasiLive">' + mmss(detikTerakhir(p)) + "</span> direkam" : i >= 5 && p.durasi != null ? "Durasi " + mmss(p.durasi) : "" },
+        ket: i >= 3 && i < 5 ? '<span id="durasiLive">' + mmss(detikLive(p)) + "</span> direkam" : i >= 5 && p.durasi != null ? "Durasi " + mmss(p.durasi) : "" },
       { nama: "Membaca jawaban", state: i === 5 ? "jalan" : i >= 6 ? "selesai" : "menunggu", jam: jamLog(p, "membaca_jawaban"), ket: i === 5 ? "Mengubah percakapan menjadi isian" : "" },
       { nama: "Kartu bukti", state: i >= 6 ? "selesai" : "menunggu", jam: jamLog(p, "selesai"), ket: "" }
     ];
@@ -795,7 +813,7 @@
     const tak = p.label === "tidak_terhubung";
     const k = kartu ? { mode: tak ? "tak" : "akhir", teks: tak ? "Tidak diangkat" : "Panggilan berakhir" } : keadaanPonsel(p, t);
     const nomor = namaPemanggil(p);
-    const detik = kartu ? 0 : Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
+    const detik = kartu ? 0 : Math.max(0, M.hidup ? detikLive(p) : detikRekam(p, t));
     const baris = k.mode === "aktif" ? '<span class="durasi-ponsel">' + sisaTeks(p, detik) + "</span>"
       : k.mode === "akhir" && p.durasi != null ? "Durasi " + mmss(p.durasi) : "";
     const gel = '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
@@ -1622,6 +1640,7 @@
     let berubah = false;
     const ubah = (kunci, nilai) => { const sig = kunci === "antrean" ? sigAntrean(nilai) : JSON.stringify(nilai); if (M.sig[kunci] === sig) return false; M.sig[kunci] = sig; berubah = true; return true; };
     M.waktuServer = baru.antrean.pengaturan.waktu_server;
+    if (M.waktuServer && !isNaN(Date.parse(M.waktuServer))) M.selisihJam = Date.parse(M.waktuServer) - Date.now();
     selaraskanPengServer(baru.antrean.pengaturan);
     if (ubah("antrean", baru.antrean)) { M.antrean = baru.antrean; M.baris = baru.antrean.baris.map(A3.keBaris); catatTransisi(); }
     if (baru.detail && ubah("d:" + baru.detail.id, baru.detail)) { M.detail[baru.detail.id] = A3.kePasien(baru.detail); }
@@ -1891,7 +1910,7 @@
     if (A3 && await A3.sehat()) {
       M.hidup = true;
       await segarkan();
-      if (M.antrean) M.timer = setInterval(segarkan, 1000); else M.hidup = false;
+      if (M.antrean) { M.timer = setInterval(segarkan, 1000); M.detak = M.detak || setInterval(() => { if (M.hidup) perbaruiHitung(); }, 500); } else M.hidup = false;
     }
     gambar(false);
   }
