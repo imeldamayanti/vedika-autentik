@@ -27,9 +27,10 @@
 
 .label--tidak_sesuai { background: var(--prioritas-bg); color: var(--prioritas-fg); }
 .label--sesuai { background: var(--lolos-bg); color: var(--lolos-fg); }
-.label--tidak_yakin { background: var(--cek-bg); color: var(--cek-fg); }
-.label--tidak_terhubung { background: var(--ulang-bg); color: var(--ulang-fg); }
-.label--menolak { background: var(--muted); color: var(--fg-2); border: 1px solid var(--border-strong); }
+/* Tidak ada jawaban (tidak yakin, tidak terhubung, menolak): satu warna netral, alasannya kecil di dalam chip. */
+.label--tanpa_jawaban { background: var(--muted); color: var(--fg-2); border: 1px solid var(--border-strong); }
+.label-alasan { margin-left: 6px; font-size: .85em; font-weight: 500; opacity: .8; }
+.label-alasan::before { content: "· "; }
 .label--belum { background: var(--muted); color: var(--fg-2); border: 1px dashed var(--border-strong); }
 .sel-status { white-space: nowrap; }
 .sel-status .progres-rs { display: block; margin-top: 4px; font-size: 13px; color: var(--fg-2); }

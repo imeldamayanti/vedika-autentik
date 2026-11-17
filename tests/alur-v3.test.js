@@ -135,6 +135,19 @@ async function tanpaGeserSamping(page, nama) {
   }
   await page.goto(TARGET + "#/autentik");
   cek(await page.isVisible("#stripStatus"), "strip status tetap tampil di 390 px");
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  console.log("\nTiga label: Sesuai, Tidak sesuai, Tidak ada jawaban");
+  await page.goto(TARGET + "#/autentik");
+  await page.waitForSelector('[data-aksi="telepon"][data-id="S8"]');
+  await page.click('[data-aksi="telepon"][data-id="S8"]');
+  await page.goto(TARGET + "#/panggilan/S8");
+  await page.waitForSelector("#panggilan");
+  await page.keyboard.press("Alt+KeyL");
+  await page.waitForURL(/#\/kartu\/S8/, { timeout: 10000 });
+  const labelS8 = (await page.textContent(".judul-label .label")).replace(/\s+/g, " ").trim();
+  cek(labelS8 === "Tidak ada jawabanmenolak menjawab", "S8 (Menolak) tampil sebagai Tidak ada jawaban dengan alasan kecil", labelS8);
+  cek((await page.$$(".label--tanpa_jawaban")).length === 1 && (await page.$$(".label--menolak")).length === 0, "label tanpa jawaban memakai satu gaya netral");
 
   cek(galat.length === 0, "tidak ada galat JavaScript", galat.slice(0, 3).join(" | "));
   await browser.close();

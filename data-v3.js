@@ -25,12 +25,14 @@
 
   /* ---------- label hasil panggilan (PRD F4) ---------- */
 
+  /* Lima label dari aturan.py (API dan backend tetap memakai kelimanya). Di layar hanya tiga: Tidak yakin, Tidak terhubung,
+     dan Menolak tampil sebagai "Tidak ada jawaban" dengan alasan kecil, karena tindakannya sama dan ketiganya tidak dihitung. */
   const LABEL = {
     tidak_sesuai: { nama: "Tidak sesuai" },
     sesuai: { nama: "Sesuai" },
-    tidak_yakin: { nama: "Tidak yakin" },
-    tidak_terhubung: { nama: "Tidak terhubung" },
-    menolak: { nama: "Menolak" }
+    tidak_yakin: { nama: "Tidak ada jawaban", alasan: "tidak yakin jumlahnya" },
+    tidak_terhubung: { nama: "Tidak ada jawaban", alasan: "tidak diangkat" },
+    menolak: { nama: "Tidak ada jawaban", alasan: "menolak menjawab" }
   };
 
   /* Tindakan verifikator (PRD R5.3). "Pantau" hanya muncul sebagai saran, bukan pilihan lain. */
