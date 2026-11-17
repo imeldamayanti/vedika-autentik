@@ -1,0 +1,122 @@
+[
+  {
+    "id": "E01-lupa-lalu-ingat",
+    "tags": ["peserta", "lupa", "ingat"],
+    "sesi_ditagih": 9,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Bapak datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Waduh, lupa saya, Mbak."},
+      {"detik": 6, "pembicara": "ai", "teks": "Tidak apa-apa, Pak. Kira-kira lebih dari lima kali atau kurang?"},
+      {"detik": 10, "pembicara": "penerima", "teks": "Oh iya, sekarang saya ingat. Lima kali, tiap Selasa."},
+      {"detik": 14, "pembicara": "ai", "teks": "Jadi sekitar lima kali, ya?"},
+      {"detik": 16, "pembicara": "penerima", "teks": "Iya, lima kali."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 5, "jumlah_maks": 5, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Tidak sesuai"
+    }
+  },
+  {
+    "id": "E02-koreksi-angka",
+    "tags": ["peserta", "koreksi"],
+    "sesi_ditagih": 10,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Ibu datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Delapan kali. Eh, bukan, maaf. Delapan itu bulan Juli. Agustus cuma empat kali."},
+      {"detik": 9, "pembicara": "ai", "teks": "Baik, jadi empat kali, ya?"},
+      {"detik": 11, "pembicara": "penerima", "teks": "Iya, empat."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 4, "jumlah_maks": 4, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Tidak sesuai"
+    }
+  },
+  {
+    "id": "E03-rentang-dikonfirmasi",
+    "tags": ["peserta", "rentang"],
+    "sesi_ditagih": 6,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Bapak datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Seminggu sekali atau dua kali, ya."},
+      {"detik": 6, "pembicara": "ai", "teks": "Kalau dijumlah, kira-kira berapa kali dalam sebulan?"},
+      {"detik": 9, "pembicara": "penerima", "teks": "Ya antara lima sampai enam kali."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 5, "jumlah_maks": 6, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Sesuai"
+    }
+  },
+  {
+    "id": "E04-tanya-angka-tagihan",
+    "tags": ["peserta", "tanya-tagihan"],
+    "sesi_ditagih": 6,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Ibu datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Memangnya rumah sakit nagihnya berapa kali?"},
+      {"detik": 6, "pembicara": "ai", "teks": "Saya hanya mencatat versi Ibu. Kira-kira berapa kali Ibu datang bulan Agustus?"},
+      {"detik": 10, "pembicara": "penerima", "teks": "Enam kali."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 6, "jumlah_maks": 6, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Sesuai"
+    }
+  },
+  {
+    "id": "E05-keluarga-tidak-tahu",
+    "tags": ["keluarga", "tidak-tahu"],
+    "sesi_ditagih": 8,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Ibu Sri datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Saya anaknya. Ibu memang terapi di sana, tapi saya nggak tahu berapa kali. Yang antar biasanya Bapak."},
+      {"detik": 9, "pembicara": "ai", "teks": "Apakah ada orang lain di rumah yang menemani terapi?"},
+      {"detik": 12, "pembicara": "penerima", "teks": "Bapak lagi kerja, nggak ada di rumah."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "keluarga", "hubungan": "anak", "hadir": true, "jumlah_min": null, "jumlah_maks": null, "keyakinan": "rendah", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Tidak yakin"
+    }
+  },
+  {
+    "id": "E06-diam-lalu-menjawab",
+    "tags": ["peserta", "diam"],
+    "sesi_ditagih": 3,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Bapak datang fisioterapi bulan Agustus?"},
+      {"detik": 12, "pembicara": "ai", "teks": "Bapak masih tersambung? Tadi saya tanya, kira-kira berapa kali terapinya?"},
+      {"detik": 16, "pembicara": "penerima", "teks": "Oh iya, maaf, tadi sinyalnya jelek. Tiga kali."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 3, "jumlah_maks": 3, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Sesuai"
+    }
+  },
+  {
+    "id": "E07-tanya-robot",
+    "tags": ["peserta", "robot"],
+    "sesi_ditagih": 7,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Kira-kira berapa kali Ibu datang fisioterapi bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Ini robot ya?"},
+      {"detik": 5, "pembicara": "ai", "teks": "Iya, Bu, saya asisten otomatis BPJS Kesehatan. Kira-kira berapa kali Ibu datang?"},
+      {"detik": 9, "pembicara": "penerima", "teks": "Oh oke. Tujuh kali."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "terjawab", "penerima": "peserta", "hubungan": null, "hadir": true, "jumlah_min": 7, "jumlah_maks": 7, "keyakinan": "tinggi", "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Sesuai"
+    }
+  },
+  {
+    "id": "E08-sibuk-minta-nanti",
+    "tags": ["peserta", "sibuk"],
+    "sesi_ditagih": 9,
+    "transkrip": [
+      {"detik": 0, "pembicara": "ai", "teks": "Apakah Bapak menjalani fisioterapi di RS Melati Sehat bulan Agustus?"},
+      {"detik": 3, "pembicara": "penerima", "teks": "Aduh, saya lagi nyetir. Nanti saja ya."},
+      {"detik": 5, "pembicara": "ai", "teks": "Baik, Pak, nanti kami hubungi lagi. Terima kasih atas waktunya."}
+    ],
+    "expected": {
+      "hasil": {"status_panggilan": "menolak", "penerima": "peserta", "hubungan": null, "hadir": null, "jumlah_min": null, "jumlah_maks": null, "keyakinan": null, "tanda_bahaya": [], "membantah_tanggal_libur": null},
+      "label": "Menolak"
+    }
+  }
+]

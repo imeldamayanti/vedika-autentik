@@ -144,4 +144,9 @@ def test_prompt_contains_context_roles_and_every_required_output_field():
     assert "2026-08-16" in prompt
     assert "Andi Pratama" in prompt
     assert "11" not in prompt
+    assert "pakai jawaban terakhir" in prompt
+    assert "ujung rentangnya" in prompt
+    assert "null, bukan 0" in prompt
+    assert "layanan_berbeda dipakai bila penerima datang" in prompt
+    assert "hadir false bila penerima tidak menjalani fisioterapi" in prompt
     assert set(schema["properties"]) == set(VALID)

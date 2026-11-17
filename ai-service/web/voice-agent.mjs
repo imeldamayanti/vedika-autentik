@@ -19,8 +19,9 @@ export const SILENCE_HANGUP_MS = 10000;
 // often missed, so the AI asks once more before the call is ended.
 export const REPLY_NUDGE = "Penerima sudah selesai menjawab. Tanggapi jawabannya dengan singkat, lalu lanjutkan "
   + "ke langkah berikutnya. Jangan mengulang pertanyaan yang sudah dijawab.";
-export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Ulangi pertanyaan terakhir dengan singkat, "
-  + "tanpa sapaan dan tanpa kata halo. Jangan menganggap penerima sudah menjawab atau membenarkan.";
+export const SILENCE_NUDGE = "Penerima belum terdengar menjawab. Tanyakan sekali dengan lembut apakah penerima "
+  + "masih tersambung, lalu ulangi pertanyaan terakhir dengan singkat, tanpa kata halo. "
+  + "Jangan menganggap penerima sudah menjawab atau membenarkan.";
 // After the network reports the call as answered, how long the recipient may stay silent before
 // the AI opens the conversation itself.
 export const PICKUP_SILENCE_MS = 3000;
