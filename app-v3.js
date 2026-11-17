@@ -1683,8 +1683,36 @@
     clearInterval(M.timer);
     M.hidup = false;
     suaraHenti(); tutupWa();
-    toast("API tidak terjangkau. Memakai data contoh.");
+    toast("API tidak terjangkau. Memakai data contoh sampai API kembali.");
     gambar(true);
+    cobaSambungLagi();
+  }
+
+  /* Sambung ke API: dipakai saat dimuat dan saat API kembali setelah terputus. */
+  async function hidupkanApi() {
+    M.hidup = true; M.gagal = 0; M.sig = {};
+    await segarkan();
+    if (!M.antrean) { M.hidup = false; return false; }
+    clearInterval(M.timer);
+    M.timer = setInterval(segarkan, 1000);
+    M.detak = M.detak || setInterval(() => { if (M.hidup) perbaruiHitung(); }, 500);
+    return true;
+  }
+
+  /* API mati saat halaman dimuat atau terputus sebentar (mis. backend dimulai ulang): jangan terjebak di data
+     contoh. Cek tiap 3 detik dan kembali ke data langsung begitu API sehat, kecuali simulasi panggilan sedang diputar. */
+  function cobaSambungLagi() {
+    if (!A3 || M.hidup || M.cobaSambung) return;
+    M.cobaSambung = setInterval(async () => {
+      if (M.hidup) { clearInterval(M.cobaSambung); M.cobaSambung = null; return; }
+      if (ui.aktif || M.mencoba) return;
+      M.mencoba = true;
+      try {
+        if (!(await A3.sehat())) return;
+        clearInterval(M.cobaSambung); M.cobaSambung = null;
+        if (await hidupkanApi()) { toast("API tersambung lagi. Memakai data langsung."); gambar(true); } else cobaSambungLagi();
+      } finally { M.mencoba = false; }
+    }, 3000);
   }
 
   const galatToast = (awal) => (e) => toast(awal + ": " + (e && e.message ? e.message : "tidak diketahui") + ". Periksa koneksi ke API, lalu coba lagi.");
@@ -1907,12 +1935,9 @@
 
   /* Mulai: pakai API bila sehat dan antreannya bisa dibaca, selain itu simulasi dari data-v3.js. */
   async function mulaiApp() {
-    if (A3 && await A3.sehat()) {
-      M.hidup = true;
-      await segarkan();
-      if (M.antrean) { M.timer = setInterval(segarkan, 1000); M.detak = M.detak || setInterval(() => { if (M.hidup) perbaruiHitung(); }, 500); } else M.hidup = false;
-    }
+    if (A3 && await A3.sehat()) await hidupkanApi();
     gambar(false);
+    if (!M.hidup) cobaSambungLagi();
   }
   mulaiApp();
 })();

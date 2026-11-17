@@ -61,7 +61,7 @@ Contract B; ia tidak dijalankan oleh halaman statis demo.
 Tidak ada build step. Cukup layani foldernya:
 
 ```bash
-python3 -m http.server 8899
+python3 tools/web.py 8899
 ```
 
 Lalu buka <http://localhost:8899>.

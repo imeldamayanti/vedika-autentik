@@ -31,7 +31,7 @@ trap 'trap - EXIT; kill 0' INT TERM EXIT
 
 (cd "$ROOT/ai-service" && uv run --env-file .env env LOG_FORMAT=text uvicorn vedika_ai.main:app --port "$AI_PORT" 2>&1 | sed -u 's/^/[ai-service] /') &
 (cd "$ROOT/backend" && .venv/bin/uvicorn app.main:app --port "$API_PORT" 2>&1 | sed -u 's/^/[backend] /') &
-(cd "$ROOT" && python3 -m http.server "$WEB_PORT" --bind 127.0.0.1 2>&1 | sed -u 's/^/[web] /') &
+(cd "$ROOT" && python3 tools/web.py "$WEB_PORT" 2>&1 | sed -u 's/^/[web] /') &
 
 curl -s --retry 30 --retry-delay 1 --retry-connrefused -o /dev/null "http://localhost:$AI_PORT/v1/kesehatan"
 curl -s --retry 30 --retry-delay 1 --retry-connrefused -o /dev/null "http://localhost:$API_PORT/api/v1/kesehatan"
