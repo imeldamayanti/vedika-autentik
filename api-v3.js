@@ -53,7 +53,7 @@
     } catch (e) { return null; }
   }
 
-  const antrean = () => panggil("GET", "/antrean");
+  const antrean = (bulan) => panggil("GET", "/antrean" + (bulan ? "?bulan=" + encodeURIComponent(bulan) : ""));
   const panggilan = (id) => panggil("GET", "/panggilan/" + encodeURIComponent(id));
   const ringkasanRs = () => panggil("GET", "/ringkasan-rs");
   const keputusan = () => panggil("GET", "/keputusan");
