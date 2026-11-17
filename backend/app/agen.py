@@ -73,7 +73,7 @@ def susun_tugas(conn, p: dict, pengaturan: dict, pesan: dict | None = None) -> d
             "sapaan_penerima": sapaan_pasien if p["penerima"] == "peserta" else "Bapak/Ibu",
             "hubungan": at.hubungan_penerima(p), "nama_pasien": p["pasien"], "sapaan_pasien": sapaan_pasien,
             "nama_rs": p["nama_rs"], "bulan": at.nama_bulan(p["bulan_layanan"]),
-            "tanggal_libur": tanggal_libur_skrip(conn, p),
+            "tanggal_libur": tanggal_libur_skrip(conn, p), "sesi_ditagih": p["sesi_ditagih"],
         },
         "wa": {"lewati": True, "dikirim_server": True, "status": pesan["status"], "teks": pesan["teks"]},
         "jeda_wa_menit": pengaturan["jeda_wa_menit"], "batas_detik": config.BATAS_PANGGILAN_DETIK,

@@ -41,6 +41,10 @@ describe("parity with the Python reference (scripts/export_worker_fixtures.py)",
   test.each(parity.answers.map((a, i) => [i, a]))("answer validation %i", (_i, { answer, valid }) => {
     expect(isValidAnswer(answer)).toBe(valid);
   });
+  test.each([0, 100, 2.5, "8"])("rejects billed count %p in the call script context", (billed) => {
+    const [{ context }] = parity.instructions;
+    expect(() => parseVoiceContext({ ...context, sesi_ditagih: billed })).toThrow();
+  });
 });
 
 describe("GET /v1/kesehatan", () => {

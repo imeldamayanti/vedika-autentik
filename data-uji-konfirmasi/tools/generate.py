@@ -247,24 +247,26 @@ for sid, nama, umur, jk, rs, kel, hub, dx, tagih, benar, sebelum in SK:
     skenario.append(entry)
 
 # ---------- keadaan demo (demo_2026-08.json, dipakai POST /demo/reset) ----------
-# Dua pasien demo yang ditelepon langsung saat presentasi, berurutan D1 lalu D2. Polanya sama dengan S1
-# (I1, I2, I4) supaya skor anomalinya sama dan urutan ditentukan id. Tanggal tetap, tanpa rng, dan tidak masuk
-# peserta.csv/klaim_sesi.csv, jadi data uji lain tidak berubah. no_hp berisi placeholder; nomor asli hanya diisi
-# langsung di database, tidak pernah di repo. Pasien terpilih lain sudah punya hasil, jadi hanya D1 dan D2 yang antre.
-DEMO = [  # id, nama, umur, jk, rs, dx, tanggal Agustus
-    ("D1", "Imelda", 46, "P", "RS01", DX[0],
-     ["2026-08-03", "2026-08-04", "2026-08-06", "2026-08-10", "2026-08-11", "2026-08-13", "2026-08-16", "2026-08-17",
-      "2026-08-20", "2026-08-24", "2026-08-27"]),
-    ("D2", "Zahra", 44, "P", "RS01", DX[1],
+# Dua pasien demo yang ditelepon langsung saat presentasi, berurutan D1 lalu D2. Tanggal tetap, tanpa rng, dan
+# tidak masuk peserta.csv/klaim_sesi.csv, jadi data uji lain tidak berubah. Nomor berisi placeholder; nomor asli
+# hanya diisi langsung di database, tidak pernah di repo. Pasien terpilih lain sudah punya hasil, jadi hanya D1 dan
+# D2 yang antre.
+# D1: Hartono (72) diwakili anaknya Imelda. 8 sesi ditagih dan memang 8 (RS benar); dipilih karena I2 dan I4.
+# D2: Zahra sendiri. 11 sesi ditagih (I1, I2, I4), sebenarnya 4 (RS salah).
+DEMO = [  # id, nama, umur, jk, keluarga, hubungan, rs, dx, tanggal Agustus
+    ("D1", "Hartono", 72, "L", "Imelda", "anak", "RS01", DX[1],
+     ["2026-08-03", "2026-08-05", "2026-08-07", "2026-08-11", "2026-08-17", "2026-08-19", "2026-08-24", "2026-08-27"]),
+    ("D2", "Zahra", 44, "P", None, None, "RS01", DX[0],
      ["2026-08-04", "2026-08-05", "2026-08-07", "2026-08-11", "2026-08-12", "2026-08-14", "2026-08-16", "2026-08-17",
       "2026-08-21", "2026-08-25", "2026-08-28"]),
 ]
 demo_peserta, demo_klaim = [], []
-for did, nama, umur, jk, rs, dx, tgl in DEMO:
+for did, nama, umur, jk, kel, hub, rs, dx, tgl in DEMO:
     pid = f"P-{did}"
     demo_peserta.append({"id_peserta": pid, "nama": nama, "tanggal_lahir": "", "umur": umur, "jenis_kelamin": jk,
-                         "no_hp": f"0800-0000-9{did[1]:0>3}", "kontak_keluarga": "", "hubungan_keluarga": "",
-                         "no_hp_keluarga": "", "hubungi_keluarga": "tidak", "catatan": f"pasien demo {did}"})
+                         "no_hp": f"0800-0000-9{did[1]:0>3}", "kontak_keluarga": kel or "", "hubungan_keluarga": hub or "",
+                         "no_hp_keluarga": f"0800-1000-9{did[1]:0>3}" if kel else "",
+                         "hubungi_keluarga": "ya" if kel else "tidak", "catatan": f"pasien demo {did}"})
     for t in tgl:
         demo_klaim.append({"id_klaim": f"SEP-DEMO-{len(demo_klaim)+1:06d}", "id_peserta": pid, "id_rs": rs, "tanggal": t,
                            "kode_cbg": dx[2], "kode_icd10": dx[0], "diagnosis": dx[1], "tarif": dx[3],

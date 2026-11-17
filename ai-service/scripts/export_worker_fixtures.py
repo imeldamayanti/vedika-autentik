@@ -69,12 +69,12 @@ CONTEXTS = [
     {
         "nama_penerima": "Andi Pratama", "sapaan_penerima": "Bapak", "hubungan": "peserta",
         "nama_pasien": "Andi Pratama", "sapaan_pasien": "Bapak", "nama_rs": "RS Melati Sehat",
-        "bulan": "Agustus", "tanggal_libur": ["16 Agustus", "17 Agustus"],
+        "bulan": "Agustus", "tanggal_libur": ["16 Agustus", "17 Agustus"], "sesi_ditagih": 11,
     },
     {
         "nama_penerima": "Dewi Rahmawati", "sapaan_penerima": "Bapak/Ibu", "hubungan": "anak",
         "nama_pasien": "Siti Rahmawati", "sapaan_pasien": "Ibu", "nama_rs": "RS Melati Sehat",
-        "bulan": "Agustus", "tanggal_libur": ["23 Agustus"],
+        "bulan": "Agustus", "tanggal_libur": ["23 Agustus"], "sesi_ditagih": 2,
     },
     {
         "nama_penerima": "Slamet Riyadi", "sapaan_penerima": "Bapak", "hubungan": "peserta",

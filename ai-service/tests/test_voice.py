@@ -2,6 +2,9 @@ import io
 import json
 from datetime import UTC, datetime
 
+import pytest
+from pydantic import ValidationError
+
 from vedika_ai.voice import GeminiTokenIssuer, VoiceContext, build_voice_instruction
 
 
@@ -225,3 +228,30 @@ def test_token_locks_the_call_instruction_and_voice_into_the_session_setup():
             "languageCode": "id-ID",
         },
     }
+
+
+def test_voice_instruction_rechecks_far_counts_neutrally_without_saying_the_bill():
+    instruction = build_voice_instruction(context(sesi_ditagih=8))
+
+    assert "Rentang cek rahasia: 6 sampai 10 kali" in instruction
+    assert "D2. Cek ulang: jika jumlah dari penerima di luar 6 sampai 10 kali, sebelum\nlangkah E" in instruction
+    assert "Jangan pernah\nmengucapkan rentang itu, angka tagihan, atau kata lebih atau kurang" in instruction
+    assert "Apakah [jumlah dari penerima] kali itu\nsudah pas, atau mau diingat-ingat sebentar?" in instruction
+    assert "Jangan bertanya ulang lagi" in instruction
+
+
+def test_voice_instruction_skips_the_recheck_without_a_billed_count():
+    instruction = build_voice_instruction(context())
+
+    assert "Rentang cek" not in instruction
+    assert "D2." not in instruction
+    assert instruction.endswith("Konfirmasi ulang di nomor 8 sampai 10 tidak dihitung sebagai pertanyaan inti baru.")
+
+
+def test_voice_recheck_range_never_goes_below_one():
+    assert "Rentang cek rahasia: 1 sampai 4 kali" in build_voice_instruction(context(sesi_ditagih=2))
+
+
+def test_voice_context_rejects_an_invalid_billed_count():
+    with pytest.raises(ValidationError):
+        context(sesi_ditagih=0)

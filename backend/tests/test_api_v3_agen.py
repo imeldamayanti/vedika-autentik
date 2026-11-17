@@ -128,7 +128,7 @@ def test_ambil_tugas_s1_bentuk_kontrak(klien_agen, conn_v3, monkeypatch):
         "id": S1, "percobaan": 1, "no_tujuan": "081234567890",
         "skrip": {"nama_penerima": "Andi Pratama", "sapaan_penerima": "Bapak", "hubungan": "peserta",
                   "nama_pasien": "Andi Pratama", "sapaan_pasien": "Bapak", "nama_rs": "RS Melati Sehat", "bulan": "Agustus",
-                  "tanggal_libur": ["16 Agustus", "17 Agustus"]},
+                  "tanggal_libur": ["16 Agustus", "17 Agustus"], "sesi_ditagih": 11},
         "wa": {"lewati": True, "dikirim_server": True, "status": "simulasi", "teks": teks},
         "jeda_wa_menit": 1, "batas_detik": 150,
     }
@@ -146,7 +146,7 @@ def test_ambil_tugas_keluarga_dan_tanpa_libur(klien_agen, conn_v3, monkeypatch):
     t = klien_agen.post(f"{BASE}/agen/ambil").json()
     assert t["skrip"] == {"nama_penerima": "Dewi Rahmawati", "sapaan_penerima": "Bapak/Ibu", "hubungan": "anak",
                           "nama_pasien": "Siti Rahmawati", "sapaan_pasien": "Ibu", "nama_rs": "RS Melati Sehat",
-                          "bulan": "Agustus", "tanggal_libur": ["23 Agustus"]}
+                          "bulan": "Agustus", "tanggal_libur": ["23 Agustus"], "sesi_ditagih": 10}
     ubah(conn_v3, t["id"], status="selesai", label="Sesuai")
     klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")
     t3 = klien_agen.post(f"{BASE}/agen/ambil").json()
@@ -458,16 +458,18 @@ def test_reset_demo_menunggu_mode_otomatis_lalu_menelepon_d1_kemudian_d2(klien_a
     jam_palsu(monkeypatch)
     klien_agen.post(f"{BASE}/demo/reset")
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # belum dinyalakan
-    conn_v3.execute("update peserta set no_hp = '+62 811-1111-1111' where id_peserta = 'P-D1'")
+    conn_v3.execute("update peserta set no_hp_keluarga = '+62 811-1111-1111' where id_peserta = 'P-D1'")
     nyalakan(klien_agen)
     t = klien_agen.post(f"{BASE}/agen/ambil").json()
-    assert (t["id"], t["skrip"]["nama_pasien"], t["no_tujuan"]) == ("CALL-P-D1-2026-08", "Imelda", "+6281111111111")
+    assert (t["id"], t["no_tujuan"]) == ("CALL-P-D1-2026-08", "+6281111111111")
+    s = t["skrip"]
+    assert (s["nama_pasien"], s["nama_penerima"], s["hubungan"], s["sesi_ditagih"]) == ("Hartono", "Imelda", "anak", 8)
     lapor(klien_agen, t["id"], "menelepon")
     lapor(klien_agen, t["id"], "tersambung")
     klien_agen.post(f"{BASE}/panggilan/{t['id']}/batal")
     conn_v3.execute("update panggilan set status = 'selesai', label = 'Sesuai' where id = %s", (t["id"],))
     t = klien_agen.post(f"{BASE}/agen/ambil").json()
-    assert (t["id"], t["skrip"]["nama_pasien"]) == ("CALL-P-D2-2026-08", "Zahra")
+    assert (t["id"], t["skrip"]["nama_pasien"], t["skrip"]["sesi_ditagih"]) == ("CALL-P-D2-2026-08", "Zahra", 11)
     assert t["no_tujuan"] == "081234567890"  # nomor Zahra belum diisi: placeholder, jadi nomor penguji
     conn_v3.execute("update panggilan set status = 'selesai', label = 'Sesuai' where id = %s", (t["id"],))
     assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # tidak ada lagi yang antre
