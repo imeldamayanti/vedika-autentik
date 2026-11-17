@@ -245,14 +245,20 @@ def isi_ke(conn, d, reset=False):
 
 
 def tambah_master_demo(conn, d):
-    """Pasien demo, klaim, dan indikatornya. Baris yang sudah ada tidak ditimpa, jadi nomor HP asli yang diisi
-    langsung di database tetap."""
-    ids = set(d["demo"]["urutan"])
+    """Pasien demo, klaim, dan indikatornya diperbarui dari demo_2026-08.json. no_hp dan no_hp_keluarga yang sudah
+    ada tidak ditimpa, jadi nomor HP asli yang diisi langsung di database tetap. Dipanggil setelah panggilan dihapus."""
+    ids = sorted(d["demo"]["urutan"])
     cur = conn.cursor()
     cur.executemany(
-        "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict do nothing",
+        "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict (id_peserta) do update set"
+        " nama = excluded.nama, tanggal_lahir = excluded.tanggal_lahir, umur = excluded.umur,"
+        " jenis_kelamin = excluded.jenis_kelamin, kontak_keluarga = excluded.kontak_keluarga,"
+        " hubungan_keluarga = excluded.hubungan_keluarga, hubungi_keluarga = excluded.hubungi_keluarga,"
+        " catatan = excluded.catatan",
         [baris_peserta(r) for r in d["peserta"] if r["id_peserta"] in ids],
     )
+    conn.execute("delete from indikator_bulanan where id_peserta = any(%s)", (ids,))
+    conn.execute("delete from klaim_sesi where id_peserta = any(%s)", (ids,))
     cur.executemany(SQL_KLAIM, [baris_klaim(r) for r in d["klaim"] if r["id_peserta"] in ids])
     cur.executemany(SQL_INDIKATOR, [baris_indikator(h, d["anomali"][k]) for k, h in d["indikator"].items() if k[0] in ids])
 
@@ -261,11 +267,11 @@ def reset_panggilan(conn, d):
     """Keadaan awal demo: hapus panggilan, log, dan keputusan, isi ulang riwayat Selesai + panggilan Antre, matikan
     Jeda. Tanpa commit. Data biasa: mode otomatis menyala. Data demo: pasien demo ditambahkan bila belum ada, dan mode
     otomatis mati supaya panggilan pertama dimulai saat verifikator menyalakannya. Data master lain tidak disentuh."""
-    if d.get("demo"):
-        tambah_master_demo(conn, d)
     conn.execute("delete from panggilan_log")
     conn.execute("delete from keputusan_panggilan")
     conn.execute("delete from panggilan")
+    if d.get("demo"):
+        tambah_master_demo(conn, d)
     cur = conn.cursor()
     cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
     cur.executemany(SQL_PANGGILAN, d["antre"])

@@ -255,7 +255,7 @@ def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
     }
     assert h["pengaturan"]["mode_otomatis"] is False and h["pengaturan"]["jeda"] is False  # demo: verifikator menyalakan
     antre = [b for b in h["baris"] if b["status"] == "antre"]
-    assert [b["pasien"] for b in antre] == ["Imelda", "Zahra"]
+    assert [(b["pasien"], b["penerima"]["nama"]) for b in antre] == [("Hartono", "Imelda"), ("Zahra", "Zahra")]
     assert all(not b["prioritas"] and b["percobaan"] == 0 for b in antre)
     assert conn_v3.execute("select count(*) as n from panggilan_log").fetchone()["n"] == 0
     assert klien_v3.get("/api/v1/keputusan").json() == []
@@ -268,13 +268,15 @@ def test_reset_demo_tidak_menyentuh_data_master(klien_v3, conn_v3):
     sebelum = [n(t) for t in tabel]
     assert sebelum == [5, 410, 4938, 4, 302]
     klien_v3.post("/api/v1/demo/reset")
-    assert [n(t) for t in tabel] == [5, 412, 4960, 4, 304]  # hanya dua pasien demo yang ditambahkan
-    conn_v3.execute("update peserta set no_hp = '+6281111111111' where id_peserta = 'P-D1'")
+    assert [n(t) for t in tabel] == [5, 412, 4957, 4, 304]  # hanya dua pasien demo yang ditambahkan
+    conn_v3.execute("update peserta set nama = 'Lama', no_hp_keluarga = '+6281111111111' where id_peserta = 'P-D1'")
     conn_v3.execute("update peserta set nama = 'Pasien Lain' where id_peserta = 'P0001'")
+    conn_v3.execute("delete from klaim_sesi where id_klaim = 'SEP-DEMO-000001'")
     klien_v3.post("/api/v1/demo/reset")
-    assert [n(t) for t in tabel] == [5, 412, 4960, 4, 304]
-    nama = lambda pid: conn_v3.execute("select nama, no_hp from peserta where id_peserta = %s", (pid,)).fetchone()
-    assert nama("P-D1")["no_hp"] == "+6281111111111" and nama("P0001")["nama"] == "Pasien Lain"
+    assert [n(t) for t in tabel] == [5, 412, 4957, 4, 304]
+    baris = lambda pid: conn_v3.execute("select nama, no_hp_keluarga from peserta where id_peserta = %s", (pid,)).fetchone()
+    assert baris("P-D1") == {"nama": "Hartono", "no_hp_keluarga": "+6281111111111"}  # data demo diperbarui, nomor tetap
+    assert baris("P0001")["nama"] == "Pasien Lain"
 
 
 def test_reset_demo_mematikan_mode_otomatis_dan_jeda(klien_v3):
