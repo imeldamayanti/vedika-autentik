@@ -77,7 +77,7 @@ Stasiun siap.
   Website petugas : http://localhost:$WEB_PORT
   Halaman agen    : http://localhost:$AI_PORT/voice/?mulai=1 (jendela Chrome tersendiri, jangan ditutup)
   Kesehatan       : $(curl -s "http://localhost:$API_PORT/api/v1/kesehatan")
-Panggilan hanya berjalan 09.00-17.00 WIB. Ctrl-C menghentikan semuanya.
+Panggilan hanya berjalan pada jam panggilan di Pengaturan website. Ctrl-C menghentikan semuanya.
 
 EOF
 open -na "Google Chrome" --args --user-data-dir="$HOME/.vedika-stasiun-chrome" --use-fake-ui-for-media-stream \

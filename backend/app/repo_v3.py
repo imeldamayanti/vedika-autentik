@@ -50,7 +50,7 @@ def satu_baris(conn, id_: str) -> dict | None:
     return conn.execute(
         f"select {KOLOM_BARIS}, p.transkrip, p.tangkapan_sementara, p.alasan, p.rekaman_path, p.hapus_pada,"
         f" p.sumber, p.durasi_detik, p.waktu_wa, p.galat_pembaca, p.chat_cadangan_terkirim, p.no_tujuan,"
-        f" p.jeda_wa_menit, i.alasan_anomali{DARI_BARIS}"
+        f" p.jeda_wa_menit, i.alasan_anomali, s.no_hp as no_hp_peserta, s.no_hp_keluarga{DARI_BARIS}"
         " where p.id = %s",
         (id_,),
     ).fetchone()

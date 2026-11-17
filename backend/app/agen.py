@@ -1,6 +1,7 @@
 """Logika agen suara (Kontrak B1) dan pembacaan hasil (Kontrak B2). Aturan percobaan, jeda, dan label ada di sini,
 bukan di agen: agen hanya menarik tugas dan melapor (docs/api-contract-v3.md)."""
 import logging
+import re
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,6 +20,7 @@ EKSTENSI_AUDIO = {".webm", ".mp3", ".wav", ".ogg", ".m4a"}
 TANGKAPAN = ("penerima", "hubungan", "hadir", "jumlah_min", "jumlah_maks", "keyakinan", "membantah_tanggal_libur", "tanda_bahaya")
 TANDA_BAHAYA = {"tanda_tangan_tanpa_layanan", "diminta_membayar", "layanan_berbeda"}
 PESAN_PEMBACA_GAGAL = "Jawaban belum bisa dibaca otomatis. Tidak dihitung."
+NOMOR_HP = re.compile(r"^\+?\d{8,15}$")
 
 
 def _tidak_ada() -> Galat:
@@ -28,6 +30,13 @@ def _tidak_ada() -> Galat:
 def _nomor_percobaan(p: dict) -> int:
     """Percobaan yang sedang dijalankan: DB menaikkan nilainya saat agen melapor 'menelepon'."""
     return p["percobaan"] + 1 if p["status"] in ("antre", "wa_terkirim") else p["percobaan"]
+
+
+def nomor_tujuan(p: dict) -> str:
+    """Nomor penerima (peserta atau keluarga) bila nomor asli; data sintetis memakai placeholder 0800, jadi
+    panggilannya menuju NOMOR_PENGUJI."""
+    nomor = re.sub(r"[\s-]", "", (p["no_hp_keluarga"] if p["penerima"] == "keluarga" else p["no_hp_peserta"]) or "")
+    return nomor if NOMOR_HP.fullmatch(nomor) and not nomor.startswith("0800") else config.nomor_penguji()
 
 
 # ---- POST /agen/ambil ----
@@ -43,7 +52,7 @@ def kirim_pemberitahuan(conn, p: dict, pengaturan: dict, sekarang) -> dict:
         nama_penerima=p["nama_penerima"], nama_pasien=p["pasien"], nama_rs=p["nama_rs"], bulan=p["bulan_layanan"],
         jeda_menit=pengaturan["jeda_wa_menit"], nomor_penelepon=config.nomor_penelepon(),
     )
-    hasil = wa.kirim(config.nomor_penguji(), "pemberitahuan", teks, [
+    hasil = wa.kirim(nomor_tujuan(p), "pemberitahuan", teks, [
         p["nama_penerima"], str(pengaturan["jeda_wa_menit"]), config.nomor_penelepon(), p["pasien"], p["nama_rs"],
         at.nama_bulan(p["bulan_layanan"]),
     ])
@@ -58,7 +67,7 @@ def susun_tugas(conn, p: dict, pengaturan: dict, pesan: dict | None = None) -> d
     sapaan_pasien = at.sapaan(p["jenis_kelamin"])
     pesan = pesan or {"status": None, "teks": None}
     return {
-        "id": p["id"], "percobaan": p["percobaan"] + 1, "no_tujuan": config.nomor_penguji(),
+        "id": p["id"], "percobaan": p["percobaan"] + 1, "no_tujuan": nomor_tujuan(p),
         "skrip": {
             "nama_penerima": p["nama_penerima"],
             "sapaan_penerima": sapaan_pasien if p["penerima"] == "peserta" else "Bapak/Ibu",
@@ -84,7 +93,7 @@ def ambil_tugas(conn) -> dict | None:
     if id_ is None:
         return None
     p = repo_v3.satu_baris(conn, id_)
-    repo_v3.perbarui(conn, id_, {"no_tujuan": config.nomor_penguji(), "jeda_wa_menit": pengaturan["jeda_wa_menit"]})
+    repo_v3.perbarui(conn, id_, {"no_tujuan": nomor_tujuan(p), "jeda_wa_menit": pengaturan["jeda_wa_menit"]})
     pesan = kirim_pemberitahuan(conn, p, pengaturan, sekarang) if p["percobaan"] == 0 else None
     return susun_tugas(conn, p, pengaturan, pesan)
 
@@ -106,7 +115,7 @@ def _gagal_satu_percobaan(conn, p: dict, catatan: str) -> dict:
     jawaban = dict(at.JAWABAN_TIDAK_TERHUBUNG)
     label, alasan = at.label_jawaban(jawaban, p["sesi_ditagih"])
     teks = at.pesan_cadangan(nama_pasien=p["pasien"], nama_rs=p["nama_rs"], bulan=p["bulan_layanan"])
-    kirim = wa.kirim(config.nomor_penguji(), "cadangan", teks, [p["pasien"], p["nama_rs"], at.nama_bulan(p["bulan_layanan"])])
+    kirim = wa.kirim(nomor_tujuan(p), "cadangan", teks, [p["pasien"], p["nama_rs"], at.nama_bulan(p["bulan_layanan"])])
     repo_v3.perbarui(conn, id_, {
         "status": "tidak_terhubung", "percobaan": ke, "label": label, "alasan": alasan, "jawaban": jawaban,
         "waktu_selesai": sekarang, "diambil_pada": None, "coba_lagi_setelah": None, "transkrip": None,

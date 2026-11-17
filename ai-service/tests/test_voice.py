@@ -59,6 +59,24 @@ def test_voice_instruction_contains_required_flow_safety_and_seven_branches():
         assert required.casefold() in instruction.casefold(), required
 
 
+def test_voice_instruction_handles_recall_corrections_ranges_and_other_edge_cases():
+    instruction = build_voice_instruction(context())
+
+    for required in [
+        "Lupa lalu ingat",
+        "Mengoreksi angka",
+        "pakai angka terakhir",
+        "Jawaban rentang",
+        "jangan menghitung sendiri",
+        "Ditanya angka tagihan",
+        "minta ditelepon lagi",
+        "Keluarga tidak tahu",
+        "apakah ini robot",
+        "tidak dihitung sebagai pertanyaan inti baru",
+    ]:
+        assert required in instruction, required
+
+
 def test_voice_context_accepts_the_b1_skrip_with_unknown_fields():
     skrip = context().model_dump() | {"field_baru": "diabaikan"}
 
