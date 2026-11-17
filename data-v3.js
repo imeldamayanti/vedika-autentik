@@ -99,17 +99,105 @@
   const PASIEN_AKTIF = 302;
   const PASIEN_TERPICU = 30;
 
-  /* ---------- teks WhatsApp (PRD Lampiran B) ---------- */
+  /* ---------- pengaturan (halaman Pengaturan) ----------
+     Bentuknya sengaja sama dengan PUT /pengaturan supaya nanti tinggal disambung ke API. Selama backend belum
+     menerimanya, app-v3.js menyimpannya di localStorage dan memberi tahu modul ini lewat ubahPengaturan. */
 
-  function pesanPemberitahuan(p) {
-    return "Halo " + p.penerima.nama + ". Ini BPJS Kesehatan. Dalam " + JEDA_PESAN_MENIT + " menit kami akan menelepon dari nomor " + NOMOR_PENELEPON +
-      " untuk konfirmasi singkat layanan fisioterapi " + p.pasien + " di " + namaRs(p.rs) + " bulan " + BULAN_PENDEK +
-      ". Ini bukan tagihan. Kami tidak akan meminta data pribadi, kode OTP, atau pembayaran. Untuk memastikan pesan ini, hubungi Care Center 165.";
+  /* Bagian pesan yang tidak bisa diubah verifikator: melindungi peserta dari penipuan, dan pilihan jawaban 1–6
+     yang dibaca otomatis oleh sistem. Selalu ditempel di belakang templat yang diedit. */
+  const KUNCI_WA = "Ini bukan tagihan. Kami tidak akan meminta NIK, kode OTP, nomor rekening, atau pembayaran. Ragu pesan ini asli? Hubungi Care Center 165.";
+  const KUNCI_CADANGAN = "Balas dengan angka: 1) 1–2 kali  2) 3–4 kali  3) 5–8 kali  4) lebih dari 8 kali  5) tidak ingat  6) tidak pernah terapi di sana.";
+
+  const PENGATURAN_BAWAAN = {
+    nomor_penelepon: NOMOR_PENELEPON,
+    nomor_uji: "0812-0000-0000",
+    saluran: "wa",
+    templat_wa: "Halo {{nama}}, kami dari BPJS Kesehatan. Sekitar {{menit}} menit lagi kami akan menelepon dari nomor {{nomor}} untuk konfirmasi singkat layanan fisioterapi {{pasien}} di {{rs}} bulan {{bulan}}. Teleponnya sekitar 2 menit, mohon diangkat.",
+    templat_cadangan: "Kami belum berhasil menelepon. Kira-kira berapa kali {{pasien}} menjalani fisioterapi di {{rs}} bulan {{bulan}}?",
+    jam_mulai: "08:00", jam_selesai: "16:00", hari: "senin_jumat", batas_harian: 40,
+    jeda_wa_menit: JEDA_PESAN_MENIT, jeda_percobaan_menit: 3, percobaan_maks: 2,
+    indikator_min: 2, indikator_aktif: ["I1", "I2", "I3", "I4"], sertakan_model: true
+  };
+  let pengaturanAktif = Object.assign({}, PENGATURAN_BAWAAN, { indikator_aktif: PENGATURAN_BAWAAN.indikator_aktif.slice() });
+  const pengaturan = () => pengaturanAktif;
+  function ubahPengaturan(patch) {
+    pengaturanAktif = Object.assign({}, pengaturanAktif, patch);
+    return pengaturanAktif;
+  }
+  const nomorPenelepon = () => pengaturanAktif.nomor_penelepon;
+  const jedaWa = () => pengaturanAktif.jeda_wa_menit;
+
+  /* Placeholder yang boleh dipakai di templat, dengan arti singkatnya untuk chip di editor. */
+  const PLACEHOLDER = {
+    nama: "Nama penerima", menit: "Menit sebelum telepon", nomor: "Nomor penelepon",
+    pasien: "Nama pasien", rs: "Rumah sakit", bulan: "Bulan layanan"
+  };
+  /* Placeholder yang wajib ada: tanpa ini peserta tidak tahu siapa menelepon, kapan, dan soal siapa. */
+  const WAJIB = { wa: ["nomor", "menit", "pasien"], cadangan: ["pasien"] };
+  const BATAS_KARAKTER = { wa: 600, cadangan: 400 };
+  const RE_PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/gi;
+
+  function isiTemplat(teks, data) {
+    return teks.replace(RE_PLACEHOLDER, (utuh, k) => (data[k.toLowerCase()] != null ? data[k.toLowerCase()] : utuh));
   }
 
-  function pesanCadangan(p) {
-    return "Kami belum berhasil menelepon. Kira-kira berapa kali " + p.pasien + " menjalani fisioterapi di " + namaRs(p.rs) + " bulan " + BULAN_PENDEK +
-      "? Balas dengan angka: 1) 1–2 kali  2) 3–4 kali  3) 5–8 kali  4) lebih dari 8 kali  5) tidak ingat  6) tidak pernah terapi di sana.";
+  /* Galat templat yang diedit (bagian yang bisa diubah saja), dalam kalimat yang langsung bisa dipahami. */
+  function cekTemplat(teks, jenis) {
+    const galat = [];
+    const dipakai = [];
+    String(teks).replace(RE_PLACEHOLDER, (utuh, k) => { dipakai.push(k.toLowerCase()); return utuh; });
+    dipakai.filter((k, i) => !PLACEHOLDER[k] && dipakai.indexOf(k) === i).forEach((k) => galat.push("Placeholder {{" + k + "}} tidak dikenal."));
+    WAJIB[jenis].filter((k) => dipakai.indexOf(k) < 0).forEach((k) => galat.push("Placeholder {{" + k + "}} wajib ada (" + PLACEHOLDER[k].toLowerCase() + ")."));
+    if (/https?:|www\.|\b[a-z0-9-]+\.(com|id|net|org)\b/i.test(teks)) galat.push("Pesan tidak boleh berisi tautan.");
+    if (String(teks).length > BATAS_KARAKTER[jenis]) galat.push("Terlalu panjang: " + String(teks).length + " dari " + BATAS_KARAKTER[jenis] + " karakter.");
+    return galat;
+  }
+
+  const jumlahSms = (n) => (n > 0 ? Math.ceil(n / 160) : 0);
+
+  function cekNomor(nomor) {
+    const n = String(nomor).trim();
+    const angka = n.replace(/\D/g, "");
+    if (!/^[+()\d\s-]+$/.test(n) || angka.length < 3 || angka.length > 15) return "Nomor hanya berisi angka, spasi, tanda hubung, atau +, sepanjang 3–15 angka.";
+    return "";
+  }
+
+  const keMenit = (h) => { const [j, m] = String(h).split(":").map(Number); return j * 60 + m; };
+  function cekAturanPanggilan(a) {
+    const galat = [];
+    const bulat = (x, min, maks) => x !== "" && Number.isInteger(Number(x)) && Number(x) >= min && Number(x) <= maks;
+    if (!/^\d{2}:\d{2}$/.test(a.jam_mulai) || !/^\d{2}:\d{2}$/.test(a.jam_selesai)) galat.push("Jam panggilan: isi jam mulai dan jam selesai.");
+    else if (keMenit(a.jam_mulai) >= keMenit(a.jam_selesai)) galat.push("Jam panggilan: jam mulai harus lebih awal dari jam selesai.");
+    if (!bulat(a.jeda_wa_menit, 1, 10)) galat.push("Jeda pesan ke telepon: 1–10 menit.");
+    if (!bulat(a.jeda_percobaan_menit, 1, 30)) galat.push("Jeda antar percobaan: 1–30 menit.");
+    if (!bulat(a.percobaan_maks, 1, 3)) galat.push("Percobaan telepon: 1–3 kali.");
+    if (!bulat(a.batas_harian, 1, 500)) galat.push("Batas panggilan per hari: 1–500.");
+    if (!bulat(a.indikator_min, 1, 4)) galat.push("Minimal indikator: 1–4.");
+    if (!a.indikator_aktif.length && !a.sertakan_model) galat.push("Pilih minimal satu indikator atau sertakan model anomali.");
+    return galat;
+  }
+
+  /* Berapa pasien di data contoh yang dipilih untuk ditelepon menurut aturan pemicu: indikator aktif yang
+     terpenuhi minimal indikator_min, ATAU (bila model disertakan) model anomali menandainya. */
+  function hitungDipilih(aturan) {
+    const a = Object.assign({}, PENGATURAN_BAWAAN, aturan || {});
+    const semua = Object.keys(SEMUA).map((id) => SEMUA[id]).concat(TIDAK_DIPICU);
+    return semua.filter((p) => {
+      const kena = p.indikator.filter((i) => a.indikator_aktif.indexOf(i) >= 0).length;
+      return kena >= a.indikator_min || (a.sertakan_model && !!(p.anomali && p.anomali.ditandai));
+    }).length;
+  }
+
+  /* ---------- teks WhatsApp (PRD Lampiran B), dari templat di Pengaturan ---------- */
+
+  const dataPesan = (p) => ({ nama: p.penerima.nama, menit: jedaWa(), nomor: nomorPenelepon(), pasien: p.pasien, rs: namaRs(p.rs), bulan: BULAN_PENDEK });
+
+  function pesanPemberitahuan(p, templat) {
+    return isiTemplat(templat != null ? templat : pengaturanAktif.templat_wa, dataPesan(p)) + "\n\n" + KUNCI_WA;
+  }
+
+  function pesanCadangan(p, templat) {
+    return isiTemplat(templat != null ? templat : pengaturanAktif.templat_cadangan, dataPesan(p)) + " " + KUNCI_CADANGAN;
   }
 
   function namaRs(id) { return RS.find((r) => r.id === id).nama; }
@@ -540,6 +628,8 @@
     LABEL, TINDAKAN, PILIHAN_TINDAKAN, SARAN, RETENSI, INDIKATOR, TOLERANSI,
     RS, PASIEN_AKTIF, PASIEN_TERPICU, PASIEN_HANYA_MODEL, VERSI_ANOMALI,
     SKENARIO, LATAR, MENGANTRE, SEMUA, URUTAN_ANTREAN, TIDAK_DIPICU,
+    PENGATURAN_BAWAAN, PLACEHOLDER, KUNCI_WA, KUNCI_CADANGAN, BATAS_KARAKTER, pengaturan, ubahPengaturan, nomorPenelepon, jedaWa,
+    isiTemplat, cekTemplat, cekNomor, cekAturanPanggilan, jumlahSms, hitungDipilih, dataPesan,
     pesanPemberitahuan, pesanCadangan, namaRs, hitungLabel, selisih, ringkasanRs, statusRs, progresRs, STATUS_RS, RS_MIN_TERJAWAB, UJI, UJI_ANOMALI
   };
 })(window);

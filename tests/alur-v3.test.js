@@ -65,14 +65,11 @@ async function tanpaGeserSamping(page, nama) {
   cek(s3 && s3.teks === "Aturan", "S3 hanya dipilih aturan", JSON.stringify(s3));
   cek((await page.$$("tbody .chip-ind-wadah")).length === 0 && !(await page.textContent("thead")).includes("Indikator aktif"), "tabel antrean tanpa kolom Indikator aktif");
   cek((await page.$$("tbody .label + .status-chip, tbody .status-chip + .label")).length === 0, "baris selesai hanya menampilkan label hasil");
-  const kaki = await page.textContent(".catatan-kaki");
-  cek(kaki.includes("Model anomali menandai") && !kaki.includes("Skor pola"), "catatan kaki menjelaskan model anomali, bukan skor pola", kaki);
-  cek((await page.textContent(".keterangan-pemicu")).includes("aturan (dua indikator atau lebih) atau model anomali"), "keterangan antrean menyebut aturan ATAU model");
   const atas = await page.$$eval("tbody tr .nama-berkas b", (el) => el.slice(0, 2).map((x) => x.textContent));
   cek(atas[0] === "Andi Pratama" && atas[1] === "Siti Rahmawati", "urutan antrean menurut model anomali: S1 lalu S2", atas.join(", "));
   cek((await namaAntre()).length === 12, "12 pasien antre, termasuk dua yang hanya dipilih model", (await namaAntre()).join(", "));
   const kpi = await page.textContent(".kartu-angka .kpi:first-child");
-  cek(kpi.includes("Pasien dipilih") && kpi.includes("32") && kpi.includes("30 aturan + 2 model"), "kartu angka: 32 dipilih (30 aturan + 2 model)", kpi.replace(/\s+/g, " "));
+  cek(kpi.includes("Pasien perlu dikonfirmasi") && kpi.includes("32") && !kpi.includes("aturan +"), "kartu angka: 32 pasien perlu dikonfirmasi, tanpa keterangan tambahan", kpi.replace(/\s+/g, " "));
   cek(await page.evaluate(() => window.DATA3.UJI.length === 0 && window.DATA3.UJI_ANOMALI.length === 0), "uji mandiri data simulasi (label, model anomali) bersih");
 
   console.log("\nPasien yang hanya dipilih model");
@@ -108,13 +105,9 @@ async function tanpaGeserSamping(page, nama) {
   await page.waitForSelector(".pola-kartu");
   cek((await page.textContent(".pola-kartu .chip-dipilih")) === "Aturan" && (await page.textContent(".pola-kartu")).includes("model tidak menandainya"), "kartu R3: hanya aturan, model tidak menandai");
   await page.goto(TARGET + "#/ringkasan-rs");
-  await page.waitForSelector(".baris-pembanding");
-  const corong = await page.$$eval(".baris-pembanding", (el) => el.map((x) => x.textContent.trim()));
-  cek(corong.length === 5 && corong[0].includes("Terpicu 39,7% · dipilih 27, harapan menurut umur pasien 2,3"), "Ringkasan RS: corong dipilih dibanding harapan menurut umur", corong[0]);
-  cek((await page.$$(".baris-pembanding .lencana-pola")).length === 1 && corong[0].includes("Jauh di atas harapan"), "hanya RS Melati berlencana jauh di atas harapan corong");
-  cek(corong.slice(1).every((t) => t.includes("harapan menurut umur pasien")), "semua RS punya baris corong");
-  const kinerja = await page.textContent(".kinerja-pola");
-  cek(kinerja.includes("Sumber pemilihan dan hasil panggilan") && kinerja.includes("2 dari 2 panggilan yang ditandai model berakhir Tidak sesuai") && kinerja.includes("1 dari 3 panggilan yang hanya dipilih aturan") && kinerja.includes("5 panggilan terjawab"), "kartu sumber pemilihan dan hasil panggilan", kinerja);
+  await page.waitForSelector(".tabel-rs tbody tr");
+  cek((await page.$$(".tabel-rs tbody tr")).length === 5, "Ringkasan RS: satu baris per rumah sakit, tanpa baris corong");
+  cek((await page.$$(".kinerja-pola, .baris-pembanding, .lencana-pola")).length === 0, "Ringkasan RS: kartu sumber pemilihan dan baris corong sudah dihapus");
   cek(await page.isVisible("text=RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab)"), "RS Melati menjadi Perlu klarifikasi RS (3 dari 5)");
 
   console.log("\nBahasa");

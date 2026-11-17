@@ -54,21 +54,32 @@
     tambah: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     video: '<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
     daftarCek: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
-    lencanaCek: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>'
+    lencanaCek: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
+    gir: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'
   };
   const ikon = (n) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + IKON[n] + "</svg>";
   const logoVeritas = '<img src="assets/veritas-mark.svg" alt="" aria-hidden="true">';
 
   /* Tiga label di layar: Sesuai, Tidak sesuai, Tidak ada jawaban (dengan alasan kecil). */
-  const labelChip = (kunci, besar) => {
+  const labelChip = (kunci, besar, alasanTerpisah) => {
     const l = D.LABEL[kunci];
     return '<span class="label label--' + (l.alasan ? "tanpa_jawaban" : kunci) + (besar ? " label--besar" : "") + '">' + l.nama +
-      (l.alasan ? '<small class="label-alasan">' + l.alasan + "</small>" : "") + "</span>";
+      (l.alasan && !alasanTerpisah ? '<small class="label-alasan">' + l.alasan + "</small>" : "") + "</span>" +
+      (l.alasan && alasanTerpisah ? '<small class="alasan-baris">' + l.alasan + "</small>" : "");
+  };
+  /* Chip kolom Hasil: Sesuai dan Tidak sesuai apa adanya; semua jenis tanpa jawaban jadi "Tidak diketahui" dengan alasan kecil di bawahnya. */
+  const chipHasil = (kunci) => {
+    const l = D.LABEL[kunci];
+    return l.alasan ? '<span class="label label--tanpa_jawaban">' + HASIL.tidak_diketahui + '</span><small class="alasan-baris">' + l.alasan + "</small>" : labelChip(kunci);
+  };
+  /* Tahap panggilan yang belum selesai ditulis kecil di bawah chip Antre (WA terkirim, Menelepon, Coba lagi). */
+  const tahapBaris = (b, p) => {
+    const teks = M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : b.st === "antre" || b.st === "selesai" ? "" : STATUS[b.st];
+    return teks ? '<small class="alasan-baris">' + teks + "</small>" : "";
   };
   const namaLabel = (kunci) => D.LABEL[kunci].nama + (D.LABEL[kunci].alasan ? " (" + D.LABEL[kunci].alasan + ")" : "");
   const koma = (n) => String(n).replace(".", ",");
 
-  const persenSatu = (x) => koma(x.toFixed(1)) + "%";
 
   /* Sumber pemilihan: pasien ditelepon bila aturan (≥ 2 indikator) ATAU model anomali menandainya.
      Simulasi dan API sama-sama membawa field dipilih. */
@@ -87,8 +98,8 @@
   const tunggal = (id) => D.SEMUA[id];
   /* Mode presentasi: pemanggil tampil sebagai BPJS Kesehatan, label Simulasi disembunyikan lewat kelas di <html>. */
   if (D.PRESENTASI) document.documentElement.classList.add("presentasi");
-  const namaPemanggil = (p) => D.PRESENTASI ? "BPJS Kesehatan" : M.hidup ? p.pesanWa.dari : D.NOMOR_PENELEPON;
-  const ketPemanggil = D.PRESENTASI ? "Care Center " + D.NOMOR_PENELEPON : "Nomor uji coba";
+  const namaPemanggil = (p) => D.PRESENTASI ? "BPJS Kesehatan" : M.hidup ? p.pesanWa.dari : D.nomorPenelepon();
+  const ketPemanggil = () => (D.PRESENTASI ? "Care Center " + D.nomorPenelepon() : "");
 
   /* Jam kerja simulasi: demo selalu terasa berlangsung pagi hari di kantor cabang. */
   const MULAI = Date.now();
@@ -121,17 +132,26 @@
 
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
-    menuBuka: false, filterRs: "", filterStatus: "",
+    menuBuka: false, filterRs: "", filterStatus: "", bulan: "2026-08",
     otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null,
-    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false, ubah: null
+    pilihLain: false, tindakanLain: null, catatan: null, bisu: false, ubah: null,
+    peng: null, uji: null, timerUji: []
   };
 
+  /* Kolom Hasil di Antrean: empat nilai. Panggilan belum selesai = Antre; tanpa jawaban (tidak yakin, tidak diangkat, menolak) = Tidak diketahui. */
+  const HASIL = { antre: "Antre", tidak_diketahui: "Tidak diketahui", sesuai: "Sesuai", tidak_sesuai: "Tidak sesuai" };
+  const hasilBaris = (lab) => (!lab ? "antre" : lab === "sesuai" || lab === "tidak_sesuai" ? lab : "tidak_diketahui");
   const STATUS = { antre: "Antre", wa: "WA terkirim", menelepon: "Menelepon", selesai: "Selesai", tidak_terhubung: "Tidak terhubung" };
+  /* Bulan layanan yang bisa dipilih di Antrean. Data panggilan baru ada untuk bulan bawaan (Agustus 2026); bulan lain kosong. */
+  const BULAN_BAWAAN = "2026-08";
+  const NAMA_BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const DAFTAR_BULAN = ["2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"];
+  const labelBulan = (b) => NAMA_BULAN[parseInt(b.slice(5, 7), 10) - 1] + " " + b.slice(0, 4);
   const TIP_TELEPON = "Kirim pesan WA ke penerima, lalu telepon begitu saluran kosong";
 
   /* ============================================================== perute */
 
-  /* #/autentik (halaman awal), #/panggilan/:id, #/kartu/:id, #/ringkasan-rs, #/riwayat */
+  /* #/autentik (halaman awal), #/panggilan/:id, #/kartu/:id, #/ringkasan-rs, #/ringkasan-rs/:id_rs, #/riwayat */
   function rute() {
     const bagian = (location.hash || "").replace(/^#\/?/, "").split("/").filter(Boolean);
     return { nama: bagian[0] || "autentik", id: bagian[1] || null };
@@ -314,6 +334,7 @@
           '<a href="#/riwayat"' + aktif(r.nama === "riwayat") + ">" + ikon("riwayat") + "Riwayat keputusan</a>" +
         "</nav>" +
         '<div class="sisi-kaki nav">' +
+          '<a href="#/pengaturan"' + aktif(r.nama === "pengaturan") + ">" + ikon("gir") + "Pengaturan</a>" +
           '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
         "</div>" +
       "</aside>" +
@@ -337,26 +358,19 @@
 
   const penerimaTeks = (p) => (p.penerima.hubungan === "peserta" ? "Peserta" : esc(p.penerima.nama) + ' <span class="redup">(' + esc(p.penerima.hubungan) + ")</span>");
 
-  /* Kartu angka: kepala (ikon + nama), lalu panel berisi angka, penyebut, dan pill.
-     Warna angka dan pill peringatan hanya muncul bila nilainya bukan nol; pill lain netral (persen). */
+  /* Kartu angka: kepala (ikon + nama) lalu angka. Angka diwarnai (sorot) hanya bila nilainya bukan nol. */
   function kartuAngka() {
     const a = angka();
-    const jumlahRs = M.hidup && M.antrean.daftar_rs ? M.antrean.daftar_rs.length : D.RS.length;
-    const persen = (n, dari) => (dari ? Math.round((n / dari) * 100) + "%" : "0%");
     const kartu = (o) =>
       '<div class="kpi' + (o.sorot ? " " + o.sorot : "") + '">' +
         '<div class="kpi-kepala"><span class="kpi-nama">' + o.nama + '</span><span class="kpi-ikon kpi-ikon--' + o.warna + '">' + ikon(o.ikon) + "</span></div>" +
         "<b>" + o.n + "</b>" +
-        '<div class="kpi-bawah">' + (o.pill ? '<span class="kpi-pill' + (o.pillKelas ? " " + o.pillKelas : "") + '">' + o.pill + "</span>" : "") + '<span class="kpi-ket">' + o.ket + "</span></div>" +
       "</div>";
     return '<div class="kartu-angka">' +
-      kartu({ nama: "Pasien dipilih", ikon: "orang", warna: "primer", n: a.dipilih,
-        ket: a.hanyaModel ? a.terpicu + " aturan + " + a.hanyaModel + " model" : "dari " + a.aktif + " pasien aktif", pill: persen(a.dipilih, a.aktif) }) +
-      kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon, ket: "dari " + a.dipilih + " dipilih", pill: persen(a.ditelepon, a.dipilih) }) +
-      kartu({ nama: "Jawaban tidak sesuai", ikon: "awas", warna: "merah", n: a.tidakSesuai, ket: "dari " + a.ditelepon + " ditelepon",
-        sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "", pill: a.tidakSesuai ? "Perlu dicek" : persen(a.tidakSesuai, a.ditelepon), pillKelas: a.tidakSesuai ? "kpi-pill--merah" : "" }) +
-      kartu({ nama: "RS perlu klarifikasi", ikon: "rumahSakit", warna: "kuning", n: a.rsKlarifikasi, ket: "dari " + jumlahRs + " rumah sakit",
-        sorot: a.rsKlarifikasi ? "angka-klarifikasi" : "", pill: a.rsKlarifikasi ? "Perlu tindakan" : persen(a.rsKlarifikasi, jumlahRs), pillKelas: a.rsKlarifikasi ? "kpi-pill--kuning" : "" }) +
+      kartu({ nama: "Pasien perlu dikonfirmasi", ikon: "orang", warna: "primer", n: a.dipilih }) +
+      kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon }) +
+      kartu({ nama: "Jawaban tidak sesuai", ikon: "awas", warna: "merah", n: a.tidakSesuai, sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "" }) +
+      kartu({ nama: "RS perlu klarifikasi", ikon: "rumahSakit", warna: "kuning", n: a.rsKlarifikasi, sorot: a.rsKlarifikasi ? "angka-klarifikasi" : "" }) +
     "</div>";
   }
 
@@ -371,10 +385,10 @@
 
   /* Baris antrean (satu bentuk untuk API dan simulasi), sudah disaring menurut rumah sakit dan status. */
   function barisAntrean() {
-    const dasar = M.hidup ? M.baris : D.URUTAN_ANTREAN.map((id) => Object.assign({ st: statusBaris(id) }, tunggal(id)));
+    const dasar = M.hidup ? M.baris : ui.bulan !== BULAN_BAWAAN ? [] : D.URUTAN_ANTREAN.map((id) => Object.assign({ st: statusBaris(id) }, tunggal(id)));
     return dasar
       .filter((p) => !ui.filterRs || p.rs === ui.filterRs)
-      .filter((p) => !ui.filterStatus || p.st === ui.filterStatus)
+      .filter((p) => !ui.filterStatus || hasilBaris(labelBaris(p.id)) === ui.filterStatus)
       .map((p) => {
         const lab = labelBaris(p.id);
         const putusan = M.hidup ? p.keputusanTindakan : S.keputusan[p.id] && S.keputusan[p.id].tindakan;
@@ -454,40 +468,33 @@
         aksi = '<span class="redup">Belum ditelepon</span>';
       }
       return "<tr" + (tujuan ? ' class="bisa-klik" data-aksi="buka-baris" data-tujuan="' + tujuan + '"' : "") + ">" +
-        /* .s-rs, .s-penerima, .s-ditagih: isi kolom yang disembunyikan di layar sempit (app-v3.css, audit T-03). */
-        '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span>" +
-          '<span class="s-rs">' + esc(namaRs(p.rs)) + "</span>" +
-          '<span class="s-penerima">Penerima: ' + penerimaTeks(p) + "</span>" +
-          '<span class="s-ditagih">' + p.ditagih + " sesi ditagih</span></td>" +
-        '<td class="sembunyi-hp" data-label="Rumah sakit">' + esc(namaRs(p.rs)) + "</td>" +
-        '<td class="angka sembunyi-hp" data-label="Ditagih">' + p.ditagih + " sesi</td>" +
+        /* Satu sel pasien: "nama | sesi" lalu rumah sakit. Penerima dan umur ada di halaman panggilan dan kartu bukti. */
+        '<td class="nama-berkas"><b>' + esc(p.pasien) + '</b><span class="s-rs">' + esc(namaRs(p.rs)) + "</span></td>" +
+        '<td class="angka" data-label="Sesi">' + p.ditagih + " sesi</td>" +
         '<td data-label="Dipilih oleh">' + chipDipilih(p) + "</td>" +
-        '<td class="sembunyi-hp" data-label="Penerima"><span class="nilai">' + penerimaTeks(p) + "</span></td>" +
         /* Panggilan selesai: satu pernyataan "hasil + keputusan", bukan tiga baris (audit S-10). */
-        '<td data-label="Status"><div class="sel-status">' + (lab
-          ? labelChip(lab) + (b.putusan ? '<span class="putusan-baris">' + D.TINDAKAN[b.putusan].status + "</span>" : '<span class="putusan-baris putusan-baris--perlu">Perlu diputuskan</span>')
-          : '<span class="status-chip status-chip--' + b.st + '">' + (M.hidup && menungguCoba(p) ? "Coba lagi " + hitung(p.cobaLagi) : STATUS[b.st]) + "</span>") + "</div></td>" +
+        '<td data-label="Hasil"><div class="sel-status">' + (lab
+          ? chipHasil(lab) + (b.putusan ? '<span class="putusan-baris">' + D.TINDAKAN[b.putusan].status + "</span>" : "")
+          : '<span class="status-chip status-chip--' + b.st + '">' + HASIL.antre + "</span>" + tahapBaris(b, p)) + "</div></td>" +
         '<td class="aksi lebar-penuh">' + aksi + "</td></tr>";
     }).join("");
 
     const oto = otomatisAktif(), jd = jedaAktif();
 
-    return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dipilih aturan (dua indikator atau lebih) atau model anomali. Ditelepon satu per satu pukul 09.00–17.00.</p></div></div>" +
-      stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
+    return stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
+        '<select class="pilih" data-aksi="saring-bulan" aria-label="Saring menurut bulan layanan">' +
+          DAFTAR_BULAN.map((b) => '<option value="' + b + '"' + (ui.bulan === b ? " selected" : "") + ">" + labelBulan(b) + "</option>").join("") + "</select>" +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
-        '<select class="pilih" data-aksi="saring-status" aria-label="Saring menurut status"><option value="">Semua status</option>' +
-          Object.keys(STATUS).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + STATUS[k] + "</option>").join("") + "</select>" +
+        '<select class="pilih" data-aksi="saring-status" aria-label="Saring menurut hasil"><option value="">Semua hasil</option>' +
+          Object.keys(HASIL).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + HASIL[k] + "</option>").join("") + "</select>" +
         '<div class="kanan">' +
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + oto + '"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>' +
           '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button></div></div></div>" +
       '<section class="panel tabel-antrean">' +
-        '<div class="panel-kepala"><h2>Antrean pasien</h2><span class="kanan">' + daftarBaris.length + " pasien</span></div>" +
         (baris
-          ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Dipilih oleh</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
-          : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
-        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. Model anomali menandai tagihan yang polanya jarang dibanding data sampel BPJS 2023–2024. Hasilnya tetap dari jawaban peserta.</p>' +
+          ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Sesi</th><th>Dipilih oleh</th><th>Hasil</th><th>Aksi</th></tr></thead><tbody>' + baris + "</tbody></table></div>"
+          : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>' + (ui.bulan !== BULAN_BAWAAN ? "Belum ada antrean untuk " + labelBulan(ui.bulan) + "." : "Ubah saringan rumah sakit atau hasil.") + '</div>') +
       "</section>";
   }
   /* ============================================================== panggilan */
@@ -565,17 +572,17 @@
         return { nama: "Percobaan " + n, state: s === "selesai" ? "gagal" : s, ket: s === "jalan" ? "Memanggil…" : s === "selesai" ? "Tidak diangkat" : "", jam: jam(x) };
       };
       return [
-        wa, coba(1, k.coba1, k.gagal1, D.JEDA_PESAN_MENIT), coba(2, k.coba2, k.gagal2, D.JEDA_PESAN_MENIT + 3),
-        { nama: "Chat cadangan terkirim", state: st(k.gagal2, k.chat), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: st(k.gagal2, k.chat) === "selesai" ? tautanWa("cadangan", "Lihat chat · pilihan 1–6") : "" },
-        { nama: "Kartu bukti", state: st(k.chat, k.total), jam: jam(D.JEDA_PESAN_MENIT + 4), ket: st(k.chat, k.total) === "jalan" ? "Menyusun kartu bukti" : "" }
+        wa, coba(1, k.coba1, k.gagal1, D.jedaWa()), coba(2, k.coba2, k.gagal2, D.jedaWa() + D.pengaturan().jeda_percobaan_menit),
+        { nama: "Chat cadangan terkirim", state: st(k.gagal2, k.chat), jam: jam(D.jedaWa() + D.pengaturan().jeda_percobaan_menit + 1), ket: st(k.gagal2, k.chat) === "selesai" ? tautanWa("cadangan", "Lihat chat · pilihan 1–6") : "" },
+        { nama: "Kartu bukti", state: st(k.chat, k.total), jam: jam(D.jedaWa() + D.pengaturan().jeda_percobaan_menit + 1), ket: st(k.chat, k.total) === "jalan" ? "Menyusun kartu bukti" : "" }
       ];
     }
     const sambung = st(0, k.sambung), rekam = st(k.rekam, k.akhir), baca = st(k.akhir, k.kartu), kartu = st(k.kartu, k.total);
-    const jamBaca = jam(D.JEDA_PESAN_MENIT + Math.ceil(p.durasi / 60));
+    const jamBaca = jam(D.jedaWa() + Math.ceil(p.durasi / 60));
     return [
       wa,
-      { nama: "Panggilan tersambung", state: t == null ? "menunggu" : sambung, jam: jam(D.JEDA_PESAN_MENIT), ket: sambung === "jalan" ? "Menunggu jeda pesan, dipadatkan" : "" },
-      { nama: "Merekam", state: rekam, jam: jam(D.JEDA_PESAN_MENIT),
+      { nama: "Panggilan tersambung", state: t == null ? "menunggu" : sambung, jam: jam(D.jedaWa()), ket: sambung === "jalan" ? "Menunggu jeda pesan, dipadatkan" : "" },
+      { nama: "Merekam", state: rekam, jam: jam(D.jedaWa()),
         ket: rekam === "jalan" ? '<span id="durasiLive">' + mmss(detikRekam(p, t)) + "</span> direkam" : rekam === "selesai" ? "Durasi " + mmss(p.durasi) : "" },
       { nama: "Membaca jawaban", state: baca, jam: jamBaca, ket: baca === "jalan" ? "Mengubah percakapan menjadi isian" : "" },
       { nama: "Kartu bukti", state: kartu, jam: jamBaca, ket: kartu === "jalan" ? "Menyusun kartu bukti" : "" }
@@ -763,33 +770,24 @@
   /* Durasi di layar HP: menghitung mundur (sisa) bila lama panggilan sudah diketahui. */
   const sisaTeks = (p, detik) => (p.durasi != null ? "Sisa " + mmss(Math.max(0, Math.ceil(p.durasi - detik))) : mmss(detik));
 
-  const STATUS_HP = '<svg class="sinyal" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>' +
-    '<svg class="baterai" viewBox="0 0 27 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".55"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".55"/></svg>';
-
   /* Mockup layar telepon penerima. Pemanggil hanya nomor tim (Simulasi), bukan nama atau logo BPJS.
      kartu: bingkai yang sama di kartu bukti, layar menampilkan hasil akhir panggilan; tambahan: html di bawah keterangan. */
   function htmlPonsel(p, t, kartu, tambahan) {
     const tak = p.label === "tidak_terhubung";
     const k = kartu ? { mode: tak ? "tak" : "akhir", teks: tak ? "Tidak diangkat" : "Panggilan berakhir" } : keadaanPonsel(p, t);
     const nomor = namaPemanggil(p);
-    const jam = kartu ? waktuPanggilan(p).split(", ").pop() : M.hidup ? A3.jamTeks(M.waktuServer) : formatJam(menitPanggilan(p.id));
     const detik = kartu ? 0 : Math.max(0, M.hidup ? detikTerakhir(p) : detikRekam(p, t));
     const baris = k.mode === "aktif" ? '<span class="durasi-ponsel">' + sisaTeks(p, detik) + "</span>"
       : k.mode === "akhir" && p.durasi != null ? "Durasi " + mmss(p.durasi) : "";
-    const bulat = (kelas, nama, isi) => '<span class="tombol-telp ' + kelas + '">' + isi + "<small>" + nama + "</small></span>";
-    const kisi = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><circle cx="6" cy="5" r="1.7"/><circle cx="12" cy="5" r="1.7"/><circle cx="18" cy="5" r="1.7"/><circle cx="6" cy="11" r="1.7"/><circle cx="12" cy="11" r="1.7"/><circle cx="18" cy="11" r="1.7"/><circle cx="6" cy="17" r="1.7"/><circle cx="12" cy="17" r="1.7"/><circle cx="18" cy="17" r="1.7"/></svg>';
-    const opsi = '<div class="telp-opsi">' + bulat("", "Bisukan", ikon("mik")) + bulat("", "Keypad", kisi) + bulat("", "Speaker", ikon("suara")) +
-      bulat("", "Tambah", ikon("tambah")) + bulat("", "Video", ikon("video")) + bulat("", "Kontak", ikon("pengguna")) + "</div>";
-    const akhiri = '<div class="telp-aksi">' + bulat("merah", "Akhiri", ikon("telepon")) + "</div>";
-    const bawah = k.mode === "dering" ? '<div class="telp-aksi telp-aksi--dering">' + bulat("merah", "Tolak", ikon("telepon")) + bulat("hijau", "Jawab", ikon("telepon")) + "</div>"
-      : opsi + akhiri;
-    const info = '<div class="telp-info"><span class="telp-foto">' + ikon("telepon") + "</span><b>" + esc(nomor) + "</b><span>" + ketPemanggil + "</span>" +
-      '<p class="telp-status">' + k.teks + '</p><p class="telp-durasi">' + baris + "</p>" +
-      '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>';
-    return '<div class="kol-ponsel"><div class="ponsel ponsel--telp ponsel--' + k.mode + '" role="img" aria-label="Layar telepon penerima: ' + k.teks + '">' +
-      '<div class="ponsel-layar"><span class="poni"></span><div class="status-ponsel"><b>' + jam + "</b><span>" + STATUS_HP + "</span></div>" +
-      info + bawah + "</div></div>" +
-      '<p class="ponsel-ket">Layar HP penerima: <b>' + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</b></p>" + (tambahan || "") + "</div>";
+    const gel = '<div class="gelombang" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
+    const hub = p.penerima.hubungan === "peserta" ? "Peserta" : p.penerima.hubungan;
+    return '<div class="kol-ponsel"><div class="ponsel ponsel--telp ponsel--' + k.mode + '" role="img" aria-label="Status panggilan ke penerima: ' + k.teks + '">' +
+      '<div class="telp-atas">' + gel + '<span class="telp-foto">' + ikon("telepon") + "</span>" + gel + "</div>" +
+      '<p class="telp-status">' + k.teks + '</p><b class="telp-nomor">' + esc(nomor) + '</b><span class="telp-ket">' + ketPemanggil() + "</span>" +
+      '<p class="telp-durasi">' + baris + "</p>" +
+      '<div class="telp-penerima"><span class="telp-avatar">' + ikon("pengguna") + "</span><div><b>" + esc(p.penerima.nama) + "</b><small>Penerima · " + esc(hub) + "</small></div></div>" +
+      (kartu ? '<button class="btn btn--kecil telp-ulang" type="button" data-aksi="putar-ulang" data-mode="' + k.mode + '">' + ikon("telepon") + "Putar ulang panggilan</button>" : "") +
+      "</div>" + (tambahan || "") + "</div>";
   }
 
   /* Di kartu bukti, memutar rekaman membuat layar HP ikut berjalan: durasi menghitung mundur sampai rekaman habis. */
@@ -872,7 +870,7 @@
     const kop = '<div class="kepala-panggilan"><div><h1>' + esc(p.pasien) + '</h1><p class="sub-judul">' + esc(namaRs(p.rs)) + ", fisioterapi " + D.BULAN + "</p>" +
       '<div class="meta-panggilan"><span><b>Ditagih</b>' + p.ditagih + " sesi</span>" +
         "<span><b>Indikator</b>" + teksIndikator(p.indikator) + "</span>" +
-        "<span><b>Tanggal libur</b>" + libur + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div>" +
+        "<span><b>Tanggal libur</b>" + libur + "</span></div></div>" +
       '<div class="kepala-aksi">' + aksi + "</div></div>";
     if (selesai) {
       return kop + '<section class="panel"><div class="belum-mulai"><b>Panggilan sudah selesai</b><p>Hasilnya ada di kartu bukti.</p><a class="btn btn--primer" href="#/kartu/' + id + '">Buka kartu bukti</a></div></section>';
@@ -897,9 +895,9 @@
     }
     const m = menitPanggilan(p.id);
     return '<span class="tanggal-obrolan">Hari ini</span>' + gelembungWa(D.pesanPemberitahuan(p), formatJam(m)) +
-      (cadangan ? '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.JEDA_PESAN_MENIT) + "</div>" +
-        '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.JEDA_PESAN_MENIT + 3) + "</div>" +
-        gelembungWa(D.pesanCadangan(p), formatJam(m + D.JEDA_PESAN_MENIT + 4)) : "");
+      (cadangan ? '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.jedaWa()) + "</div>" +
+        '<div class="gelembung sistem">Panggilan suara tak terjawab · ' + formatJam(m + D.jedaWa() + D.pengaturan().jeda_percobaan_menit) + "</div>" +
+        gelembungWa(D.pesanCadangan(p), formatJam(m + D.jedaWa() + D.pengaturan().jeda_percobaan_menit + 1)) : "");
   }
 
   /* Komponen ponsel dari v2. Pengirim hanya nomor tim (Simulasi), bukan nama atau logo BPJS. */
@@ -908,12 +906,12 @@
     if (!p) return "";
     const obrolan = obrolanWa(p, cadangan);
     const nomor = namaPemanggil(p);
-    const jedaWa = M.hidup ? M.antrean.pengaturan.jeda_wa_menit : D.JEDA_PESAN_MENIT;
+    const jedaWa = M.hidup ? M.antrean.pengaturan.jeda_wa_menit : D.jedaWa();
     const petunjuk = cadangan ? "Penerima belum membalas. Jawaban 1–6 menggantikan panggilan." : "Penerima belum membalas.";
     const keterangan = cadangan ? "Dikirim setelah dua panggilan tidak diangkat." : "Dikirim " + jedaWa + " menit sebelum panggilan.";
     return '<div class="modal-wa" id="modalWa" data-aksi="tutup-wa"><div class="modal-wa-kartu" data-aksi="diam" role="dialog" aria-modal="true" aria-label="Layar WhatsApp penerima">' +
       '<button class="modal-wa-tutup" type="button" data-aksi="tutup-wa" aria-label="Tutup">' + ikon("x") + "</button>" +
-      '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(nomor) + "</b><span>" + ketPemanggil + "</span></div></div>" +
+      '<div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(nomor) + "</b><span>" + ketPemanggil() + "</span></div></div>" +
         '<div class="obrolan">' + obrolan + '</div><div class="ponsel-balas"><span class="petunjuk">' + petunjuk + "</span></div></div></div>" +
       '<div class="modal-wa-info"><span class="kapital">' + (cadangan ? "Chat cadangan" : "Pesan pemberitahuan") + "</span><h2>" + esc(p.penerima.nama) + (p.penerima.hubungan === "peserta" ? "" : " (" + esc(p.penerima.hubungan) + ")") + "</h2>" +
         "<p>" + keterangan + "</p>" +
@@ -1063,7 +1061,7 @@
     const durasi = p.label === "tidak_terhubung" ? "2 percobaan, tidak diangkat" : p.durasi != null ? "durasi " + mmss(p.durasi) : "durasi tidak tercatat";
     const kop = '<div class="kepala-kartu"><div><div class="judul-label"><h1>' + esc(p.pasien) + "</h1>" + labelChip(p.label, true) + "</div>" +
       '<p class="sub-judul">' + esc(namaRs(p.rs)) + ", fisioterapi " + D.BULAN + "</p>" +
-      '<div class="meta-panggilan"><span><b>Ditelepon</b>' + waktuPanggilan(p) + ", " + durasi + "</span><span><b>Penerima</b>" + penerimaTeks(p) + "</span></div></div></div>";
+      '<div class="meta-panggilan"><span><b>Ditelepon</b>' + waktuPanggilan(p) + ", " + durasi + "</span></div></div></div>";
 
     const peringatan = bahaya ? '<div class="tanda-bahaya" role="alert">' + ikon("awas") + "<div><b>Tanda bahaya: " + esc(j.tanda_bahaya.map((x) => TANDA_BAHAYA[x]).join(", ")) + "</b><p>" + esc(j.ringkasan) + "</p></div></div>" : "";
 
@@ -1109,8 +1107,8 @@
       '<p class="catatan-saran">Rekaman menjadi bukti awal untuk klarifikasi ke RS.</p></div>' +
       (tampilPutusan ? putusanTerpilih(p, keputusan) : "") + "</section>";
 
-    return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
-      '<div class="kartu-kanan">' + ringkasan + kutipan + pola + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
+    return kop + peringatan + '<div class="kartu-grid"><div class="kartu-kiri">' + htmlPonsel(p, null, true, pemutar) + kutipan + '</div>' +
+      '<div class="kartu-kanan">' + ringkasan + pola + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
   function sectionDipilih(p) {
     const k = sumberDipilih(p), a = p.anomali;
@@ -1162,67 +1160,61 @@
     return '<span class="label label--' + kelas + '">' + (c.status === D.STATUS_RS.normal ? "Belum perlu klarifikasi" : c.status) + "</span>";
   }
 
-  /* Satu baris corong per RS: persen terpicu aturan, lalu pasien dipilih (aturan ATAU model) dibanding harapan menurut
-     umur pasiennya. Lencana bila RS di luar batas corong setelah memperhitungkan sebaran antar-RS. */
-  const LENCANA_CORONG = { above_99_8: "Jauh di atas harapan", above_95: "Di atas harapan" };
-  function barisCorong(r) {
-    const f = r.funnel;
-    if (!f) return "";
-    const lencana = LENCANA_CORONG[f.position];
-    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Harapan dari laju nasional per kelompok umur, data sampel BPJS 2023–2024">' +
-      "<span>Terpicu " + persenSatu(r.persen) + " · dipilih " + f.selected + ", harapan menurut umur pasien " + koma(f.expected.toFixed(1)) + "</span>" +
-      (lencana ? '<span class="lencana-pola" title="Di luar batas corong ' + (f.position === "above_99_8" ? "99,8%" : "95%") + ' setelah memperhitungkan umur pasien dan sebaran antar-RS">' + lencana + "</span>" : "") +
-      "</div></td></tr>";
-  }
-
-  /* Kartu kecil: berapa panggilan dari tiap sumber pemilihan berakhir Tidak sesuai (hanya Sesuai dan Tidak sesuai).
-     Inilah ukuran ketepatan model yang tidak bisa dihitung dari data klaim saja. */
-  function kartuKinerjaModel(k) {
-    if (!k) return "";
-    const isi = k.n
-      ? "<span><b>" + k.model_tidak_sesuai + " dari " + k.model + "</b> panggilan yang ditandai model berakhir Tidak sesuai</span>" +
-        "<span><b>" + k.aturan_tidak_sesuai + " dari " + k.aturan + "</b> panggilan yang hanya dipilih aturan berakhir Tidak sesuai</span>" +
-        '<span class="redup">' + k.n + " panggilan terjawab</span>"
-      : '<span class="redup">Belum ada panggilan terjawab.</span>';
-    return '<div class="kinerja-pola"><b>Sumber pemilihan dan hasil panggilan</b>' + isi + "</div>";
-  }
-
   function lamanRingkasanRs() {
     const data = dataRingkasan();
     if (!data) return kepala("Memuat ringkasan RS", "Mengambil data dari API…");
     const baris = data.rs.map((r) => {
-      const c = r.c, buka = ui.rsBuka === r.id;
-      const rinci = r.daftar.length
-        ? '<ul class="daftar-rinci">' + r.daftar.map((d) => {
-          const versi = d.jumlah_min === d.jumlah_maks ? d.jumlah_min : d.jumlah_min + "–" + d.jumlah_maks;
-          const ringkas = d.label === "tidak_terhubung" ? "Panggilan tidak diangkat" : d.label === "menolak" ? "Menolak menjawab"
-            : d.jumlah_maks == null ? "Jawaban belum bisa dibaca otomatis"
-            : d.ditagih + " ditagih · versi peserta " + versi + (d.label === "tidak_yakin" ? " (perkiraan)" : " · selisih " + d.selisih);
-          return "<li><b>" + esc(d.pasien) + "</b>" + labelChip(d.label) + "<span>" + ringkas + '</span><a class="btn btn--kecil" href="#/kartu/' + d.id + '">Buka kartu</a></li>';
-        }).join("") + "</ul>"
-        : '<p class="daftar-rinci kosong-rinci">Belum ada panggilan selesai untuk rumah sakit ini.</p>';
+      const c = r.c;
       return "<tr>" +
-        '<td class="nama-berkas"><b>' + esc(r.nama) + "</b><span>" + r.id + '</span><span class="s-aktif">' + r.aktif + " pasien aktif</span></td>" +
+        '<td class="nama-berkas"><b>' + esc(r.nama) + '</b><span class="s-aktif">' + r.aktif + " pasien aktif</span></td>" +
         '<td class="angka sembunyi-hp" data-label="Pasien aktif">' + r.aktif + "</td>" +
         '<td class="angka" data-label="Terpicu"><span class="nilai">' + r.terpicu + ' <span class="redup-kecil">(' + persenRs(r.persen) + ")</span></span></td>" +
         '<td class="angka sembunyi-hp" data-label="Terjawab">' + c.terjawab + "</td>" +
         '<td class="angka" data-label="Tidak sesuai"><span class="nilai">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</span></td>" +
         '<td data-label="Status"><div class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</div></td>" +
-        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisCorong(r) +
-        (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
+        '<td class="aksi lebar-penuh"><a class="btn btn--kecil" href="#/ringkasan-rs/' + r.id + '">Lihat pasien</a></td></tr>';
     }).join("");
 
     /* Banner narasi demo: hanya bila RS Melati memang baru beralih ke Perlu klarifikasi RS karena S1. */
     const melati = data.rs.find((r) => r.id === "RS01");
     const s1 = M.hidup ? barisApi("CALL-P-S1-2026-08") : null;
     const sesudahS1 = M.hidup ? !!(s1 && selesaiSt(s1.status) && s1.label === "tidak_sesuai" && melati && melati.c.status === "Perlu klarifikasi RS" && melati.c.tidak_sesuai === 3 && melati.c.terjawab === 5) : !!S.hasil.S1;
-    return '<div class="kepala"><div><h1>Ringkasan rumah sakit</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
-      (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Belum perlu klarifikasi (2 dari 4).</div>' : "") +
-      kartuKinerjaModel(data.kinerjaModel) +
-      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak ada jawaban (tidak diangkat, menolak, atau tidak yakin jumlahnya) tidak dihitung.</div>' +
-      '<section class="panel"><div class="panel-kepala"><h2>Status rumah sakit</h2><span class="kanan">' + data.rs.length + ' rumah sakit</span></div><div class="tabel-bungkus"><table class="tabel tabel--kartu tabel-rs"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
-        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
+    return (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Belum perlu klarifikasi (2 dari 4).</div>' : "") +
+      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak ada jawaban tidak dihitung.</div>' +
+      '<section class="panel"><div class="tabel-bungkus"><table class="tabel tabel--kartu tabel-rs"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th>Aksi</th></tr></thead><tbody>' + baris + "</tbody></table></div></section>";
+  }
+  /* Halaman detail satu RS: ringkasan angka dan daftar pasien, terpisah dari tabel status. */
+  function lamanDetailRs(id) {
+    const data = dataRingkasan();
+    if (!data) return kepala("Memuat detail rumah sakit", "Mengambil data dari API…");
+    const r = data.rs.find((x) => x.id === id);
+    if (!r) return '<section class="panel"><div class="belum-mulai"><b>Rumah sakit tidak ditemukan</b><p>Kembali ke daftar rumah sakit.</p><a class="btn btn--primer" href="#/ringkasan-rs">Ringkasan RS</a></div></section>';
+    const c = r.c;
+    const kartu = (nama, ico, warna, n, sorot) =>
+      '<div class="kpi' + (sorot ? " " + sorot : "") + '"><div class="kpi-kepala"><span class="kpi-nama">' + nama + '</span><span class="kpi-ikon kpi-ikon--' + warna + '">' + ikon(ico) + "</span></div><b>" + n + "</b></div>";
+    const baris = r.daftar.map((d) => {
+      const tujuan = "#/kartu/" + d.id;
+      const terbaca = d.jumlah_maks != null && d.label !== "tidak_terhubung" && d.label !== "menolak";
+      const versi = d.jumlah_min === d.jumlah_maks ? d.jumlah_min : d.jumlah_min + "–" + d.jumlah_maks;
+      return '<tr class="bisa-klik" data-aksi="buka-baris" data-tujuan="' + tujuan + '">' +
+        '<td class="nama-berkas"><b>' + esc(d.pasien) + "</b></td>" +
+        '<td class="angka" data-label="Sesi">' + d.ditagih + " sesi</td>" +
+        '<td class="angka" data-label="Versi peserta">' + (terbaca ? versi + (d.label === "tidak_yakin" ? " (perkiraan)" : "") : "–") + "</td>" +
+        '<td class="angka" data-label="Selisih">' + (terbaca && d.label !== "tidak_yakin" ? d.selisih : "–") + "</td>" +
+        '<td data-label="Hasil"><div class="sel-status">' + chipHasil(d.label) + "</div></td>" +
+        '<td class="aksi lebar-penuh"><a class="btn btn--kecil" href="' + tujuan + '">Buka kartu</a></td></tr>';
+    }).join("");
+    return '<div class="kartu-angka">' +
+        kartu("Pasien aktif", "orang", "primer", r.aktif) +
+        kartu("Terpicu (" + persenRs(r.persen) + ")", "telepon", "biru", r.terpicu) +
+        kartu("Terjawab", "cek", "primer", c.terjawab) +
+        kartu("Tidak sesuai" + (c.terjawab ? " (" + Math.round(c.rasio * 100) + "%)" : ""), "awas", "merah", c.tidak_sesuai, c.tidak_sesuai ? "angka-tidak-sesuai" : "") +
+      "</div>" +
+      '<section class="panel tabel-antrean"><div class="panel-kepala"><h2>' + esc(r.nama) + '</h2><div class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + '</div><span class="kanan">' + r.daftar.length + " pasien</span></div>" +
+      (baris
+        ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu tabel-pasien-rs"><thead><tr><th>Pasien</th><th>Sesi</th><th>Versi peserta</th><th>Selisih</th><th>Hasil</th><th>Aksi</th></tr></thead><tbody>' + baris + "</tbody></table></div>"
+        : '<div class="kosong"><b>Belum ada pasien</b>Belum ada panggilan selesai untuk rumah sakit ini.</div>') +
+      "</section>";
   }
   /* ============================================================== riwayat */
 
@@ -1249,9 +1241,271 @@
       (daftar.length ? '<div class="panel-kepala"><h2>Semua keputusan</h2><span class="kanan">' + daftar.length + " keputusan</span></div>" : "") + isi + "</section>";
   }
 
-  /* ============================================================== render */
+  /* ============================================================ pengaturan */
 
-  const JUDUL_HALAMAN = { autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan" };
+  /* Pengaturan dan riwayat perubahannya disimpan terpisah dari status demo (S), jadi "Mulai ulang demo" tidak
+     menghapusnya. Bentuk datanya sama dengan PUT /pengaturan; sampai backend menerimanya, hanya tersimpan di peramban ini. */
+  const KUNCI_PENG = "vedika.pengaturan.v1";
+  const BATAS_RIWAYAT_PENG = 50;
+  function muatPeng() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KUNCI_PENG));
+      if (s && typeof s === "object") return { pengaturan: s.pengaturan && typeof s.pengaturan === "object" ? s.pengaturan : {}, riwayat: Array.isArray(s.riwayat) ? s.riwayat : [] };
+    } catch (e) { /* penyimpanan peramban tidak tersedia: pakai bawaan */ }
+    return { pengaturan: {}, riwayat: [] };
+  }
+  const PENG = muatPeng();
+  /* Hanya kunci yang dikenal dan bertipe sama dengan bawaan yang dipakai, supaya data lama atau rusak tidak merusak layar. */
+  (function () {
+    const patch = {};
+    Object.keys(D.PENGATURAN_BAWAAN).forEach((k) => {
+      const nilai = PENG.pengaturan[k], bawaan = D.PENGATURAN_BAWAAN[k];
+      const tipeSama = Array.isArray(bawaan) ? Array.isArray(nilai) && nilai.every((x) => typeof x === "string") : typeof nilai === typeof bawaan;
+      if (k in PENG.pengaturan && tipeSama && (typeof nilai !== "number" || isFinite(nilai))) patch[k] = nilai;
+    });
+    D.ubahPengaturan(patch);
+  })();
+  const simpanPeng = () => {
+    try { localStorage.setItem(KUNCI_PENG, JSON.stringify({ pengaturan: D.pengaturan(), riwayat: PENG.riwayat })); } catch (e) { /* diabaikan */ }
+  };
+  const waktuPeng = () => D.HARI_INI.replace(/^[^,]+, /, "") + " · " + formatJam(menitSekarang());
+  function catatPeng(apa, rincian) {
+    PENG.riwayat.unshift({ waktu: waktuPeng(), oleh: D.VERIFIKATOR.nama, apa: apa, rincian: rincian });
+    PENG.riwayat.length = Math.min(PENG.riwayat.length, BATAS_RIWAYAT_PENG);
+  }
+
+  const SALURAN = { wa: "WhatsApp", sms: "SMS", wa_sms: "WhatsApp, lalu SMS bila gagal" };
+  const SALURAN_HP = { wa: "WhatsApp", sms: "SMS", wa_sms: "WhatsApp" };
+  const HARI = { senin_jumat: "Senin–Jumat", senin_sabtu: "Senin–Sabtu" };
+  const ANGKA_PENG = ["batas_harian", "jeda_wa_menit", "jeda_percobaan_menit", "percobaan_maks", "indikator_min"];
+  const KUNCI_KARTU = {
+    pesan: ["saluran", "templat_wa"],
+    cadangan: ["templat_cadangan"],
+    panggilan: ["jam_mulai", "jam_selesai", "hari", "batas_harian", "jeda_wa_menit", "jeda_percobaan_menit", "percobaan_maks", "indikator_min", "indikator_aktif", "sertakan_model"]
+  };
+  const JUDUL_RIWAYAT_PENG = { pesan: "Pesan pertama", cadangan: "Pesan cadangan", panggilan: "Aturan panggilan" };
+  const LABEL_PENG = {
+    saluran: "Saluran", templat_wa: "Teks pesan pertama", templat_cadangan: "Teks pesan cadangan", jam_mulai: "Jam mulai", jam_selesai: "Jam selesai", hari: "Hari panggilan",
+    batas_harian: "Batas per hari", jeda_wa_menit: "Jeda pesan ke telepon (menit)", jeda_percobaan_menit: "Jeda antar percobaan (menit)", percobaan_maks: "Percobaan maksimal",
+    indikator_min: "Minimal indikator", indikator_aktif: "Indikator aktif", sertakan_model: "Model anomali"
+  };
+  const tampilNilaiPeng = (k, v) => (k === "saluran" ? SALURAN[v] : k === "hari" ? HARI[v] : k === "sertakan_model" ? (v ? "disertakan" : "tidak disertakan") : k === "indikator_aktif" ? v.join(", ") || "tidak ada" : String(v));
+  const normPeng = (k, v) => (ANGKA_PENG.indexOf(k) >= 0 ? Number(v) : k === "indikator_aktif" ? v.slice().sort() : v);
+  const samaPeng = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  /* Salinan kerja yang diedit di layar; baru masuk ke pengaturan setelah tombol simpan kartunya ditekan. Dibuang saat pindah halaman. */
+  function draf() {
+    if (!ui.peng) {
+      const a = D.pengaturan();
+      ui.peng = Object.assign({}, a, { indikator_aktif: a.indikator_aktif.slice(), gantiNomor: false, nomor_baru: "", alasan_nomor: "" });
+    }
+    return ui.peng;
+  }
+  const berubahPeng = (kartu) => KUNCI_KARTU[kartu].some((k) => !samaPeng(normPeng(k, draf()[k]), D.pengaturan()[k]));
+  const aturanDraf = () => { const d = draf(); return { indikator_min: Number(d.indikator_min), indikator_aktif: d.indikator_aktif, sertakan_model: d.sertakan_model }; };
+  const draf2 = () => { const d = draf(), o = {}; KUNCI_KARTU.panggilan.forEach((k) => { o[k] = normPeng(k, d[k]); }); return o; };
+
+  const htmlGalat = (g) => (g.length ? '<ul class="galat-templat" role="alert">' + g.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "");
+  const kartuPeng = (nama, judul, ket, isi) => '<section class="panel kartu-peng" id="kartu-' + nama + '" data-kartu="' + nama + '"><div class="panel-kepala"><h2>' + judul + "</h2>" +
+    (ket ? '<p class="peng-ket">' + ket + "</p>" : "") + '</div><div class="panel-isi">' + isi + "</div></section>";
+  const isianPeng = (f, label, tipe, nilai, atribut) => '<label class="medan-peng"><span>' + label + '</span><input type="' + tipe + '" data-f="' + f + '" value="' + esc(nilai) + '"' + (atribut || "") + "></label>";
+
+  function nomorSah() {
+    const d = draf(), n = d.nomor_baru.trim();
+    return !!n && !D.cekNomor(n) && !!d.alasan_nomor.trim() && n !== D.nomorPenelepon();
+  }
+
+  function htmlKartuNomor() {
+    const d = draf(), s = stasiun();
+    const ok = !!(M.hidup && s && s.aktif && s.siap);
+    const ket = !M.hidup ? "Mode contoh: belum ada stasiun saluran yang terhubung."
+      : !s || !s.aktif ? "Stasiun saluran terputus" + (s && s.terakhir_terlihat ? " sejak " + esc(A3.jamTeks(s.terakhir_terlihat)) : "")
+      : "Stasiun saluran aktif" + (s.perangkat ? " (" + esc(s.perangkat) + ")" : "") + (s.siap ? "" : ", belum siap");
+    const galatNomor = d.nomor_baru.trim() ? D.cekNomor(d.nomor_baru) : "";
+    const form = d.gantiNomor
+      ? '<div class="peng-form">' + isianPeng("nomor_baru", "Nomor baru", "tel", d.nomor_baru, ' inputmode="tel" autocomplete="off" placeholder="0812-3456-7890"') +
+          isianPeng("alasan_nomor", "Alasan penggantian", "text", d.alasan_nomor, ' maxlength="120" autocomplete="off" placeholder="Mis. nomor lama diblokir operator"') + htmlGalat(galatNomor ? [galatNomor] : []) +
+          '<div class="aksi-peng"><button class="btn btn--primer btn--kecil" type="button" data-aksi="simpan-nomor"' + (nomorSah() ? "" : " disabled") + '>Simpan nomor</button>' +
+          '<button class="btn btn--kecil" type="button" data-aksi="batal-nomor">Batal</button></div></div>'
+      : '<div class="aksi-peng"><button class="btn btn--kecil" type="button" data-aksi="ganti-nomor">Ganti nomor</button></div>';
+    return kartuPeng("nomor", "Nomor penelepon", "",
+      '<div class="nomor-baris"><span class="nomor-aktif">' + esc(D.nomorPenelepon()) + '</span><span class="stasiun-ket"><i class="titik' + (ok ? " ok" : "") + '"></i>' + ket + "</span></div>" +
+      '<p class="peng-ket">Nomor ini tampil di HP peserta dan terisi sendiri pada placeholder <code>{{nomor}}</code> di pesan.</p>' + form +
+      '<p class="peng-ket peng-ket--kecil">Penggantian nomor nantinya butuh persetujuan atasan.</p>');
+  }
+
+  /* HP pratinjau: satu gelembung pesan, dipakai ulang gaya ponsel WA. */
+  function pratinjauPonsel(teks, salurannya, ket) {
+    return '<div class="pratinjau-wa"><div class="ponsel"><div class="ponsel-layar"><div class="ponsel-kepala"><span class="foto">' + ikon("pengguna") + "</span><div><b>" + esc(D.nomorPenelepon()) + "</b><span>" + salurannya + "</span></div></div>" +
+      '<div class="obrolan"><span class="tanggal-obrolan">Hari ini</span>' + gelembungWa(teks, formatJam(menitSekarang())) + '</div><div class="ponsel-balas"><span class="petunjuk">Pratinjau, bukan pesan sungguhan.</span></div></div></div>' +
+      '<p class="ponsel-ket">' + ket + "</p></div>";
+  }
+
+  const chipPlaceholder = (daftar) => '<div class="chip-wadah" role="group" aria-label="Sisipkan placeholder">' + daftar.map((k) =>
+    '<button class="chip-ph" type="button" data-aksi="sisip" data-ph="' + k + '" title="' + esc(D.PLACEHOLDER[k]) + '">{{' + k + "}}</button>").join("") + "</div>";
+
+  function editorPeng(o) {
+    const d = draf(), teks = d[o.field], galat = D.cekTemplat(teks, o.jenis), sah = !galat.length && berubahPeng(o.kartu);
+    return '<div class="peng-dua"><div class="peng-kiri">' +
+        '<label class="kapital" for="f-' + o.field + '">' + o.label + "</label>" + chipPlaceholder(o.chip) +
+        '<textarea id="f-' + o.field + '" data-f="' + o.field + '" rows="' + o.baris + '" spellcheck="false">' + esc(teks) + "</textarea>" +
+        '<p class="hitung-karakter">' + o.hitung(teks) + "</p>" + htmlGalat(galat) +
+        '<div class="paragraf-kunci"><span class="kunci-label">' + ikon("kunci") + "Dikunci, selalu ikut terkirim</span><p>" + esc(o.kunci) + "</p></div>" +
+        '<div class="aksi-peng"><button class="btn btn--primer btn--kecil" type="button" data-aksi="simpan-' + o.kartu + '"' + (sah ? "" : " disabled") + '>Simpan</button>' +
+        '<button class="btn btn--kecil" type="button" data-aksi="bawaan-' + o.kartu + '">Kembalikan ke bawaan</button></div></div>' +
+      '<div class="peng-kanan">' + pratinjauPonsel(o.pratinjau(teks), o.salurannya, o.ketPonsel) + "</div></div>";
+  }
+
+  function htmlKartuPesan() {
+    const d = draf(), sms = d.saluran !== "wa";
+    const saluran = '<fieldset class="saluran-peng"><legend>Saluran pesan pertama</legend>' + Object.keys(SALURAN).map((k) =>
+      '<label class="pilih-saluran"><input type="radio" name="saluran" data-f="saluran" value="' + k + '"' + (d.saluran === k ? " checked" : "") + "> " + SALURAN[k] + "</label>").join("") + "</fieldset>" +
+      (sms ? '<p class="peng-ket peng-ket--kecil">Pengiriman SMS belum tersambung ke backend: pilihan ini baru mengubah pratinjau dan hitungan karakter.</p>' : "");
+    return kartuPeng("pesan", "Pesan pertama (sebelum telepon)", "Dikirim ke peserta beberapa menit sebelum ditelepon.", saluran + editorPeng({
+      kartu: "pesan", field: "templat_wa", jenis: "wa", label: "Teks pesan", baris: 6, kunci: D.KUNCI_WA,
+      chip: ["nama", "menit", "nomor", "pasien", "rs", "bulan"],
+      hitung: (t) => { const penuh = D.pesanPemberitahuan(D.SKENARIO.S1, t).length; return "Kolom " + t.length + " dari " + D.BATAS_KARAKTER.wa + " karakter · pesan lengkap " + penuh + " karakter" + (sms ? " · " + D.jumlahSms(penuh) + " SMS (160 karakter per SMS)" : ""); },
+      pratinjau: (t) => D.pesanPemberitahuan(D.SKENARIO.S1, t), salurannya: SALURAN_HP[d.saluran], ketPonsel: "Pratinjau untuk peserta contoh: <b>Andi Pratama</b>"
+    }));
+  }
+
+  function htmlKartuCadangan() {
+    return kartuPeng("cadangan", "Pesan cadangan (setelah " + D.pengaturan().percobaan_maks + " kali tidak diangkat)", "Dikirim bila telepon tidak diangkat. Peserta membalas dengan angka 1–6.", editorPeng({
+      kartu: "cadangan", field: "templat_cadangan", jenis: "cadangan", label: "Teks pesan", baris: 4, kunci: D.KUNCI_CADANGAN,
+      chip: ["nama", "pasien", "rs", "bulan"],
+      hitung: (t) => "Kolom " + t.length + " dari " + D.BATAS_KARAKTER.cadangan + " karakter",
+      pratinjau: (t) => D.pesanCadangan(D.SKENARIO.S5, t), salurannya: "WhatsApp", ketPonsel: "Pratinjau untuk peserta contoh: <b>" + esc(D.SKENARIO.S5.penerima.nama) + "</b>"
+    }));
+  }
+
+  function htmlKartuPanggilan() {
+    const d = draf(), galat = D.cekAturanPanggilan(draf2()), sah = !galat.length && berubahPeng("panggilan");
+    const n = D.hitungDipilih(aturanDraf()), kini = D.hitungDipilih(D.pengaturan());
+    const hari = '<label class="medan-peng"><span>Hari panggilan</span><select data-f="hari">' + Object.keys(HARI).map((k) => '<option value="' + k + '"' + (d.hari === k ? " selected" : "") + ">" + HARI[k] + "</option>").join("") + "</select></label>";
+    const indikator = Object.keys(D.INDIKATOR).map((k) => '<label class="centang"><input type="checkbox" data-f="indikator" value="' + k + '"' + (d.indikator_aktif.indexOf(k) >= 0 ? " checked" : "") + "> " + esc(D.INDIKATOR[k].nama) + "</label>").join("");
+    return kartuPeng("panggilan", "Panggilan", "Kapan menelepon, seberapa sering mencoba, dan siapa yang masuk antrean.",
+      '<div class="peng-grid">' + isianPeng("jam_mulai", "Jam mulai", "time", d.jam_mulai) + isianPeng("jam_selesai", "Jam selesai", "time", d.jam_selesai) + hari +
+        isianPeng("jeda_wa_menit", "Jeda pesan ke telepon (menit)", "number", d.jeda_wa_menit, ' min="1" max="10"') +
+        isianPeng("jeda_percobaan_menit", "Jeda antar percobaan (menit)", "number", d.jeda_percobaan_menit, ' min="1" max="30"') +
+        isianPeng("percobaan_maks", "Percobaan telepon maksimal", "number", d.percobaan_maks, ' min="1" max="3"') +
+        isianPeng("batas_harian", "Batas panggilan per hari", "number", d.batas_harian, ' min="1" max="500"') + "</div>" +
+      '<h3 class="peng-sub">Siapa masuk antrean</h3><div class="peng-grid">' + isianPeng("indikator_min", "Minimal indikator terpenuhi", "number", d.indikator_min, ' min="1" max="4"') + "</div>" +
+      '<fieldset class="indikator-peng"><legend>Indikator yang dihitung</legend>' + indikator +
+        '<label class="centang"><input type="checkbox" data-f="sertakan_model"' + (d.sertakan_model ? " checked" : "") + "> Sertakan pasien yang ditandai model anomali</label></fieldset>" +
+      '<p class="efek-antrean"><b>' + n + " pasien</b> di data contoh dipilih untuk ditelepon dengan aturan ini" + (n !== kini ? " (aturan tersimpan: " + kini + " pasien)" : "") +
+        ". Antrean di layar Antrean belum dihitung ulang dari aturan ini.</p>" + htmlGalat(galat) +
+      '<div class="aksi-peng"><button class="btn btn--primer btn--kecil" type="button" data-aksi="simpan-panggilan"' + (sah ? "" : " disabled") + ">Simpan aturan</button></div>");
+  }
+
+  /* Uji coba (simulasi): tiga tahap berurutan yang selesai satu per satu. */
+  function htmlKartuUji() {
+    const d = draf(), u = ui.uji, galat = d.nomor_uji.trim() ? D.cekNomor(d.nomor_uji) : "Isi nomor HP penerima uji.";
+    const jalan = !!(u && !u.selesai);
+    const langkah = [
+      ["Pesan terkirim", SALURAN_HP[D.pengaturan().saluran] + " ke " + (u ? u.nomor : "")],
+      ["Menunggu jeda sebelum telepon", D.jedaWa() + " menit, dipadatkan jadi beberapa detik"],
+      ["Telepon tersambung", "Dari " + D.nomorPenelepon() + " ke " + (u ? u.nomor : "")]
+    ];
+    const hasil = u ? '<ul class="hasil-uji">' + langkah.map((l, i) => {
+      const st = i < u.tahap ? "selesai" : i === u.tahap ? "jalan" : "menunggu";
+      return '<li class="' + st + '"><b>' + l[0] + "</b><span>" + esc(l[1]) + "</span></li>";
+    }).join("") + "</ul>" + (u.selesai ? '<p class="hasil-akhir">Uji coba selesai: pesan terkirim dan telepon tersambung.</p>' : "") : "";
+    return kartuPeng("uji", "Uji coba", "Kirim satu pesan dan satu telepon uji ke nomor tim, memakai nomor penelepon dan pesan yang tersimpan.",
+      '<div class="peng-form">' + isianPeng("nomor_uji", "Nomor HP penerima uji", "tel", d.nomor_uji, ' inputmode="tel" autocomplete="off"') + htmlGalat(galat ? [galat] : []) +
+      '<div class="aksi-peng"><button class="btn btn--primer" type="button" data-aksi="kirim-uji"' + (galat || jalan ? " disabled" : "") + ">Kirim uji ke nomor saya</button></div></div>" + hasil +
+      '<p class="peng-ket peng-ket--kecil">Mode contoh: belum tersambung ke stasiun saluran, jadi tidak ada pesan atau telepon sungguhan yang dikirim.</p>');
+  }
+
+  function htmlKartuRiwayat() {
+    const r = PENG.riwayat;
+    return kartuPeng("riwayat", "Riwayat perubahan", "Siapa mengubah apa dan kapan. Nantinya jadi dasar persetujuan atasan.",
+      r.length ? '<ul class="riwayat-peng">' + r.map((x) => "<li><time>" + esc(x.waktu) + "</time><div><b>" + esc(x.apa) + "</b><span>" + esc(x.rincian) + "</span></div><small>" + esc(x.oleh) + "</small></li>").join("") + "</ul>"
+        : '<p class="peng-ket">Belum ada perubahan. Penggantian nomor, perubahan pesan, dan aturan panggilan akan tercatat di sini.</p>');
+  }
+
+  const HTML_KARTU = { nomor: htmlKartuNomor, pesan: htmlKartuPesan, cadangan: htmlKartuCadangan, panggilan: htmlKartuPanggilan, uji: htmlKartuUji, riwayat: htmlKartuRiwayat };
+  const URUTAN_KARTU = ["nomor", "pesan", "cadangan", "panggilan", "uji", "riwayat"];
+
+  function lamanPengaturan() {
+    return '<p class="peng-intro">Atur nomor penelepon, pesan yang dikirim sebelum telepon, dan aturan panggilan. Perubahan baru tersimpan di peramban ini sampai server tersambung.</p>' +
+      URUTAN_KARTU.map((k) => HTML_KARTU[k]()).join("");
+  }
+
+  /* Render ulang satu kartu saja (bukan seluruh halaman) saat mengetik, lalu kembalikan fokus dan posisi kursor. */
+  function gambarKartu(nama, fokus) {
+    const el = document.getElementById("kartu-" + nama);
+    if (!el) return;
+    el.outerHTML = HTML_KARTU[nama]();
+    if (!fokus) return;
+    const baru = document.querySelector("#kartu-" + nama + " " + fokus.sel);
+    if (!baru) return;
+    baru.focus({ preventScroll: true });
+    if (fokus.pos != null) { try { baru.setSelectionRange(fokus.pos, fokus.pos); } catch (e) { /* tipe isian tanpa kursor */ } }
+  }
+
+  function selFokus(el) {
+    const f = el.dataset.f;
+    let pos = null;
+    try { pos = el.selectionStart; } catch (e) { /* tipe isian tanpa kursor */ }
+    return { sel: '[data-f="' + f + '"]' + (el.type === "radio" || f === "indikator" ? '[value="' + el.value + '"]' : ""), pos: pos };
+  }
+
+  document.addEventListener("input", (e) => {
+    const el = e.target, f = el.dataset && el.dataset.f;
+    if (!f) return;
+    const kartu = el.closest("[data-kartu]");
+    if (!kartu) return;
+    const d = draf();
+    if (f === "indikator") {
+      const s = new Set(d.indikator_aktif);
+      if (el.checked) s.add(el.value); else s.delete(el.value);
+      d.indikator_aktif = Array.from(s).sort();
+    } else if (el.type === "checkbox") d[f] = el.checked;
+    else d[f] = el.value;
+    gambarKartu(kartu.dataset.kartu, selFokus(el));
+  });
+
+  /* Simpan satu kartu: terapkan ke pengaturan, catat di riwayat, lalu render ulang halaman (pratinjau kartu lain ikut berubah). */
+  /* Kunci pengaturan yang diterima server (PUT /pengaturan). Kunci lain di kartu Panggilan tetap hanya tersimpan di peramban ini. */
+  const KUNCI_PENG_API = ["jam_mulai", "jam_selesai", "jeda_wa_menit", "jeda_percobaan_menit"];
+
+  /* Saat API hidup, nilai dari server menjadi nilai tersimpan untuk kunci di atas, sehingga isian Pengaturan mulai dari angka server. */
+  function selaraskanPengServer(dariServer) {
+    const kini = D.pengaturan(), patch = {};
+    KUNCI_PENG_API.forEach((k) => { if (dariServer[k] != null && dariServer[k] !== kini[k]) patch[k] = dariServer[k]; });
+    if (!Object.keys(patch).length) return;
+    D.ubahPengaturan(patch);
+    simpanPeng();
+    ui.peng = null;
+  }
+
+  function simpanKartu(kartu) {
+    const d = draf(), lama = D.pengaturan(), patch = {};
+    KUNCI_KARTU[kartu].forEach((k) => { patch[k] = normPeng(k, d[k]); });
+    const galat = kartu === "pesan" ? D.cekTemplat(patch.templat_wa, "wa") : kartu === "cadangan" ? D.cekTemplat(patch.templat_cadangan, "cadangan") : D.cekAturanPanggilan(patch);
+    if (galat.length || !berubahPeng(kartu)) return;
+    if (kartu === "panggilan" && M.hidup) {
+      const kePeladen = {};
+      KUNCI_PENG_API.forEach((k) => { kePeladen[k] = patch[k]; });
+      A3.ubahPengaturan(kePeladen).then(() => { simpanKartuLokal(kartu, patch, lama, true); }).catch(galatToast("Aturan panggilan gagal disimpan"));
+      return;
+    }
+    simpanKartuLokal(kartu, patch, lama, false);
+  }
+
+  function simpanKartuLokal(kartu, patch, lama, keServer) {
+    const rincian = KUNCI_KARTU[kartu].filter((k) => !samaPeng(patch[k], lama[k])).map((k) => (k.indexOf("templat") === 0 ? LABEL_PENG[k] + " diubah" : LABEL_PENG[k] + ": " + tampilNilaiPeng(k, lama[k]) + " → " + tampilNilaiPeng(k, patch[k]))).join("; ");
+    D.ubahPengaturan(patch);
+    catatPeng(JUDUL_RIWAYAT_PENG[kartu], rincian);
+    simpanPeng();
+    gambar(true);
+    if (keServer) segarkan();
+    toast(JUDUL_RIWAYAT_PENG[kartu] + (keServer ? " disimpan: jam dan jeda sudah masuk ke server, pengaturan lain tersimpan di peramban ini." : " disimpan dan tercatat di riwayat perubahan."));
+  }
+
+  const JUDUL_HALAMAN = { autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan", pengaturan: "Pengaturan" };
+
+  /* ============================================================== render */
 
   function gambar(tetap) {
     /* API mode before the first queue response: every page reads M.antrean, so wait for mulaiApp to render. */
@@ -1261,15 +1515,18 @@
     const akar = document.getElementById("akar");
     const sedangMengetik = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.aksi === "catatan" ? document.activeElement.selectionStart : null;
     document.body.style.overflow = "";
+    /* Render ulang karena data API berubah tidak boleh mengambil fokus dari kolom Pengaturan yang sedang diisi. */
+    const fokusPeng = r.nama === "pengaturan" && document.activeElement && document.activeElement.dataset && document.activeElement.dataset.f ? selFokus(document.activeElement) : null;
 
-    const antrean = '<a href="#/autentik">Autentik</a><span>/</span>';
     let isi, jejak;
-    if (r.nama === "autentik") { isi = lamanAntrean(); jejak = "<b>Antrean konfirmasi</b>"; }
-    else if (r.nama === "panggilan") { isi = lamanPanggilan(r.id); jejak = antrean + '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Panggilan</b>'; }
-    else if (r.nama === "kartu") { isi = lamanKartu(r.id); jejak = antrean + '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Kartu bukti</b>'; }
-    else if (r.nama === "ringkasan-rs") { isi = lamanRingkasanRs(); jejak = antrean + "<b>Ringkasan RS</b>"; }
+    if (r.nama === "autentik") { isi = lamanAntrean(); jejak = '<h1 class="judul-laman">Antrean konfirmasi</h1>'; }
+    else if (r.nama === "panggilan") { isi = lamanPanggilan(r.id); jejak = '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Panggilan</b>'; }
+    else if (r.nama === "kartu") { isi = lamanKartu(r.id); jejak = '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Kartu bukti</b>'; }
+    else if (r.nama === "ringkasan-rs" && r.id) { isi = lamanDetailRs(r.id); jejak = '<a href="#/ringkasan-rs">Ringkasan RS</a><span>/</span><b>' + esc(namaRs(r.id) || "Detail rumah sakit") + "</b>"; }
+    else if (r.nama === "ringkasan-rs") { isi = lamanRingkasanRs(); jejak = '<h1 class="judul-laman">Ringkasan rumah sakit</h1>'; }
     else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = "<b>Riwayat keputusan</b>"; }
-    else { isi = lamanAntrean(); jejak = "<b>Antrean konfirmasi</b>"; }
+    else if (r.nama === "pengaturan") { isi = lamanPengaturan(); jejak = '<h1 class="judul-laman">Pengaturan</h1>'; }
+    else { isi = lamanAntrean(); jejak = '<h1 class="judul-laman">Antrean konfirmasi</h1>'; }
 
     /* Pemutar rekaman di kartu bukti dipertahankan lintas render ulang (buka-tutup transkrip, keputusan),
        jika tidak elemen audio baru menggantikannya dan rekaman yang sedang diputar berhenti. */
@@ -1292,6 +1549,10 @@
     if (sedangMengetik != null) {
       const kolom = document.querySelector('[data-aksi="catatan"]');
       if (kolom) { kolom.focus(); kolom.setSelectionRange(sedangMengetik, sedangMengetik); }
+    }
+    if (fokusPeng) {
+      const kolom = document.querySelector(fokusPeng.sel);
+      if (kolom) { kolom.focus({ preventScroll: true }); try { kolom.setSelectionRange(fokusPeng.pos, fokusPeng.pos); } catch (e) { /* tipe isian tanpa kursor */ } }
     }
   }
 
@@ -1342,6 +1603,7 @@
     let berubah = false;
     const ubah = (kunci, nilai) => { const sig = kunci === "antrean" ? sigAntrean(nilai) : JSON.stringify(nilai); if (M.sig[kunci] === sig) return false; M.sig[kunci] = sig; berubah = true; return true; };
     M.waktuServer = baru.antrean.pengaturan.waktu_server;
+    selaraskanPengServer(baru.antrean.pengaturan);
     if (ubah("antrean", baru.antrean)) { M.antrean = baru.antrean; M.baris = baru.antrean.baris.map(A3.keBaris); catatTransisi(); }
     if (baru.detail && ubah("d:" + baru.detail.id, baru.detail)) { M.detail[baru.detail.id] = A3.kePasien(baru.detail); }
     if (baru.ringkasan && ubah("ringkasan", baru.ringkasan)) M.ringkasan = A3.keRingkasan(baru.ringkasan);
@@ -1360,16 +1622,16 @@
     if (!M.hidup || M.sibuk) return;
     M.sibuk = true;
     try {
-      const r = rute(), baru = {};
+      const r = rute(), baru = {}, bulanMinta = ui.bulan;
       if (M.putaran++ % 10 === 0) A3.kesehatan().then((k) => { if (JSON.stringify(k) !== JSON.stringify(M.kesehatan)) { M.kesehatan = k; if (M.hidup) gambar(true); } });
-      baru.antrean = await A3.antrean();
+      baru.antrean = await A3.antrean(ui.bulan);
       if ((r.nama === "panggilan" || r.nama === "kartu") && r.id) {
         try { baru.detail = await A3.panggilan(r.id); delete M.tidakAda[r.id]; } catch (e) { if (e.status === 404) M.tidakAda[r.id] = true; else throw e; }
       }
       if (r.nama === "ringkasan-rs") baru.ringkasan = await A3.ringkasanRs();
       if (r.nama === "riwayat") baru.riwayat = await A3.keputusan();
       M.gagal = 0;
-      terapkan(baru);
+      if (bulanMinta === ui.bulan) terapkan(baru); /* bulan diganti saat menunggu: buang jawaban bulan lama */
     } catch (e) {
       M.gagal += 1;
       if (M.gagal >= 3) putusApi();
@@ -1401,9 +1663,68 @@
 
   const AKSI = {
     menu() { ui.menuBuka = !ui.menuBuka; gambar(true); },
+    "ganti-nomor"() { draf().gantiNomor = true; gambarKartu("nomor", { sel: '[data-f="nomor_baru"]', pos: 0 }); },
+    "batal-nomor"() { const d = draf(); d.gantiNomor = false; d.nomor_baru = ""; d.alasan_nomor = ""; gambarKartu("nomor"); },
+    "simpan-nomor"() {
+      if (!nomorSah()) return;
+      const d = draf(), lama = D.nomorPenelepon(), baru = d.nomor_baru.trim(), alasan = d.alasan_nomor.trim();
+      D.ubahPengaturan({ nomor_penelepon: baru });
+      catatPeng("Nomor penelepon", lama + " → " + baru + " · alasan: " + alasan);
+      Object.assign(d, { nomor_penelepon: baru, gantiNomor: false, nomor_baru: "", alasan_nomor: "" });
+      simpanPeng();
+      gambar(true);
+      toast("Nomor penelepon diganti ke " + baru + ". Pesan memakai nomor baru.");
+    },
+    "simpan-pesan"() { simpanKartu("pesan"); },
+    "simpan-cadangan"() { simpanKartu("cadangan"); },
+    "simpan-panggilan"() { simpanKartu("panggilan"); },
+    "bawaan-pesan"() { draf().templat_wa = D.PENGATURAN_BAWAAN.templat_wa; gambarKartu("pesan"); },
+    "bawaan-cadangan"() { draf().templat_cadangan = D.PENGATURAN_BAWAAN.templat_cadangan; gambarKartu("cadangan"); },
+    sisip(el) {
+      const kartu = el.closest("[data-kartu]"), kolom = kartu && kartu.querySelector("textarea[data-f]");
+      if (!kolom) return;
+      const awal = kolom.selectionStart == null ? kolom.value.length : kolom.selectionStart, akhir = kolom.selectionEnd == null ? awal : kolom.selectionEnd;
+      const tambah = "{{" + el.dataset.ph + "}}";
+      draf()[kolom.dataset.f] = kolom.value.slice(0, awal) + tambah + kolom.value.slice(akhir);
+      gambarKartu(kartu.dataset.kartu, { sel: '[data-f="' + kolom.dataset.f + '"]', pos: awal + tambah.length });
+    },
+    "kirim-uji"() {
+      const d = draf(), nomor = d.nomor_uji.trim();
+      if (D.cekNomor(nomor) || (ui.uji && !ui.uji.selesai)) return;
+      ui.timerUji.forEach(clearTimeout);
+      ui.uji = { nomor: nomor, tahap: 0, selesai: false };
+      D.ubahPengaturan({ nomor_uji: nomor });
+      catatPeng("Uji coba", "Pesan dan telepon uji ke " + nomor + " lewat " + SALURAN[D.pengaturan().saluran]);
+      simpanPeng();
+      ui.timerUji = [700, 1700, 3000].map((ms, i) => setTimeout(() => {
+        if (!ui.uji || ui.uji.nomor !== nomor) return;
+        ui.uji.tahap = i + 1; ui.uji.selesai = i === 2;
+        if (rute().nama === "pengaturan") gambarKartu("uji");
+      }, ms));
+      gambarKartu("uji"); gambarKartu("riwayat");
+    },
     "buka-baris"(el) { ke(el.dataset.tujuan); },
     wa(el) { bukaWa(el.dataset.id, el.dataset.jenis, false); },
     transkrip() { const d = document.getElementById("transkripSinkron"); if (d) bukaTranskrip(d.hidden); },
+    /* Putar ulang di kartu bukti. Ada rekaman: putar dari awal (layar HP, durasi, dan transkrip ikut lewat event audio).
+       Tanpa rekaman: layar HP menyala sebentar tanpa suara lalu kembali ke hasil akhir. */
+    "putar-ulang"(el) {
+      const a = document.querySelector(".pemutar--ponsel audio");
+      if (a) { a.currentTime = 0; a.play(); return; }
+      const hp = document.querySelector(".ponsel--telp");
+      if (!hp || hp.dataset.ulang) return;
+      const tak = el.dataset.mode === "tak";
+      const status = hp.querySelector(".telp-status"), durasi = hp.querySelector(".telp-durasi");
+      const awal = { kelas: hp.className, status: status.textContent, durasi: durasi.textContent };
+      hp.dataset.ulang = "1";
+      hp.className = hp.className.replace(/ponsel--(akhir|tak)/, tak ? "ponsel--dering" : "ponsel--aktif");
+      status.textContent = tak ? "Berdering…" : "Tersambung";
+      durasi.textContent = "";
+      setTimeout(() => {
+        hp.className = awal.kelas; status.textContent = awal.status; durasi.textContent = awal.durasi;
+        delete hp.dataset.ulang;
+      }, 4000);
+    },
     loncat(el) {
       const a = document.querySelector(".pemutar--ponsel audio");
       if (!a) return;
@@ -1420,7 +1741,7 @@
       if (M.hidup) {
         A3.resetDemo().then(() => {
           tutupWa(); suaraHenti();
-          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null });
+          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, menuBuka: false, ubah: null });
           M.detail = {}; M.lalu = {}; M.sejak = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
           return segarkan();
         }).then(() => { ke("#/autentik"); toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal."); }).catch(galatToast("Gagal memulai ulang demo"));
@@ -1429,12 +1750,11 @@
       /* Hentikan panggilan yang sedang berjalan dan jadwal otomatis, lalu kosongkan semua hasil dan keputusan. */
       clearInterval(ui.timer); clearTimeout(ui.timerBerikut); tutupWa(); suaraHenti();
       S = statusAwal();
-      Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false });
+      Object.assign(ui, { filterRs: "", filterStatus: "", otomatis: false, jeda: false, aktif: null, pilihLain: false, tindakanLain: null, catatan: null, menuBuka: false });
       simpan();
       ke("#/autentik");
       toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal.");
     },
-    "lihat-kartu-rs"(el) { ui.rsBuka = ui.rsBuka === el.dataset.id ? null : el.dataset.id; gambar(true); },
     setujui(el) {
       if (M.hidup) { putuskanApi(el.dataset.id, { ikut_saran: true }); return; }
       putuskan(el.dataset.id, D.SARAN[tunggal(el.dataset.id).label], "", true);
@@ -1510,7 +1830,12 @@
 
   document.addEventListener("change", (e) => {
     const a = e.target.dataset && e.target.dataset.aksi;
-    if (a === "saring-rs") { ui.filterRs = e.target.value; gambar(true); }
+    if (a === "saring-bulan") {
+      ui.bulan = e.target.value; ui.filterRs = ""; ui.filterStatus = "";
+      if (M.hidup) { M.sig = {}; M.baris = []; segarkan(); }
+      gambar(true);
+    }
+    else if (a === "saring-rs") { ui.filterRs = e.target.value; gambar(true); }
     else if (a === "saring-status") { ui.filterStatus = e.target.value; gambar(true); }
     else if (a === "tindakan-lain") { ui.tindakanLain = e.target.value; gambar(true); }
   });
@@ -1524,7 +1849,7 @@
   });
 
   window.addEventListener("hashchange", () => {
-    ui.menuBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; ui.ubah = null;
+    ui.menuBuka = false; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; ui.ubah = null; ui.peng = null;
     suaraSelaraskan(); gambar(false);
     if (M.hidup) segarkan();
   });

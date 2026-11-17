@@ -141,16 +141,14 @@
 
   function lamanMasuk() {
     return '<div class="masuk"><div class="masuk-foto"><img src="assets/foto/kantor.jpg" alt=""></div><div class="masuk-bungkus">' +
-      '<div class="merek-ikon">' + ikon("perisai") + "</div>" +
-      "<h1>VEDIKA</h1><p>Verifikasi Digital Klaim</p>" +
+      '<div class="merek-ikon merek-ikon--bpjs"><img src="assets/logo-bpjs.png" alt="BPJS Kesehatan" width="72" height="72"></div>' +
+      "<h1>VEDIKA</h1><p>Verifikasi Digital Klaim BPJS Kesehatan</p>" +
       '<div class="masuk-kartu">' +
         "<h2>Otentikasi pengguna</h2>" +
         '<div class="medan"><span class="kapital">Username</span><div class="medan-isi">' + ikon("pengguna") + "rsantoso.kc0901</div></div>" +
         '<div class="medan"><span class="kapital">Kata sandi</span><div class="medan-isi">' + ikon("kunci") + "••••••••••</div></div>" +
-        '<button class="btn btn--primer btn--lebar btn--kapital" type="button" data-aksi="masuk">Masuk sebagai verifikator demo</button>' +
-        '<p class="masuk-catatan">Akun fiktif. Tidak ada data yang dikirim.</p>' +
+        '<button class="btn btn--primer btn--lebar btn--kapital" type="button" data-aksi="masuk">Masuk</button>' +
       "</div>" +
-      '<p class="masuk-versi">Prototipe Vedika Autentik · Healthkathon 2026</p>' +
     "</div></div>";
   }
 
