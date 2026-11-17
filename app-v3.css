@@ -75,11 +75,6 @@
 }
 .bar-antrean .pilih:hover { border-color: oklch(80% .006 90); }
 .bar-antrean .pilih:focus-visible { outline-offset: 1px; }
-.atur { padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; }
-.atur-isian { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; flex: 1 1 520px; }
-.atur-isian label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted-fg); }
-.atur-isian .pilih { width: 100%; height: 36px; padding: 0 10px; font-size: 14px; font-weight: 600; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; }
-.atur-aksi { display: flex; gap: 8px; }
 /* Saklar: label menyebut keadaan ON, posisi dan warna saklar menunjukkan keadaannya (aria-pressed untuk pembaca layar). */
 .btn--otomatis { gap: 10px; }
 .saklar { position: relative; flex: none; width: 30px; height: 18px; border-radius: 9px; background: var(--border-strong); transition: background .15s; }
@@ -1008,6 +1003,8 @@ main.isi { padding-top: 20px; }
 @media (max-width: 900px) { .peng-dua { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) {
   .nomor-aktif { font-size: 24px; }
+  .kartu-peng .panel-kepala { flex-wrap: wrap; row-gap: 4px; }
+  .kartu-peng .panel-kepala > * { min-width: 0; }
   .riwayat-peng li { grid-template-columns: minmax(0, 1fr); }
 }
 
@@ -1091,3 +1088,23 @@ main.isi { padding-top: 20px; }
 
 /* Tabel tanpa kepala panel: beri jarak atas supaya bar header tidak menempel ke tepi panel (Antrean, Ringkasan RS). */
 .panel > .tabel-bungkus:first-child { padding-top: 16px; }
+
+/* Layar keluar (simulasi) */
+.layar-keluar { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.layar-keluar-kartu { width: 100%; max-width: 420px; padding: 36px 28px; text-align: center; background: #fff; border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); display: grid; justify-items: center; gap: 12px; }
+.layar-keluar-kartu h1 { font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+.layar-keluar-kartu p { color: var(--muted-fg); line-height: 1.5; margin-bottom: 8px; }
+
+/* Tutorial: panel melayang di kanan bawah, tanpa latar gelap supaya halaman tetap bisa dipakai. */
+.tutorial { position: fixed; right: 20px; bottom: 20px; z-index: 75; width: 340px; max-width: calc(100vw - 32px); padding: 18px 18px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-pop); }
+.tutorial-kepala { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.tutorial-tutup { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+.tutorial-tutup svg { width: 14px; height: 14px; }
+.tutorial h2 { font-size: 17px; font-weight: 700; margin: 2px 0 6px; }
+.tutorial p { font-size: 14px; color: var(--fg-2); line-height: 1.5; }
+.tutorial-titik-baris { display: flex; gap: 6px; margin: 14px 0; }
+.tutorial-titik { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; background: var(--border); cursor: pointer; }
+.tutorial-titik.aktif { width: 20px; background: var(--primary, #0f766e); }
+.tutorial-aksi { display: flex; justify-content: space-between; gap: 8px; }
+.tutorial-aksi .btn:disabled { opacity: .4; cursor: default; }
+@media (max-width: 720px) { .tutorial { right: 16px; left: 16px; bottom: 16px; width: auto; max-width: none; } }

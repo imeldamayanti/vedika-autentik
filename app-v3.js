@@ -30,10 +30,12 @@
 
   /* Ikon garis 24px, satu ketebalan untuk seluruh antarmuka. */
   const IKON = {
+    buku: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
     perisai: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
     rumah: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
     berkas: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M9 11h6"/>',
     riwayat: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    keluar: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
     ulang: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     cek: '<path d="M20 6 9 17l-5-5"/>',
     telepon: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
@@ -132,10 +134,10 @@
 
   /* Status tampilan yang tidak perlu bertahan setelah halaman dimuat ulang. */
   const ui = {
-    menuBuka: false, filterRs: "", filterStatus: "", bulan: "2026-08",
+    keluar: false, menuBuka: false, filterRs: "", filterStatus: "", bulan: "2026-08",
     otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null,
-    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false, ubah: null, atur: null,
-    peng: null, uji: null, timerUji: []
+    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false, ubah: null,
+    peng: null, uji: null, timerUji: [], tutorial: null
   };
 
   /* Kolom Hasil di Antrean: empat nilai. Panggilan belum selesai = Antre; tanpa jawaban (tidak yakin, tidak diangkat, menolak) = Tidak diketahui. */
@@ -335,7 +337,9 @@
         "</nav>" +
         '<div class="sisi-kaki nav">' +
           '<a href="#/pengaturan"' + aktif(r.nama === "pengaturan") + ">" + ikon("gir") + "Pengaturan</a>" +
+          '<button type="button" data-aksi="buka-tutorial">' + ikon("buku") + "Lihat tutorial</button>" +
           '<button type="button" data-aksi="ulang-demo">' + ikon("ulang") + "Mulai ulang demo</button>" +
+          '<button type="button" data-aksi="keluar">' + ikon("keluar") + "Keluar</button>" +
         "</div>" +
       "</aside>" +
       '<div class="kolom">' +
@@ -448,21 +452,6 @@
       (ket ? "<p>" + ket + "</p>" : "") + '</div><div class="siap-aksi">' + aksi + "</div>" + (M.hidup ? chipSehat() : "") + "</section>";
   }
 
-  /* Pengaturan antrean (PUT /pengaturan). Isian disimpan di ui.atur supaya tidak hilang saat halaman digambar ulang. */
-  const ISIAN_ATUR = [
-    ["jam_mulai", "Jam mulai menelepon", "time"], ["jam_selesai", "Jam selesai menelepon", "time"],
-    ["jeda_wa_menit", "Jeda WA ke telepon (menit)", "number"], ["jeda_percobaan_menit", "Jeda sebelum mencoba lagi (menit)", "number"]
-  ];
-
-  function panelAtur() {
-    if (!ui.atur) return "";
-    return '<section class="panel atur" aria-label="Pengaturan antrean"><div class="atur-isian">' +
-      ISIAN_ATUR.map(([k, label, tipe]) => '<label><span>' + label + '</span><input class="pilih" data-aksi="atur" data-kunci="' + k + '" type="' + tipe + '"' +
-        (tipe === "number" ? ' min="0" max="1440" step="1"' : "") + ' value="' + esc(String(ui.atur[k])) + '" required></label>').join("") +
-      '</div><div class="atur-aksi"><button class="btn btn--primer" type="button" data-aksi="simpan-atur">Simpan</button>' +
-      '<button class="btn" type="button" data-aksi="buka-atur">Batal</button></div></section>';
-  }
-
   const daftarRsPilihan = () => (M.hidup ? M.antrean.daftar_rs.map((r) => ({ id: r.id_rs, nama: r.nama })) : D.RS.map((r) => ({ id: r.id, nama: r.nama })));
 
   function lamanAntrean() {
@@ -508,8 +497,7 @@
         '<div class="kanan">' +
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + oto + '"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>' +
           '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button>" +
-          (peng ? '<button class="btn" type="button" data-aksi="buka-atur" aria-expanded="' + !!ui.atur + '">' + ikon("jam") + "Pengaturan</button>" : "") +
-          "</div></div></div>" + panelAtur() +
+          "</div></div></div>" +
       '<section class="panel tabel-antrean">' +
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Sesi</th><th>Dipilih oleh</th><th>Hasil</th><th>Aksi</th></tr></thead><tbody>' + baris + "</tbody></table></div>"
@@ -938,6 +926,42 @@
     "</div></div>";
   }
 
+  /* Tutorial: panel kecil di pojok kanan bawah tanpa latar gelap, jadi halaman di belakangnya tetap bisa diklik. */
+  const LANGKAH_TUTORIAL = [
+    { judul: "Mulai dari Antrean konfirmasi", tujuan: "#/autentik",
+      isi: "Antrean berisi pasien yang klaimnya dipilih untuk dikonfirmasi lewat telepon. Kartu angka di atas merangkum posisi antrean, dan tabel di bawahnya memuat tiap pasien." },
+    { judul: "Atur jadwal panggilan", tujuan: "#/pengaturan",
+      isi: "Isi jam mulai, jam selesai, dan jeda WA ke telepon. AI hanya menelepon di dalam jam itu, satu jeda setelah pesan WA terkirim." },
+    { judul: "Nyalakan Panggilan otomatis", tujuan: "#/autentik",
+      isi: "Tekan saklar Panggilan otomatis di atas tabel. Sistem mengirim pesan WA ke penerima, lalu menelepon pasien satu per satu menurut urutan antrean." },
+    { judul: "Pantau panggilan", tujuan: "#/autentik",
+      isi: "Klik Lihat panggilan di baris pasien untuk melihat transkrip berjalan. Tombol Lihat pesan membuka tampilan WA yang diterima penerima." },
+    { judul: "Baca kartu bukti", tujuan: "#/autentik",
+      isi: "Setelah panggilan selesai, klik Buka kartu bukti. Isinya hasil (Sesuai atau Tidak sesuai), rekaman, dan transkrip. Sistem hanya mencatat jawaban penerima, tidak menuduh rumah sakit." },
+    { judul: "Ambil keputusan", tujuan: "#/autentik",
+      isi: "Di kartu bukti, klik Setujui saran. Kalau tidak setuju, klik Pilih tindakan lain, pilih tindakannya, lalu simpan." },
+    { judul: "Lihat Ringkasan RS", tujuan: "#/ringkasan-rs",
+      isi: "Ringkasan RS merangkum hasil konfirmasi per rumah sakit, jadi terlihat rumah sakit mana yang perlu klarifikasi." },
+    { judul: "Cek Riwayat keputusan", tujuan: "#/riwayat",
+      isi: "Semua keputusan yang sudah diambil tercatat di sini, lengkap dengan tindakan yang dipilih." },
+    { judul: "Ulangi dari awal", tujuan: "#/autentik",
+      isi: "Klik Mulai ulang demo di menu samping untuk menghapus semua hasil panggilan dan keputusan, lalu coba lagi dari langkah 3." }
+  ];
+
+  function panelTutorial() {
+    const i = ui.tutorial, n = LANGKAH_TUTORIAL.length, l = LANGKAH_TUTORIAL[i];
+    if (!l) return "";
+    const titik = LANGKAH_TUTORIAL.map((_, k) => '<button type="button" class="tutorial-titik' + (k === i ? " aktif" : "") + '" data-aksi="tutorial-ke" data-i="' + k + '" aria-label="Langkah ' + (k + 1) + '"' + (k === i ? ' aria-current="step"' : "") + "></button>").join("");
+    return '<aside class="tutorial" id="panelTutorial" role="dialog" aria-label="Tutorial memakai Vedika">' +
+      '<div class="tutorial-kepala"><span class="kapital">Langkah ' + (i + 1) + " dari " + n + '</span>' +
+        '<button class="tutorial-tutup" type="button" data-aksi="tutup-tutorial" aria-label="Tutup tutorial">' + ikon("x") + "</button></div>" +
+      "<h2>" + esc(l.judul) + "</h2><p>" + esc(l.isi) + "</p>" +
+      '<div class="tutorial-titik-baris">' + titik + "</div>" +
+      '<div class="tutorial-aksi"><button class="btn btn--hantu btn--kecil" type="button" data-aksi="tutorial-mundur"' + (i === 0 ? " disabled" : "") + ">Sebelumnya</button>" +
+        '<button class="btn btn--primer btn--kecil" type="button" data-aksi="tutorial-maju">' + (i === n - 1 ? "Selesai" : "Berikutnya") + "</button></div>" +
+    "</aside>";
+  }
+
   function statusKirimWa(p, cadangan) {
     const l = (p.log || []).filter((x) => x.status === (cadangan ? "tidak_terhubung" : "wa_terkirim"))[0];
     return (cadangan ? CHAT_KET : WA_KET)[kunciCatatan(l)] || "";
@@ -1256,7 +1280,7 @@
           (x.ikutSaran ? "Diikuti" : '<b class="tidak-diikuti">Tidak diikuti</b>') + '</td><td class="alasan lebar-penuh" data-label="Alasan">' + esc(x.alasan || "–") + '</td><td class="sembunyi-hp" data-label="Verifikator">' + esc(x.oleh) + "</td></tr>").join("") +
         "</tbody></table></div>"
       : '<div class="riwayat-kosong"><b>Belum ada keputusan</b><p>Keputusan dari kartu bukti akan muncul di sini.</p><a class="btn btn--primer" href="#/autentik">Buka antrean konfirmasi</a></div>';
-    return '<div class="kepala"><div><h1>Riwayat keputusan</h1><p>Jejak audit semua keputusan verifikator.</p></div></div><section class="panel">' +
+    return '<section class="panel">' +
       (daftar.length ? '<div class="panel-kepala"><h2>Semua keputusan</h2><span class="kanan">' + daftar.length + " keputusan</span></div>" : "") + isi + "</section>";
   }
 
@@ -1526,12 +1550,26 @@
 
   /* ============================================================== render */
 
+  /* Simulasi keluar: belum ada login sungguhan, jadi hanya menampilkan layar keluar. Pengaturan dan data demo tidak disentuh. */
+  function layarKeluar() {
+    return '<main class="layar-keluar"><div class="layar-keluar-kartu">' +
+      '<span class="merek-ikon merek-ikon--bpjs"><img src="assets/logo-bpjs.png" alt="BPJS Kesehatan" width="48" height="48"></span>' +
+      "<h1>Anda sudah keluar</h1><p>Sesi verifikator " + esc(D.VERIFIKATOR.nama) + " ditutup. Pengaturan dan data demo tetap tersimpan.</p>" +
+      '<button class="btn btn--primer" type="button" data-aksi="masuk-lagi">Masuk lagi</button></div></main>';
+  }
+
   function gambar(tetap) {
     /* API mode before the first queue response: every page reads M.antrean, so wait for mulaiApp to render. */
     if (M.hidup && !M.antrean) return;
     const y = window.scrollY;
     const r = rute();
     const akar = document.getElementById("akar");
+    if (ui.keluar) {
+      akar.innerHTML = layarKeluar();
+      document.title = "Keluar · Vedika Autentik";
+      window.scrollTo(0, 0);
+      return;
+    }
     const sedangMengetik = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.aksi === "catatan" ? document.activeElement.selectionStart : null;
     document.body.style.overflow = "";
     /* Render ulang karena data API berubah tidak boleh mengambil fokus dari kolom Pengaturan yang sedang diisi. */
@@ -1543,7 +1581,7 @@
     else if (r.nama === "kartu") { isi = lamanKartu(r.id); jejak = '<a href="#/autentik">Antrean konfirmasi</a><span>/</span><b>Kartu bukti</b>'; }
     else if (r.nama === "ringkasan-rs" && r.id) { isi = lamanDetailRs(r.id); jejak = '<a href="#/ringkasan-rs">Ringkasan RS</a><span>/</span><b>' + esc(namaRs(r.id) || "Detail rumah sakit") + "</b>"; }
     else if (r.nama === "ringkasan-rs") { isi = lamanRingkasanRs(); jejak = '<h1 class="judul-laman">Ringkasan rumah sakit</h1>'; }
-    else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = "<b>Riwayat keputusan</b>"; }
+    else if (r.nama === "riwayat") { isi = lamanRiwayat(); jejak = '<h1 class="judul-laman">Riwayat keputusan</h1>'; }
     else if (r.nama === "pengaturan") { isi = lamanPengaturan(); jejak = '<h1 class="judul-laman">Pengaturan</h1>'; }
     else { isi = lamanAntrean(); jejak = '<h1 class="judul-laman">Antrean konfirmasi</h1>'; }
 
@@ -1551,7 +1589,7 @@
        jika tidak elemen audio baru menggantikannya dan rekaman yang sedang diputar berhenti. */
     const pemutarLama = document.querySelector(".pemutar audio");
     const mainLagi = !!pemutarLama && !pemutarLama.paused;
-    akar.innerHTML = kerangka(r, isi, jejak) + (ui.wa ? modalWa() : "");
+    akar.innerHTML = kerangka(r, isi, jejak) + (ui.wa ? modalWa() : "") + (ui.tutorial != null ? panelTutorial() : "");
     const pemutarBaru = document.querySelector(".pemutar audio");
     if (pemutarLama && pemutarBaru && pemutarLama.getAttribute("src") === pemutarBaru.getAttribute("src")) {
       pemutarBaru.replaceWith(pemutarLama);
@@ -1755,12 +1793,22 @@
       suara.klip.forEach((a) => { a.muted = ui.bisu; });
       document.querySelectorAll('[data-aksi="bisu"]').forEach((el) => { el.outerHTML = tombolBisu(); });
     },
+    keluar() {
+      tutupWa(); suaraHenti();
+      ui.keluar = true; ui.menuBuka = false;
+      gambar();
+    },
+    "masuk-lagi"() {
+      ui.keluar = false;
+      ke("#/autentik");
+      gambar();
+    },
     "ulang-demo"() {
       if (!window.confirm("Mulai ulang demo?\n\nSemua hasil panggilan dan keputusan dihapus, antrean kembali ke keadaan awal.")) return;
       if (M.hidup) {
         A3.resetDemo().then(() => {
           tutupWa(); suaraHenti();
-          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null, atur: null });
+          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null });
           M.detail = {}; M.lalu = {}; M.sejak = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
           return segarkan();
         }).then(() => { ke("#/autentik"); toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal."); }).catch(galatToast("Gagal memulai ulang demo"));
@@ -1793,6 +1841,20 @@
     "batal-ubah"() { ui.ubah = null; ui.pilihLain = false; ui.tindakanLain = null; ui.catatan = null; gambar(true); },
     "tutup-wa"() { tutupWa(); },
     diam() { /* klik di dalam kartu tidak menutup latar */ },
+    "buka-tutorial"() { ui.menuBuka = false; ui.tutorial = 0; ke(LANGKAH_TUTORIAL[0].tujuan); gambar(true); },
+    "tutup-tutorial"() { ui.tutorial = null; const el = document.getElementById("panelTutorial"); if (el) el.remove(); },
+    "tutorial-maju"() {
+      if (ui.tutorial >= LANGKAH_TUTORIAL.length - 1) { AKSI["tutup-tutorial"](); return; }
+      AKSI["tutorial-ke"]({ dataset: { i: ui.tutorial + 1 } });
+    },
+    "tutorial-mundur"() { if (ui.tutorial > 0) AKSI["tutorial-ke"]({ dataset: { i: ui.tutorial - 1 } }); },
+    "tutorial-ke"(el) {
+      const k = Number(el.dataset.i);
+      if (!(k >= 0 && k < LANGKAH_TUTORIAL.length)) return;
+      ui.tutorial = k;
+      ke(LANGKAH_TUTORIAL[k].tujuan);
+      gambar(true);
+    },
     telepon(el) {
       const id = el.dataset.id, b = barisApi(id), kenal = M.hidup ? b : tunggal(id);
       /* Menelepon peserta tidak bisa ditarik kembali: minta konfirmasi (dilewati di mode presentasi untuk rekaman video). */
@@ -1824,18 +1886,6 @@
       if (ui.otomatis) lanjutOtomatis();
       else toast("Panggilan otomatis dinonaktifkan.");
     },
-    "buka-atur"() {
-      const p = M.antrean.pengaturan;
-      ui.atur = ui.atur ? null : { jam_mulai: p.jam_mulai, jam_selesai: p.jam_selesai, jeda_wa_menit: p.jeda_wa_menit, jeda_percobaan_menit: p.jeda_percobaan_menit };
-      gambar(true);
-    },
-    "simpan-atur"() {
-      const a = ui.atur, angka = (v) => (/^\d+$/.test(String(v).trim()) ? Number(v) : NaN);
-      const isi = { jam_mulai: a.jam_mulai, jam_selesai: a.jam_selesai, jeda_wa_menit: angka(a.jeda_wa_menit), jeda_percobaan_menit: angka(a.jeda_percobaan_menit) };
-      if (Number.isNaN(isi.jeda_wa_menit) || Number.isNaN(isi.jeda_percobaan_menit)) { toast("Jeda harus bilangan bulat 0 sampai 1440 menit."); return; }
-      A3.ubahPengaturan(isi).then(() => { ui.atur = null; return segarkan(); }).then(() => toast("Pengaturan disimpan."))
-        .catch((e) => toast("Pengaturan belum disimpan: " + (e && e.message ? e.message : "tidak diketahui")));
-    },
     jeda() {
       if (M.hidup) { A3.ubahPengaturan({ jeda: !jedaAktif() }).then(segarkan).catch(galatToast("Gagal mengubah jeda")); return; }
       ui.jeda = !ui.jeda;
@@ -1855,7 +1905,7 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.altKey && e.code === "KeyL") { e.preventDefault(); lompatAkhir(); }
-    else if (e.key === "Escape") tutupWa();
+    else if (e.key === "Escape") { if (ui.wa) tutupWa(); else if (ui.tutorial != null) AKSI["tutup-tutorial"](); }
     else if ((e.key === "Enter" || e.key === " ") && e.target.dataset && e.target.dataset.aksi === "loncat") { e.preventDefault(); AKSI.loncat(e.target); }
   });
 
@@ -1873,7 +1923,6 @@
 
   /* Tombol simpan hanya menyala bila tindakan dipilih dan alasan terisi; diperbarui tanpa merender ulang agar kursor tetap. */
   document.addEventListener("input", (e) => {
-    if (e.target.dataset && e.target.dataset.aksi === "atur" && ui.atur) { ui.atur[e.target.dataset.kunci] = e.target.value; return; }
     if (!e.target.dataset || e.target.dataset.aksi !== "catatan") return;
     ui.catatan = e.target.value;
     const simpanBtn = document.querySelector('[data-aksi="simpan-lain"]');
