@@ -11,7 +11,7 @@ from psycopg.rows import dict_row
 
 from scripts.seed_v3 import BULAN, DATA, PESAN_KONEKSI, muat_aturan
 
-TIDAK_DITELEPON = {"S7"}  # I3 saja, tidak terpicu
+TIDAK_DITELEPON = {"S7"}  # I3 saja, tidak terpicu dan tidak ditandai model anomali
 
 
 def hitung(conn, sql, *param):
@@ -21,13 +21,19 @@ def hitung(conn, sql, *param):
 def periksa_jumlah(conn):
     harapan = [
         ("5 rumah sakit", hitung(conn, "select count(*) as n from rumah_sakit"), 5),
-        ("408 peserta", hitung(conn, "select count(*) as n from peserta"), 408),
-        ("4.913 klaim sesi", hitung(conn, "select count(*) as n from klaim_sesi"), 4913),
-        ("300 indikator Agustus", hitung(conn, "select count(*) as n from indikator_bulanan where bulan = %s", BULAN), 300),
+        ("410 peserta", hitung(conn, "select count(*) as n from peserta"), 410),
+        ("4.938 klaim sesi", hitung(conn, "select count(*) as n from klaim_sesi"), 4938),
+        ("302 indikator Agustus", hitung(conn, "select count(*) as n from indikator_bulanan where bulan = %s", BULAN), 302),
         ("30 pasien dipicu", hitung(conn, "select count(*) as n from indikator_bulanan where bulan = %s and dipicu", BULAN), 30),
-        ("30 baris panggilan", hitung(conn, "select count(*) as n from panggilan"), 30),
+        ("2 pasien hanya dipilih model anomali", hitung(
+            conn, "select count(*) as n from indikator_bulanan where bulan = %s and anomali_ditandai and not dipicu", BULAN
+        ), 2),
+        ("302 bulan-pasien dinilai model anomali", hitung(
+            conn, "select count(*) as n from indikator_bulanan where bulan = %s and alasan_anomali is not null", BULAN
+        ), 302),
+        ("32 baris panggilan", hitung(conn, "select count(*) as n from panggilan"), 32),
         ("4 panggilan selesai", hitung(conn, "select count(*) as n from panggilan where status = 'selesai'"), 4),
-        ("26 panggilan antre", hitung(conn, "select count(*) as n from panggilan where status = 'antre'"), 26),
+        ("28 panggilan antre", hitung(conn, "select count(*) as n from panggilan where status = 'antre'"), 28),
     ]
     return [(nama, ada == mau, f"ada {ada}") for nama, ada, mau in harapan]
 
@@ -49,6 +55,15 @@ def periksa_skenario(conn):
         penerima = "peserta" if s["penerima_telepon"]["hubungan"] == "peserta" else "keluarga"
         ok = r is not None and r["status"] == "antre" and r["penerima"] == penerima
         hasil.append((f"{sid} antre, penerima {penerima}", ok, f"{r['status']}/{r['penerima']}" if r else "tidak ada"))
+    hanya_model = conn.execute(
+        "select p.id_peserta, p.status from panggilan p join indikator_bulanan i on i.id_peserta = p.id_peserta"
+        " and i.id_rs = p.id_rs and i.bulan = p.bulan_layanan where i.anomali_ditandai and not i.dipicu"
+    ).fetchall()
+    hasil.append((
+        "M1 dan M2 antre, hanya dipilih model anomali",
+        sorted((r["id_peserta"], r["status"]) for r in hanya_model) == [("P-M1", "antre"), ("P-M2", "antre")],
+        str([(r["id_peserta"], r["status"]) for r in hanya_model]),
+    ))
     return hasil
 
 

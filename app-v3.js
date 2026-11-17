@@ -62,14 +62,19 @@
   const labelChip = (kunci, besar) => '<span class="label label--' + kunci + (besar ? " label--besar" : "") + '">' + D.LABEL[kunci].nama + "</span>";
   const koma = (n) => String(n).replace(".", ",");
 
-  /* Skor pola: hanya menentukan urutan panggilan. Dua desimal, koma desimal. Warna hanya untuk pola tidak biasa. */
-  const skorTeks = (s) => koma(s.toFixed(2));
   const persenSatu = (x) => koma(x.toFixed(1)) + "%";
-  function chipPola(p) {
-    if (p.skor_pola == null) return "";
-    const judul = "Skor pola " + skorTeks(p.skor_pola) + (p.pola_tinggi ? ", pola tidak biasa" : "");
-    return '<span class="chip-pola' + (p.pola_tinggi ? " chip-pola--tinggi" : "") + '" title="' + judul + '" aria-label="' + judul + '">Pola ' + skorTeks(p.skor_pola) +
-      '<i aria-hidden="true"><b style="width:' + Math.round(p.skor_pola * 100) + '%"></b></i></span>';
+
+  /* Sumber pemilihan: pasien ditelepon bila aturan (≥ 2 indikator) ATAU model anomali menandainya.
+     Simulasi dan API sama-sama membawa field dipilih. */
+  const DIPILIH = {
+    keduanya: { nama: "Aturan + model", arti: "Dipilih aturan (dua indikator atau lebih) dan model anomali" },
+    aturan: { nama: "Aturan", arti: "Dipilih aturan: dua indikator atau lebih" },
+    model: { nama: "Model", arti: "Dipilih model anomali: polanya jarang di antara tagihan pasien seusia, walau tidak terkena aturan" }
+  };
+  const sumberDipilih = (p) => p.dipilih || "aturan";
+  function chipDipilih(p) {
+    const k = sumberDipilih(p);
+    return '<span class="chip-dipilih chip-dipilih--' + k + '" title="' + DIPILIH[k].arti + '">' + DIPILIH[k].nama + "</span>";
   }
   /* Indikator aktif sebagai teks biasa; arti lengkap di keterangan arah kursor. */
   const teksIndikator = (daftar) => '<span class="ind-teks">' + daftar.map((i) => '<span title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join(" · ") + "</span>";
@@ -217,11 +222,11 @@
   function angka() {
     if (M.hidup) {
       const a = M.antrean.angka;
-      return { terpicu: a.terpicu, aktif: a.pasien_aktif, ditelepon: a.sudah_ditelepon, tidakSesuai: a.tidak_sesuai, rsKlarifikasi: a.rs_perlu_klarifikasi };
+      return { dipilih: a.dipilih, terpicu: a.terpicu, hanyaModel: a.hanya_model, aktif: a.pasien_aktif, ditelepon: a.sudah_ditelepon, tidakSesuai: a.tidak_sesuai, rsKlarifikasi: a.rs_perlu_klarifikasi };
     }
     const selesai = panggilanSelesai();
     return {
-      terpicu: D.PASIEN_TERPICU, aktif: D.PASIEN_AKTIF, ditelepon: selesai.length,
+      dipilih: D.PASIEN_TERPICU + D.PASIEN_HANYA_MODEL, terpicu: D.PASIEN_TERPICU, hanyaModel: D.PASIEN_HANYA_MODEL, aktif: D.PASIEN_AKTIF, ditelepon: selesai.length,
       tidakSesuai: selesai.filter((p) => p.label === "tidak_sesuai").length,
       rsKlarifikasi: D.ringkasanRs(selesai).filter((r) => r.status === "Perlu klarifikasi RS").length
     };
@@ -340,8 +345,9 @@
         '<div class="kpi-bawah">' + (o.pill ? '<span class="kpi-pill' + (o.pillKelas ? " " + o.pillKelas : "") + '">' + o.pill + "</span>" : "") + '<span class="kpi-ket">' + o.ket + "</span></div>" +
       "</div>";
     return '<div class="kartu-angka">' +
-      kartu({ nama: "Pasien terpicu", ikon: "orang", warna: "primer", n: a.terpicu, ket: "dari " + a.aktif + " pasien aktif", pill: persen(a.terpicu, a.aktif) }) +
-      kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon, ket: "dari " + a.terpicu + " terpicu", pill: persen(a.ditelepon, a.terpicu) }) +
+      kartu({ nama: "Pasien dipilih", ikon: "orang", warna: "primer", n: a.dipilih,
+        ket: a.hanyaModel ? a.terpicu + " aturan + " + a.hanyaModel + " model" : "dari " + a.aktif + " pasien aktif", pill: persen(a.dipilih, a.aktif) }) +
+      kartu({ nama: "Sudah ditelepon", ikon: "telepon", warna: "biru", n: a.ditelepon, ket: "dari " + a.dipilih + " dipilih", pill: persen(a.ditelepon, a.dipilih) }) +
       kartu({ nama: "Jawaban tidak sesuai", ikon: "awas", warna: "merah", n: a.tidakSesuai, ket: "dari " + a.ditelepon + " ditelepon",
         sorot: a.tidakSesuai ? "angka-tidak-sesuai" : "", pill: a.tidakSesuai ? "Perlu dicek" : persen(a.tidakSesuai, a.ditelepon), pillKelas: a.tidakSesuai ? "kpi-pill--merah" : "" }) +
       kartu({ nama: "RS perlu klarifikasi", ikon: "rumahSakit", warna: "kuning", n: a.rsKlarifikasi, ket: "dari " + jumlahRs + " rumah sakit",
@@ -354,6 +360,7 @@
     if (M.hidup) return selesaiSt(p.status) ? "#/kartu/" + p.id : "#/panggilan/" + p.id;
     if (D.LATAR[p.id] || S.hasil[p.id]) return "#/kartu/" + p.id;
     if (D.SKENARIO[p.id]) return "#/panggilan/" + p.id;
+    if (D.MENGANTRE[p.id]) return "#/kartu/" + p.id;
     return null;
   }
 
@@ -437,7 +444,7 @@
       } else if (b.bisaTelepon) {
         aksi = '<button class="btn btn--kecil" type="button" data-aksi="telepon" data-id="' + p.id + '"' + (!M.hidup && sibuk ? ' disabled title="Satu panggilan aktif pada satu waktu"' : ' title="Pindahkan ke urutan berikutnya"') + ">Dahulukan</button>";
       } else if (tujuan) {
-        aksi = '<a class="btn btn--kecil" href="' + tujuan + '">' + (tujuan.indexOf("#/kartu/") === 0 ? "Buka kartu" : "Lihat panggilan") + "</a>";
+        aksi = '<a class="btn btn--kecil" href="' + tujuan + '">' + (tujuan.indexOf("#/kartu/") !== 0 ? "Lihat panggilan" : D.MENGANTRE[p.id] && !M.hidup ? "Lihat alasan" : "Buka kartu") + "</a>";
       } else {
         aksi = '<span class="redup">Belum ditelepon</span>';
       }
@@ -445,7 +452,8 @@
         '<td class="nama-berkas"><b>' + esc(p.pasien) + "</b><span>" + p.umur + " th</span></td>" +
         '<td class="sembunyi-hp" data-label="Rumah sakit">' + esc(namaRs(p.rs)) + "</td>" +
         '<td class="angka sembunyi-hp" data-label="Ditagih">' + p.ditagih + " sesi</td>" +
-        '<td class="lebar-penuh" data-label="Indikator aktif"><div class="sel-indikator">' + teksIndikator(p.indikator) + chipPola(p) + "</div></td>" +
+        '<td class="lebar-penuh" data-label="Indikator aktif"><div class="chip-ind-wadah">' + p.indikator.map((i) => '<span class="chip-ind chip-ind--' + i + '" title="' + esc(D.INDIKATOR[i].arti) + '">' + D.INDIKATOR[i].nama + "</span>").join("") + "</div></td>" +
+        '<td data-label="Dipilih oleh">' + chipDipilih(p) + "</td>" +
         '<td class="sembunyi-hp" data-label="Penerima"><span class="nilai">' + penerimaTeks(p) + "</span></td>" +
         /* Panggilan selesai: satu pernyataan "hasil + keputusan", bukan tiga baris (audit S-10). */
         '<td data-label="Status"><div class="sel-status">' + (lab
@@ -457,7 +465,7 @@
     const oto = otomatisAktif(), jd = jedaAktif();
 
     return '<div class="kepala"><div><h1>Antrean konfirmasi</h1>' +
-        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dengan dua indikator atau lebih, diurutkan menurut skor pola. Ditelepon satu per satu pukul 09.00–17.00.</p></div></div>" +
+        '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ". Pasien dipilih aturan (dua indikator atau lebih) atau model anomali. Ditelepon satu per satu pukul 09.00–17.00.</p></div></div>" +
       stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-rs" aria-label="Saring menurut rumah sakit"><option value="">Semua RS</option>' +
           daftarRsPilihan().map((r) => '<option value="' + r.id + '"' + (ui.filterRs === r.id ? " selected" : "") + ">" + esc(r.nama) + "</option>").join("") + "</select>" +
@@ -469,9 +477,9 @@
       '<section class="panel tabel-antrean">' +
         '<div class="panel-kepala"><h2>Antrean pasien</h2><span class="kanan">' + daftarBaris.length + " pasien</span></div>" +
         (baris
-          ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
+          ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Rumah sakit</th><th>Ditagih</th><th>Indikator aktif</th><th>Dipilih oleh</th><th>Penerima</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>"
           : '<div class="kosong"><b>Tidak ada pasien yang cocok</b>Ubah saringan rumah sakit atau status.</div>') +
-        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. Skor pola hanya menentukan urutan panggilan. Hasilnya tetap dari jawaban peserta.</p>' +
+        '<p class="catatan-kaki">Indikator: lebih dari 8 sesi sebulan, 3 sesi seminggu, 6 bulan berturut-turut, sesi di hari libur. Model anomali menandai tagihan yang polanya jarang dibanding data sampel BPJS 2023–2024. Hasilnya tetap dari jawaban peserta.</p>' +
       "</section>";
   }
   /* ============================================================== panggilan */
@@ -1017,11 +1025,19 @@
   function lamanKartu(id) {
     const p = dataPasien(id);
     if (M.hidup && !p && !M.tidakAda[id]) return kepala("Memuat kartu bukti", "Mengambil data dari API…");
+    /* Simulasi: pasien antre tanpa skenario panggilan (A1–A3, M1, M2) hanya punya alasan pemilihan. */
+    if (!M.hidup && p && D.MENGANTRE[id]) {
+      return '<div class="kepala-kartu"><div><div class="judul-label"><h1>' + esc(p.pasien) + "</h1>" + chipDipilih(p) + "</div>" +
+        '<p class="sub-judul">' + esc(namaRs(p.rs)) + ", fisioterapi " + D.BULAN + ", " + p.ditagih + " sesi ditagih</p></div></div>" +
+        '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + " belum ditelepon</b><p>Pasien ini tidak punya skenario panggilan di simulasi. Kartu bukti dibuat setelah panggilan selesai.</p></div></section>" +
+        sectionDipilih(p);
+    }
     if (M.hidup ? !p : !p || !(D.LATAR[id] || D.SKENARIO[id])) {
       return kepala("Kartu bukti tidak ditemukan", "Kartu bukti hanya ada untuk pasien yang sudah ditelepon.") + '<section class="panel"><div class="belum-mulai"><b>Tidak ada kartu untuk ' + esc(id || "") + '</b><a class="btn btn--primer" href="#/autentik">Ke antrean konfirmasi</a></div></section>';
     }
     if (M.hidup ? !selesaiSt(p.status) : D.SKENARIO[id] && !S.hasil[id]) {
-      return kepala("Kartu bukti belum tersedia", p.pasien) + '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + ' belum ditelepon</b><p>Kartu bukti dibuat setelah panggilan selesai.</p><a class="btn btn--primer" href="#/panggilan/' + id + '">Ke layar panggilan</a></div></section>';
+      return kepala("Kartu bukti belum tersedia", p.pasien) + '<section class="panel"><div class="belum-mulai"><b>' + esc(p.pasien) + ' belum ditelepon</b><p>Kartu bukti dibuat setelah panggilan selesai.</p><a class="btn btn--primer" href="#/panggilan/' + id + '">Ke layar panggilan</a></div></section>' +
+        (M.hidup ? sectionDipilih(p) : "");
     }
     const j = p.jawaban, rk = ringkasKartu(p), latar = M.hidup ? p.sumber === "sintetis-riwayat" : !!D.LATAR[id];
     const saran = D.TINDAKAN[saranP(p)];
@@ -1050,12 +1066,8 @@
       angka("Ditagih RS", p.ditagih, "netral", "") + angka("Versi peserta", rk.versi, rk.versiGaya, rk.versiKet) + angka("Selisih", rk.selisih, rk.gaya, rk.selisihKet) + "</div>" +
       '<div class="tgl-blok"><span class="kapital">Tanggal ditagih</span>' + tanggal + "</div></section>";
 
-    /* Alasan prioritas: dua alasan teratas skor pola dan kelangkaan gabungan indikatornya. */
-    const pola = p.pola ? '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Alasan prioritas</h2><div class="kanan">' +
-        (p.pola.tinggi ? '<span class="lencana-pola">Pola tidak biasa</span>' : "") + chipPola({ skor_pola: p.pola.skor, pola_tinggi: p.pola.tinggi }) + "</div></div>" +
-      '<ul class="pola-alasan">' + p.pola.alasan.map((a) => "<li>" + esc(a.teks) + "</li>").join("") + "</ul>" +
-      '<p class="pola-kombinasi">' + esc(p.pola.kombinasi.teks) + "</p>" +
-      '<p class="pola-catatan">Dibandingkan dengan data sampel BPJS 2024.</p></section>' : "";
+    /* Mengapa dipilih: indikator aturan yang aktif, lalu alasan model anomali (bila ada datanya). */
+    const pola = sectionDipilih(p);
 
     let bukti, pemutar = "";
     if (latar) bukti = '<p class="tanpa-rekaman">Panggilan sebelum demo, tanpa rekaman.</p>';
@@ -1092,6 +1104,19 @@
     return kop + peringatan + '<div class="kartu-grid">' + htmlPonsel(p, null, true, pemutar) +
       '<div class="kartu-kanan">' + ringkasan + kutipan + pola + '</div><div class="kartu-saran">' + sarankan + "</div></div>";
 }
+  function sectionDipilih(p) {
+    const k = sumberDipilih(p), a = p.anomali;
+    const aturan = p.indikator.length >= 2
+      ? "<li><b>Aturan:</b> " + p.indikator.length + " indikator aktif (" + p.indikator.map((i) => D.INDIKATOR[i].nama.toLowerCase()).join(", ") + ").</li>"
+      : "<li><b>Aturan:</b> " + (p.indikator.length ? "hanya " + p.indikator.length + " indikator aktif" : "tidak ada indikator aktif") + ", belum cukup untuk dipilih aturan.</li>";
+    const model = !a ? ""
+      : a.ditandai ? "<li><b>Model anomali:</b> " + esc(a.gabungan) + (a.alasan.length ? '<ul class="pola-alasan">' + a.alasan.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") + "</li>"
+      : "<li><b>Model anomali:</b> polanya tidak jarang di antara pasien seusia, jadi model tidak menandainya.</li>";
+    return '<section class="panel pola-kartu"><div class="panel-kepala"><h2>Mengapa dipilih</h2><div class="kanan">' + chipDipilih(p) + "</div></div>" +
+      '<ul class="pola-alasan">' + aturan + model + "</ul>" +
+      '<p class="pola-catatan">' + (a ? "Model dibandingkan dengan data sampel BPJS 2023–2024. Hasil tetap ditentukan jawaban peserta." : "Hasil tetap ditentukan jawaban peserta.") + "</p></section>";
+  }
+
   /* ============================================================ ringkasan RS */
 
   const persenRs = (x) => koma(x.toFixed(1)) + "%";
@@ -1103,16 +1128,18 @@
     const ring = D.ringkasanRs(selesai);
     const terjawab = selesai.filter((p) => p.label === "sesuai" || p.label === "tidak_sesuai");
     const tidakSesuai = terjawab.filter((p) => p.label === "tidak_sesuai");
-    const rata = (d) => (d.length ? d.reduce((a, p) => a + p.skor_pola, 0) / d.length : null);
+    const dariModel = (d) => d.filter((p) => p.dipilih === "model" || p.dipilih === "keduanya");
+    const hanyaAturan = (d) => d.filter((p) => p.dipilih === "aturan");
     return {
       jumlah: selesai.length,
-      kinerjaPola: {
-        n: terjawab.length, skor_rata_tidak_sesuai: rata(tidakSesuai), skor_rata_sesuai: rata(terjawab.filter((p) => p.label === "sesuai")),
-        tinggi: terjawab.filter((p) => p.pola_tinggi).length, tinggi_dan_tidak_sesuai: tidakSesuai.filter((p) => p.pola_tinggi).length
+      kinerjaModel: {
+        n: terjawab.length,
+        model: dariModel(terjawab).length, model_tidak_sesuai: dariModel(tidakSesuai).length,
+        aturan: hanyaAturan(terjawab).length, aturan_tidak_sesuai: hanyaAturan(tidakSesuai).length
       },
       rs: D.RS.map((r, i) => ({
         id: r.id, nama: r.nama, aktif: r.aktif, terpicu: r.terpicu, persen: r.persen, c: ring[i],
-        pembanding: r.pembanding, polaTinggiTidakTerpicu: r.pola_tinggi_tidak_terpicu,
+        funnel: r.funnel,
         daftar: selesai.filter((p) => p.rs === r.id).map((p) => ({
           id: p.id, pasien: p.pasien, label: p.label, ditagih: p.ditagih, jumlah_min: p.jawaban.jumlah_min, jumlah_maks: p.jawaban.jumlah_maks, selisih: D.selisih(p)
         }))
@@ -1126,29 +1153,29 @@
     return '<span class="label label--' + kelas + '">' + c.status + "</span>";
   }
 
-  /* Satu baris pembanding per RS: persen terpicu RS ini, RS sejenis nasional, dan batas 95% kelompok RS sejenis. */
-  function barisPembanding(r) {
-    const b = r.pembanding;
-    if (!b) return "";
-    const bagian = ["Terpicu " + persenSatu(r.persen), "rata-rata RS sejenis " + persenSatu(b.persen_terpicu_nasional)];
-    if (b.terpicu_p95_kelompok != null) bagian.push("batas 95% RS sejenis " + persenSatu(b.terpicu_p95_kelompok));
-    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Dibandingkan dengan ' + esc(b.tipe) + ' di data sampel BPJS 2024">' +
-      "<span>" + bagian.join(" · ") + "</span>" +
-      (b.posisi === "di_atas_p95" ? '<span class="lencana-pola">Di atas 95% RS sejenis</span>' : "") +
-      (r.polaTinggiTidakTerpicu > 0 ? '<span class="redup">' + r.polaTinggiTidakTerpicu + " pasien berpola tidak biasa tanpa pemicu aturan, tidak ditelepon</span>" : "") +
+  /* Satu baris corong per RS: persen terpicu aturan, lalu pasien dipilih (aturan ATAU model) dibanding harapan menurut
+     umur pasiennya. Lencana bila RS di luar batas corong setelah memperhitungkan sebaran antar-RS. */
+  const LENCANA_CORONG = { above_99_8: "Jauh di atas harapan", above_95: "Di atas harapan" };
+  function barisCorong(r) {
+    const f = r.funnel;
+    if (!f) return "";
+    const lencana = LENCANA_CORONG[f.position];
+    return '<tr class="baris-pembanding"><td colspan="7" class="lebar-penuh"><div title="Harapan dari laju nasional per kelompok umur, data sampel BPJS 2023–2024">' +
+      "<span>Terpicu " + persenSatu(r.persen) + " · dipilih " + f.selected + ", harapan menurut umur pasien " + koma(f.expected.toFixed(1)) + "</span>" +
+      (lencana ? '<span class="lencana-pola" title="Di luar batas corong ' + (f.position === "above_99_8" ? "99,8%" : "95%") + ' setelah memperhitungkan umur pasien dan sebaran antar-RS">' + lencana + "</span>" : "") +
       "</div></td></tr>";
   }
 
-  /* Kartu kecil: apakah skor pola sejalan dengan hasil panggilan (hanya Sesuai dan Tidak sesuai). */
-  function kartuKinerjaPola(k) {
+  /* Kartu kecil: berapa panggilan dari tiap sumber pemilihan berakhir Tidak sesuai (hanya Sesuai dan Tidak sesuai).
+     Inilah ukuran ketepatan model yang tidak bisa dihitung dari data klaim saja. */
+  function kartuKinerjaModel(k) {
     if (!k) return "";
-    const skor = (s) => (s == null ? "–" : skorTeks(s));
     const isi = k.n
-      ? "<span>Rata-rata skor <b>" + skor(k.skor_rata_tidak_sesuai) + "</b> pada Tidak sesuai · <b>" + skor(k.skor_rata_sesuai) + "</b> pada Sesuai</span>" +
-        "<span><b>" + k.tinggi_dan_tidak_sesuai + " dari " + k.tinggi + "</b> panggilan berpola tidak biasa berakhir Tidak sesuai</span>" +
+      ? "<span><b>" + k.model_tidak_sesuai + " dari " + k.model + "</b> panggilan yang ditandai model berakhir Tidak sesuai</span>" +
+        "<span><b>" + k.aturan_tidak_sesuai + " dari " + k.aturan + "</b> panggilan yang hanya dipilih aturan berakhir Tidak sesuai</span>" +
         '<span class="redup">' + k.n + " panggilan terjawab</span>"
       : '<span class="redup">Belum ada panggilan terjawab.</span>';
-    return '<div class="kinerja-pola"><b>Skor pola dan hasil panggilan</b>' + isi + "</div>";
+    return '<div class="kinerja-pola"><b>Sumber pemilihan dan hasil panggilan</b>' + isi + "</div>";
   }
 
   function lamanRingkasanRs() {
@@ -1172,7 +1199,7 @@
         '<td class="angka sembunyi-hp" data-label="Terjawab">' + c.terjawab + "</td>" +
         '<td class="angka" data-label="Tidak sesuai"><span class="nilai">' + c.tidak_sesuai + (c.terjawab ? ' <span class="redup-kecil">(' + Math.round(c.rasio * 100) + "%)</span>" : "") + "</span></td>" +
         '<td data-label="Status"><div class="sel-status">' + chipStatusRs(c) + (D.progresRs(c) ? '<span class="progres-rs">' + D.progresRs(c) + "</span>" : "") + "</div></td>" +
-        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisPembanding(r) +
+        '<td class="aksi lebar-penuh"><button class="btn btn--kecil" type="button" data-aksi="lihat-kartu-rs" data-id="' + r.id + '" aria-expanded="' + buka + '">' + (buka ? "Sembunyikan pasien" : "Tampilkan pasien") + "</button></td></tr>" + barisCorong(r) +
         (buka ? '<tr class="rinci"><td colspan="7" class="lebar-penuh">' + rinci + "</td></tr>" : "");
     }).join("");
 
@@ -1183,9 +1210,10 @@
     return '<div class="kepala"><div><h1>Ringkasan rumah sakit</h1>' +
         '<p class="keterangan-pemicu">Layanan ' + D.BULAN + ", dari " + data.jumlah + " panggilan yang sudah selesai.</p></div></div>" +
       (sesudahS1 ? '<div class="perubahan-rs">RS Melati Sehat kini berstatus Perlu klarifikasi RS (3 tidak sesuai dari 5 terjawab). Sebelum panggilan Andi Pratama statusnya Normal (2 dari 4).</div>' : "") +
-      kartuKinerjaPola(data.kinerjaPola) +
+      kartuKinerjaModel(data.kinerjaModel) +
+      '<div class="keterangan-aturan"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung.</div>' +
       '<section class="panel"><div class="panel-kepala"><h2>Status rumah sakit</h2><span class="kanan">' + data.rs.length + ' rumah sakit</span></div><div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Rumah sakit</th><th>Pasien aktif</th><th>Terpicu</th><th>Terjawab</th><th>Tidak sesuai</th><th>Status</th><th><span class="sr">Aksi</span></th></tr></thead><tbody>' + baris + "</tbody></table></div>" +
-        '<p class="catatan-kaki"><b>Perlu klarifikasi RS</b> bila ada minimal 3 jawaban tidak sesuai dan minimal 10% dari yang terjawab. Tidak yakin, Tidak terhubung, dan Menolak tidak dihitung. Identitas penerima telepon tidak dibagikan ke RS.</p></section>';
+        '<p class="catatan-kaki">Identitas penerima telepon tidak dibagikan ke rumah sakit.</p></section>';
   }
   /* ============================================================== riwayat */
 
@@ -1217,6 +1245,8 @@
   const JUDUL_HALAMAN = { autentik: "Antrean konfirmasi", panggilan: "Panggilan", kartu: "Kartu bukti", "ringkasan-rs": "Ringkasan RS", riwayat: "Riwayat keputusan" };
 
   function gambar(tetap) {
+    /* API mode before the first queue response: every page reads M.antrean, so wait for mulaiApp to render. */
+    if (M.hidup && !M.antrean) return;
     const y = window.scrollY;
     const r = rute();
     const akar = document.getElementById("akar");

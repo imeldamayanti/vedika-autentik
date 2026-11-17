@@ -46,6 +46,25 @@ uv run --group data python scripts/prepare_claim_reference.py \
 The command writes aggregate JSON/CSV files, a data dictionary, and a checksum manifest. It
 does not export participant IDs, visit IDs, or row-level claims.
 
+## Offline ML pipeline (`vedika_ai.ml`)
+
+Everything that reads the raw sample lives in `src/vedika_ai/ml/`; the voice service never imports it.
+
+| Module | Role |
+|---|---|
+| `privacy.py` | Export rules: minimum cell count, identifier guard, JSON/CSV writers |
+| `cohort.py` | Raw FKRTL visits to participant-months (plus secondary diagnosis and age) |
+| `claim_reference.py` | `rehab-2024` descriptive aggregates |
+| `anomaly_model.py`, `anomaly_evaluation.py` | Train and evaluate `anomali-v2` |
+| `tools.py` | Loads the stdlib modules in `data-uji-konfirmasi/tools` (`pola.py` visit features, `anomali.py` scorer) |
+
+| Script | Output |
+|---|---|
+| `prepare_claim_reference.py` | `data/reference/rehab-2024` |
+| `train_anomaly_model.py`, `compare_anomaly_models.py` | `anomali-v2` model, evaluation (`data/reference/anomali`), and comparison with v1 |
+
+Full commands for the anomaly model: `../docs/rencana-v3-skor-pola/MODEL-ANOMALI.md` (section 15).
+
 ## Endpoints
 
 | Endpoint | Behavior |

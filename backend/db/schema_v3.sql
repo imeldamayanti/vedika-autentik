@@ -62,13 +62,20 @@ create table if not exists public.indikator_bulanan (
   primary key (id_peserta, id_rs, bulan)
 );
 create index if not exists indikator_dipicu_idx on public.indikator_bulanan (bulan) where dipicu;
--- Skor pola (tools/pola.py + referensi-pola/): hanya mengurutkan antrean dan menjelaskan alasannya.
--- Tidak mengubah dipicu, label, saran, atau status RS.
-alter table public.indikator_bulanan add column if not exists skor_pola real;
-alter table public.indikator_bulanan add column if not exists alasan_pola jsonb not null default '[]';
-alter table public.indikator_bulanan add column if not exists pola_tinggi boolean not null default false;
--- Kunci urutan antrean: skor di atas 0,999 tampil sama (1,00), logitnya masih berbeda.
-alter table public.indikator_bulanan add column if not exists logit_pola real;
+-- Skor pola pola-v1 dipensiunkan 17 Nov 2026. Database lama masih punya kolom skor_pola, alasan_pola, pola_tinggi,
+-- logit_pola dan kunci pengaturan versi_pola; aman di-drop setelah backend baru ter-deploy (lihat api-contract-v3.md).
+-- Model anomali (tools/anomali.py + referensi-pola/model-anomali-v2.json): ikut memilih siapa ditelepon
+-- (dipicu ATAU anomali_ditandai) dan mengurutkan antrean (paling jarang dulu). Tidak mengubah dipicu, label, saran,
+-- atau status RS.
+alter table public.indikator_bulanan add column if not exists skor_anomali real;
+alter table public.indikator_bulanan add column if not exists anomali_ditandai boolean not null default false;
+alter table public.indikator_bulanan add column if not exists anomali_langka boolean not null default false;
+-- {"alasan": [teks], "gabungan": teks}; null bila belum dinilai
+alter table public.indikator_bulanan add column if not exists alasan_anomali jsonb;
+
+-- Rujukan per kunjungan (fitur model anomali). Baris lama tanpa kolom ini dianggap dirujuk FKTP kab/kota yang sama.
+alter table public.klaim_sesi add column if not exists rujukan_fktp boolean not null default true;
+alter table public.klaim_sesi add column if not exists perujuk_luar_wilayah boolean not null default false;
 
 -- F2-F5: satu baris per pasien-RS-bulan yang ditelepon. Antrean = indikator dipicu yang belum punya baris di sini.
 create table if not exists public.panggilan (
