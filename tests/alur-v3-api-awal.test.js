@@ -161,7 +161,7 @@ async function openFresh(browser, hash) {
     if (hash === "#/autentik") {
       cek(text.includes(QUEUED_PATIENT) && text.includes(DONE_PATIENT), "antrean menampilkan data API, bukan simulasi", text.replace(/\s+/g, " ").slice(0, 200));
       const badges = await page.$$eval(".lencana-simulasi", (el) => el.map((x) => x.textContent.trim()));
-      cek(!badges.includes("Simulasi"), "tanpa tanda Simulasi di mode API", badges.join(" | "));
+      cek(badges.length === 0, "tanpa tanda Simulasi atau Prototipe di mode API", badges.join(" | "));
     }
     if (hash.startsWith("#/kartu/")) cek(text.includes(DONE_PATIENT), "kartu bukti menampilkan pasien dari API", text.replace(/\s+/g, " ").slice(0, 200));
     await context.close();

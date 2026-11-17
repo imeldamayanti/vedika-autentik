@@ -27,6 +27,9 @@ async function tanpaGeserSamping(page, nama) {
   const page = await konteks.newPage();
   const galat = [];
   page.on("pageerror", (e) => galat.push(e.message));
+  /* Dahulukan telepon meminta konfirmasi (window.confirm): setujui otomatis. */
+  const dialog = [];
+  page.on("dialog", (d) => { dialog.push(d.message()); d.accept(); });
   /* Tanpa API: semua permintaan /api/v1 diputus, jadi aplikasi jatuh ke simulasi. */
   await page.route("**/api/v1/**", (rute) => rute.abort());
 
@@ -43,13 +46,13 @@ async function tanpaGeserSamping(page, nama) {
   cek((await page.$$("#stripStatus .siap-ikon")).length === 1 && (await page.$$("#stripStatus b")).length === 1, "strip status menampilkan tepat satu keadaan");
   cek((await page.$$("#stripStatus .sehat")).length === 0, "simulasi tanpa chip kesehatan yang semuanya merah");
   const tanda = await page.$$eval(".lencana-simulasi", (el) => el.map((x) => x.textContent.trim()));
-  cek(tanda.length === 1 && tanda[0] === "Simulasi" && !(await page.$(".catatan-prototipe")), "tepat satu tanda Simulasi", tanda.join(" | "));
+  cek(tanda.length === 0 && !(await page.$(".catatan-prototipe")), "tanpa tanda Simulasi atau Prototipe", tanda.join(" | "));
 
   console.log("\nAntrean");
   const tombol = await page.$$eval('[data-aksi="telepon"]', (el) => el.map((x) => x.textContent.trim()));
-  cek(tombol.length >= 7 && tombol.every((t) => t === "Dahulukan"), "baris antrean memakai tombol Dahulukan", tombol.length + " tombol: " + tombol.slice(0, 3).join(", "));
+  cek(tombol.length >= 7 && tombol.every((t) => t === "Dahulukan telepon"), "baris antrean memakai tombol Dahulukan telepon", tombol.length + " tombol: " + tombol.slice(0, 3).join(", "));
   cek(!(await page.content()).includes("Telepon sekarang"), "tidak ada lagi teks Telepon sekarang");
-  cek((await page.getAttribute('[data-aksi="telepon"][data-id="S1"]', "title")) === "Pindahkan ke urutan berikutnya", "tooltip Dahulukan");
+  cek((await page.getAttribute('[data-aksi="telepon"][data-id="S1"]', "title")) === "Kirim pesan WA ke penerima, lalu telepon begitu saluran kosong", "tooltip Dahulukan telepon");
   cek(!(await page.content()).includes("masih stub"), "teks 'masih stub' sudah dihapus");
 
   console.log("\nSumber pemilihan di antrean (aturan ATAU model anomali)");
@@ -60,7 +63,7 @@ async function tanpaGeserSamping(page, nama) {
   cek(s1 && s1.teks === "Aturan + model", "S1 dipilih aturan dan model", JSON.stringify(s1));
   cek(m1 && m1.teks === "Model" && m1.kelas.includes("chip-dipilih--model") && m1.judul.includes("tidak terkena aturan"), "M1 hanya dipilih model, dengan keterangan", JSON.stringify(m1));
   cek(s3 && s3.teks === "Aturan", "S3 hanya dipilih aturan", JSON.stringify(s3));
-  cek((await page.textContent("tbody tr:nth-child(2) .chip-ind-wadah")).includes("Lebih dari 8 sesi/bulan"), "indikator tampil sebagai chip berarti (gaya opsi 3)");
+  cek((await page.$$("tbody .chip-ind-wadah")).length === 0 && !(await page.textContent("thead")).includes("Indikator aktif"), "tabel antrean tanpa kolom Indikator aktif");
   cek((await page.$$("tbody .label + .status-chip, tbody .status-chip + .label")).length === 0, "baris selesai hanya menampilkan label hasil");
   const kaki = await page.textContent(".catatan-kaki");
   cek(kaki.includes("Model anomali menandai") && !kaki.includes("Skor pola"), "catatan kaki menjelaskan model anomali, bukan skor pola", kaki);

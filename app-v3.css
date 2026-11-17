@@ -378,18 +378,13 @@
 
 body { font-size: 16px; line-height: 1.5; background: var(--bg); font-feature-settings: "cv11", "ss01"; }
 
-/* Skala 90%: sama dengan zoom Chrome 90% yang dinilai paling nyaman oleh tim.
-   Semua ukuran di file ini ditulis pada skala 100% lalu diperkecil serentak, jadi proporsinya tetap.
-   Ukuran tampil efektif: isi ~14,4px, tabel ~13,5px, teks terkecil ~11,7px, tombol ~40px.
-   Tinggi berbasis 100vh dibagi skala supaya tetap penuh satu layar. */
-/* Skala 90%: tampilan yang disetujui tim adalah halaman ini dilihat dengan zoom Chrome 90%.
-   Dipasang di CSS supaya semua domain (lokal, Vercel) tampil sama tanpa mengatur zoom browser.
-   Lihat di zoom browser 100%; kalau browser juga 90%, hasilnya jadi 81%. */
-:root { --skala: .9; }
-body { zoom: var(--skala); }
-.sisi { height: calc(100vh / var(--skala)); }
-.kolom { min-height: calc(100vh / var(--skala) - 24px); }
-.masuk { min-height: calc(100vh / var(--skala)); }
+/* Tanpa zoom CSS (audit T-01): ukuran tampil = ukuran yang tertulis. Sebelumnya body diperkecil 90% sehingga isi hanya
+   14,4px, tabel 13,5px, dan teks terkecil 9,5px, terlalu kecil untuk pengguna 30+ yang sudah memakai zoom 125–150%.
+   Sekarang isi 16px, tabel 15px, tombol minimal 40px, tidak ada teks di bawah 12px. */
+:root { --skala: 1; }
+.sisi { height: 100vh; }
+.kolom { min-height: calc(100vh - 24px); }
+.masuk { min-height: 100vh; }
 .angka, .kartu-angka b, .tabel td { font-variant-numeric: tabular-nums; }
 .kapital, .nav-judul { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); }
 .redup-kecil { font-size: 13px; }
@@ -902,3 +897,53 @@ table.tabel { border-collapse: separate; border-spacing: 0; }
   background: var(--muted); color: var(--fg-2); border: 1px solid var(--border); }
 .chip-dipilih--model, .chip-dipilih--keduanya { background: var(--primary-subtle); color: var(--primary); border-color: oklch(86% .04 205); }
 .pola-alasan .pola-alasan { padding: 6px 0 0 18px; }
+
+/* Logo BPJS Kesehatan di sidebar: gambar asli tanpa kotak warna. */
+.merek .merek-ikon--bpjs { background: transparent; border: 0; border-radius: 0; width: 38px; height: 38px; }
+.merek-ikon--bpjs img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* ================================================================
+   Audit T-01, T-02, T-03 (tanpa zoom 90%): teks minimal 12px, teks tabel minimal 14px (kecuali chip indikator 13px),
+   target klik minimal 40px, dan tabel antrean muat tanpa gulir samping. Blok ini sengaja di akhir berkas supaya menang
+   atas aturan "dipulihkan dari opsi 3" di atas yang sempat mengecilkan chip. Isi mockup ponsel ikut dinaikkan ke 12px.
+   ================================================================ */
+.chip-ind { height: 28px; padding: 0 10px; font-size: 13px; font-weight: 600; }
+.lencana-pola { height: 26px; padding: 0 10px; font-size: 13px; }
+.chip-dipilih { font-size: 14px; }
+.tabel .label, .tabel .status-chip, .tabel .chip-dipilih { font-size: 14px; }
+.sel-status small, .sel-status .progres-rs, .tabel .nama-berkas span, .tabel .redup, .tabel .redup-kecil { font-size: 14px; }
+.sisi .merek span span, .sisi .merek > span > span { font-size: 13px; }
+.ponsel .tombol-telp small, .ponsel--telp .tombol-telp small { font-size: 12px; }
+.tgl small { font-size: 12px; }
+.gelembung.sistem { font-size: 12px; }
+.modal-wa .tanggal-obrolan, .modal-wa .petunjuk { font-size: 12px; }
+.pilihan-lain label.catatan-medan > .kapital { font-size: 13px; }
+
+/* Target klik 40px ke atas. Radio memakai seluruh label sebagai area klik; bulatnya dibesarkan. */
+.tautan-kecil { display: inline-flex; align-items: center; min-height: 40px; }
+.modal-wa-tutup { width: 44px; height: 44px; }
+.toast a { display: inline-block; padding: 10px 4px; margin: -10px 0; }
+.pilihan-lain label input[type="radio"] { width: 22px; height: 22px; }
+
+/* Keterangan kartu angka boleh turun baris, bukan terpotong "…" di layar 1366px. */
+.kartu-angka .kpi-ket { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+
+/* Tabel antrean tanpa gulir samping. Isi kolom yang disembunyikan pindah ke bawah nama pasien (.s-rs, .s-penerima, .s-ditagih)
+   ≤1599px: Rumah sakit dan Penerima. ≤1279px: ditambah Ditagih. Ponsel (≤640px) memakai tampilan kartu sendiri. */
+.tabel-antrean .s-rs, .tabel-antrean .s-penerima, .tabel-antrean .s-ditagih { display: none; }
+@media (min-width: 641px) and (max-width: 1599px) {
+  .tabel-antrean th:nth-child(2), .tabel-antrean td[data-label="Rumah sakit"],
+  .tabel-antrean th:nth-child(5), .tabel-antrean td[data-label="Penerima"] { display: none; }
+  .tabel-antrean .s-rs, .tabel-antrean .s-penerima { display: block; }
+  .tabel-antrean .nama-berkas b { white-space: normal; }
+}
+@media (min-width: 641px) and (max-width: 1279px) {
+  .tabel-antrean th:nth-child(3), .tabel-antrean td[data-label="Ditagih"] { display: none; }
+  .tabel-antrean .s-ditagih { display: block; }
+}
+/* Ringkasan RS: kolom Pasien aktif pindah ke bawah nama rumah sakit di ≤1279px (ponsel tetap tampilan kartu). */
+.tabel-rs .s-aktif { display: none; }
+@media (min-width: 641px) and (max-width: 1279px) {
+  .tabel-rs th:nth-child(2), .tabel-rs td[data-label="Pasien aktif"] { display: none; }
+  .tabel-rs .s-aktif { display: block; }
+}
