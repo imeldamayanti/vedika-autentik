@@ -763,3 +763,22 @@ def test_pembaca_tidak_mengulang_galat_klien():
     tidur = []
     j, galat = agen.baca_dengan_ulang(Pembaca(), {}, tidur=tidur.append)
     assert j is None and galat.startswith("kunci_salah") and Pembaca.n == 1 and tidur == []
+
+
+
+def test_hasil_pembaca_basi_tidak_menimpa_panggilan_baru(klien_agen, conn_v3, pembaca, monkeypatch):
+    """Uji HP 18 Nov: pembacaan panggilan lama masih mengulang saat demo di-reset dan panggilan baru berjalan.
+    Hasil lama tidak boleh menutup panggilan baru dengan label Tidak yakin."""
+    from app import agen
+
+    def reset_lalu_gagal(permintaan, batas):
+        # Selama dibaca: baris dikembalikan ke antre (reset demo / panggilan baru), lalu pembaca menyerah.
+        conn_v3.execute("update panggilan set status='merekam', waktu_selesai=null where id=%s", (S1,))
+        raise MesinGalat("batas_waktu", "Terlalu lama.", 504)
+
+    pembaca.baca = reset_lalu_gagal
+    monkeypatch.setattr(agen.config, "JEDA_ULANG_PEMBACA", ())
+    sampai_merekam(klien_agen, monkeypatch)
+    assert kirim_hasil(klien_agen, transkrip=TRANSKRIP).status_code == 202
+    b = baris_db(conn_v3, S1)
+    assert b["status"] == "merekam" and b["label"] is None and b["galat_pembaca"] is None

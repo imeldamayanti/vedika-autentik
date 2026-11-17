@@ -313,16 +313,22 @@ def proses_hasil(buka_conn, simpan, mesin, id_: str) -> None:
 
 def _proses(conn, simpan, mesin, id_: str) -> None:
     p = repo_v3.satu_baris(conn, id_)
+    # Penanda panggilan yang sedang dibaca. Pembacaan bisa memakan waktu lebih dari semenit (jeda ulang); selama itu
+    # baris yang sama bisa dibatalkan, di-reset demo, atau dipakai panggilan baru. Hasil hanya ditulis ke panggilan ini.
+    kunci = (p["status"], p["waktu_selesai"])
     libur = [t.isoformat() for t in repo_v3.tanggal_libur(conn, p["id_peserta"], p["id_rs"], p["bulan_layanan"])]
     jawaban, galat = baca_dengan_ulang(mesin, {
         "id": id_, "transkrip": p["transkrip"] or [],
         "konteks": {"sesi_ditagih": p["sesi_ditagih"], "tanggal_libur": libur, "nama_pasien": p["pasien"], "bulan": p["bulan_layanan"]},
     })
-    _selesaikan(conn, simpan, id_, jawaban, galat)
+    _selesaikan(conn, simpan, id_, jawaban, galat, kunci)
 
 
-def _selesaikan(conn, simpan, id_: str, jawaban: dict | None, galat: str | None) -> None:
+def _selesaikan(conn, simpan, id_: str, jawaban: dict | None, galat: str | None, kunci: tuple | None = None) -> None:
     p = repo_v3.satu_baris(conn, id_)
+    if p is None or (kunci is not None and (p["status"], p["waktu_selesai"]) != kunci):
+        log.warning("hasil pembaca %s dibuang: panggilan sudah berubah selama dibaca", id_)
+        return
     if jawaban is None:
         jawaban = {**at.lengkapi_jawaban({"status_panggilan": "terjawab", "ringkasan": PESAN_PEMBACA_GAGAL}), "kutipan_kunci": ""}
         label, _ = at.label_jawaban(jawaban, p["sesi_ditagih"])
