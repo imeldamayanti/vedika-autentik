@@ -5,7 +5,7 @@ from datetime import timedelta
 
 import pytest
 
-from app import config, wa
+from app import agen, config, wa
 from app.mesin import MesinGalat
 from tests.util_v3 import jam_palsu, ubah, wib
 
@@ -128,7 +128,7 @@ def test_ambil_tugas_s1_bentuk_kontrak(klien_agen, conn_v3, monkeypatch):
         "id": S1, "percobaan": 1, "no_tujuan": "081234567890",
         "skrip": {"nama_penerima": "Andi Pratama", "sapaan_penerima": "Bapak", "hubungan": "peserta",
                   "nama_pasien": "Andi Pratama", "sapaan_pasien": "Bapak", "nama_rs": "RS Melati Sehat", "bulan": "Agustus",
-                  "tanggal_libur": ["16 Agustus", "17 Agustus"]},
+                  "tanggal_libur": ["16 Agustus", "17 Agustus"], "sesi_ditagih": 11},
         "wa": {"lewati": True, "dikirim_server": True, "status": "simulasi", "teks": teks},
         "jeda_wa_menit": 1, "batas_detik": 150,
     }
@@ -146,7 +146,7 @@ def test_ambil_tugas_keluarga_dan_tanpa_libur(klien_agen, conn_v3, monkeypatch):
     t = klien_agen.post(f"{BASE}/agen/ambil").json()
     assert t["skrip"] == {"nama_penerima": "Dewi Rahmawati", "sapaan_penerima": "Bapak/Ibu", "hubungan": "anak",
                           "nama_pasien": "Siti Rahmawati", "sapaan_pasien": "Ibu", "nama_rs": "RS Melati Sehat",
-                          "bulan": "Agustus", "tanggal_libur": ["23 Agustus"]}
+                          "bulan": "Agustus", "tanggal_libur": ["23 Agustus"], "sesi_ditagih": 10}
     ubah(conn_v3, t["id"], status="selesai", label="Sesuai")
     klien_agen.post(f"{BASE}/panggilan/{id_skenario('S3')}/mulai")
     t3 = klien_agen.post(f"{BASE}/agen/ambil").json()
@@ -454,13 +454,39 @@ def test_detak_menolak_isi_tidak_valid(klien_agen):
     assert klien_agen.post(f"{BASE}/agen/detak", json={}).status_code == 422
 
 
-def test_reset_demo_menyalakan_mode_otomatis_dan_antrean_diambil_tanpa_klik(klien_agen, monkeypatch):
+def test_reset_demo_menunggu_mode_otomatis_lalu_menelepon_d1_kemudian_d2(klien_agen, conn_v3, monkeypatch):
     jam_palsu(monkeypatch)
-    matikan(klien_agen)
-    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204
     klien_agen.post(f"{BASE}/demo/reset")
-    assert klien_agen.get(f"{BASE}/pengaturan").json()["mode_otomatis"] is True
-    assert klien_agen.post(f"{BASE}/agen/ambil").json()["id"] == PERTAMA  # tanpa klik, pertama di antrean
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # belum dinyalakan
+    conn_v3.execute("update peserta set no_hp_keluarga = '+62 811-1111-1111' where id_peserta = 'P-D1'")
+    nyalakan(klien_agen)
+    t = klien_agen.post(f"{BASE}/agen/ambil").json()
+    assert (t["id"], t["no_tujuan"]) == ("CALL-P-D1-2026-08", "+6281111111111")
+    s = t["skrip"]
+    assert (s["nama_pasien"], s["nama_penerima"], s["hubungan"], s["sesi_ditagih"]) == ("Hartono", "Imelda", "anak", 8)
+    lapor(klien_agen, t["id"], "menelepon")
+    lapor(klien_agen, t["id"], "tersambung")
+    klien_agen.post(f"{BASE}/panggilan/{t['id']}/batal")
+    conn_v3.execute("update panggilan set status = 'selesai', label = 'Sesuai' where id = %s", (t["id"],))
+    t = klien_agen.post(f"{BASE}/agen/ambil").json()
+    assert (t["id"], t["skrip"]["nama_pasien"], t["skrip"]["sesi_ditagih"]) == ("CALL-P-D2-2026-08", "Zahra", 11)
+    assert t["no_tujuan"] == "081234567890"  # nomor Zahra belum diisi: placeholder, jadi nomor penguji
+    conn_v3.execute("update panggilan set status = 'selesai', label = 'Sesuai' where id = %s", (t["id"],))
+    assert klien_agen.post(f"{BASE}/agen/ambil").status_code == 204  # tidak ada lagi yang antre
+
+
+@pytest.mark.parametrize("penerima,peserta,keluarga,harap", [
+    ("peserta", "0812-3456-7890", None, "081234567890"),
+    ("peserta", "+62 812 3456 7890", None, "+6281234567890"),
+    ("peserta", "0800-0000-0401", None, "NOMOR_PENGUJI"),
+    ("peserta", None, None, "NOMOR_PENGUJI"),
+    ("peserta", "12-34", None, "NOMOR_PENGUJI"),
+    ("keluarga", "0812-3456-7890", "0813-0000-1111", "081300001111"),
+    ("keluarga", "0812-3456-7890", "0800-1000-0402", "NOMOR_PENGUJI"),
+])
+def test_nomor_tujuan_memakai_nomor_asli_penerima_atau_nomor_penguji(monkeypatch, penerima, peserta, keluarga, harap):
+    monkeypatch.setenv("NOMOR_PENGUJI", "NOMOR_PENGUJI")
+    assert agen.nomor_tujuan({"penerima": penerima, "no_hp_peserta": peserta, "no_hp_keluarga": keluarga}) == harap
 
 
 def test_jeda_percobaan_mengikuti_pengaturan(klien_agen, monkeypatch):

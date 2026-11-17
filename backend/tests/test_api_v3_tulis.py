@@ -250,31 +250,40 @@ def test_reset_demo_mengembalikan_keadaan_awal(klien_v3, conn_v3, tmp_path):
 
     h = klien_v3.get("/api/v1/antrean").json()
     assert h["angka"] == {
-        "pasien_aktif": 302, "terpicu": 30, "dipilih": 32, "hanya_model": 2, "sudah_ditelepon": 4, "tidak_sesuai": 2,
-        "rs_perlu_klarifikasi": 0, "antre": 28, "menunggu_keputusan": 2,
+        "pasien_aktif": 304, "terpicu": 32, "dipilih": 34, "hanya_model": 2, "sudah_ditelepon": 32, "tidak_sesuai": 25,
+        "rs_perlu_klarifikasi": 1, "antre": 2, "menunggu_keputusan": 25,
     }
-    assert h["pengaturan"]["mode_otomatis"] is True and h["pengaturan"]["jeda"] is False  # otomatis bawaan menyala
-    assert all(not b["prioritas"] and b["percobaan"] == 0 for b in h["baris"] if b["status"] == "antre")
+    assert h["pengaturan"]["mode_otomatis"] is False and h["pengaturan"]["jeda"] is False  # demo: verifikator menyalakan
+    antre = [b for b in h["baris"] if b["status"] == "antre"]
+    assert [(b["pasien"], b["penerima"]["nama"]) for b in antre] == [("Hartono", "Imelda"), ("Zahra", "Zahra")]
+    assert all(not b["prioritas"] and b["percobaan"] == 0 for b in antre)
     assert conn_v3.execute("select count(*) as n from panggilan_log").fetchone()["n"] == 0
     assert klien_v3.get("/api/v1/keputusan").json() == []
     assert not (tmp_path / rel).exists()
-    awal = klien_v3.get("/api/v1/ringkasan-rs").json()["rs"][0]
-    assert (awal["tidak_sesuai"], awal["terjawab"], awal["status"]) == (2, 4, "Normal")
 
 
 def test_reset_demo_tidak_menyentuh_data_master(klien_v3, conn_v3):
     n = lambda t: conn_v3.execute(f"select count(*) as n from {t}").fetchone()["n"]
-    sebelum = [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")]
+    tabel = ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")
+    sebelum = [n(t) for t in tabel]
+    assert sebelum == [5, 410, 4938, 4, 302]
     klien_v3.post("/api/v1/demo/reset")
-    assert [n(t) for t in ("rumah_sakit", "peserta", "klaim_sesi", "libur_nasional", "indikator_bulanan")] == sebelum
-    assert sebelum[:3] == [5, 410, 4938] and sebelum[4] == 302
+    assert [n(t) for t in tabel] == [5, 412, 4957, 4, 304]  # hanya dua pasien demo yang ditambahkan
+    conn_v3.execute("update peserta set nama = 'Lama', no_hp_keluarga = '+6281111111111' where id_peserta = 'P-D1'")
+    conn_v3.execute("update peserta set nama = 'Pasien Lain' where id_peserta = 'P0001'")
+    conn_v3.execute("delete from klaim_sesi where id_klaim = 'SEP-DEMO-000001'")
+    klien_v3.post("/api/v1/demo/reset")
+    assert [n(t) for t in tabel] == [5, 412, 4957, 4, 304]
+    baris = lambda pid: conn_v3.execute("select nama, no_hp_keluarga from peserta where id_peserta = %s", (pid,)).fetchone()
+    assert baris("P-D1") == {"nama": "Hartono", "no_hp_keluarga": "+6281111111111"}  # data demo diperbarui, nomor tetap
+    assert baris("P0001")["nama"] == "Pasien Lain"
 
 
-def test_reset_demo_mematikan_jeda(klien_v3):
-    klien_v3.put("/api/v1/pengaturan", json={"jeda": True})
+def test_reset_demo_mematikan_mode_otomatis_dan_jeda(klien_v3):
+    klien_v3.put("/api/v1/pengaturan", json={"mode_otomatis": True, "jeda": True})
     klien_v3.post("/api/v1/demo/reset")
     p = klien_v3.get("/api/v1/pengaturan").json()
-    assert (p["mode_otomatis"], p["jeda"]) == (True, False)
+    assert (p["mode_otomatis"], p["jeda"]) == (False, False)
 
 
 # ---- POST /panggilan/{id}/batal ----

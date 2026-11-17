@@ -502,7 +502,8 @@ Body kosong. Agen memanggil tiap 3 detik saat menganggur dan siap.
     "sapaan_pasien": "Bapak",
     "nama_rs": "RS Melati Sehat",
     "bulan": "Agustus",
-    "tanggal_libur": ["16 Agustus", "17 Agustus"]
+    "tanggal_libur": ["16 Agustus", "17 Agustus"],
+    "sesi_ditagih": 11
   },
   "wa": {
     "lewati": true,
@@ -517,7 +518,7 @@ Body kosong. Agen memanggil tiap 3 detik saat menganggur dan siap.
 
 - `percobaan` = percobaan ke-n yang akan dijalankan (`panggilan.percobaan + 1`). Nilai di DB naik saat agen melapor `menelepon`, bukan saat tugas diambil, supaya kunci yang kedaluwarsa tidak menghabiskan percobaan.
 - `no_tujuan` prototipe = `NOMOR_PENGUJI` dari `.env` (R2.1), disimpan di `panggilan.no_tujuan`. Pesan WA dan panggilan menuju nomor yang sama.
-- `skrip` mengisi variabel Lampiran A (R3.1). `hubungan` salah satu `peserta`, `anak`, `orang tua`, `pasangan`. `tanggal_libur` kosong bila I4 tidak aktif; agen tidak bertanya soal libur (S3).
+- `skrip` mengisi variabel Lampiran A (R3.1). `hubungan` salah satu `peserta`, `anak`, `orang tua`, `pasangan`. `tanggal_libur` kosong bila I4 tidak aktif; agen tidak bertanya soal libur (S3). `sesi_ditagih` hanya dipakai agen untuk cek ulang netral: bila jumlah dari penerima jauh dari tagihan (lebih dari 2 sesi, ke arah mana pun), agen bertanya sekali "apakah [jumlah dari penerima] kali itu sudah pas" tanpa pernah menyebut angka tagihan.
 - `sapaan_pasien` (`Bapak`/`Ibu`) dari `peserta.jenis_kelamin` pasien (`L` → Bapak, `P` → Ibu). `sapaan_penerima` sama dengan `sapaan_pasien` bila penerima peserta; bila keluarga, `Bapak/Ibu` karena jenis kelamin keluarga tidak tercatat, dan agen boleh menyesuaikan dari `nama_penerima`. Contoh S2: `sapaan_pasien: "Ibu"`, `sapaan_penerima: "Bapak/Ibu"`, `hubungan: "anak"`.
 - `wa.dikirim_server` selalu `true` dan `wa.lewati` selalu `true`: agen tidak mengirim apa pun dan tidak melapor `wa_terkirim`. `wa.status` = `terkirim`, `simulasi`, atau `gagal`; `wa.teks` = Lampiran B persis (R2.3), tanpa tautan, dengan `nomor_penelepon` = `NOMOR_PENELEPON` (nomor SIM stasiun). Keduanya `null` pada percobaan ke-2 (pemberitahuan cukup sekali).
 - `batas_detik` = batas panggilan 2,5 menit (R3.3, Lampiran A).

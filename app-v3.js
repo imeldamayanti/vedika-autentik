@@ -134,7 +134,7 @@
   const ui = {
     menuBuka: false, filterRs: "", filterStatus: "", bulan: "2026-08",
     otomatis: false, jeda: false, aktif: null, timer: null, timerBerikut: null, wa: null,
-    pilihLain: false, tindakanLain: null, catatan: null, bisu: false, ubah: null,
+    pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, bisu: false, ubah: null, atur: null,
     peng: null, uji: null, timerUji: []
   };
 
@@ -448,6 +448,21 @@
       (ket ? "<p>" + ket + "</p>" : "") + '</div><div class="siap-aksi">' + aksi + "</div>" + (M.hidup ? chipSehat() : "") + "</section>";
   }
 
+  /* Pengaturan antrean (PUT /pengaturan). Isian disimpan di ui.atur supaya tidak hilang saat halaman digambar ulang. */
+  const ISIAN_ATUR = [
+    ["jam_mulai", "Jam mulai menelepon", "time"], ["jam_selesai", "Jam selesai menelepon", "time"],
+    ["jeda_wa_menit", "Jeda WA ke telepon (menit)", "number"], ["jeda_percobaan_menit", "Jeda sebelum mencoba lagi (menit)", "number"]
+  ];
+
+  function panelAtur() {
+    if (!ui.atur) return "";
+    return '<section class="panel atur" aria-label="Pengaturan antrean"><div class="atur-isian">' +
+      ISIAN_ATUR.map(([k, label, tipe]) => '<label><span>' + label + '</span><input class="pilih" data-aksi="atur" data-kunci="' + k + '" type="' + tipe + '"' +
+        (tipe === "number" ? ' min="0" max="1440" step="1"' : "") + ' value="' + esc(String(ui.atur[k])) + '" required></label>').join("") +
+      '</div><div class="atur-aksi"><button class="btn btn--primer" type="button" data-aksi="simpan-atur">Simpan</button>' +
+      '<button class="btn" type="button" data-aksi="buka-atur">Batal</button></div></section>';
+  }
+
   const daftarRsPilihan = () => (M.hidup ? M.antrean.daftar_rs.map((r) => ({ id: r.id_rs, nama: r.nama })) : D.RS.map((r) => ({ id: r.id, nama: r.nama })));
 
   function lamanAntrean() {
@@ -480,6 +495,8 @@
     }).join("");
 
     const oto = otomatisAktif(), jd = jedaAktif();
+    const peng = M.hidup ? M.antrean.pengaturan : null;
+    const jamKerja = peng ? jamTitik(peng.jam_mulai) + "–" + jamTitik(peng.jam_selesai) : "09.00–17.00";
 
     return stripStatus() + '<div class="antrean-atas">' + kartuAngka() + '<div class="bar-antrean">' +
         '<select class="pilih" data-aksi="saring-bulan" aria-label="Saring menurut bulan layanan">' +
@@ -490,7 +507,9 @@
           Object.keys(HASIL).map((k) => '<option value="' + k + '"' + (ui.filterStatus === k ? " selected" : "") + ">" + HASIL[k] + "</option>").join("") + "</select>" +
         '<div class="kanan">' +
           '<button class="btn btn--otomatis" type="button" data-aksi="otomatis" aria-pressed="' + oto + '"><span class="saklar" aria-hidden="true"></span>Panggilan otomatis</button>' +
-          '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button></div></div></div>" +
+          '<button class="btn" type="button" data-aksi="jeda"' + (oto ? "" : " disabled") + ">" + ikon(jd ? "main" : "jeda") + (jd ? "Lanjutkan" : "Jeda") + "</button>" +
+          (peng ? '<button class="btn" type="button" data-aksi="buka-atur" aria-expanded="' + !!ui.atur + '">' + ikon("jam") + "Pengaturan</button>" : "") +
+          "</div></div></div>" + panelAtur() +
       '<section class="panel tabel-antrean">' +
         (baris
           ? '<div class="tabel-bungkus"><table class="tabel tabel--kartu"><thead><tr><th>Pasien</th><th>Sesi</th><th>Dipilih oleh</th><th>Hasil</th><th>Aksi</th></tr></thead><tbody>' + baris + "</tbody></table></div>"
@@ -1741,7 +1760,7 @@
       if (M.hidup) {
         A3.resetDemo().then(() => {
           tutupWa(); suaraHenti();
-          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, menuBuka: false, ubah: null });
+          Object.assign(ui, { filterRs: "", filterStatus: "", pilihLain: false, tindakanLain: null, catatan: null, rsBuka: null, menuBuka: false, ubah: null, atur: null });
           M.detail = {}; M.lalu = {}; M.sejak = {}; M.lihat = {}; M.terisi = {}; M.waDibuka = {}; M.kartuDibuka = {}; M.tidakAda = {}; M.sig = {}; M.ringkasan = null; M.riwayat = null;
           return segarkan();
         }).then(() => { ke("#/autentik"); toast("Demo dimulai ulang. Antrean dan ringkasan RS kembali ke keadaan awal."); }).catch(galatToast("Gagal memulai ulang demo"));
@@ -1805,6 +1824,18 @@
       if (ui.otomatis) lanjutOtomatis();
       else toast("Panggilan otomatis dinonaktifkan.");
     },
+    "buka-atur"() {
+      const p = M.antrean.pengaturan;
+      ui.atur = ui.atur ? null : { jam_mulai: p.jam_mulai, jam_selesai: p.jam_selesai, jeda_wa_menit: p.jeda_wa_menit, jeda_percobaan_menit: p.jeda_percobaan_menit };
+      gambar(true);
+    },
+    "simpan-atur"() {
+      const a = ui.atur, angka = (v) => (/^\d+$/.test(String(v).trim()) ? Number(v) : NaN);
+      const isi = { jam_mulai: a.jam_mulai, jam_selesai: a.jam_selesai, jeda_wa_menit: angka(a.jeda_wa_menit), jeda_percobaan_menit: angka(a.jeda_percobaan_menit) };
+      if (Number.isNaN(isi.jeda_wa_menit) || Number.isNaN(isi.jeda_percobaan_menit)) { toast("Jeda harus bilangan bulat 0 sampai 1440 menit."); return; }
+      A3.ubahPengaturan(isi).then(() => { ui.atur = null; return segarkan(); }).then(() => toast("Pengaturan disimpan."))
+        .catch((e) => toast("Pengaturan belum disimpan: " + (e && e.message ? e.message : "tidak diketahui")));
+    },
     jeda() {
       if (M.hidup) { A3.ubahPengaturan({ jeda: !jedaAktif() }).then(segarkan).catch(galatToast("Gagal mengubah jeda")); return; }
       ui.jeda = !ui.jeda;
@@ -1842,6 +1873,7 @@
 
   /* Tombol simpan hanya menyala bila tindakan dipilih dan alasan terisi; diperbarui tanpa merender ulang agar kursor tetap. */
   document.addEventListener("input", (e) => {
+    if (e.target.dataset && e.target.dataset.aksi === "atur" && ui.atur) { ui.atur[e.target.dataset.kunci] = e.target.value; return; }
     if (!e.target.dataset || e.target.dataset.aksi !== "catatan") return;
     ui.catatan = e.target.value;
     const simpanBtn = document.querySelector('[data-aksi="simpan-lain"]');

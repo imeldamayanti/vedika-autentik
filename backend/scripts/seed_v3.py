@@ -143,15 +143,19 @@ def id_panggilan(id_peserta, bulan):
 
 
 def baris_panggilan(p, peserta, jadwal=JADWAL_RIWAYAT):
-    """Riwayat: penerima mengikuti R1.3 (bukan kolom penerima di berkas riwayat); jawaban disesuaikan."""
+    """Riwayat: penerima mengikuti R1.3 (bukan kolom penerima di berkas riwayat); jawaban disesuaikan.
+    Hasil demo (demo_2026-08.json) membawa waktu, status, dan percobaannya sendiri."""
     pes = peserta[p["id_peserta"]]
     penerima, nama, hubungan = tentukan_penerima(pes)
     j = {**p["jawaban"], "penerima": penerima, "hubungan": hubungan}
-    mulai, durasi = jadwal[p["id_panggilan"]]
-    selesai = mulai + timedelta(seconds=durasi)
+    if p["id_panggilan"] in jadwal:
+        mulai, durasi = jadwal[p["id_panggilan"]]
+    else:
+        mulai, durasi = datetime.fromisoformat(p["waktu_mulai"]), p["durasi_detik"]
+    selesai = mulai + timedelta(seconds=durasi or 0)
     return (
         p["id_panggilan"], p["id_peserta"], p["id_rs"], p["bulan_layanan"], p["sesi_ditagih"],
-        penerima, nama, hubungan, "selesai", 1, Jsonb(j), p["label"], p["alasan"],
+        penerima, nama, hubungan, p.get("status", "selesai"), p.get("percobaan", 1), Jsonb(j), p["label"], p["alasan"],
         mulai, selesai, hapus_pada(p["label"], selesai), "sintetis-riwayat", durasi,
     )
 
@@ -175,13 +179,29 @@ def susun_antre(indikator, peserta, riwayat, anomali):
     ]
 
 
-def muat_data():
-    """Baca data uji dan hitung indikator. Tanpa database."""
+def susun_demo(demo, indikator, peserta, riwayat, anomali):
+    """Keadaan demo: semua pasien terpilih lain sudah punya hasil, hanya pasien demo yang antre, sesuai urutan."""
+    selesai = riwayat + demo["selesai"]
+    sudah = {(p["id_peserta"], p["id_rs"]) for p in selesai}
+    sisa = [k for k, h in indikator.items() if (h["dipicu"] or anomali[k]["ditandai"]) and k[:2] not in sudah]
+    ke = {pid: i for i, pid in enumerate(demo["urutan"])}
+    if sorted(k[0] for k in sisa) != sorted(ke):
+        raise ValueError(f"Antre demo harus tepat {demo['urutan']}, ternyata {sorted(k[0] for k in sisa)}")
+    sisa.sort(key=lambda k: ke[k[0]])
+    return selesai, [baris_antre(indikator[k], peserta[k[0]]) for k in sisa]
+
+
+def muat_data(demo=False):
+    """Baca data uji dan hitung indikator. Tanpa database. demo: tambah pasien dan hasil dari demo_2026-08.json."""
     aturan = muat_aturan()
     peserta = baca_csv("peserta.csv")
     klaim = baca_csv("klaim_sesi.csv")
     libur = baca_csv("libur_nasional_2026.csv")
     riwayat = json.loads((DATA / "riwayat_panggilan_2026-08.json").read_text(encoding="utf-8"))
+    data_demo = json.loads((DATA / "demo_2026-08.json").read_text(encoding="utf-8")) if demo else None
+    if data_demo:
+        peserta = peserta + [{k: str(v) for k, v in r.items()} for r in data_demo["peserta"]]
+        klaim = klaim + [{k: str(v) for k, v in r.items()} for r in data_demo["klaim"]]
     sesi = [
         {"id_peserta": k["id_peserta"], "id_rs": k["id_rs"], "tanggal": date.fromisoformat(k["tanggal"])}
         for k in klaim
@@ -191,11 +211,13 @@ def muat_data():
     peta_peserta = {r["id_peserta"]: r for r in peserta}
     fitur = fitur_pola(sesi, tanggal_libur, BULAN)
     anomali = nilai_anomali(klaim, peta_peserta, fitur, BULAN)
+    antre = susun_antre(indikator, peta_peserta, riwayat, anomali)
+    if data_demo:
+        riwayat, antre = susun_demo(data_demo, indikator, peta_peserta, riwayat, anomali)
     return {
         "rs": baca_csv("rumah_sakit.csv"), "peserta": peserta, "klaim": klaim, "libur": libur,
         "riwayat": riwayat, "indikator": indikator, "peta_peserta": peta_peserta,
-        "fitur_pola": fitur, "anomali": anomali,
-        "antre": susun_antre(indikator, peta_peserta, riwayat, anomali),
+        "fitur_pola": fitur, "anomali": anomali, "antre": antre, "demo": data_demo,
     }
 
 
@@ -222,17 +244,38 @@ def isi_ke(conn, d, reset=False):
     cur.executemany(SQL_PANGGILAN, d["antre"])
 
 
+def tambah_master_demo(conn, d):
+    """Pasien demo, klaim, dan indikatornya diperbarui dari demo_2026-08.json. no_hp dan no_hp_keluarga yang sudah
+    ada tidak ditimpa, jadi nomor HP asli yang diisi langsung di database tetap. Dipanggil setelah panggilan dihapus."""
+    ids = sorted(d["demo"]["urutan"])
+    cur = conn.cursor()
+    cur.executemany(
+        "insert into peserta values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) on conflict (id_peserta) do update set"
+        " nama = excluded.nama, tanggal_lahir = excluded.tanggal_lahir, umur = excluded.umur,"
+        " jenis_kelamin = excluded.jenis_kelamin, kontak_keluarga = excluded.kontak_keluarga,"
+        " hubungan_keluarga = excluded.hubungan_keluarga, hubungi_keluarga = excluded.hubungi_keluarga,"
+        " catatan = excluded.catatan",
+        [baris_peserta(r) for r in d["peserta"] if r["id_peserta"] in ids],
+    )
+    conn.execute("delete from indikator_bulanan where id_peserta = any(%s)", (ids,))
+    conn.execute("delete from klaim_sesi where id_peserta = any(%s)", (ids,))
+    cur.executemany(SQL_KLAIM, [baris_klaim(r) for r in d["klaim"] if r["id_peserta"] in ids])
+    cur.executemany(SQL_INDIKATOR, [baris_indikator(h, d["anomali"][k]) for k, h in d["indikator"].items() if k[0] in ids])
+
+
 def reset_panggilan(conn, d):
-    """Keadaan awal demo tanpa menyentuh data master: hapus panggilan, log, dan keputusan, isi ulang 4 riwayat
-    Selesai + panggilan Antre, nyalakan mode otomatis dan matikan Jeda. Tanpa commit.
-    indikator_bulanan tidak disentuh, jadi hasil model anomali tetap."""
+    """Keadaan awal demo: hapus panggilan, log, dan keputusan, isi ulang riwayat Selesai + panggilan Antre, matikan
+    Jeda. Tanpa commit. Data biasa: mode otomatis menyala. Data demo: pasien demo ditambahkan bila belum ada, dan mode
+    otomatis mati supaya panggilan pertama dimulai saat verifikator menyalakannya. Data master lain tidak disentuh."""
     conn.execute("delete from panggilan_log")
     conn.execute("delete from keputusan_panggilan")
     conn.execute("delete from panggilan")
+    if d.get("demo"):
+        tambah_master_demo(conn, d)
     cur = conn.cursor()
     cur.executemany(SQL_PANGGILAN, [baris_panggilan(p, d["peta_peserta"]) for p in d["riwayat"]])
     cur.executemany(SQL_PANGGILAN, d["antre"])
-    for kunci, nilai in (("mode_otomatis", "true"), ("jeda", "false")):
+    for kunci, nilai in (("mode_otomatis", "false" if d.get("demo") else "true"), ("jeda", "false")):
         conn.execute(
             "insert into pengaturan (kunci, nilai) values (%s, %s::jsonb)"
             " on conflict (kunci) do update set nilai = excluded.nilai",

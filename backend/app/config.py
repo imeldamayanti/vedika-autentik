@@ -72,7 +72,7 @@ def kunci_agen() -> str | None:
 
 
 def nomor_penguji() -> str:
-    """Prototipe: semua panggilan dan WA menuju satu nomor penguji (R2.1), bukan nomor peserta."""
+    """Prototipe: panggilan dan WA menuju nomor ini bila nomor penerima di data hanya placeholder 0800 (R2.1)."""
     return os.environ.get("NOMOR_PENGUJI", "0800-0000-0000")
 
 

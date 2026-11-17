@@ -40,6 +40,7 @@ class VoiceContext(BaseModel):
     nama_rs: str = Field(min_length=1, max_length=160)
     bulan: str = Field(min_length=1, max_length=40)
     tanggal_libur: list[str] = Field(default_factory=list)
+    sesi_ditagih: int | None = Field(default=None, ge=1, le=99)
 
 
 class VoiceTokenResponse(BaseModel):
@@ -64,6 +65,31 @@ def _holiday_text(values: list[str]) -> str:
     if len(set(months)) == 1 and all(months):
         return f"{_join(list(days))} {months[0]}"
     return _join(values)
+
+
+def _recheck_rule(billed: int | None) -> str:
+    """Neutral one-time recheck when the count is far from the claim, in either direction. The AI gets a
+    range, never told to say it, and repeats only the recipient's own number."""
+    if billed is None:
+        return "Konfirmasi ulang di nomor 8 sampai 10 tidak dihitung sebagai pertanyaan inti baru."
+    return (
+        f"15. Cek ulang jumlah. Rentang cek rahasia: {max(1, billed - 2)} sampai {billed + 2} kali. Jangan pernah\n"
+        "mengucapkan rentang itu, angka tagihan, atau kata lebih atau kurang. Jika jumlah yang disebut penerima\n"
+        "seluruhnya di luar rentang cek, tanyakan sekali dengan netral: \"Apakah [jumlah dari penerima] kali itu\n"
+        "sudah pas, atau mau diingat-ingat sebentar?\" Terima jawaban berikutnya apa adanya, berubah atau tetap,\n"
+        "lalu lanjut. Jangan bertanya ulang lagi dan jangan mengatakan jawabannya berbeda dari catatan.\n"
+        "Konfirmasi ulang di nomor 8 sampai 10 dan cek ulang di nomor 15 tidak dihitung sebagai pertanyaan inti baru."
+    )
+
+
+def _recheck_step(billed: int | None) -> str:
+    if billed is None:
+        return ""
+    return (
+        f"\nD2. Cek ulang: jika jumlah dari penerima di luar {max(1, billed - 2)} sampai {billed + 2} kali, sebelum\n"
+        "langkah E tanyakan sekali: \"Apakah [jumlah dari penerima] kali itu sudah pas, atau mau diingat-ingat\n"
+        "sebentar?\" Jika di dalam rentang itu, langsung ke langkah E. Aturan lengkap di nomor 15."
+    )
 
 
 def build_voice_instruction(context: VoiceContext) -> str:
@@ -97,7 +123,7 @@ A. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, 
 dan kamu tidak meminta NIK, OTP, rekening, atau uang.
 B. Pastikan kamu berbicara dengan penerima yang benar. {recipient_rule}
 C. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.
-D. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.
+D. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.{_recheck_step(context.sesi_ditagih)}
 {holiday_rule}
 F. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi
 layanan atau iuran. Akhiri dengan kalimat persis "Terima kasih atas waktunya." lalu diam.
@@ -132,6 +158,21 @@ atau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.
 5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.
 6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.
 7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup.
+
+Penanganan khusus:
+8. Lupa lalu ingat: jika penerima awalnya tidak ingat lalu menyebut jumlah di giliran berikutnya,
+terima jumlah terakhir itu. Konfirmasi sekali: "Jadi sekitar [jumlah] kali, ya?" lalu lanjut.
+9. Mengoreksi angka: jika penerima mengganti angkanya, pakai angka terakhir. Jangan menyebut angka
+yang pertama. Konfirmasi sekali: "Baik, jadi [angka terakhir] kali, ya?"
+10. Jawaban rentang atau perkiraan ("lima atau enam", "seminggu dua kali"): jangan menghitung sendiri.
+Tanyakan sekali: "Kalau dijumlah, kira-kira berapa kali dalam sebulan?" Jika tetap rentang, catat rentangnya.
+11. Ditanya angka tagihan: jangan sebutkan. Katakan kamu hanya mencatat versi penerima, lalu ulangi
+pertanyaan terakhir.
+12. Sibuk atau minta ditelepon lagi: jangan memaksa. Katakan akan dihubungi lagi, lalu tutup dengan sopan.
+13. Keluarga tidak tahu jumlahnya: tanyakan sekali apakah ada orang lain di rumah yang menemani terapi.
+Jika tidak ada, catat tidak tahu dan tutup.
+14. Ditanya apakah ini robot: jawab jujur bahwa kamu asisten otomatis BPJS Kesehatan, lalu lanjut.
+{_recheck_rule(context.sesi_ditagih)}
 """.strip()
 
 

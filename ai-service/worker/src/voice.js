@@ -22,7 +22,11 @@ export function parseVoiceContext(body) {
   if (!Array.isArray(holidays) || !holidays.every((day) => typeof day === "string")) {
     throw fail(422, "validasi", "Permintaan tidak valid.");
   }
-  return { ...context, tanggal_libur: holidays };
+  const billed = body.sesi_ditagih ?? null;
+  if (billed !== null && !(Number.isInteger(billed) && billed >= 1 && billed <= 99)) {
+    throw fail(422, "validasi", "Permintaan tidak valid.");
+  }
+  return { ...context, tanggal_libur: holidays, sesi_ditagih: billed };
 }
 
 const join = (items) => (items.length === 1 ? items[0] : `${items.slice(0, -1).join(", ")} dan ${items.at(-1)}`);
@@ -38,6 +42,25 @@ function holidayText(values) {
     return `${join(parts.map(([day]) => day))} ${parts[0][1]}`;
   }
   return join(values);
+}
+
+// Neutral one-time recheck when the count is far from the claim, in either direction.
+function recheckRule(billed) {
+  if (billed == null) return "Konfirmasi ulang di nomor 8 sampai 10 tidak dihitung sebagai pertanyaan inti baru.";
+  return `15. Cek ulang jumlah. Rentang cek rahasia: ${Math.max(1, billed - 2)} sampai ${billed + 2} kali. Jangan pernah
+mengucapkan rentang itu, angka tagihan, atau kata lebih atau kurang. Jika jumlah yang disebut penerima
+seluruhnya di luar rentang cek, tanyakan sekali dengan netral: "Apakah [jumlah dari penerima] kali itu
+sudah pas, atau mau diingat-ingat sebentar?" Terima jawaban berikutnya apa adanya, berubah atau tetap,
+lalu lanjut. Jangan bertanya ulang lagi dan jangan mengatakan jawabannya berbeda dari catatan.
+Konfirmasi ulang di nomor 8 sampai 10 dan cek ulang di nomor 15 tidak dihitung sebagai pertanyaan inti baru.`;
+}
+
+function recheckStep(billed) {
+  if (billed == null) return "";
+  return `
+D2. Cek ulang: jika jumlah dari penerima di luar ${Math.max(1, billed - 2)} sampai ${billed + 2} kali, sebelum
+langkah E tanyakan sekali: "Apakah [jumlah dari penerima] kali itu sudah pas, atau mau diingat-ingat
+sebentar?" Jika di dalam rentang itu, langsung ke langkah E. Aturan lengkap di nomor 15.`;
 }
 
 export function buildVoiceInstruction(c) {
@@ -64,7 +87,7 @@ A. Pembuka maksimal 45 detik. Katakan kamu asisten otomatis, panggilan direkam, 
 dan kamu tidak meminta NIK, OTP, rekening, atau uang.
 B. Pastikan kamu berbicara dengan penerima yang benar. ${recipientRule}
 C. Tanyakan apakah pasien hadir fisioterapi di rumah sakit dan bulan tersebut.
-D. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.
+D. Tanyakan kira-kira berapa kali. Jangan menyebut atau menebak angka tagihan.${recheckStep(c.sesi_ditagih)}
 ${holidayRule}
 F. Ulangi jawaban penting, berterima kasih, dan katakan jawaban tidak memengaruhi
 layanan atau iuran. Akhiri dengan kalimat persis "Terima kasih atas waktunya." lalu diam.
@@ -98,7 +121,22 @@ atau Mobile JKN, lalu tawarkan sekali untuk lanjut. Jika menolak, tutup.
 4. Jika diminta berhenti, langsung tutup dengan sopan.
 5. Jika jawaban berbeda dari dugaan apa pun, catat tanpa mengoreksi atau berdebat.
 6. Jika pertanyaan di luar topik, arahkan ke Care Center 165 lalu kembali ke pertanyaan konfirmasi.
-7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup.`;
+7. Jika penerima berkata tidak pernah terapi di sana, catat apa adanya, jangan berdebat, lalu tutup.
+
+Penanganan khusus:
+8. Lupa lalu ingat: jika penerima awalnya tidak ingat lalu menyebut jumlah di giliran berikutnya,
+terima jumlah terakhir itu. Konfirmasi sekali: "Jadi sekitar [jumlah] kali, ya?" lalu lanjut.
+9. Mengoreksi angka: jika penerima mengganti angkanya, pakai angka terakhir. Jangan menyebut angka
+yang pertama. Konfirmasi sekali: "Baik, jadi [angka terakhir] kali, ya?"
+10. Jawaban rentang atau perkiraan ("lima atau enam", "seminggu dua kali"): jangan menghitung sendiri.
+Tanyakan sekali: "Kalau dijumlah, kira-kira berapa kali dalam sebulan?" Jika tetap rentang, catat rentangnya.
+11. Ditanya angka tagihan: jangan sebutkan. Katakan kamu hanya mencatat versi penerima, lalu ulangi
+pertanyaan terakhir.
+12. Sibuk atau minta ditelepon lagi: jangan memaksa. Katakan akan dihubungi lagi, lalu tutup dengan sopan.
+13. Keluarga tidak tahu jumlahnya: tanyakan sekali apakah ada orang lain di rumah yang menemani terapi.
+Jika tidak ada, catat tidak tahu dan tutup.
+14. Ditanya apakah ini robot: jawab jujur bahwa kamu asisten otomatis BPJS Kesehatan, lalu lanjut.
+${recheckRule(c.sesi_ditagih)}`;
 }
 
 export async function issueToken(context, { apiKey, model, fetchImpl = fetch, now = () => new Date() }) {

@@ -158,7 +158,7 @@ def reset_demo(conn=Depends(get_conn), simpan=Depends(get_penyimpanan)):
     from scripts import seed_v3
 
     jalur = repo_v3.jalur_rekaman(conn)
-    seed_v3.reset_panggilan(conn, seed_v3.muat_data())
+    seed_v3.reset_panggilan(conn, seed_v3.muat_data(demo=True))
     conn.commit()
     for rel in jalur:  # berkas dihapus setelah DB berhasil di-commit
         simpan.hapus(rel)
