@@ -459,7 +459,7 @@
     const terjawab = c.terjawab || 0, tidakSesuai = c.tidak_sesuai || 0;
     const status = statusRs(c);
     if (status === STATUS_RS.belum) return terjawab + " dari " + RS_MIN_TERJAWAB + " jawaban minimal";
-    if (status === STATUS_RS.normal) return tidakSesuai + " dari " + RS_MIN_TIDAK_SESUAI + " tidak sesuai untuk klarifikasi";
+    if (status === STATUS_RS.normal) return tidakSesuai >= RS_MIN_TIDAK_SESUAI ? "di bawah 10% dari jawaban" : "baru " + tidakSesuai + " dari " + RS_MIN_TIDAK_SESUAI + " yang dibutuhkan";
     return "";
   }
 

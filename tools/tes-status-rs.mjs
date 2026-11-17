@@ -26,7 +26,8 @@ cek("30 jawaban, 3 tidak sesuai (10%) → Perlu klarifikasi RS", D.statusRs({ te
 cek("data kosong → Belum cukup jawaban", D.statusRs({}), belum);
 
 cek("progres 0 jawaban", D.progresRs({ terjawab: 0, tidak_sesuai: 0 }), "0 dari 3 jawaban minimal");
-cek("progres RS Melati awal", D.progresRs({ terjawab: 4, tidak_sesuai: 2 }), "2 dari 3 tidak sesuai untuk klarifikasi");
+cek("progres RS Melati awal", D.progresRs({ terjawab: 4, tidak_sesuai: 2 }), "baru 2 dari 3 yang dibutuhkan");
+cek("progres 3 tidak sesuai tapi di bawah 10%", D.progresRs({ terjawab: 40, tidak_sesuai: 3 }), "di bawah 10% dari jawaban");
 cek("progres sudah klarifikasi", D.progresRs({ terjawab: 5, tidak_sesuai: 3 }), "");
 
 const awal = D.ringkasanRs(Object.values(D.LATAR));
